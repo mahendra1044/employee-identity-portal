@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sun, Moon } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
+import { toast } from "sonner";
 
 const API_BASE = "http://localhost:3001"; // dev: backend server
 
@@ -16,6 +17,9 @@ type Features = {
   useMocks: boolean;
   useMockAuth: boolean;
   systems: Record<string, boolean>;
+  // Optional config additions
+  opsShowTilesAfterSearch?: boolean;
+  employeeSearchSystems?: Partial<Record<SystemKey, boolean>>;
 };
 
 type LoginResponse = { token: string; role: string; email: string };
@@ -211,12 +215,19 @@ function SystemCard({
     const payload = details || data || {};
     const body = `Hello ${name} Support,\n\nPlease assist with an issue on ${name}.\n\nContext (JSON excerpt):\n\n${JSON.stringify(payload, null, 2).slice(0, 1500)}\n\nThank you.`;
     try {
-      await fetch("/api/send-email", {
+      const res = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to, subject, body, system, payload }),
       });
-    } catch {}
+      if (res.ok) {
+        toast.success("Email sent successfully");
+      } else {
+        toast.error("Failed to send email");
+      }
+    } catch {
+      toast.error("Failed to send email");
+    }
   };
 
   return (
@@ -277,7 +288,7 @@ function SystemCard({
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between w-full">
+            <DialogTitle className="flex items-center justify-between w-full pr-12">
               <span>{name} — Details</span>
               {details && (
                 <Button
@@ -305,7 +316,7 @@ function SystemCard({
       <Dialog open={htmlOpen} onOpenChange={setHtmlOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{name} — HTML View</DialogTitle>
+            <DialogTitle className="pr-12">{name} — HTML View</DialogTitle>
           </DialogHeader>
           {(() => {
             const payload = details || data;
@@ -595,6 +606,9 @@ export default function HomePage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   aria-label="Search employees"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") doSearch();
+                  }}
                 />
                 <Button onClick={doSearch}>Search</Button>
               </div>
@@ -604,145 +618,163 @@ export default function HomePage() {
               {searchError && <p className="text-sm text-red-600 mt-2">{searchError}</p>}
               {hasSearched && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Ping Directory</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {(() => {
-                        const list = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
-                        const filtered = role === "ops" && search.trim()
-                          ? list.filter((u: any) =>
-                              u.userId === search.trim() || u.email?.toLowerCase() === search.trim().toLowerCase()
-                            )
-                          : list;
-                        const final = role === "ops" ? filtered.slice(0, 1) : filtered;
-                        return final.length > 0 ? (
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>User ID</TableHead>
-                                <TableHead className="w-40">Actions</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {final.map((u: any) => (
-                                <TableRow key={`pd-${u.userId}`}>
-                                  <TableCell>{u.name}</TableCell>
-                                  <TableCell>{u.email}</TableCell>
-                                  <TableCell>{u.userId}</TableCell>
-                                  <TableCell>
-                                    <div className="flex gap-2">
-                                      <Button
-                                        size="sm"
-                                        onClick={async () => {
-                                          const key = u.userId || u.email;
-                                          setSearchDialogTitle(`Ping Directory — ${key || "Details"}`);
-                                          setSearchDialogData(null);
-                                          setSearchDialogLoading(true);
-                                          setSearchDialogOpen(true);
-                                          try {
-                                            const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-directory`;
-                                            const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                            if (res.ok) {
-                                              const json = await res.json();
-                                              setSearchDialogData(json.data ?? u);
-                                            } else {
-                                              setSearchDialogData(u);
-                                            }
-                                          } catch {
-                                            setSearchDialogData(u);
-                                          } finally {
-                                            setSearchDialogLoading(false);
-                                          }
-                                        }}
-                                      >
-                                        View Details
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">No results</p>
-                        );
-                      })()}
-                    </CardContent>
-                  </Card>
+                  {/* Ping Directory card (respect employee search config when not self) */}
+                  {(() => {
+                    const isEmployee = role === "employee";
+                    const isSelf = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
+                    const allowPD = features?.employeeSearchSystems?.["ping-directory"] ?? true;
+                    if (isEmployee && !isSelf && !allowPD) return null;
+                    return (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Ping Directory</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {(() => {
+                            const list = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+                            const filtered = role === "ops" && search.trim()
+                              ? list.filter((u: any) =>
+                                  u.userId === search.trim() || u.email?.toLowerCase() === search.trim().toLowerCase()
+                                )
+                              : list;
+                            const final = role === "ops" ? filtered.slice(0, 1) : filtered;
+                            return final.length > 0 ? (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>User ID</TableHead>
+                                    <TableHead className="w-40">Actions</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {final.map((u: any) => (
+                                    <TableRow key={`pd-${u.userId}`}>
+                                      <TableCell>{u.name}</TableCell>
+                                      <TableCell>{u.email}</TableCell>
+                                      <TableCell>{u.userId}</TableCell>
+                                      <TableCell>
+                                        <div className="flex gap-2">
+                                          <Button
+                                            size="sm"
+                                            onClick={async () => {
+                                              const key = u.userId || u.email;
+                                              setSearchDialogTitle(`Ping Directory — ${key || "Details"}`);
+                                              setSearchDialogData(null);
+                                              setSearchDialogLoading(true);
+                                              setSearchDialogOpen(true);
+                                              try {
+                                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-directory`;
+                                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                                if (res.ok) {
+                                                  const json = await res.json();
+                                                  setSearchDialogData(json.data ?? u);
+                                                } else {
+                                                  setSearchDialogData(u);
+                                                }
+                                              } catch {
+                                                setSearchDialogData(u);
+                                              } finally {
+                                                setSearchDialogLoading(false);
+                                              }
+                                            }}
+                                          >
+                                            View Details
+                                          </Button>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">No results</p>
+                            );
+                          })()}
+                        </CardContent>
+                      </Card>
+                    );
+                  })()}
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Ping MFA</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {(() => {
-                        const list = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
-                        const filtered = role === "ops" && search.trim()
-                          ? list.filter((u: any) => u.userId === search.trim())
-                          : list;
-                        const final = role === "ops" ? filtered.slice(0, 1) : filtered;
-                        return final.length > 0 ? (
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>User ID</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Last Event</TableHead>
-                                <TableHead className="w-40">Actions</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {final.map((u: any) => (
-                                <TableRow key={`mfa-${u.userId}`}>
-                                  <TableCell>{u.userId}</TableCell>
-                                  <TableCell>{u.status}</TableCell>
-                                  <TableCell>{u.lastEvent}</TableCell>
-                                  <TableCell>
-                                    <div className="flex gap-2">
-                                      <Button
-                                        size="sm"
-                                        onClick={async () => {
-                                          const key = u.userId || u.email;
-                                          setSearchDialogTitle(`Ping MFA — ${u.userId}`);
-                                          setSearchDialogData(null);
-                                          setSearchDialogLoading(true);
-                                          setSearchDialogOpen(true);
-                                          try {
-                                            const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-mfa`;
-                                            const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                            if (res.ok) {
-                                              const json = await res.json();
-                                              setSearchDialogData(json.data ?? u);
-                                            } else {
-                                              setSearchDialogData(u);
-                                            }
-                                          } catch {
-                                            setSearchDialogData(u);
-                                          } finally {
-                                            setSearchDialogLoading(false);
-                                          }
-                                        }}
-                                      >
-                                        View Details
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">No results</p>
-                        );
-                      })()}
-                    </CardContent>
-                  </Card>
+                  {/* Ping MFA card (respect employee search config when not self) */}
+                  {(() => {
+                    const isEmployee = role === "employee";
+                    const isSelf = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
+                    const allowMFA = features?.employeeSearchSystems?.["ping-mfa"] ?? true;
+                    if (isEmployee && !isSelf && !allowMFA) return null;
+                    return (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Ping MFA</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {(() => {
+                            const list = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
+                            const filtered = role === "ops" && search.trim()
+                              ? list.filter((u: any) => u.userId === search.trim())
+                              : list;
+                            const final = role === "ops" ? filtered.slice(0, 1) : filtered;
+                            return final.length > 0 ? (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>User ID</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Last Event</TableHead>
+                                    <TableHead className="w-40">Actions</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {final.map((u: any) => (
+                                    <TableRow key={`mfa-${u.userId}`}>
+                                      <TableCell>{u.userId}</TableCell>
+                                      <TableCell>{u.status}</TableCell>
+                                      <TableCell>{u.lastEvent}</TableCell>
+                                      <TableCell>
+                                        <div className="flex gap-2">
+                                          <Button
+                                            size="sm"
+                                            onClick={async () => {
+                                              const key = u.userId || u.email;
+                                              setSearchDialogTitle(`Ping MFA — ${u.userId}`);
+                                              setSearchDialogData(null);
+                                              setSearchDialogLoading(true);
+                                              setSearchDialogOpen(true);
+                                              try {
+                                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-mfa`;
+                                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                                if (res.ok) {
+                                                  const json = await res.json();
+                                                  setSearchDialogData(json.data ?? u);
+                                                } else {
+                                                  setSearchDialogData(u);
+                                                }
+                                              } catch {
+                                                setSearchDialogData(u);
+                                              } finally {
+                                                setSearchDialogLoading(false);
+                                              }
+                                            }}
+                                          >
+                                            View Details
+                                          </Button>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">No results</p>
+                            );
+                          })()}
+                        </CardContent>
+                      </Card>
+                    );
+                  })()}
 
-                  {/* Global View All Systems button below the two boxes */}
+                  {/* Global View All Systems buttons */}
                   <div className="md:col-span-2">
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Button
@@ -758,7 +790,7 @@ export default function HomePage() {
                           const firstPd = pd?.[0];
                           const firstMfa = mfa?.[0];
                           // Build candidate identifiers to try per-system (email + userId variants)
-                          const candidateKeys = (
+                          const baseCandidates = (
                             [
                               exactPd?.email,
                               exactPd?.userId,
@@ -769,9 +801,12 @@ export default function HomePage() {
                               firstMfa?.email,
                               search,
                             ] as Array<string | undefined | null>
-                          )
-                            .filter(Boolean)
-                            .map((s) => String(s));
+                          ).filter(Boolean).map((s) => String(s));
+                          const candidateKeys = Array.from(new Set([
+                            ...baseCandidates,
+                            ...baseCandidates.map((k) => k.toLowerCase()),
+                            ...baseCandidates.map((k) => k.toUpperCase()),
+                          ]));
                           const displayKey = candidateKeys[0] || "";
 
                           setSearchDialogMode("json");
@@ -781,7 +816,7 @@ export default function HomePage() {
                           setSearchDialogOpen(true);
                           try {
                             const aggregate: Record<string, any> = {};
-                            // NEW: fetch all-users once as a fallback source for per-system data
+                            // fetch all-users once as a fallback source for per-system data
                             let allUsers: any[] | null = null;
                             try {
                               const auRes = await fetch(`${API_BASE}/api/all-users`, {
@@ -791,11 +826,18 @@ export default function HomePage() {
                                 const auJson = await auRes.json();
                                 allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
                               }
-                            } catch {
-                              // ignore
-                            }
+                            } catch {}
+
+                            const isEmployee = role === "employee";
+                            const isSelf = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
+                            const allowMap = features?.employeeSearchSystems || {};
 
                             for (const sys of SYSTEMS) {
+                              // Employee searching others: respect config by skipping disallowed systems
+                              if (isEmployee && !isSelf && allowMap && allowMap[sys] === false) {
+                                aggregate[sys] = null;
+                                continue;
+                              }
                               let found: any = undefined;
                               // Try details endpoint with multiple possible identifiers
                               for (const key of candidateKeys) {
@@ -804,14 +846,9 @@ export default function HomePage() {
                                   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                                   if (res.ok) {
                                     const json = await res.json();
-                                    if (json?.data) {
-                                      found = json.data;
-                                      break;
-                                    }
+                                    if (json?.data) { found = json.data; break; }
                                   }
-                                } catch {
-                                  // continue trying other keys
-                                }
+                                } catch {}
                               }
                               // Fallback to in-memory search results if details not found
                               if (!found) {
@@ -821,7 +858,7 @@ export default function HomePage() {
                                 );
                                 if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
                               }
-                              // NEW: Fallback to all-users systems map
+                              // Fallback to all-users systems map
                               if (!found && allUsers) {
                                 const matchedUser = allUsers.find((u: any) =>
                                   candidateKeys.some(
@@ -832,7 +869,6 @@ export default function HomePage() {
                                   found = matchedUser.systems[sys];
                                 }
                               }
-                              // Ensure key exists for every system so UI shows all 6 sections
                               aggregate[sys] = found ?? null;
                             }
                             setSearchDialogData(aggregate);
@@ -852,8 +888,6 @@ export default function HomePage() {
                           onClick={async () => {
                             // trigger same aggregation then render as HTML
                             setSearchDialogMode("html");
-                            // Reuse the JSON button handler by clicking it programmatically is complex; duplicate minimal fetching
-                            // Determine keys as above
                             const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
                             const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
                             const q = String(search).trim().toLowerCase();
@@ -861,7 +895,7 @@ export default function HomePage() {
                             const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
                             const firstPd = pd?.[0];
                             const firstMfa = mfa?.[0];
-                            const candidateKeys = (
+                            const baseCandidates = (
                               [
                                 exactPd?.email,
                                 exactPd?.userId,
@@ -872,9 +906,12 @@ export default function HomePage() {
                                 firstMfa?.email,
                                 search,
                               ] as Array<string | undefined | null>
-                            )
-                              .filter(Boolean)
-                              .map((s) => String(s));
+                            ).filter(Boolean).map((s) => String(s));
+                            const candidateKeys = Array.from(new Set([
+                              ...baseCandidates,
+                              ...baseCandidates.map((k) => k.toLowerCase()),
+                              ...baseCandidates.map((k) => k.toUpperCase()),
+                            ]));
                             const displayKey = candidateKeys[0] || "";
 
                             setSearchDialogTitle(`All Systems HTML — ${displayKey || "Details"}`);
@@ -947,17 +984,28 @@ export default function HomePage() {
           <Dialog open={searchDialogOpen} onOpenChange={setSearchDialogOpen}>
             <DialogContent className="max-w-5xl">
               <DialogHeader>
-                <DialogTitle className="flex items-center justify-between w-full">
+                <DialogTitle className="flex items-center justify-between w-full pr-12">
                   <span>{searchDialogTitle || "Details"}</span>
-                  {searchDialogData && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigator.clipboard.writeText(JSON.stringify(searchDialogData, null, 2))}
-                    >
-                      Copy JSON
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {(searchDialogData && !(searchDialogTitle || "").startsWith("All Systems")) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSearchDialogMode((m) => (m === "json" ? "html" : "json"))}
+                      >
+                        {searchDialogMode === "json" ? "HTML View" : "JSON View"}
+                      </Button>
+                    )}
+                    {searchDialogData && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigator.clipboard.writeText(JSON.stringify(searchDialogData, null, 2))}
+                      >
+                        Copy JSON
+                      </Button>
+                    )}
+                  </div>
                 </DialogTitle>
               </DialogHeader>
               {searchDialogLoading ? (
@@ -1046,9 +1094,27 @@ export default function HomePage() {
                     </div>
                   )
                 ) : (
-                  <div className="space-y-2">
-                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
-                  </div>
+                  searchDialogMode === "html" ? (
+                    (() => {
+                      const pairs = toPairsGlobal(searchDialogData).slice(0, 1000);
+                      return (
+                        <div className="max-h-[70vh] overflow-y-auto pr-1">
+                          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+                            {pairs.map(({ k, v }) => (
+                              <div key={k} className="flex flex-col py-1 border-b last:border-b-0 border-border/60">
+                                <dt className="text-xs font-medium text-muted-foreground truncate">{k}</dt>
+                                <dd className="text-sm break-words">{typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : JSON.stringify(v)}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <div className="space-y-2">
+                      <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
+                    </div>
+                  )
                 )
               ) : (
                 <p className="text-sm text-muted-foreground">No details available</p>
@@ -1129,29 +1195,37 @@ export default function HomePage() {
 
         {/* System Cards (hide by default for ops) */}
         <section>
-          {!anyEnabled ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>No systems enabled</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Feature not enabled. Please contact your administrator or update features.json.
-                </p>
-              </CardContent>
-            </Card>
-          ) : role === "ops" ? (
-            <></>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <SystemCard name="Ping Directory" system="ping-directory" enabled={!!enabled["ping-directory"]} token={token!} />
-              <SystemCard name="Ping Federate" system="ping-federate" enabled={!!enabled["ping-federate"]} token={token!} />
-              <SystemCard name="CyberArk" system="cyberark" enabled={!!enabled["cyberark"]} token={token!} />
-              <SystemCard name="Saviynt" system="saviynt" enabled={!!enabled["saviynt"]} token={token!} />
-              <SystemCard name="Azure AD" system="azure-ad" enabled={!!enabled["azure-ad"]} token={token!} />
-              <SystemCard name="Ping MFA" system="ping-mfa" enabled={!!enabled["ping-mfa"]} token={token!} />
-            </div>
-          )}
+          {(() => {
+            const showOpsTiles = role === "ops" && !!features?.opsShowTilesAfterSearch && hasSearched;
+            const isOps = role === "ops";
+            if (!anyEnabled) {
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>No systems enabled</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Feature not enabled. Please contact your administrator or update features.json.
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            }
+            if (isOps && !showOpsTiles) {
+              return <></>;
+            }
+            return (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <SystemCard name="Ping Directory" system="ping-directory" enabled={!!enabled["ping-directory"]} token={token!} />
+                <SystemCard name="Ping Federate" system="ping-federate" enabled={!!enabled["ping-federate"]} token={token!} />
+                <SystemCard name="CyberArk" system="cyberark" enabled={!!enabled["cyberark"]} token={token!} />
+                <SystemCard name="Saviynt" system="saviynt" enabled={!!enabled["saviynt"]} token={token!} />
+                <SystemCard name="Azure AD" system="azure-ad" enabled={!!enabled["azure-ad"]} token={token!} />
+                <SystemCard name="Ping MFA" system="ping-mfa" enabled={!!enabled["ping-mfa"]} token={token!} />
+              </div>
+            );
+          })()}
         </section>
 
         {/* All Users feature removed as requested */}
