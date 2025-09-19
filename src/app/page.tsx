@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sun, Moon } from "lucide-react";
 
 const API_BASE = "http://localhost:3001"; // dev: backend server
 
@@ -94,6 +95,7 @@ function SystemCard({
   const [details, setDetails] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const loadInitial = async () => {
     if (!enabled) return;
@@ -123,6 +125,7 @@ function SystemCard({
       if (!res.ok) throw new Error((await res.json()).error || "Failed");
       const json = await res.json();
       setDetails(json.data);
+      setDetailsOpen(true);
     } catch (e: any) {
       setError(e.message || "Error loading details");
     } finally {
@@ -136,48 +139,60 @@ function SystemCard({
   }, [token, enabled]);
 
   return (
-    <Card className="shadow-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>{name}</span>
-          <div className="space-x-2">
-            <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading}>
-              Refresh
-            </Button>
-            <Button size="sm" onClick={loadDetails} disabled={!enabled || loading}>
-              View Details
-            </Button>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {!enabled ? (
-          <p className="text-sm text-muted-foreground">Feature not enabled</p>
-        ) : loading ? (
-          <p className="text-sm animate-pulse">Loading...</p>
-        ) : error ? (
-          <p className="text-sm text-red-600">{error}</p>
-        ) : (
-          <div className="space-y-3">
-            {data ? (
-              <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
-                {JSON.stringify(data, null, 2)}
-              </pre>
-            ) : (
-              <p className="text-sm text-muted-foreground">No data yet</p>
-            )}
-            {details && (
-              <div>
-                <div className="text-sm font-medium mb-1">Details</div>
+    <>
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>{name}</span>
+            <div className="space-x-2">
+              <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading}>
+                Refresh
+              </Button>
+              <Button size="sm" onClick={loadDetails} disabled={!enabled || loading}>
+                View Details
+              </Button>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!enabled ? (
+            <p className="text-sm text-muted-foreground">Feature not enabled</p>
+          ) : loading ? (
+            <p className="text-sm animate-pulse">Loading...</p>
+          ) : error ? (
+            <p className="text-sm text-red-600">{error}</p>
+          ) : (
+            <div className="space-y-3">
+              {data ? (
                 <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
-                  {JSON.stringify(details, null, 2)}
+                  {JSON.stringify(data, null, 2)}
                 </pre>
-              </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              ) : (
+                <p className="text-sm text-muted-foreground">No data yet</p>
+              )}
+              {/* details moved to dialog to keep the page compact */}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{name} — Details</DialogTitle>
+          </DialogHeader>
+          {loading ? (
+            <p className="text-sm animate-pulse">Loading details...</p>
+          ) : details ? (
+            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+              {JSON.stringify(details, null, 2)}
+            </pre>
+          ) : (
+            <p className="text-sm text-muted-foreground">No details available</p>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -238,6 +253,27 @@ export default function HomePage() {
   const [offset, setOffset] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">();
+
+  useEffect(() => {
+    // init theme from localStorage or system preference
+    const stored = localStorage.getItem("theme");
+    if (stored === "light" || stored === "dark") {
+      setTheme(stored);
+      return;
+    }
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(prefersDark ? "dark" : "light");
+  }, []);
+
+  useEffect(() => {
+    if (!theme) return;
+    const root = document.documentElement;
+    if (theme === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   useEffect(() => {
     if (!token) return;
@@ -278,6 +314,7 @@ export default function HomePage() {
     if (!token || !search.trim()) return;
     setSearchError(null);
     setSearchResults(null);
+    setHasSearched(true);
     try {
       const res = await fetch(`${API_BASE}/api/search-employee/${encodeURIComponent(search)}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -327,12 +364,17 @@ export default function HomePage() {
               <div className="text-xs text-muted-foreground">Signed in as {email} ({role})</div>
             </div>
           </div>
-          <Button variant="secondary" onClick={logout}>Sign out</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button variant="secondary" onClick={logout}>Sign out</Button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-8">
-        {/* Search Section (employee and ops if enabled) */}
+        {/* Search Section */}
         <section>
           <Card>
             <CardHeader>
@@ -348,15 +390,18 @@ export default function HomePage() {
                 />
                 <Button onClick={doSearch}>Search</Button>
               </div>
+              {!hasSearched && !searchError && (
+                <p className="text-xs text-muted-foreground mt-2">Enter a query and click Search to see results.</p>
+              )}
               {searchError && <p className="text-sm text-red-600 mt-2">{searchError}</p>}
-              {searchResults && (
+              {hasSearched && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-base">Ping Directory</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {Array.isArray(searchResults["ping-directory"]) && searchResults["ping-directory"].length > 0 ? (
+                      {Array.isArray(searchResults?.["ping-directory"]) && searchResults["ping-directory"].length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -386,7 +431,7 @@ export default function HomePage() {
                       <CardTitle className="text-base">Ping MFA</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {Array.isArray(searchResults["ping-mfa"]) && searchResults["ping-mfa"].length > 0 ? (
+                      {Array.isArray(searchResults?.["ping-mfa"]) && searchResults["ping-mfa"].length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
