@@ -5,6 +5,10 @@ A local-first web portal for employees and ops to view identity data across syst
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3001 (health: GET /health → { ok: true })
 
+## Prerequisites & Install
+- Node.js 18+ (recommended 20.x) and npm 8+
+- One-time install at repo root: `npm install`
+  - The first run of `npm run dev:all` will auto-install backend deps (under `backend/`). You can also do `cd backend && npm install` manually.
 
 ## Features
 
@@ -158,6 +162,7 @@ Responses
 - 403 errors: Role lacks permission in roles.json
 - Token issues: Click "Sign out" (clears localStorage) and log back in
 - Port conflicts: Change PORT in backend/.env and update API_BASE in src/app/page.tsx if needed
+- Backend not starting: Verify `backend/server.js` exists and that you ran `npm install` at the repo root (or `cd backend && npm install`).
 
 
 ## Tech Stack
