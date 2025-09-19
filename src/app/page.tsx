@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, User } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
@@ -580,7 +580,24 @@ export default function HomePage() {
             <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" alt="Logo" className="w-8 h-8 rounded" />
             <div>
               <div className="font-semibold">Identity Portal</div>
-              <div className="text-xs text-muted-foreground">Signed in as {email} ({role})</div>
+              {/* Signed-in badge */}
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">
+                  <User className="h-3 w-3" /> {email}
+                </span>
+                <span
+                  className={
+                    `inline-flex items-center rounded-full px-2 py-0.5 text-[10px] border ` +
+                    (role === "ops"
+                      ? "border-purple-200 text-purple-700 bg-purple-50 dark:bg-purple-900/20"
+                      : role === "employee"
+                      ? "border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-amber-200 text-amber-700 bg-amber-50 dark:bg-amber-900/20")
+                  }
+                >
+                  {role}
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
