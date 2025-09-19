@@ -288,13 +288,128 @@ PING_DIR_API_KEY=xxxx
 ```
 - Used when credentialSource=env or as fallback if CCP fails.
 
-Mock data layout (when useMocks=true)
-- backend/mocks/
-  - <system>-initial.json → ~10 attributes
-  - <system>-details.json → ~20 attributes
-  - <system>-search.json → limited attrs (Ping Directory & Ping MFA only)
-  - all-users.json → aggregated list for ops view
+### Employee Search configuration (NEW)
 
+These flags control exactly what an Employee can see in the Search UI, with different behavior for searching self vs. searching others. They are returned by `GET /config/features` and applied by the frontend.
+
+Add the following optional keys to `backend/config/features.json`:
+
+```
+{
+  // ... keep existing keys ...
+  "employeeSearchSystems": {
+    "ping-directory": true,   // show Ping Directory results when an employee searches other employees
+    "ping-mfa": true,         // show Ping MFA results when an employee searches other employees
+    "ping-federate": false,   // controls visibility in the "All Systems" dialog for employee→other searches
+    "azure-ad": false,        // controls visibility in the "All Systems" dialog for employee→other searches
+    "cyberark": false,        // controls visibility in the "All Systems" dialog for employee→other searches
+    "saviynt": false          // controls visibility in the "All Systems" dialog for employee→other searches
+  },
+  "opsShowTilesAfterSearch": true // if true, Ops will only see the big system tiles AFTER they perform a search
+}
+```
+
+What each flag does in the UI
+- employeeSearchSystems
+  - Applies ONLY when the logged-in role is "employee" AND they are searching for someone else (not themselves).
+  - Self-search (employee searches their own email/ID): always shows all systems that are enabled globally, including in the "All Systems" dialog.
+  - Searching others:
+    - Ping Directory card: rendered only if `employeeSearchSystems["ping-directory"] !== false` (default true).
+    - Ping MFA card: rendered only if `employeeSearchSystems["ping-mfa"] !== false` (default true).
+    - "View all system details" dialogs: per-system panels are shown only if `employeeSearchSystems[system] !== false`. This is how you can also hide CyberArk/Azure AD/Saviynt/etc. from the aggregated details when an employee is viewing other employees.
+
+- opsShowTilesAfterSearch
+  - When `true`: On ops login, the large per-system tiles are hidden until a search has been performed. This keeps the ops dashboard focused on the Recent Failures panel and search-first workflows.
+  - When `false` or omitted: Ops tiles behave like other roles (visible whenever the system is enabled).
+
+Scenarios (step-by-step)
+- Goal: Hide CyberArk and Azure AD when an employee searches OTHER users, but keep Ping Directory and Ping MFA visible.
+  - Set in features.json:
+    - `employeeSearchSystems.cyberark = false`
+    - `employeeSearchSystems.azure-ad = false`
+    - `employeeSearchSystems["ping-directory"] = true`
+    - `employeeSearchSystems["ping-mfa"] = true`
+  - Effect in UI:
+    - Employee searches "dana.lee@company.com" → Search grid shows only Ping Directory and Ping MFA cards.
+    - Clicking "View all system details" will NOT include CyberArk and Azure AD panels.
+
+- Goal: Allow one specific employee to see everything about themselves while restricting other-employee searches.
+  - No extra setting required beyond `employeeSearchSystems`. The app already treats "self" queries as full visibility.
+  - Effect in UI:
+    - Employee searches their own email (exact match) → All systems show up in the aggregated dialog; PD/MFA cards are visible as normal.
+    - Employee searches a teammate → Only systems with `employeeSearchSystems[system] !== false` are displayed.
+
+- Goal: Ops should see tiles only after search
+  - Set `opsShowTilesAfterSearch = true`.
+  - Effect in UI: On ops login, only Recent Failures and the Search section are visible. After the first search, the system tiles grid appears.
+
+Notes
+- You can omit `employeeSearchSystems` entirely; defaults apply (PD+MFA visible when employees search others, all systems visible for self).
+- Changes take effect after you update `backend/config/features.json`, restart the backend, and reload the frontend (the frontend reads `GET /config/features`).
+
+#### Examples: Common setups and their UI effects
+
+1) Only Ping Directory for other-employee searches
+```
+{
+  "employeeSearchSystems": {
+    "ping-directory": true,
+    "ping-mfa": false,
+    "ping-federate": false,
+    "azure-ad": false,
+    "cyberark": false,
+    "saviynt": false
+  }
+}
+```
+- Effect: Employees searching others see only the Ping Directory card in the search results. The All Systems dialog hides MFA, Federate, Azure AD, CyberArk, Saviynt panels for other-employee viewing. Self-search still shows all enabled systems.
+
+2) PD + MFA only for other-employee searches (recommended default)
+```
+{
+  "employeeSearchSystems": {
+    "ping-directory": true,
+    "ping-mfa": true,
+    "ping-federate": false,
+    "azure-ad": false,
+    "cyberark": false,
+    "saviynt": false
+  }
+}
+```
+- Effect: Employees see PD and MFA cards for teammates. The All Systems dialog includes only PD and MFA panels for other-employee viewing. Self-search shows all enabled systems.
+
+3) Hide everything for other-employee searches (no visibility)
+```
+{
+  "employeeSearchSystems": {
+    "ping-directory": false,
+    "ping-mfa": false,
+    "ping-federate": false,
+    "azure-ad": false,
+    "cyberark": false,
+    "saviynt": false
+  }
+}
+```
+- Effect: Employees cannot see any cards when searching others; the All Systems dialog will have no panels. Self-search remains fully visible for the logged-in employee.
+
+4) Ops tiles only after search
+```
+{
+  "opsShowTilesAfterSearch": true
+}
+```
+- Effect: Ops land on Recent Failures + Search. After the first search in the session, the big system tiles appear below.
+
+#### Self vs. Others matching rule
+- Self-search is detected when the search query (email or ID) exactly matches the logged-in user's email (case-insensitive). In that case, the employee sees all globally enabled systems in dialogs and tiles.
+- Any other query is considered an "other-employee" search and is restricted by `employeeSearchSystems`.
+
+#### How to apply config changes
+1) Edit `backend/config/features.json` with the desired flags.
+2) Restart the backend server (required so `/config/features` reflects changes).
+3) Reload the frontend page. The Employee Search UI will immediately reflect the new visibility rules.
 
 ## API Overview
 - POST /auth/login → { token, role, email }
