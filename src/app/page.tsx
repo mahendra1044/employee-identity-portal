@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sun, Moon, User } from "lucide-react";
+import { Sun, Moon, User, Copy } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
@@ -849,31 +849,17 @@ export default function HomePage() {
                     <p className="text-sm text-muted-foreground">{g.summary}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {g.actions.viewJson && (
-                        <Button size="sm" className="w-full" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(g.sample, null, 2))}>
-                          Copy sample JSON
-                        </Button>
-                      )}
-                      {g.actions.sendMail && (
                         <Button
                           size="sm"
-                          className="w-full"
-                          onClick={async () => {
-                            try {
-                              const to = getSupportEmail(g.system);
-                              const subject = `[${SYSTEM_LABELS[g.system]}] Assistance needed — ${g.title}`;
-                              const body = `Hello ${SYSTEM_LABELS[g.system]} Support,\n\nI'm facing: ${g.title}.\n\nSample JSON context:\n\n${JSON.stringify(g.sample, null, 2)}\n\nThanks.`;
-                              const res = await fetch("/api/send-email", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ to, subject, body, system: g.system, payload: g.sample }),
-                              });
-                              if (res.ok) toast.success("Email queued to support"); else toast.error("Failed to send email");
-                            } catch {
-                              toast.error("Failed to send email");
-                            }
+                          className="w-full justify-center gap-2"
+                          variant="secondary"
+                          onClick={() => {
+                            navigator.clipboard.writeText(JSON.stringify(g.sample, null, 2));
+                            toast.success("Sample JSON copied");
                           }}
                         >
-                          Send mail to support
+                          <Copy className="h-4 w-4" />
+                          Copy sample
                         </Button>
                       )}
                     </div>
