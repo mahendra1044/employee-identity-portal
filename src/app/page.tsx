@@ -20,6 +20,7 @@ type Features = {
   // Optional config additions
   opsShowTilesAfterSearch?: boolean;
   employeeSearchSystems?: Partial<Record<SystemKey, boolean>>;
+  systemsOrder?: SystemKey[]; // NEW: optional preferred order for system cards
 };
 
 type LoginResponse = { token: string; role: string; email: string };
@@ -40,6 +41,16 @@ const SYSTEMS: SystemKey[] = [
   "azure-ad",
   "ping-mfa",
 ];
+
+// Human-readable labels for systems
+const SYSTEM_LABELS: Record<SystemKey, string> = {
+  "ping-directory": "Ping Directory",
+  "ping-federate": "Ping Federate",
+  "cyberark": "CyberArk",
+  "saviynt": "Saviynt",
+  "azure-ad": "Azure AD",
+  "ping-mfa": "Ping MFA",
+};
 
 function useAuth() {
   const [token, setToken] = useState<string | null>(null);
@@ -527,6 +538,14 @@ export default function HomePage() {
   }, [features]);
 
   const anyEnabled = useMemo(() => Object.values(enabled || {}).some(Boolean), [enabled]);
+
+  // Determine the order of system cards based on features.systemsOrder (if provided)
+  const orderedSystems = useMemo<SystemKey[]>(() => {
+    const order = features?.systemsOrder || [];
+    const valid = order.filter((s): s is SystemKey => (SYSTEMS as string[]).includes(s as string));
+    const remaining = SYSTEMS.filter((s) => !valid.includes(s));
+    return [...valid, ...remaining];
+  }, [features]);
 
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
@@ -1262,12 +1281,15 @@ export default function HomePage() {
             }
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <SystemCard name="Ping Directory" system="ping-directory" enabled={!!enabled["ping-directory"]} token={token!} />
-                <SystemCard name="Ping Federate" system="ping-federate" enabled={!!enabled["ping-federate"]} token={token!} />
-                <SystemCard name="CyberArk" system="cyberark" enabled={!!enabled["cyberark"]} token={token!} />
-                <SystemCard name="Saviynt" system="saviynt" enabled={!!enabled["saviynt"]} token={token!} />
-                <SystemCard name="Azure AD" system="azure-ad" enabled={!!enabled["azure-ad"]} token={token!} />
-                <SystemCard name="Ping MFA" system="ping-mfa" enabled={!!enabled["ping-mfa"]} token={token!} />
+                {orderedSystems.map((sys) => (
+                  <SystemCard
+                    key={sys}
+                    name={SYSTEM_LABELS[sys]}
+                    system={sys}
+                    enabled={!!enabled[sys]}
+                    token={token!}
+                  />
+                ))}
               </div>
             );
           })()}

@@ -19,6 +19,9 @@
   - Replaced mailto with a server API to record email requests for audit/debug
   - Route: `POST /api/send-email`
   - Logs mock payloads to the server console and returns `{ ok: true }`
+- Configurable card order (deployment-time)
+  - New optional `systemsOrder` array in backend/config/features.json controls the order of the six system cards on the dashboard.
+  - Missing or invalid keys are ignored; any systems not listed are appended in the default order.
 
 ## How to Use
 
@@ -49,13 +52,46 @@
 - Edit `src/lib/support-emails.ts` to change the destination team addresses per system.
 - Helper: `getSupportEmail(system: "ping-directory" | "ping-federate" | "cyberark" | "saviynt" | "azure-ad" | "ping-mfa")`
 
+### Card layout order (NEW)
+
+Control the order of the six system cards from a single deployment-time setting.
+
+1) Open `backend/config/features.json`
+2) Add an optional `systemsOrder` array with any subset/sequence of system keys:
+```
+{
+  // ... keep existing keys ...
+  "systemsOrder": [
+    "ping-directory",  // 1st
+    "cyberark",        // 2nd
+    "ping-federate",   // 3rd
+    "saviynt",         // 4th
+    "azure-ad",        // 5th
+    "ping-mfa"         // 6th
+  ]
+}
+```
+3) Restart the backend (so `/config/features` serves the updated config)
+4) Reload the frontend or log in again; the new order will be applied immediately on the dashboard
+
+Notes
+- Keys must be one of: `ping-directory`, `ping-federate`, `cyberark`, `saviynt`, `azure-ad`, `ping-mfa`.
+- If you provide only a partial list, e.g. `["cyberark", "ping-directory"]`, the remaining systems are appended after these two in the default order.
+- Invalid keys are ignored safely.
+- This setting does not enable/disable systems; use `systems` flags for that (see below). Disabled systems still respect order but render as "Feature not enabled".
+
 ## Implementation Notes
 
 - File: `src/app/page.tsx`
-  - Added Copy JSON buttons to cards and dialogs
-  - Improved header layout for system tiles
-  - Added Ops-only dual buttons for All Systems (JSON/HTML) with consistent data aggregation
-  - System tile "Send Email" now calls `/api/send-email` instead of `mailto:`
+  - Added a new optional field to the `Features` type: `systemsOrder?: SystemKey[]`.
+  - Compute `orderedSystems` with `useMemo` that:
+    - takes `features.systemsOrder` when available,
+    - filters out unknown keys,
+    - appends any missing systems in the default order.
+  - The card grid now renders by mapping over `orderedSystems`, using a `SYSTEM_LABELS` map for human-friendly names.
+  - This is read from `GET http://localhost:3001/config/features` post-login, so changes take effect when users log in or refresh.
+- No backend code change is required beyond supplying `systemsOrder` in `backend/config/features.json`.
+
 - File: `src/app/api/send-email/route.ts`
   - Mock server endpoint that logs email requests and returns success
 
@@ -245,7 +281,15 @@ All config lives in the backend folder. Changes require restarting the backend s
     "saviynt": true,
     "azure-ad": true,
     "ping-mfa": true
-  }
+  },
+  "systemsOrder": [
+    "ping-directory",
+    "cyberark",
+    "ping-federate",
+    "saviynt",
+    "azure-ad",
+    "ping-mfa"
+  ]
 }
 ```
 - Flip behaviors:
@@ -253,6 +297,7 @@ All config lives in the backend folder. Changes require restarting the backend s
   - Turn off mocks: set useMocks=false → backend will call real integrations where implemented
   - Switch auth mode: set useMockAuth=false → backend expects real SSO (placeholder), UI still posts to /auth/login
   - Credential source: set credentialSource=cyberArkCcp to fetch secrets from CCP (fallback to env if fails)
+  - Card order: set `systemsOrder` as shown above to control dashboard tile order
 
 2) backend/config/roles.json
 - Define which roles can access own/all/search for each system. 403 when denied.
@@ -341,7 +386,7 @@ Scenarios (step-by-step)
 
 - Goal: Ops should see tiles only after search
   - Set `opsShowTilesAfterSearch = true`.
-  - Effect in UI: On ops login, only Recent Failures and the Search section are visible. After the first search, the system tiles grid appears.
+  - Effect in UI: On ops login, only Recent Failures and the Search section are visible. After the first search, the system tiles grid appears below.
 
 Notes
 - You can omit `employeeSearchSystems` entirely; defaults apply (PD+MFA visible when employees search others, all systems visible for self).
