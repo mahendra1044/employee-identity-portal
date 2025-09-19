@@ -451,6 +451,14 @@ export default function HomePage() {
   const [searchDialogData, setSearchDialogData] = useState<any | null>(null);
   const [searchDialogLoading, setSearchDialogLoading] = useState(false);
   const [searchDialogMode, setSearchDialogMode] = useState<"json" | "html">("json");
+  
+  // SNOW incidents state
+  const [snowOpen, setSnowOpen] = useState(false);
+  const [snowLoading, setSnowLoading] = useState(false);
+  const [snowError, setSnowError] = useState<string | null>(null);
+  const [snowCount, setSnowCount] = useState<number | null>(null);
+  const [snowItems, setSnowItems] = useState<any[] | null>(null);
+  const [snowEmail, setSnowEmail] = useState<string | null>(null);
 
   // helper for HTML view in search dialog (global)
   const toPairsGlobal = (obj: any): Array<{ k: string; v: any }> => {
@@ -605,6 +613,52 @@ export default function HomePage() {
     }
   };
 
+  // Helper: decide which email to use for SNOW incidents based on role/search
+  const resolveSnowEmail = (): string | null => {
+    const self = String(email || '').toLowerCase();
+    if (role === 'ops' && hasSearched) {
+      const q = String(search || '').trim().toLowerCase();
+      // If the query itself looks like an email, prefer it
+      if (q && q.includes('@') && q.includes('.')) return q;
+      // Otherwise try first Ping Directory result's email
+      const pd = Array.isArray((searchResults as any)?.["ping-directory"]) ? (searchResults as any)["ping-directory"] : [];
+      const exact = pd.find((u: any) => String(u?.email || '').toLowerCase() === q || String(u?.userId || '') === String(search || '').trim());
+      if (exact?.email) return String(exact.email).toLowerCase();
+      if (pd[0]?.email) return String(pd[0].email).toLowerCase();
+    }
+    return self || null;
+  };
+
+  // Open SNOW dialog and fetch incidents
+  const openSnowDialog = async () => {
+    if (!token) return;
+    const target = resolveSnowEmail();
+    if (!target) {
+      toast.error('No target user found for SNOW incidents');
+      return;
+    }
+    setSnowOpen(true);
+    setSnowLoading(true);
+    setSnowError(null);
+    setSnowItems(null);
+    setSnowEmail(target);
+    try {
+      const url = `${API_BASE}/api/snow/incidents?email=${encodeURIComponent(target)}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || 'Failed to load incidents');
+      const items = Array.isArray(json?.items) ? json.items : [];
+      setSnowItems(items);
+      setSnowCount(Number(json?.open || 0) + Number(json?.in_progress || 0));
+    } catch (e: any) {
+      setSnowError(e.message || 'Failed to load incidents');
+      setSnowItems([]);
+      setSnowCount(0);
+    } finally {
+      setSnowLoading(false);
+    }
+  };
+
   // removed loadAllUsers (feature deprecated)
 
   useEffect(() => {
@@ -650,6 +704,15 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </Button>
+            {/* Show SNOW tickets button with dynamic count */}
+            <Button variant="outline" onClick={openSnowDialog}>
+              <span className="mr-2">Show SNOW tickets</span>
+              {typeof snowCount === 'number' && (
+                <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">
+                  {snowCount}
+                </span>
+              )}
             </Button>
             <Button variant="secondary" onClick={logout}>Sign out</Button>
           </div>
@@ -1186,6 +1249,68 @@ export default function HomePage() {
             </DialogContent>
           </Dialog>
         </section>
+
+        {/* SNOW incidents dialog */}
+        <Dialog open={snowOpen} onOpenChange={setSnowOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between w-full pr-12">
+                <span>ServiceNow Incidents{snowEmail ? ` — ${snowEmail}` : ''}</span>
+                <div className="flex items-center gap-2">
+                  {typeof snowCount === 'number' && (
+                    <span className="text-xs rounded border px-2 py-0.5">
+                      Open/In-Progress: {snowCount}
+                    </span>
+                  )}
+                  <Button size="sm" variant="outline" onClick={openSnowDialog} disabled={snowLoading}>Refresh</Button>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+            {snowLoading ? (
+              <p className="text-sm animate-pulse">Loading incidents...</p>
+            ) : snowError ? (
+              <p className="text-sm text-red-600">{snowError}</p>
+            ) : (snowItems?.length || 0) > 0 ? (
+              <div className="space-y-3">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Number</TableHead>
+                      <TableHead>Summary</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Updated</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {snowItems!.map((it: any) => (
+                      <TableRow key={it.number}>
+                        <TableCell className="font-mono text-xs">{it.number}</TableCell>
+                        <TableCell className="text-sm">{it.short_description}</TableCell>
+                        <TableCell>
+                          <span className={
+                            `text-[11px] px-2 py-0.5 rounded border ` +
+                            (String(it.state).toLowerCase() === 'open'
+                              ? 'text-blue-700 border-blue-200 bg-blue-50 dark:bg-blue-900/20'
+                              : String(it.state).toLowerCase().includes('progress')
+                              ? 'text-amber-700 border-amber-200 bg-amber-50 dark:bg-amber-900/20'
+                              : 'text-green-700 border-green-200 bg-green-50 dark:bg-green-900/20')
+                          }>
+                            {it.state}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-xs">{it.priority}</TableCell>
+                        <TableCell className="text-xs">{it.updatedAt}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No incidents found</p>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Ops Recent Failures Panel */}
         {role === "ops" && (

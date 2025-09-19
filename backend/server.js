@@ -221,6 +221,40 @@ app.get('/api/search-employee/:query', authRequired, (req, res) => {
   return res.json(results);
 });
 
+// NEW: Mock ServiceNow incidents endpoint
+app.get('/api/snow/incidents', authRequired, (req, res) => {
+  if (!FEATURES.useMocks) return res.status(501).json({ error: 'Real ServiceNow API not implemented' });
+
+  const requester = req.user || {};
+  const role = requester.role || 'employee';
+  const selfEmail = String(requester.email || '').toLowerCase();
+  const queryEmail = sanitize(String(req.query.email || '')).toLowerCase();
+
+  // Enforce access: non-ops can only view their own incidents
+  if (role !== 'ops' && queryEmail && queryEmail !== selfEmail) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const targetEmail = (role === 'ops' ? (queryEmail || selfEmail) : selfEmail) || '';
+  if (!targetEmail) return res.status(400).json({ error: 'Target email required' });
+
+  const incidents = loadMock('snow-incidents.json') || [];
+  const items = (incidents || []).filter((it) => String(it.assigned_to || '').toLowerCase() === targetEmail);
+
+  const counts = items.reduce(
+    (acc, it) => {
+      const st = String(it.state || '').toLowerCase();
+      if (st === 'open') acc.open += 1;
+      else if (st === 'in_progress' || st === 'in progress') acc.in_progress += 1;
+      else if (st === 'closed' || st === 'resolved') acc.closed += 1;
+      acc.total += 1;
+      return acc;
+    },
+    { total: 0, open: 0, in_progress: 0, closed: 0 }
+  );
+
+  return res.json({ email: targetEmail, ...counts, items });
+});
+
 // Start server
 app.listen(PORT, () => {
   logger.info({ msg: `backend listening on ${PORT}` });

@@ -1,0 +1,66 @@
+[
+  {
+    "number": "INC0010001",
+    "short_description": "Unable to sign in to VPN",
+    "state": "open",
+    "priority": "2 - High",
+    "updatedAt": "2025-09-18T12:10:00Z",
+    "assigned_to": "jane.doe@company.com"
+  },
+  {
+    "number": "INC0010002",
+    "short_description": "Password reset request",
+    "state": "in_progress",
+    "priority": "4 - Low",
+    "updatedAt": "2025-09-18T14:55:00Z",
+    "assigned_to": "john.smith@company.com"
+  },
+  {
+    "number": "INC0010003",
+    "short_description": "MFA push notifications not received",
+    "state": "open",
+    "priority": "3 - Moderate",
+    "updatedAt": "2025-09-19T07:05:00Z",
+    "assigned_to": "john.smith@company.com"
+  },
+  {
+    "number": "INC0010004",
+    "short_description": "Access denied to CyberArk safe",
+    "state": "closed",
+    "priority": "3 - Moderate",
+    "updatedAt": "2025-09-17T09:30:00Z",
+    "assigned_to": "jane.doe@company.com"
+  },
+  {
+    "number": "INC0010005",
+    "short_description": "Ping Federate SSO error for Salesforce",
+    "state": "in_progress",
+    "priority": "2 - High",
+    "updatedAt": "2025-09-19T06:25:00Z",
+    "assigned_to": "ops.engineer@company.com"
+  },
+  {
+    "number": "INC0010006",
+    "short_description": "Azure AD group membership issue",
+    "state": "open",
+    "priority": "3 - Moderate",
+    "updatedAt": "2025-09-18T21:12:00Z",
+    "assigned_to": "employee@company.com"
+  },
+  {
+    "number": "INC0010007",
+    "short_description": "Saviynt role not applied",
+    "state": "closed",
+    "priority": "4 - Low",
+    "updatedAt": "2025-09-16T15:40:00Z",
+    "assigned_to": "employee@company.com"
+  },
+  {
+    "number": "INC0010008",
+    "short_description": "Ping Directory attribute mismatch",
+    "state": "open",
+    "priority": "3 - Moderate",
+    "updatedAt": "2025-09-19T08:02:00Z",
+    "assigned_to": "ops@company.com"
+  }
+]
