@@ -609,6 +609,20 @@ export default function HomePage() {
                         setSearchDialogOpen(true);
                         try {
                           const aggregate: Record<string, any> = {};
+                          // NEW: fetch all-users once as a fallback source for per-system data
+                          let allUsers: any[] | null = null;
+                          try {
+                            const auRes = await fetch(`${API_BASE}/api/all-users`, {
+                              headers: { Authorization: `Bearer ${token}` },
+                            });
+                            if (auRes.ok) {
+                              const auJson = await auRes.json();
+                              allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
+                            }
+                          } catch {
+                            // ignore
+                          }
+
                           for (const sys of SYSTEMS) {
                             let found: any = undefined;
                             // Try details endpoint with multiple possible identifiers
@@ -629,11 +643,22 @@ export default function HomePage() {
                             }
                             // Fallback to in-memory search results if details not found
                             if (!found) {
-                              const arr = Array.isArray(searchResults?.[sys]) ? searchResults[sys] : [];
+                              const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
                               const matched = arr.filter((it: any) =>
                                 candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
                               );
                               if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
+                            }
+                            // NEW: Fallback to all-users systems map
+                            if (!found && allUsers) {
+                              const matchedUser = allUsers.find((u: any) =>
+                                candidateKeys.some(
+                                  (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
+                                )
+                              );
+                              if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
+                                found = matchedUser.systems[sys];
+                              }
                             }
                             // Ensure key exists for every system so UI shows all 6 sections
                             aggregate[sys] = found ?? null;

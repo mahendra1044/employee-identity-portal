@@ -5,6 +5,10 @@
     "email": "alice.johnson@company.com",
     "systems": {
       "ping-directory": { "department": "Engineering", "title": "Senior Software Engineer" },
+      "ping-federate": { "lastLogin": "2025-09-17T14:22:11Z", "tokenStatus": "Valid" },
+      "cyberark": { "privilegedAccess": true, "safe": "Engineering-Privileged" },
+      "saviynt": { "roles": ["Engineer", "VPN User"], "riskScore": 12 },
+      "azure-ad": { "jobTitle": "Senior Software Engineer", "licenses": ["M365 E5", "PowerBI Pro"] },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -14,6 +18,10 @@
     "email": "bob.martin@company.com",
     "systems": {
       "ping-directory": { "department": "Engineering", "title": "Engineering Manager" },
+      "ping-federate": { "lastLogin": "2025-09-16T09:05:00Z", "tokenStatus": "Valid" },
+      "cyberark": { "privilegedAccess": true, "safe": "Eng-Leadership" },
+      "saviynt": { "roles": ["Manager", "VPN User"], "riskScore": 8 },
+      "azure-ad": { "jobTitle": "Engineering Manager", "licenses": ["M365 E5"] },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -23,7 +31,8 @@
     "email": "charlie.kim@company.com",
     "systems": {
       "ping-directory": { "department": "IT", "title": "Support Engineer" },
-      "ping-mfa": { "status": "Disabled" }
+      "ping-mfa": { "status": "Disabled" },
+      "azure-ad": { "jobTitle": "Support Engineer", "licenses": ["M365 E3"] }
     }
   },
   {
@@ -32,6 +41,7 @@
     "email": "dana.lee@company.com",
     "systems": {
       "ping-directory": { "department": "Finance", "title": "Financial Analyst" },
+      "ping-federate": { "lastLogin": "2025-09-10T18:12:44Z", "tokenStatus": "Valid" },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -41,6 +51,7 @@
     "email": "evan.torres@company.com",
     "systems": {
       "ping-directory": { "department": "HR", "title": "HR Specialist" },
+      "saviynt": { "roles": ["HR Specialist"], "riskScore": 5 },
       "ping-mfa": { "status": "Pending" }
     }
   },
@@ -50,6 +61,7 @@
     "email": "fatima.khan@company.com",
     "systems": {
       "ping-directory": { "department": "Security", "title": "Security Analyst" },
+      "cyberark": { "privilegedAccess": true, "safe": "Security-Privileged" },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -59,6 +71,7 @@
     "email": "george.smith@company.com",
     "systems": {
       "ping-directory": { "department": "Marketing", "title": "Marketing Manager" },
+      "azure-ad": { "jobTitle": "Marketing Manager", "licenses": ["M365 E3"] },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -68,6 +81,7 @@
     "email": "hannah.park@company.com",
     "systems": {
       "ping-directory": { "department": "Design", "title": "Product Designer" },
+      "saviynt": { "roles": ["Designer"], "riskScore": 4 },
       "ping-mfa": { "status": "Disabled" }
     }
   },
@@ -77,6 +91,8 @@
     "email": "ian.chen@company.com",
     "systems": {
       "ping-directory": { "department": "Engineering", "title": "Software Engineer" },
+      "ping-federate": { "lastLogin": "2025-09-13T13:55:10Z", "tokenStatus": "Valid" },
+      "azure-ad": { "jobTitle": "Software Engineer", "licenses": ["M365 E5"] },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -86,6 +102,7 @@
     "email": "julia.nguyen@company.com",
     "systems": {
       "ping-directory": { "department": "Product", "title": "Product Manager" },
+      "saviynt": { "roles": ["Product Manager"], "riskScore": 6 },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -104,6 +121,8 @@
     "email": "laura.garcia@company.com",
     "systems": {
       "ping-directory": { "department": "Legal", "title": "Counsel" },
+      "ping-federate": { "lastLogin": "2025-09-12T10:20:00Z", "tokenStatus": "Valid" },
+      "azure-ad": { "jobTitle": "Counsel", "licenses": ["M365 E3"] },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -113,6 +132,7 @@
     "email": "mohammed.ali@company.com",
     "systems": {
       "ping-directory": { "department": "IT", "title": "SysAdmin" },
+      "cyberark": { "privilegedAccess": true, "safe": "IT-Privileged" },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -131,6 +151,7 @@
     "email": "oscar.diaz@company.com",
     "systems": {
       "ping-directory": { "department": "Engineering", "title": "QA Engineer" },
+      "saviynt": { "roles": ["QA"], "riskScore": 7 },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -140,6 +161,7 @@
     "email": "priya.singh@company.com",
     "systems": {
       "ping-directory": { "department": "Data", "title": "Data Scientist" },
+      "azure-ad": { "jobTitle": "Data Scientist", "licenses": ["M365 E5", "PowerBI Pro"] },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -149,6 +171,7 @@
     "email": "quentin.roux@company.com",
     "systems": {
       "ping-directory": { "department": "Finance", "title": "Controller" },
+      "ping-federate": { "lastLogin": "2025-09-09T07:30:00Z", "tokenStatus": "Valid" },
       "ping-mfa": { "status": "Pending" }
     }
   },
@@ -158,6 +181,7 @@
     "email": "rita.souza@company.com",
     "systems": {
       "ping-directory": { "department": "People Ops", "title": "HRBP" },
+      "saviynt": { "roles": ["HRBP"], "riskScore": 10 },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -167,6 +191,7 @@
     "email": "sam.wilson@company.com",
     "systems": {
       "ping-directory": { "department": "Security", "title": "GRC Analyst" },
+      "cyberark": { "privilegedAccess": false, "safe": "GRC-ReadOnly" },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -176,6 +201,7 @@
     "email": "tina.zhang@company.com",
     "systems": {
       "ping-directory": { "department": "Engineering", "title": "DevOps Engineer" },
+      "azure-ad": { "jobTitle": "DevOps Engineer", "licenses": ["M365 E5"] },
       "ping-mfa": { "status": "Disabled" }
     }
   }
