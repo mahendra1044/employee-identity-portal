@@ -7,16 +7,22 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import winston from 'winston';
+import { fileURLToPath } from 'url';
 
 // Load env
-dotenv.config({ path: path.join(process.cwd(), 'backend', '.env') });
+// Resolve paths relative to this server file to avoid process.cwd() issues
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load env from backend/.env (same folder as this file)
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme';
 
 // Logger
-const logDir = path.join(process.cwd(), 'backend', 'logs');
+const logDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -31,8 +37,8 @@ const logger = winston.createLogger({
 });
 
 // Configs
-const featuresPath = path.join(process.cwd(), 'backend', 'config', 'features.json');
-const rolesPath = path.join(process.cwd(), 'backend', 'config', 'roles.json');
+const featuresPath = path.join(__dirname, 'config', 'features.json');
+const rolesPath = path.join(__dirname, 'config', 'roles.json');
 let FEATURES = JSON.parse(fs.readFileSync(featuresPath, 'utf-8'));
 let ROLES = JSON.parse(fs.readFileSync(rolesPath, 'utf-8'));
 
@@ -62,7 +68,7 @@ const systems = [
 
 const loadMock = (file) => {
   try {
-    const p = path.join(process.cwd(), 'backend', 'mocks', file);
+    const p = path.join(__dirname, 'mocks', file);
     return JSON.parse(fs.readFileSync(p, 'utf-8'));
   } catch (e) {
     return null;

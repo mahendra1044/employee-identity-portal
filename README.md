@@ -5,6 +5,32 @@ A local-first web portal for employees and ops to view identity data across syst
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3001 (health: GET /health → { ok: true })
 
+## TL;DR — Run Locally
+
+1) Install deps at repo root
+```
+npm install
+```
+
+2) Start frontend (3000) + backend (3001) together
+```
+npm run dev:all
+```
+
+3) Sign in (mock auth)
+- ops@company.com / any password
+- management@company.com / any password
+- any-other@company.com / any password
+
+If you prefer running separately:
+```
+# Terminal A (backend)
+cd backend && npm install && node server.js
+
+# Terminal B (frontend)
+npm run dev
+```
+
 ## Prerequisites & Install
 - Node.js 18+ (recommended 20.x) and npm 8+
 - One-time install at repo root: `npm install`
@@ -163,6 +189,7 @@ Responses
 - Token issues: Click "Sign out" (clears localStorage) and log back in
 - Port conflicts: Change PORT in backend/.env and update API_BASE in src/app/page.tsx if needed
 - Backend not starting: Verify `backend/server.js` exists and that you ran `npm install` at the repo root (or `cd backend && npm install`).
+- Windows path error (ENOENT backend/backend/...): Fixed. The server now resolves paths relative to `backend/server.js`. Pull latest and use `npm run dev:all` (avoid manually changing working directories when starting the backend).
 
 
 ## Tech Stack
