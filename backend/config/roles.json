@@ -7,6 +7,14 @@
     "azure-ad": { "own": true, "all": false, "search": false },
     "ping-mfa": { "own": true, "all": false, "search": true }
   },
+  "management": {
+    "ping-directory": { "own": true, "all": false, "search": true },
+    "ping-federate": { "own": true, "all": false, "search": false },
+    "cyberark": { "own": true, "all": false, "search": false },
+    "saviynt": { "own": true, "all": false, "search": false },
+    "azure-ad": { "own": true, "all": false, "search": false },
+    "ping-mfa": { "own": true, "all": false, "search": true }
+  },
   "ops": {
     "ping-directory": { "own": true, "all": true, "search": true },
     "ping-federate": { "own": true, "all": true, "search": false },
@@ -14,13 +22,5 @@
     "saviynt": { "own": true, "all": true, "search": false },
     "azure-ad": { "own": true, "all": true, "search": false },
     "ping-mfa": { "own": true, "all": true, "search": true }
-  },
-  "management": {
-    "ping-directory": { "own": true, "all": false, "search": true },
-    "ping-federate": { "own": true, "all": false, "search": false },
-    "cyberark": { "own": false, "all": false, "search": false },
-    "saviynt": { "own": true, "all": false, "search": false },
-    "azure-ad": { "own": true, "all": false, "search": false },
-    "ping-mfa": { "own": true, "all": false, "search": true }
   }
 }
