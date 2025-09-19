@@ -578,37 +578,65 @@ export default function HomePage() {
                       className="w-full md:w-auto"
                       variant="secondary"
                       onClick={async () => {
-                        // Determine the best key from search results
+                        // Determine the best key candidates from search results
                         const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
                         const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
                         const q = String(search).trim().toLowerCase();
                         const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
                         const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
-                        const key = (exactPd?.email || exactPd?.userId || exactMfa?.userId || pd?.[0]?.email || pd?.[0]?.userId || mfa?.[0]?.userId || mfa?.[0]?.email || search).toString();
+                        const firstPd = pd?.[0];
+                        const firstMfa = mfa?.[0];
+                        // Build candidate identifiers to try per-system (email + userId variants)
+                        const candidateKeys = (
+                          [
+                            exactPd?.email,
+                            exactPd?.userId,
+                            exactMfa?.userId,
+                            firstPd?.email,
+                            firstPd?.userId,
+                            firstMfa?.userId,
+                            firstMfa?.email,
+                            search,
+                          ] as Array<string | undefined | null>
+                        )
+                          .filter(Boolean)
+                          .map((s) => String(s));
+                        const displayKey = candidateKeys[0] || "";
 
-                        setSearchDialogTitle(`All Systems — ${key || "Details"}`);
+                        setSearchDialogTitle(`All Systems — ${displayKey || "Details"}`);
                         setSearchDialogData(null);
                         setSearchDialogLoading(true);
                         setSearchDialogOpen(true);
                         try {
                           const aggregate: Record<string, any> = {};
                           for (const sys of SYSTEMS) {
-                            try {
-                              const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
-                              const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                              if (res.ok) {
-                                const json = await res.json();
-                                if (json?.data) {
-                                  aggregate[sys] = json.data;
-                                  continue;
+                            let found: any = undefined;
+                            // Try details endpoint with multiple possible identifiers
+                            for (const key of candidateKeys) {
+                              try {
+                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
+                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                if (res.ok) {
+                                  const json = await res.json();
+                                  if (json?.data) {
+                                    found = json.data;
+                                    break;
+                                  }
                                 }
+                              } catch {
+                                // continue trying other keys
                               }
-                            } catch {}
-                            const arr = Array.isArray(searchResults?.[sys]) ? searchResults[sys] : [];
-                            const matched = arr.filter((it: any) =>
-                              key && (it.userId === key || it.email?.toLowerCase() === String(key).toLowerCase())
-                            );
-                            if (matched.length > 0) aggregate[sys] = matched.length === 1 ? matched[0] : matched;
+                            }
+                            // Fallback to in-memory search results if details not found
+                            if (!found) {
+                              const arr = Array.isArray(searchResults?.[sys]) ? searchResults[sys] : [];
+                              const matched = arr.filter((it: any) =>
+                                candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
+                              );
+                              if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
+                            }
+                            // Ensure key exists for every system so UI shows all 6 sections
+                            aggregate[sys] = found ?? null;
                           }
                           setSearchDialogData(aggregate);
                         } catch {
@@ -627,7 +655,7 @@ export default function HomePage() {
           </Card>
           {/* Search result details dialog */}
           <Dialog open={searchDialogOpen} onOpenChange={setSearchDialogOpen}>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-5xl">
               <DialogHeader>
                 <DialogTitle>{searchDialogTitle || "Details"}</DialogTitle>
               </DialogHeader>
@@ -635,21 +663,35 @@ export default function HomePage() {
                 <p className="text-sm animate-pulse">Loading details...</p>
               ) : searchDialogData ? (
                 typeof searchDialogData === "object" && (searchDialogTitle || "").startsWith("All Systems") ? (
-                  <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-                    {Object.entries(searchDialogData as Record<string, any>).length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No details available</p>
-                    ) : (
-                      Object.entries(searchDialogData as Record<string, any>).map(([sys, val]) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto pr-1">
+                    {SYSTEMS.map((sys) => {
+                      const val = (searchDialogData as any)?.[sys] ?? null;
+                      return (
                         <div key={sys} className="rounded border p-3">
-                          <div className="text-sm font-medium mb-2">
-                            {sys.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-sm font-medium">
+                              {sys.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                            </div>
+                            <span
+                              className={
+                                `text-[10px] px-2 py-0.5 rounded border ${enabled[sys] ?
+                                  'text-green-700 border-green-200 bg-green-50 dark:bg-green-900/20' :
+                                  'text-amber-700 border-amber-200 bg-amber-50 dark:bg-amber-900/20'}`
+                              }
+                            >
+                              {enabled[sys] ? 'Enabled' : 'Disabled'}
+                            </span>
                           </div>
-                          <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
-                            {JSON.stringify(val, null, 2)}
-                          </pre>
+                          {val ? (
+                            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+                              {JSON.stringify(val, null, 2)}
+                            </pre>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">No details available</p>
+                          )}
                         </div>
-                      ))
-                    )}
+                      );
+                    })}
                   </div>
                 ) : (
                   <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
