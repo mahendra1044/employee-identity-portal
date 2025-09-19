@@ -29,7 +29,7 @@ export default function RootLayout({
           data-debug="true"
           data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
         />
-        <Toaster richColors position="top-right" />
+        <Toaster richColors position="bottom-right" closeButton />
         {children}
         <VisualEditsMessenger />
       </body>
