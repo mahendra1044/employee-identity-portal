@@ -491,46 +491,6 @@ export default function HomePage() {
                                       >
                                         View Details
                                       </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="secondary"
-                                        onClick={async () => {
-                                          const key = u.userId || u.email;
-                                          setSearchDialogTitle(`All Systems — ${key || "Details"}`);
-                                          setSearchDialogData(null);
-                                          setSearchDialogLoading(true);
-                                          setSearchDialogOpen(true);
-                                          try {
-                                            const aggregate: Record<string, any> = {};
-                                            for (const sys of SYSTEMS) {
-                                              // Try full details endpoint per system; fallback to search result match
-                                              try {
-                                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
-                                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                                if (res.ok) {
-                                                  const json = await res.json();
-                                                  if (json?.data) {
-                                                    aggregate[sys] = json.data;
-                                                    continue;
-                                                  }
-                                                }
-                                              } catch {}
-                                              const arr = Array.isArray(searchResults?.[sys]) ? searchResults[sys] : [];
-                                              const matched = arr.filter((it: any) =>
-                                                key && (it.userId === key || it.email?.toLowerCase() === String(key).toLowerCase())
-                                              );
-                                              if (matched.length > 0) aggregate[sys] = matched;
-                                            }
-                                            setSearchDialogData(aggregate);
-                                          } catch {
-                                            setSearchDialogData({ error: "Unable to load aggregated details" });
-                                          } finally {
-                                            setSearchDialogLoading(false);
-                                          }
-                                        }}
-                                      >
-                                        View All Systems
-                                      </Button>
                                     </div>
                                   </TableCell>
                                 </TableRow>
@@ -599,45 +559,6 @@ export default function HomePage() {
                                       >
                                         View Details
                                       </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="secondary"
-                                        onClick={async () => {
-                                          const key = u.userId || u.email;
-                                          setSearchDialogTitle(`All Systems — ${key || "Details"}`);
-                                          setSearchDialogData(null);
-                                          setSearchDialogLoading(true);
-                                          setSearchDialogOpen(true);
-                                          try {
-                                            const aggregate: Record<string, any> = {};
-                                            for (const sys of SYSTEMS) {
-                                              try {
-                                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
-                                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                                if (res.ok) {
-                                                  const json = await res.json();
-                                                  if (json?.data) {
-                                                    aggregate[sys] = json.data;
-                                                    continue;
-                                                  }
-                                                }
-                                              } catch {}
-                                              const arr = Array.isArray(searchResults?.[sys]) ? searchResults[sys] : [];
-                                              const matched = arr.filter((it: any) =>
-                                                key && (it.userId === key || it.email?.toLowerCase() === String(key).toLowerCase())
-                                              );
-                                              if (matched.length > 0) aggregate[sys] = matched;
-                                            }
-                                            setSearchDialogData(aggregate);
-                                          } catch {
-                                            setSearchDialogData({ error: "Unable to load aggregated details" });
-                                          } finally {
-                                            setSearchDialogLoading(false);
-                                          }
-                                        }}
-                                      >
-                                        View All Systems
-                                      </Button>
                                     </div>
                                   </TableCell>
                                 </TableRow>
@@ -650,20 +571,89 @@ export default function HomePage() {
                       })()}
                     </CardContent>
                   </Card>
+
+                  {/* Global View All Systems button below the two boxes */}
+                  <div className="md:col-span-2">
+                    <Button
+                      className="w-full md:w-auto"
+                      variant="secondary"
+                      onClick={async () => {
+                        // Determine the best key from search results
+                        const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+                        const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
+                        const q = String(search).trim().toLowerCase();
+                        const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
+                        const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
+                        const key = (exactPd?.email || exactPd?.userId || exactMfa?.userId || pd?.[0]?.email || pd?.[0]?.userId || mfa?.[0]?.userId || mfa?.[0]?.email || search).toString();
+
+                        setSearchDialogTitle(`All Systems — ${key || "Details"}`);
+                        setSearchDialogData(null);
+                        setSearchDialogLoading(true);
+                        setSearchDialogOpen(true);
+                        try {
+                          const aggregate: Record<string, any> = {};
+                          for (const sys of SYSTEMS) {
+                            try {
+                              const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
+                              const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                              if (res.ok) {
+                                const json = await res.json();
+                                if (json?.data) {
+                                  aggregate[sys] = json.data;
+                                  continue;
+                                }
+                              }
+                            } catch {}
+                            const arr = Array.isArray(searchResults?.[sys]) ? searchResults[sys] : [];
+                            const matched = arr.filter((it: any) =>
+                              key && (it.userId === key || it.email?.toLowerCase() === String(key).toLowerCase())
+                            );
+                            if (matched.length > 0) aggregate[sys] = matched.length === 1 ? matched[0] : matched;
+                          }
+                          setSearchDialogData(aggregate);
+                        } catch {
+                          setSearchDialogData({ error: "Unable to load aggregated details" });
+                        } finally {
+                          setSearchDialogLoading(false);
+                        }
+                      }}
+                    >
+                      View All System Details
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
           {/* Search result details dialog */}
           <Dialog open={searchDialogOpen} onOpenChange={setSearchDialogOpen}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-4xl">
               <DialogHeader>
                 <DialogTitle>{searchDialogTitle || "Details"}</DialogTitle>
               </DialogHeader>
               {searchDialogLoading ? (
                 <p className="text-sm animate-pulse">Loading details...</p>
               ) : searchDialogData ? (
-                <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
+                typeof searchDialogData === "object" && (searchDialogTitle || "").startsWith("All Systems") ? (
+                  <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                    {Object.entries(searchDialogData as Record<string, any>).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No details available</p>
+                    ) : (
+                      Object.entries(searchDialogData as Record<string, any>).map(([sys, val]) => (
+                        <div key={sys} className="rounded border p-3">
+                          <div className="text-sm font-medium mb-2">
+                            {sys.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                          </div>
+                          <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+                            {JSON.stringify(val, null, 2)}
+                          </pre>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
+                )
               ) : (
                 <p className="text-sm text-muted-foreground">No details available</p>
               )}
