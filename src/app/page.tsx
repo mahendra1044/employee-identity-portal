@@ -255,16 +255,20 @@ export default function HomePage() {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "navy">();
+  const [minutes, setMinutes] = useState<number>(10);
+  const [failFed, setFailFed] = useState<any[] | null>(null);
+  const [failMfa, setFailMfa] = useState<any[] | null>(null);
+  const [opsLoading, setOpsLoading] = useState(false);
+  const [opsError, setOpsError] = useState<string | null>(null);
 
   useEffect(() => {
-    // init theme from localStorage or system preference
+    // init theme from localStorage; default to light regardless of system
     const stored = localStorage.getItem("theme");
     if (stored === "light" || stored === "dark" || stored === "navy") {
       setTheme(stored);
-      return;
+    } else {
+      setTheme("light");
     }
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setTheme(prefersDark ? "dark" : "light");
   }, []);
 
   useEffect(() => {
@@ -313,6 +317,31 @@ export default function HomePage() {
 
   const anyEnabled = useMemo(() => Object.values(enabled || {}).some(Boolean), [enabled]);
 
+  const loadRecentFailures = async () => {
+    if (!token || role !== "ops") return;
+    setOpsLoading(true);
+    setOpsError(null);
+    try {
+      const [fedRes, mfaRes] = await Promise.all([
+        fetch(`${API_BASE}/api/ops-failures?system=ping-federate&minutes=${minutes}`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/api/ops-failures?system=ping-mfa&minutes=${minutes}`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      const fedJson = await fedRes.json().catch(() => ({ data: [] }));
+      const mfaJson = await mfaRes.json().catch(() => ({ data: [] }));
+      setFailFed(Array.isArray(fedJson?.data) ? fedJson.data : []);
+      setFailMfa(Array.isArray(mfaJson?.data) ? mfaJson.data : []);
+      if (!fedRes.ok || !mfaRes.ok) {
+        setOpsError("Failure feeds not available (mock backend may not implement /api/ops-failures)");
+      }
+    } catch (e: any) {
+      setOpsError(e?.message || "Failed to load failures");
+      setFailFed([]);
+      setFailMfa([]);
+    } finally {
+      setOpsLoading(false);
+    }
+  };
+
   const doSearch = async () => {
     if (!token || !search.trim()) return;
     setSearchError(null);
@@ -347,7 +376,9 @@ export default function HomePage() {
 
   useEffect(() => {
     if (token && role === "ops") {
-      loadAllUsers(0);
+      // do not auto-load all users; show recent failures panel instead
+      setAllUsers(null);
+      loadRecentFailures();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, role]);
@@ -359,7 +390,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" alt="Logo" className="w-8 h-8 rounded" />
             <div>
@@ -376,7 +407,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Search Section */}
         <section>
           <Card>
@@ -404,28 +435,37 @@ export default function HomePage() {
                       <CardTitle className="text-base">Ping Directory</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {Array.isArray(searchResults?.["ping-directory"]) && searchResults["ping-directory"].length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Name</TableHead>
-                              <TableHead>Email</TableHead>
-                              <TableHead>User ID</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {searchResults["ping-directory"].map((u: any) => (
-                              <TableRow key={`pd-${u.userId}`}>
-                                <TableCell>{u.name}</TableCell>
-                                <TableCell>{u.email}</TableCell>
-                                <TableCell>{u.userId}</TableCell>
+                      {(() => {
+                        const list = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+                        const filtered = role === "ops" && search.trim()
+                          ? list.filter((u: any) =>
+                              u.userId === search.trim() || u.email?.toLowerCase() === search.trim().toLowerCase()
+                            )
+                          : list;
+                        const final = role === "ops" ? filtered.slice(0, 1) : filtered;
+                        return final.length > 0 ? (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>User ID</TableHead>
                               </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No results</p>
-                      )}
+                            </TableHeader>
+                            <TableBody>
+                              {final.map((u: any) => (
+                                <TableRow key={`pd-${u.userId}`}>
+                                  <TableCell>{u.name}</TableCell>
+                                  <TableCell>{u.email}</TableCell>
+                                  <TableCell>{u.userId}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">No results</p>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
 
@@ -434,28 +474,35 @@ export default function HomePage() {
                       <CardTitle className="text-base">Ping MFA</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {Array.isArray(searchResults?.["ping-mfa"]) && searchResults["ping-mfa"].length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>User ID</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead>Last Event</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {searchResults["ping-mfa"].map((u: any) => (
-                              <TableRow key={`mfa-${u.userId}`}>
-                                <TableCell>{u.userId}</TableCell>
-                                <TableCell>{u.status}</TableCell>
-                                <TableCell>{u.lastEvent}</TableCell>
+                      {(() => {
+                        const list = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
+                        const filtered = role === "ops" && search.trim()
+                          ? list.filter((u: any) => u.userId === search.trim())
+                          : list;
+                        const final = role === "ops" ? filtered.slice(0, 1) : filtered;
+                        return final.length > 0 ? (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>User ID</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Last Event</TableHead>
                               </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No results</p>
-                      )}
+                            </TableHeader>
+                            <TableBody>
+                              {final.map((u: any) => (
+                                <TableRow key={`mfa-${u.userId}`}>
+                                  <TableCell>{u.userId}</TableCell>
+                                  <TableCell>{u.status}</TableCell>
+                                  <TableCell>{u.lastEvent}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">No results</p>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 </div>
@@ -464,9 +511,79 @@ export default function HomePage() {
           </Card>
         </section>
 
-        {/* System Cards */}
+        {/* Ops Recent Failures Panel */}
+        {role === "ops" && (
+          <section>
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Failures (last {minutes} min)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm">Window (minutes)</label>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="w-28"
+                      value={minutes}
+                      onChange={(e) => setMinutes(Math.max(1, Number(e.target.value)))}
+                    />
+                  </div>
+                  <Button size="sm" onClick={loadRecentFailures} disabled={opsLoading}>Refresh</Button>
+                  {opsError && <span className="text-xs text-red-600">{opsError}</span>}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Ping Federate – Login Failures</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {opsLoading ? (
+                        <p className="text-sm animate-pulse">Loading...</p>
+                      ) : (failFed?.length || 0) > 0 ? (
+                        <ul className="text-sm list-disc pl-4 space-y-1">
+                          {failFed!.slice(0, 25).map((it: any, idx: number) => (
+                            <li key={`fed-${idx}`}>
+                              {it.userId || it.email || "unknown"} — {it.reason || it.error || "failure"} — {it.time || it.timestamp || ""}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No failures in window</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Ping MFA – Verification Failures</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {opsLoading ? (
+                        <p className="text-sm animate-pulse">Loading...</p>
+                      ) : (failMfa?.length || 0) > 0 ? (
+                        <ul className="text-sm list-disc pl-4 space-y-1">
+                          {failMfa!.slice(0, 25).map((it: any, idx: number) => (
+                            <li key={`mfa-${idx}`}>
+                              {it.userId || it.email || "unknown"} — {it.reason || it.error || "failure"} — {it.time || it.timestamp || ""}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No failures in window</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {/* System Cards (hide by default for ops) */}
         <section>
-          {!anyEnabled ? (
+          {role === "ops" ? null : !anyEnabled ? (
             <Card>
               <CardHeader>
                 <CardTitle>No systems enabled</CardTitle>
@@ -489,7 +606,7 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Ops All Users */}
+        {/* Ops All Users (only on demand) */}
         {role === "ops" && (
           <section>
             <Card>
@@ -497,50 +614,59 @@ export default function HomePage() {
                 <CardTitle>All Users (Ops)</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>User ID</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Ping Dir Dept</TableHead>
-                        <TableHead>Ping MFA Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {allUsers?.results?.map((u: any) => (
-                        <TableRow
-                          key={u.userId}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => {
-                            setSelectedUser(u);
-                            setModalOpen(true);
-                          }}
-                        >
-                          <TableCell>{u.userId}</TableCell>
-                          <TableCell>{u.name}</TableCell>
-                          <TableCell>{u.email}</TableCell>
-                          <TableCell>{u.systems?.["ping-directory"]?.department || "-"}</TableCell>
-                          <TableCell>{u.systems?.["ping-mfa"]?.status || "-"}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                <div className="flex items-center justify-between mt-3 text-sm">
-                  <div>
-                    Showing {allUsers ? allUsers.results.length : 0} of {allUsers?.total || 0}
+                {!allUsers || (allUsers?.results?.length || 0) === 0 ? (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <p className="text-sm text-muted-foreground">Hidden by default. Load only when needed.</p>
+                    <Button onClick={() => loadAllUsers(0)}>Load all users</Button>
                   </div>
-                  <div className="space-x-2">
-                    <Button variant="secondary" onClick={() => loadAllUsers(Math.max(0, offset - 50))} disabled={!allUsers || offset === 0}>
-                      Previous
-                    </Button>
-                    <Button variant="default" onClick={() => loadAllUsers(offset + 50)} disabled={!allUsers || offset + 50 >= (allUsers?.total || 0)}>
-                      Next
-                    </Button>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>User ID</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Ping Dir Dept</TableHead>
+                            <TableHead>Ping MFA Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {allUsers?.results?.map((u: any) => (
+                            <TableRow
+                              key={u.userId}
+                              className="cursor-pointer hover:bg-muted/50"
+                              onClick={() => {
+                                setSelectedUser(u);
+                                setModalOpen(true);
+                              }}
+                            >
+                              <TableCell>{u.userId}</TableCell>
+                              <TableCell>{u.name}</TableCell>
+                              <TableCell>{u.email}</TableCell>
+                              <TableCell>{u.systems?.["ping-directory"]?.department || "-"}</TableCell>
+                              <TableCell>{u.systems?.["ping-mfa"]?.status || "-"}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    <div className="flex items-center justify-between mt-3 text-sm">
+                      <div>
+                        Showing {allUsers ? allUsers.results.length : 0} of {allUsers?.total || 0}
+                      </div>
+                      <div className="space-x-2">
+                        <Button variant="secondary" onClick={() => loadAllUsers(Math.max(0, offset - 50))} disabled={!allUsers || offset === 0}>
+                          Previous
+                        </Button>
+                        <Button variant="default" onClick={() => loadAllUsers(offset + 50)} disabled={!allUsers || offset + 50 >= (allUsers?.total || 0)}>
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 

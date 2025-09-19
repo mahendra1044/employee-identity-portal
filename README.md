@@ -126,6 +126,36 @@ Tips
 - To simulate a disabled system, set `systems["azure-ad"] = false` in backend/config/features.json → UI cards show "Feature not enabled" and relevant APIs return 404
 - To test RBAC 403s, remove `all` permission for a role/system in backend/config/roles.json and retry the corresponding endpoint
 
+## Feature updates
+
+- Theme defaults and options
+  - Light theme is now the default (ignores system preference on first load). Your last selection persists in localStorage.
+  - Navy theme refined to a lighter, more professional gradient with smooth fade. Toggle cycles: Light → Dark → Navy.
+
+- Ops view behavior
+  - On login, the Ops dashboard no longer auto-loads the full employee list or show per-user details.
+  - A new "Recent Failures" panel shows:
+    - Ping Federate login failures in the last N minutes
+    - Ping MFA verification failures in the last N minutes
+  - The time window is configurable via an input (default 10 minutes); click Refresh to update.
+  - The full All Users table is hidden by default. Load it on demand with the "Load all users" button.
+  - Search behavior for Ops: when searching, results are reduced to the specific employee (exact match by userId/email), and full details are still shown via "View Details" dialogs.
+
+- Clean, responsive UI
+  - Layout scales across breakpoints (1/2/3-column grids), with improved spacing and overflow handling.
+  - System details and user details open in dialogs to keep pages compact and professional.
+
+### How to use
+
+- Theme toggle: header button cycles Light/Dark/Navy; selection persists across reloads.
+- Ops: adjust the minutes field in the Recent Failures card and hit Refresh.
+- Ops: click "Load all users" to fetch the full list only when needed.
+- Search: type name/email/ID and click Search; click "View Details" on a card or row to see expanded data.
+
+### Notes
+
+- If your backend does not implement `/api/ops-failures?system=<ping-federate|ping-mfa>&minutes=<n>`, the Recent Failures panel will show a friendly message; mocks can be added later to support it.
+- Navy theme variables and gradient are defined under the `.navy` class in `src/app/globals.css`.
 
 ## How the App Works
 
