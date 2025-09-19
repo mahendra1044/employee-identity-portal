@@ -84,6 +84,48 @@ Health checks
 - employee role: anything-else@company.com (any password)
 - In mock mode, role is inferred from email prefix and any password works.
 
+## Mock test data & scenarios
+- Mock mode is ON by default: backend/config/features.json → `{"useMocks": true, "useMockAuth": true}`
+- Files (backend/mocks):
+  - ping-directory-initial.json / ping-directory-details.json
+  - ping-federate-initial.json / ping-federate-details.json
+  - cyberark-initial.json / cyberark-details.json
+  - saviynt-initial.json / saviynt-details.json
+  - azure-ad-initial.json / azure-ad-details.json
+  - ping-mfa-initial.json / ping-mfa-details.json
+  - ping-directory-search.json / ping-mfa-search.json
+  - all-users.json
+
+What you can test
+- Employee dashboard (any non-ops email)
+  - System cards → Refresh / View Details
+    - Ping Directory (Alice Johnson): name, email, department, groups, pwd policy, etc.
+    - Ping Federate: lastLogin, activeSessions, tokenClaims, audit
+    - CyberArk: accounts with lastRotation, compliance, policies
+    - Saviynt: roles, entitlements, risk, certifications
+    - Azure AD: licenses, groups, devices, conditional access
+    - Ping MFA: status, enrolledDevices, policy, history
+- Search (employees and ops)
+  - Try queries (case-insensitive):
+    - "Alice" → shows PD row for Alice Johnson and MFA status for u1001
+    - "u1003" → shows PD row for Charlie Kim and MFA Disabled
+    - "dana.lee@company.com" → shows PD row for Dana Lee and MFA Enabled
+- Ops view (sign in as ops@company.com)
+  - All Users table uses all-users.json (20 seeded users)
+  - Click a row → modal shows per-system JSON (PD department/title, MFA status, etc.)
+  - Pagination controls work with total/limit reported by API
+
+Sample records (for quick reference)
+- ping-directory-initial.json (own): Alice Johnson — Engineering, Senior Software Engineer, Active
+- ping-mfa-initial.json (own): status Enabled; devices: iPhone 14, PingID
+- ping-directory-search.json: u1001..u1010 (Alice, Bob, Charlie, Dana, ...)
+- ping-mfa-search.json: MFA status per userId (Enabled/Disabled/Pending)
+- all-users.json: u1001..u1020 with departments and MFA status
+
+Tips
+- To simulate a disabled system, set `systems["azure-ad"] = false` in backend/config/features.json → UI cards show "Feature not enabled" and relevant APIs return 404
+- To test RBAC 403s, remove `all` permission for a role/system in backend/config/roles.json and retry the corresponding endpoint
+
 
 ## How the App Works
 
