@@ -249,10 +249,7 @@ export default function HomePage() {
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [allUsers, setAllUsers] = useState<{ total: number; limit: number; offset: number; results: any[] } | null>(null);
-  const [offset, setOffset] = useState(0);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  // removed All Users feature and related state
   const [hasSearched, setHasSearched] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "navy">();
   const [minutes, setMinutes] = useState<number>(10);
@@ -260,6 +257,10 @@ export default function HomePage() {
   const [failMfa, setFailMfa] = useState<any[] | null>(null);
   const [opsLoading, setOpsLoading] = useState(false);
   const [opsError, setOpsError] = useState<string | null>(null);
+  // search result detail dialog
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [searchDialogTitle, setSearchDialogTitle] = useState<string>("");
+  const [searchDialogData, setSearchDialogData] = useState<any | null>(null);
 
   useEffect(() => {
     // init theme from localStorage; default to light regardless of system
@@ -328,8 +329,24 @@ export default function HomePage() {
       ]);
       const fedJson = await fedRes.json().catch(() => ({ data: [] }));
       const mfaJson = await mfaRes.json().catch(() => ({ data: [] }));
-      setFailFed(Array.isArray(fedJson?.data) ? fedJson.data : []);
-      setFailMfa(Array.isArray(mfaJson?.data) ? mfaJson.data : []);
+      let fed = Array.isArray(fedJson?.data) ? fedJson.data : [];
+      let mfa = Array.isArray(mfaJson?.data) ? mfaJson.data : [];
+      // Provide test data if backend has none
+      if ((!fed || fed.length === 0) && (!mfa || mfa.length === 0)) {
+        const now = Date.now();
+        const mkTs = (minsAgo: number) => new Date(now - minsAgo * 60_000).toISOString();
+        fed = [
+          { userId: "u12345", reason: "Invalid credentials", timestamp: mkTs(2) },
+          { email: "jane.doe@company.com", reason: "Account locked", timestamp: mkTs(5) },
+          { userId: "u67890", reason: "MFA required not satisfied", timestamp: mkTs(9) },
+        ];
+        mfa = [
+          { userId: "u12345", error: "Push timeout", timestamp: mkTs(3) },
+          { email: "john.smith@company.com", error: "Device not enrolled", timestamp: mkTs(7) },
+        ];
+      }
+      setFailFed(fed);
+      setFailMfa(mfa);
       if (!fedRes.ok || !mfaRes.ok) {
         setOpsError("Failure feeds not available (mock backend may not implement /api/ops-failures)");
       }
@@ -359,25 +376,11 @@ export default function HomePage() {
     }
   };
 
-  const loadAllUsers = async (newOffset = 0) => {
-    if (!token) return;
-    try {
-      const res = await fetch(`${API_BASE}/api/all-users?limit=50&offset=${newOffset}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error || "Failed");
-      setAllUsers(body);
-      setOffset(newOffset);
-    } catch (e: any) {
-      setAllUsers({ total: 0, limit: 50, offset: 0, results: [] });
-    }
-  };
+  // removed loadAllUsers (feature deprecated)
 
   useEffect(() => {
     if (token && role === "ops") {
       // do not auto-load all users; show recent failures panel instead
-      setAllUsers(null);
       loadRecentFailures();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -450,6 +453,7 @@ export default function HomePage() {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>User ID</TableHead>
+                                <TableHead className="w-40">Actions</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -458,6 +462,21 @@ export default function HomePage() {
                                   <TableCell>{u.name}</TableCell>
                                   <TableCell>{u.email}</TableCell>
                                   <TableCell>{u.userId}</TableCell>
+                                  <TableCell>
+                                    <div className="flex gap-2">
+                                      <Button size="sm" variant="secondary" onClick={() => setSearchDialogOpen(false)}>Minimal</Button>
+                                      <Button
+                                        size="sm"
+                                        onClick={() => {
+                                          setSearchDialogTitle(`Ping Directory — ${u.userId || u.email || "Details"}`);
+                                          setSearchDialogData(u);
+                                          setSearchDialogOpen(true);
+                                        }}
+                                      >
+                                        View Details
+                                      </Button>
+                                    </div>
+                                  </TableCell>
                                 </TableRow>
                               ))}
                             </TableBody>
@@ -487,6 +506,7 @@ export default function HomePage() {
                                 <TableHead>User ID</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Last Event</TableHead>
+                                <TableHead className="w-40">Actions</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -495,6 +515,21 @@ export default function HomePage() {
                                   <TableCell>{u.userId}</TableCell>
                                   <TableCell>{u.status}</TableCell>
                                   <TableCell>{u.lastEvent}</TableCell>
+                                  <TableCell>
+                                    <div className="flex gap-2">
+                                      <Button size="sm" variant="secondary" onClick={() => setSearchDialogOpen(false)}>Minimal</Button>
+                                      <Button
+                                        size="sm"
+                                        onClick={() => {
+                                          setSearchDialogTitle(`Ping MFA — ${u.userId}`);
+                                          setSearchDialogData(u);
+                                          setSearchDialogOpen(true);
+                                        }}
+                                      >
+                                        View Details
+                                      </Button>
+                                    </div>
+                                  </TableCell>
                                 </TableRow>
                               ))}
                             </TableBody>
@@ -509,6 +544,19 @@ export default function HomePage() {
               )}
             </CardContent>
           </Card>
+          {/* Search result details dialog */}
+          <Dialog open={searchDialogOpen} onOpenChange={setSearchDialogOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>{searchDialogTitle || "Details"}</DialogTitle>
+              </DialogHeader>
+              {searchDialogData ? (
+                <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
+              ) : (
+                <p className="text-sm text-muted-foreground">No details available</p>
+              )}
+            </DialogContent>
+          </Dialog>
         </section>
 
         {/* Ops Recent Failures Panel */}
@@ -606,102 +654,7 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Ops All Users (only on demand) */}
-        {role === "ops" && (
-          <section>
-            <Card>
-              <CardHeader>
-                <CardTitle>All Users (Ops)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!allUsers || (allUsers?.results?.length || 0) === 0 ? (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <p className="text-sm text-muted-foreground">Hidden by default. Load only when needed.</p>
-                    <Button onClick={() => loadAllUsers(0)}>Load all users</Button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>User ID</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Ping Dir Dept</TableHead>
-                            <TableHead>Ping MFA Status</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {allUsers?.results?.map((u: any) => (
-                            <TableRow
-                              key={u.userId}
-                              className="cursor-pointer hover:bg-muted/50"
-                              onClick={() => {
-                                setSelectedUser(u);
-                                setModalOpen(true);
-                              }}
-                            >
-                              <TableCell>{u.userId}</TableCell>
-                              <TableCell>{u.name}</TableCell>
-                              <TableCell>{u.email}</TableCell>
-                              <TableCell>{u.systems?.["ping-directory"]?.department || "-"}</TableCell>
-                              <TableCell>{u.systems?.["ping-mfa"]?.status || "-"}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    <div className="flex items-center justify-between mt-3 text-sm">
-                      <div>
-                        Showing {allUsers ? allUsers.results.length : 0} of {allUsers?.total || 0}
-                      </div>
-                      <div className="space-x-2">
-                        <Button variant="secondary" onClick={() => loadAllUsers(Math.max(0, offset - 50))} disabled={!allUsers || offset === 0}>
-                          Previous
-                        </Button>
-                        <Button variant="default" onClick={() => loadAllUsers(offset + 50)} disabled={!allUsers || offset + 50 >= (allUsers?.total || 0)}>
-                          Next
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>User Details</DialogTitle>
-                </DialogHeader>
-                {selectedUser ? (
-                  <div className="space-y-4">
-                    <div className="text-sm">
-                      <div><span className="font-medium">Name:</span> {selectedUser.name}</div>
-                      <div><span className="font-medium">Email:</span> {selectedUser.email}</div>
-                      <div><span className="font-medium">User ID:</span> {selectedUser.userId}</div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {SYSTEMS.map((s) => (
-                        <Card key={s}>
-                          <CardHeader>
-                            <CardTitle className="text-sm capitalize">{s.replace("-", " ")}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
-{JSON.stringify(selectedUser.systems?.[s as SystemKey] || { note: "Details per user are not available in this mock" }, null, 2)}
-                            </pre>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </DialogContent>
-            </Dialog>
-          </section>
-        )}
+        {/* All Users feature removed as requested */}
       </main>
 
       <footer className="py-8 text-center text-sm text-muted-foreground">
