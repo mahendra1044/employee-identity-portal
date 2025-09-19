@@ -879,7 +879,7 @@ export default function HomePage() {
                     </div>
                     <details className="group">
                       <summary className="cursor-pointer text-xs font-medium text-foreground/80 hover:text-foreground select-none">Show sample JSON</summary>
-                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-x-auto max-h-40 font-mono">{JSON.stringify(g.sample, null, 2)}</pre>
+                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-x-auto overflow-y-auto max-h-40 font-mono whitespace-pre-wrap break-words max-w-full">{JSON.stringify(g.sample, null, 2)}</pre>
                     </details>
                   </CardContent>
                 </Card>
