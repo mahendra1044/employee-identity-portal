@@ -254,12 +254,12 @@ export default function HomePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">();
+  const [theme, setTheme] = useState<"light" | "dark" | "navy">();
 
   useEffect(() => {
     // init theme from localStorage or system preference
     const stored = localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark") {
+    if (stored === "light" || stored === "dark" || stored === "navy") {
       setTheme(stored);
       return;
     }
@@ -270,8 +270,11 @@ export default function HomePage() {
   useEffect(() => {
     if (!theme) return;
     const root = document.documentElement;
+    // reset theme classes first
+    root.classList.remove("dark");
+    root.classList.remove("navy");
     if (theme === "dark") root.classList.add("dark");
-    else root.classList.remove("dark");
+    if (theme === "navy") root.classList.add("navy");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
@@ -365,8 +368,8 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
             <Button variant="secondary" onClick={logout}>Sign out</Button>
           </div>
