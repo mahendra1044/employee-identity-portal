@@ -261,6 +261,7 @@ export default function HomePage() {
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [searchDialogTitle, setSearchDialogTitle] = useState<string>("");
   const [searchDialogData, setSearchDialogData] = useState<any | null>(null);
+  const [searchDialogLoading, setSearchDialogLoading] = useState(false);
 
   useEffect(() => {
     // init theme from localStorage; default to light regardless of system
@@ -464,16 +465,71 @@ export default function HomePage() {
                                   <TableCell>{u.userId}</TableCell>
                                   <TableCell>
                                     <div className="flex gap-2">
-                                      <Button size="sm" variant="secondary" onClick={() => setSearchDialogOpen(false)}>Minimal</Button>
                                       <Button
                                         size="sm"
-                                        onClick={() => {
-                                          setSearchDialogTitle(`Ping Directory — ${u.userId || u.email || "Details"}`);
-                                          setSearchDialogData(u);
+                                        onClick={async () => {
+                                          const key = u.userId || u.email;
+                                          setSearchDialogTitle(`Ping Directory — ${key || "Details"}`);
+                                          setSearchDialogData(null);
+                                          setSearchDialogLoading(true);
                                           setSearchDialogOpen(true);
+                                          try {
+                                            const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-directory`;
+                                            const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                            if (res.ok) {
+                                              const json = await res.json();
+                                              setSearchDialogData(json.data ?? u);
+                                            } else {
+                                              setSearchDialogData(u);
+                                            }
+                                          } catch {
+                                            setSearchDialogData(u);
+                                          } finally {
+                                            setSearchDialogLoading(false);
+                                          }
                                         }}
                                       >
                                         View Details
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={async () => {
+                                          const key = u.userId || u.email;
+                                          setSearchDialogTitle(`All Systems — ${key || "Details"}`);
+                                          setSearchDialogData(null);
+                                          setSearchDialogLoading(true);
+                                          setSearchDialogOpen(true);
+                                          try {
+                                            const aggregate: Record<string, any> = {};
+                                            for (const sys of SYSTEMS) {
+                                              // Try full details endpoint per system; fallback to search result match
+                                              try {
+                                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
+                                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                                if (res.ok) {
+                                                  const json = await res.json();
+                                                  if (json?.data) {
+                                                    aggregate[sys] = json.data;
+                                                    continue;
+                                                  }
+                                                }
+                                              } catch {}
+                                              const arr = Array.isArray(searchResults?.[sys]) ? searchResults[sys] : [];
+                                              const matched = arr.filter((it: any) =>
+                                                key && (it.userId === key || it.email?.toLowerCase() === String(key).toLowerCase())
+                                              );
+                                              if (matched.length > 0) aggregate[sys] = matched;
+                                            }
+                                            setSearchDialogData(aggregate);
+                                          } catch {
+                                            setSearchDialogData({ error: "Unable to load aggregated details" });
+                                          } finally {
+                                            setSearchDialogLoading(false);
+                                          }
+                                        }}
+                                      >
+                                        View All Systems
                                       </Button>
                                     </div>
                                   </TableCell>
@@ -517,16 +573,70 @@ export default function HomePage() {
                                   <TableCell>{u.lastEvent}</TableCell>
                                   <TableCell>
                                     <div className="flex gap-2">
-                                      <Button size="sm" variant="secondary" onClick={() => setSearchDialogOpen(false)}>Minimal</Button>
                                       <Button
                                         size="sm"
-                                        onClick={() => {
+                                        onClick={async () => {
+                                          const key = u.userId || u.email;
                                           setSearchDialogTitle(`Ping MFA — ${u.userId}`);
-                                          setSearchDialogData(u);
+                                          setSearchDialogData(null);
+                                          setSearchDialogLoading(true);
                                           setSearchDialogOpen(true);
+                                          try {
+                                            const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-mfa`;
+                                            const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                            if (res.ok) {
+                                              const json = await res.json();
+                                              setSearchDialogData(json.data ?? u);
+                                            } else {
+                                              setSearchDialogData(u);
+                                            }
+                                          } catch {
+                                            setSearchDialogData(u);
+                                          } finally {
+                                            setSearchDialogLoading(false);
+                                          }
                                         }}
                                       >
                                         View Details
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={async () => {
+                                          const key = u.userId || u.email;
+                                          setSearchDialogTitle(`All Systems — ${key || "Details"}`);
+                                          setSearchDialogData(null);
+                                          setSearchDialogLoading(true);
+                                          setSearchDialogOpen(true);
+                                          try {
+                                            const aggregate: Record<string, any> = {};
+                                            for (const sys of SYSTEMS) {
+                                              try {
+                                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
+                                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                                if (res.ok) {
+                                                  const json = await res.json();
+                                                  if (json?.data) {
+                                                    aggregate[sys] = json.data;
+                                                    continue;
+                                                  }
+                                                }
+                                              } catch {}
+                                              const arr = Array.isArray(searchResults?.[sys]) ? searchResults[sys] : [];
+                                              const matched = arr.filter((it: any) =>
+                                                key && (it.userId === key || it.email?.toLowerCase() === String(key).toLowerCase())
+                                              );
+                                              if (matched.length > 0) aggregate[sys] = matched;
+                                            }
+                                            setSearchDialogData(aggregate);
+                                          } catch {
+                                            setSearchDialogData({ error: "Unable to load aggregated details" });
+                                          } finally {
+                                            setSearchDialogLoading(false);
+                                          }
+                                        }}
+                                      >
+                                        View All Systems
                                       </Button>
                                     </div>
                                   </TableCell>
@@ -550,7 +660,9 @@ export default function HomePage() {
               <DialogHeader>
                 <DialogTitle>{searchDialogTitle || "Details"}</DialogTitle>
               </DialogHeader>
-              {searchDialogData ? (
+              {searchDialogLoading ? (
+                <p className="text-sm animate-pulse">Loading details...</p>
+              ) : searchDialogData ? (
                 <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
               ) : (
                 <p className="text-sm text-muted-foreground">No details available</p>
