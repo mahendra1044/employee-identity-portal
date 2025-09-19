@@ -1,0 +1,22 @@
+{
+  "userId": "u12345",
+  "roles": ["Engineer", "Git Maintainer"],
+  "policies": ["SoD-OK"],
+  "riskScore": 12,
+  "pendingAccessRequests": 0,
+  "manager": "Bob Smith",
+  "status": "Compliant",
+  "lastReview": "2025-06-30",
+  "entitlements": 5,
+  "applications": ["Jira", "Confluence"],
+  "campaigns": ["Q2 Review"],
+  "roleDetails": [
+    {"name": "Engineer", "since": "2023-01-15", "owner": "ENG"},
+    {"name": "Git Maintainer", "since": "2024-03-10", "owner": "DevTools"}
+  ],
+  "entitlementList": [
+    {"app": "Jira", "entitlement": "Project-ENG-Admin"},
+    {"app": "Confluence", "entitlement": "Space-ENG-Write"}
+  ],
+  "history": ["2025-05 Access Review Passed", "2024-12 Role Added: Git Maintainer"]
+}

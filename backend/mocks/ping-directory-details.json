@@ -1,0 +1,21 @@
+{
+  "userId": "u12345",
+  "name": "Alice Johnson",
+  "email": "alice.johnson@company.com",
+  "department": "Engineering",
+  "title": "Senior Engineer",
+  "manager": "Bob Smith",
+  "location": "NYC",
+  "employeeType": "Full-Time",
+  "phone": "+1-555-0100",
+  "startDate": "2023-01-15",
+  "lastUpdated": "2025-09-18",
+  "status": "Active",
+  "costCenter": "ENG-1001",
+  "country": "USA",
+  "city": "New York",
+  "postalCode": "10001",
+  "office": "HQ-5F",
+  "groups": ["devs", "ci-users"],
+  "aliases": ["alice.j", "ajohnson"]
+}

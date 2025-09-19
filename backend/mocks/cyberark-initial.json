@@ -1,0 +1,12 @@
+{
+  "userId": "u12345",
+  "vaultAccess": true,
+  "safe": "ENG-Shared",
+  "lastRotation": "2025-08-28",
+  "pendingTasks": 0,
+  "platforms": ["Windows", "Linux"],
+  "accounts": 3,
+  "ccpEnabled": true,
+  "owner": "ENG-OPS",
+  "status": "Healthy"
+}

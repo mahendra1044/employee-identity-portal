@@ -1,0 +1,12 @@
+{
+  "userId": "u12345",
+  "status": "Enabled",
+  "enrolledDevices": ["iPhone 14"],
+  "lastEvent": "2025-09-18T12:01:00Z",
+  "methods": ["Push", "OTP"],
+  "primaryDevice": "iPhone 14",
+  "enrolledDate": "2024-02-20",
+  "backupCodes": 5,
+  "riskLevel": "Low",
+  "policy": "Default"
+}
