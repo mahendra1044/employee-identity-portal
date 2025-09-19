@@ -21,6 +21,8 @@ type Features = {
   opsShowTilesAfterSearch?: boolean;
   employeeSearchSystems?: Partial<Record<SystemKey, boolean>>;
   systemsOrder?: SystemKey[]; // NEW: optional preferred order for system cards
+  // Employee educate guide (optional, can be toggled at deploy time)
+  employeeEducateGuideEnabled?: boolean;
 };
 
 type LoginResponse = { token: string; role: string; email: string };
@@ -460,6 +462,9 @@ export default function HomePage() {
   const [snowItems, setSnowItems] = useState<any[] | null>(null);
   const [snowEmail, setSnowEmail] = useState<string | null>(null);
 
+  // Educate guide state
+  const [educateOpen, setEducateOpen] = useState(false);
+
   // helper for HTML view in search dialog (global)
   const toPairsGlobal = (obj: any): Array<{ k: string; v: any }> => {
     const out: Array<{ k: string; v: any }> = [];
@@ -490,6 +495,60 @@ export default function HomePage() {
     walk(obj);
     return out;
   };
+
+  // Static, shared mock guide (same for all employees)
+  const EDUCATE_GUIDE = useMemo(() => (
+    [
+      {
+        id: "mfa",
+        title: "MFA related issues",
+        system: "ping-mfa" as SystemKey,
+        summary: "Check Ping MFA JSON logs for enrollment, device, and last event details.",
+        sample: {
+          userId: "u12345",
+          status: "Enabled",
+          enrolledDevices: ["iPhone 14"],
+          lastEvent: "Push timeout",
+          lastEventAt: new Date().toISOString(),
+        },
+        actions: { viewJson: true, sendMail: true },
+      },
+      {
+        id: "safe",
+        title: "Safe / Vault access issues",
+        system: "cyberark" as SystemKey,
+        summary: "Review CyberArk JSON to understand Safe membership and credential status.",
+        sample: {
+          safe: "CORP-APP-PROD",
+          account: "svc_corp_app",
+          access: "requested",
+          reason: "Pending approval",
+          lastChecked: new Date().toISOString(),
+        },
+        actions: { viewJson: true, sendMail: true },
+      },
+      {
+        id: "directory",
+        title: "Profile / directory attribute issues",
+        system: "ping-directory" as SystemKey,
+        summary: "Verify core attributes in Ping Directory (email, department, status).",
+        sample: {
+          name: "Employee Name",
+          email: String(email || localStorage.getItem("email") || "").toLowerCase(),
+          department: "Engineering",
+          status: "active",
+        },
+        actions: { viewJson: true, sendMail: false },
+      },
+    ]
+  ), [email]);
+
+  // Deployment-time toggle: env overrides features when provided
+  const educateEnabled = useMemo(() => {
+    const envVal = (process.env.NEXT_PUBLIC_EDUCATE_GUIDE || "").toString().trim().toLowerCase();
+    if (envVal) return ["1", "true", "on", "yes", "enabled"].includes(envVal);
+    return features?.employeeEducateGuideEnabled ?? true; // default ON if not specified
+  }, [features]);
 
   useEffect(() => {
     // init theme from localStorage; default to light regardless of system
@@ -746,6 +805,12 @@ export default function HomePage() {
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
+            {/* Educate Me (employees only) */}
+            {role === "employee" && educateEnabled && (
+              <Button variant="outline" onClick={() => setEducateOpen(true)}>
+                Educate me
+              </Button>
+            )}
             {/* Show SNOW tickets button with dynamic count (ops: visible only after search) */}
             {(
               role !== 'ops' || (hasSearched && !!resolveSnowEmail())
@@ -765,6 +830,60 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+        {/* Educate Guide Dialog */}
+        <Dialog open={educateOpen} onOpenChange={setEducateOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Issue Guide — Where to look</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {EDUCATE_GUIDE.map((g) => (
+                <Card key={g.id} className="border">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center justify-between">
+                      <span>{g.title}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded border bg-muted">{SYSTEM_LABELS[g.system]}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-3">{g.summary}</p>
+                    <div className="flex items-center gap-2">
+                      {g.actions.viewJson && (
+                        <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(g.sample, null, 2))}>
+                          Copy sample JSON
+                        </Button>
+                      )}
+                      {g.actions.sendMail && (
+                        <Button
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              const to = getSupportEmail(g.system);
+                              const subject = `[${SYSTEM_LABELS[g.system]}] Assistance needed — ${g.title}`;
+                              const body = `Hello ${SYSTEM_LABELS[g.system]} Support,\n\nI'm facing: ${g.title}.\n\nSample JSON context:\n\n${JSON.stringify(g.sample, null, 2)}\n\nThanks.`;
+                              const res = await fetch("/api/send-email", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ to, subject, body, system: g.system, payload: g.sample }),
+                              });
+                              if (res.ok) toast.success("Email queued to support"); else toast.error("Failed to send email");
+                            } catch {
+                              toast.error("Failed to send email");
+                            }
+                          }}
+                        >
+                          Send mail to support
+                        </Button>
+                      )}
+                    </div>
+                    <pre className="mt-3 text-xs bg-muted p-2 rounded overflow-x-auto max-h-40">{JSON.stringify(g.sample, null, 2)}</pre>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Search Section */}
         <section>
           <Card>

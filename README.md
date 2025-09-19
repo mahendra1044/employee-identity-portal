@@ -102,6 +102,80 @@ Example mock (already provided):
   - Response: `{ ok: true, message: "Email queued (mock)", to, system, timestamp }`
 - Server will log a concise mock entry with recipient, subject, preview of body, a payload snippet, and timestamp.
 
+## Employee "Educate me" guide
+
+A lightweight user guide is available for employees to quickly learn which identity system to check based on common issue types (MFA, CyberArk Safe, Directory profile). The guide uses static mock data shared by all employees and opens in a professional popup dialog.
+
+- Location: Header → "Educate me" (only visible for role = employee)
+- Behavior: Opens a dialog with categorized cards (MFA, Safe/Vault, Directory)
+  - Each card includes a short summary, a sample JSON snippet, and actions:
+    - Copy sample JSON
+    - Send mail to the appropriate support queue (uses existing /api/send-email)
+
+### Configure at deploy time
+
+You can toggle the guide with either an environment variable (recommended for deployments) or a backend features flag. The environment variable takes precedence.
+
+1) Environment variable (takes precedence)
+- NEXT_PUBLIC_EDUCATE_GUIDE=true|false (case-insensitive; accepts 1/0, true/false, on/off, yes/no, enabled/disabled)
+
+Examples:
+- Enable: NEXT_PUBLIC_EDUCATE_GUIDE=true
+- Disable: NEXT_PUBLIC_EDUCATE_GUIDE=false
+
+2) Backend features flag
+- Add/update employeeEducateGuideEnabled in features.json (served by GET /config/features)
+
+Example features.json excerpt:
+```
+{
+  "credentialSource": "env",
+  "useMocks": true,
+  "useMockAuth": true,
+  "systems": {
+    "ping-directory": true,
+    "ping-federate": true,
+    "cyberark": true,
+    "saviynt": true,
+    "azure-ad": true,
+    "ping-mfa": true
+  },
+  "employeeEducateGuideEnabled": true
+}
+```
+
+Resolution order at runtime:
+- If NEXT_PUBLIC_EDUCATE_GUIDE is set → use it
+- Else if features.employeeEducateGuideEnabled is set → use it
+- Else default ON (visible for employees)
+
+### What employees see
+
+Categories currently included (all with shared mock data):
+- MFA related issues → Check Ping MFA JSON logs (status, enrolled devices, last event)
+- Safe/Vault access issues → Check CyberArk JSON (Safe membership, account status)
+- Profile/directory issues → Check Ping Directory JSON (email, department, status)
+
+Actions:
+- Copy sample JSON: copies the rendered mock snippet
+- Send mail to support: posts to /api/send-email with the relevant support address and the sample payload
+
+No per-user persistence or customization is stored; the guide is the same for all employees by design.
+
+### Testing locally
+
+- Start backend on :3001 and frontend on :3000
+- Login with an employee account (any email not starting with ops@ or management@)
+- Confirm the header shows the "Educate me" button; click to open the guide
+- Click "Copy sample JSON" and verify your clipboard contents
+- Click "Send mail to support" to exercise /api/send-email
+
+### Notes
+
+- The dialog uses Tailwind-based components (Shadcn UI) and respects light/dark/navy themes
+- The guide does not depend on live system data and is safe in mock/real modes
+- To hide for non-employee roles, no additional config is needed (it is already limited to role = employee)
+
 ## Configuration
 
 ### Support email mapping
