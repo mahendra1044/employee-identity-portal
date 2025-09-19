@@ -35,8 +35,8 @@ export default function RootLayout({
           closeButton
           toastOptions={{
             classNames: {
-              toast: "pr-2",
-              closeButton: "ml-2 order-2 shrink-0 text-foreground/60 hover:text-foreground",
+              toast: "relative pt-6 pr-10",
+              closeButton: "absolute right-2 top-2 text-foreground/60 hover:text-foreground",
             },
           }}
         />
