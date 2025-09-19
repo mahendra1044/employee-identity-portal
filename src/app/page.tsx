@@ -107,7 +107,19 @@ function SystemCard({
       const res = await fetch(`${API_BASE}/api/own-${system}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error((await res.json()).error || "Failed");
+      if (!res.ok) {
+        let message = "Failed";
+        try {
+          const j = await res.json();
+          message = j?.error || message;
+        } catch {
+          try {
+            const t = await res.text();
+            message = t || message;
+          } catch {}
+        }
+        throw new Error(message);
+      }
       const json = await res.json();
       setData(json.data);
     } catch (e: any) {
@@ -124,7 +136,19 @@ function SystemCard({
       const res = await fetch(`${API_BASE}/api/own-${system}/details`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error((await res.json()).error || "Failed");
+      if (!res.ok) {
+        let message = "Failed";
+        try {
+          const j = await res.json();
+          message = j?.error || message;
+        } catch {
+          try {
+            const t = await res.text();
+            message = t || message;
+          } catch {}
+        }
+        throw new Error(message);
+      }
       const json = await res.json();
       setDetails(json.data);
       setDetailsOpen(true);
@@ -200,7 +224,7 @@ function SystemCard({
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-3">
-            <span className="text-base md:text-lg font-semibold truncate">{name}</span>
+            <span className="text-base md:text-lg font-semibold whitespace-normal break-words">{name}</span>
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading}>
                 Refresh
@@ -269,7 +293,7 @@ function SystemCard({
           {loading ? (
             <p className="text-sm animate-pulse">Loading details...</p>
           ) : details ? (
-            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">
               {JSON.stringify(details, null, 2)}
             </pre>
           ) : (
@@ -1023,12 +1047,7 @@ export default function HomePage() {
                   )
                 ) : (
                   <div className="space-y-2">
-                    {searchDialogData && (
-                      <div className="flex justify-end">
-                        <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(searchDialogData, null, 2))}>Copy JSON</Button>
-                      </div>
-                    )}
-                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
+                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">{JSON.stringify(searchDialogData, null, 2)}</pre>
                   </div>
                 )
               ) : (
@@ -1121,6 +1140,8 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
+          ) : role === "ops" ? (
+            <></>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <SystemCard name="Ping Directory" system="ping-directory" enabled={!!enabled["ping-directory"]} token={token!} />
