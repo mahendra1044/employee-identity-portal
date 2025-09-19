@@ -23,6 +23,62 @@
   - New optional `systemsOrder` array in backend/config/features.json controls the order of the six system cards on the dashboard.
   - Missing or invalid keys are ignored; any systems not listed are appended in the default order.
 
+## ServiceNow Incidents (SNOW) — Mock Integration
+
+This app includes a mock ServiceNow incidents feature used by the header button "Show SNOW tickets". It works in all roles and respects access rules.
+
+### Backend
+- Endpoint: `GET http://localhost:3001/api/snow/incidents?email=<userEmail>`
+- Auth: Bearer JWT required (issued by `/auth/login`)
+- Mode: Uses mocks when `useMocks: true` in `backend/config/features.json`
+- Mock file: `backend/mocks/snow-incidents.json`
+
+Example mock (already provided):
+```
+[
+  { "number": "INC0010001", "short_description": "Unable to sign in to VPN", "state": "open", "priority": "2 - High", "updatedAt": "2025-09-18T12:10:00Z", "assigned_to": "jane.doe@company.com" },
+  { "number": "INC0010002", "short_description": "Password reset request", "state": "in_progress", "priority": "4 - Low", "updatedAt": "2025-09-18T14:55:00Z", "assigned_to": "john.smith@company.com" },
+  { "number": "INC0010003", "short_description": "MFA push notifications not received", "state": "open", "priority": "3 - Moderate", "updatedAt": "2025-09-19T07:05:00Z", "assigned_to": "john.smith@company.com" },
+  { "number": "INC0010004", "short_description": "Access denied to CyberArk safe", "state": "closed", "priority": "3 - Moderate", "updatedAt": "2025-09-17T09:30:00Z", "assigned_to": "jane.doe@company.com" },
+  { "number": "INC0010005", "short_description": "Ping Federate SSO error for Salesforce", "state": "in_progress", "priority": "2 - High", "updatedAt": "2025-09-19T06:25:00Z", "assigned_to": "ops.engineer@company.com" },
+  { "number": "INC0010006", "short_description": "Azure AD group membership issue", "state": "open", "priority": "3 - Moderate", "updatedAt": "2025-09-18T21:12:00Z", "assigned_to": "employee@company.com" },
+  { "number": "INC0010007", "short_description": "Saviynt role not applied", "state": "closed", "priority": "4 - Low", "updatedAt": "2025-09-16T15:40:00Z", "assigned_to": "employee@company.com" },
+  { "number": "INC0010008", "short_description": "Ping Directory attribute mismatch", "state": "open", "priority": "3 - Moderate", "updatedAt": "2025-09-19T08:02:00Z", "assigned_to": "ops@company.com" }
+]
+```
+- States covered: `open`, `in_progress`, `closed` (frontend also treats `in progress`/`resolved` aliases)
+- Filtering: Backend filters items where `assigned_to` equals the target email
+- Counts returned: `{ total, open, in_progress, closed }` alongside `items`
+
+### Role behavior
+- Employee: can only view their own incidents; backend enforces this. Header button always visible and shows only self tickets.
+- Ops: can view incidents for the current searched user only. Header button becomes visible only after a search resolves a target user (email query or first Ping Directory match). Clicking shows that user's incidents.
+
+### Frontend usage
+- Header button: "Show SNOW tickets"
+  - Displays a count pill after first fetch (Open + In-Progress)
+  - Opens a dialog with a professional table layout: Number, Summary, Status, Priority, Updated
+  - Status shown with colored chips; content wraps and dialog scrolls for long content
+  - Refresh button available inside the dialog
+- Target resolution:
+  - Employee: uses logged-in email
+  - Ops: after Search, uses the typed email if it looks valid; else the exact/first Ping Directory match
+
+### How to test
+1) Start backend on 3001 and frontend on 3000.
+2) Login as:
+   - Employee: `employee@company.com` (any password in mock mode)
+   - Ops: `ops@company.com` (or `ops.engineer@company.com`)
+3) Employee: Click "Show SNOW tickets" → incidents for `employee@company.com` appear (open + closed examples in mock).
+4) Ops:
+   - Search for `john.smith@company.com` → header button appears → click to see John's incidents
+   - Search for `jane.doe@company.com` → click again to see Jane's incidents
+
+### Updating/adding mock data
+- Edit `backend/mocks/snow-incidents.json` and add objects with fields:
+  - `number`, `short_description`, `state` (open|in_progress|closed), `priority`, `updatedAt`, `assigned_to`
+- Save and restart backend; reload the app.
+
 ## How to Use
 
 ### Copy JSON

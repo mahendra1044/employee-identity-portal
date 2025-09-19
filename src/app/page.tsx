@@ -616,7 +616,9 @@ export default function HomePage() {
   // Helper: decide which email to use for SNOW incidents based on role/search
   const resolveSnowEmail = (): string | null => {
     const self = String(email || '').toLowerCase();
-    if (role === 'ops' && hasSearched) {
+    if (role === 'ops') {
+      // Only after a search should ops see/incidents for a user
+      if (!hasSearched) return null;
       const q = String(search || '').trim().toLowerCase();
       // If the query itself looks like an email, prefer it
       if (q && q.includes('@') && q.includes('.')) return q;
@@ -625,6 +627,7 @@ export default function HomePage() {
       const exact = pd.find((u: any) => String(u?.email || '').toLowerCase() === q || String(u?.userId || '') === String(search || '').trim());
       if (exact?.email) return String(exact.email).toLowerCase();
       if (pd[0]?.email) return String(pd[0].email).toLowerCase();
+      return null;
     }
     return self || null;
   };
@@ -658,6 +661,15 @@ export default function HomePage() {
       setSnowLoading(false);
     }
   };
+
+  // Reset SNOW context on ops search changes to avoid stale counts/targets
+  useEffect(() => {
+    if (role === 'ops') {
+      setSnowCount(null);
+      setSnowEmail(null);
+      setSnowItems(null);
+    }
+  }, [role, hasSearched, search]);
 
   // removed loadAllUsers (feature deprecated)
 
@@ -705,15 +717,19 @@ export default function HomePage() {
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
-            {/* Show SNOW tickets button with dynamic count */}
-            <Button variant="outline" onClick={openSnowDialog}>
-              <span className="mr-2">Show SNOW tickets</span>
-              {typeof snowCount === 'number' && (
-                <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">
-                  {snowCount}
-                </span>
-              )}
-            </Button>
+            {/* Show SNOW tickets button with dynamic count (ops: visible only after search) */}
+            {(
+              role !== 'ops' || (hasSearched && !!resolveSnowEmail())
+            ) && (
+              <Button variant="outline" onClick={openSnowDialog} title={role === 'ops' ? (resolveSnowEmail() || undefined) : undefined}>
+                <span className="mr-2">Show SNOW tickets</span>
+                {typeof snowCount === 'number' && (
+                  <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">
+                    {snowCount}
+                  </span>
+                )}
+              </Button>
+            )}
             <Button variant="secondary" onClick={logout}>Sign out</Button>
           </div>
         </div>
@@ -1252,26 +1268,29 @@ export default function HomePage() {
 
         {/* SNOW incidents dialog */}
         <Dialog open={snowOpen} onOpenChange={setSnowOpen}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl space-y-4">
             <DialogHeader>
-              <DialogTitle className="flex items-center justify-between w-full pr-12">
-                <span>ServiceNow Incidents{snowEmail ? ` — ${snowEmail}` : ''}</span>
-                <div className="flex items-center gap-2">
-                  {typeof snowCount === 'number' && (
-                    <span className="text-xs rounded border px-2 py-0.5">
-                      Open/In-Progress: {snowCount}
-                    </span>
-                  )}
-                  <Button size="sm" variant="outline" onClick={openSnowDialog} disabled={snowLoading}>Refresh</Button>
-                </div>
+              <DialogTitle className="pr-12">
+                ServiceNow Incidents{snowEmail ? ` — ${snowEmail}` : ''}
               </DialogTitle>
             </DialogHeader>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs">
+                {typeof snowCount === 'number' && (
+                  <span className="inline-flex items-center rounded border px-2 py-0.5">Open/In-Progress: {snowCount}</span>
+                )}
+                {(snowItems?.length || 0) > 0 && (
+                  <span className="inline-flex items-center rounded border px-2 py-0.5">Total: {snowItems!.length}</span>
+                )}
+              </div>
+              <Button size="sm" variant="outline" onClick={openSnowDialog} disabled={snowLoading}>Refresh</Button>
+            </div>
             {snowLoading ? (
               <p className="text-sm animate-pulse">Loading incidents...</p>
             ) : snowError ? (
               <p className="text-sm text-red-600">{snowError}</p>
             ) : (snowItems?.length || 0) > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1286,7 +1305,7 @@ export default function HomePage() {
                     {snowItems!.map((it: any) => (
                       <TableRow key={it.number}>
                         <TableCell className="font-mono text-xs">{it.number}</TableCell>
-                        <TableCell className="text-sm">{it.short_description}</TableCell>
+                        <TableCell className="text-sm whitespace-normal break-words">{it.short_description}</TableCell>
                         <TableCell>
                           <span className={
                             `text-[11px] px-2 py-0.5 rounded border ` +
@@ -1300,7 +1319,7 @@ export default function HomePage() {
                           </span>
                         </TableCell>
                         <TableCell className="text-xs">{it.priority}</TableCell>
-                        <TableCell className="text-xs">{it.updatedAt}</TableCell>
+                        <TableCell className="text-xs break-words">{it.updatedAt}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
