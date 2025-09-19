@@ -230,6 +230,29 @@ function SystemCard({
     }
   };
 
+  // Add a negative scenario trigger for CyberArk to simulate a failed send
+  const sendEmailFailTest = async () => {
+    const to = "invalid"; // intentionally invalid to force backend validation failure
+    const subject = `[${name}] Help request (Fail Test)`;
+    const payload = details || data || {};
+    const body = `This is a negative test for ${name} email sending.`;
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Force-Fail": "1" }, // header hint if backend supports it
+        body: JSON.stringify({ to, subject, body, system, payload, forceFail: true }),
+      });
+      if (res.ok) {
+        // If backend didn't fail, still inform the user this was a fail test
+        toast.warning("Email unexpectedly succeeded (fail test)");
+      } else {
+        toast.error("Failed to send email (expected for test)");
+      }
+    } catch {
+      toast.error("Failed to send email (expected for test)");
+    }
+  };
+
   return (
     <>
       <Card className="shadow-sm">
@@ -249,6 +272,11 @@ function SystemCard({
               <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled}>
                 Send Email
               </Button>
+              {system === "cyberark" && (
+                <Button size="sm" variant="destructive" onClick={sendEmailFailTest} disabled={!enabled}>
+                  Send Email (Fail test)
+                </Button>
+              )}
             </div>
           </CardTitle>
         </CardHeader>
