@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sun, Moon } from "lucide-react";
+import { getSupportEmail } from "@/lib/support-emails";
 
 const API_BASE = "http://localhost:3001"; // dev: backend server
 
@@ -96,6 +97,7 @@ function SystemCard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [htmlOpen, setHtmlOpen] = useState(false);
 
   const loadInitial = async () => {
     if (!enabled) return;
@@ -138,6 +140,60 @@ function SystemCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, enabled]);
 
+  // helper to flatten JSON into key/value pairs for readable HTML view
+  const toPairs = (obj: any): Array<{ k: string; v: any }> => {
+    const out: Array<{ k: string; v: any }> = [];
+    const walk = (val: any, prefix = "") => {
+      if (val === null || val === undefined) {
+        out.push({ k: prefix || "value", v: String(val) });
+        return;
+      }
+      if (Array.isArray(val)) {
+        if (val.length === 0) {
+          out.push({ k: prefix, v: "[]" });
+        } else {
+          val.forEach((item, idx) => walk(item, prefix ? `${prefix}[${idx}]` : `[${idx}]`));
+        }
+        return;
+      }
+      if (typeof val === "object") {
+        const keys = Object.keys(val);
+        if (keys.length === 0) {
+          out.push({ k: prefix, v: "{}" });
+        } else {
+          keys.forEach((key) => walk(val[key], prefix ? `${prefix}.${key}` : key));
+        }
+        return;
+      }
+      out.push({ k: prefix || "value", v: val });
+    };
+    walk(obj);
+    return out;
+  };
+
+  const openHtmlView = async () => {
+    // ensure we have something to show; try initial if nothing loaded yet
+    if (!details && !data && enabled && !loading) {
+      try {
+        await loadInitial();
+      } catch {}
+    }
+    setHtmlOpen(true);
+  };
+
+  const sendEmail = () => {
+    const to = getSupportEmail(system);
+    const subject = encodeURIComponent(`[${name}] Help request`);
+    const payload = details || data || {};
+    const snippet = encodeURIComponent(
+      JSON.stringify(payload, null, 2).slice(0, 1500)
+    );
+    const body = encodeURIComponent(
+      `Hello ${name} Support,\n\nPlease assist with an issue on ${name}.\n\nContext (JSON excerpt):\n\n`)
+      + snippet + encodeURIComponent(`\n\nThank you.`);
+    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  };
+
   return (
     <>
       <Card className="shadow-sm">
@@ -150,6 +206,12 @@ function SystemCard({
               </Button>
               <Button size="sm" onClick={loadDetails} disabled={!enabled || loading}>
                 View Details
+              </Button>
+              <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading}>
+                HTML View
+              </Button>
+              <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled}>
+                Send Email
               </Button>
             </div>
           </CardTitle>
@@ -190,6 +252,35 @@ function SystemCard({
           ) : (
             <p className="text-sm text-muted-foreground">No details available</p>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={htmlOpen} onOpenChange={setHtmlOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{name} — HTML View</DialogTitle>
+          </DialogHeader>
+          {(() => {
+            const payload = details || data;
+            if (!payload) return <p className="text-sm text-muted-foreground">No data available to display</p>;
+            const pairs = toPairs(payload).slice(0, 1000); // safety cap
+            return (
+              <div className="max-h-[70vh] overflow-y-auto pr-1">
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+                  {pairs.map(({ k, v }) => (
+                    <div key={k} className="flex flex-col py-1 border-b last:border-b-0 border-border/60">
+                      <dt className="text-xs font-medium text-muted-foreground truncate">{k}</dt>
+                      <dd className="text-sm break-words">
+                        {typeof v === "string" || typeof v === "number" || typeof v === "boolean"
+                          ? String(v)
+                          : JSON.stringify(v)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </>
@@ -800,7 +891,7 @@ export default function HomePage() {
 
         {/* System Cards (hide by default for ops) */}
         <section>
-          {role === "ops" ? null : !anyEnabled ? (
+          {!anyEnabled ? (
             <Card>
               <CardHeader>
                 <CardTitle>No systems enabled</CardTitle>
