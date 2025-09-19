@@ -1,9 +1,71 @@
-# Identity Portal (Next.js + Express)
+# Identity Portal (Next.js 15 + shadcn/ui)
 
-A local-first web portal for employees and ops to view identity data across systems. Frontend is a Next.js 15 + TypeScript app using shadcn/ui. Backend is an Express server with JWT auth, RBAC, and mock data for rapid local testing.
+## New Features (Sept 2025)
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:3001 (health: GET /health → { ok: true })
+- Copy JSON everywhere
+  - Added "Copy JSON" buttons to all places where JSON is rendered:
+    - System tiles (initial data)
+    - System Details dialog
+    - Employee Search result dialogs (single and All Systems)
+    - All Systems HTML/JSON views (per-system and global)
+- Ops enhancements for All Systems view
+  - Renamed button to: "View all system details JSON" (ops only)
+  - Added adjacent: "View all system details HTML" (ops only)
+  - HTML view renders a clean key/value layout for non-technical readability
+- System tile header layout (employee view)
+  - Buttons are now consistently aligned and wrap nicely on smaller screens
+  - System name is more prominent and always visible (truncates gracefully)
+- Server-side email endpoint (mock)
+  - Replaced mailto with a server API to record email requests for audit/debug
+  - Route: `POST /api/send-email`
+  - Logs mock payloads to the server console and returns `{ ok: true }`
+
+## How to Use
+
+### Copy JSON
+- Click "Copy JSON" above any JSON block to copy the pretty-printed JSON to your clipboard.
+- In the All Systems dialog (both JSON and HTML modes), use either the global Copy JSON (top-right) or the per-system Copy JSON.
+
+### Ops: All Systems buttons
+- In the search section (for ops role):
+  - "View all system details JSON": Aggregates per-system details across all six systems into one dialog.
+  - "View all system details HTML": Same data as JSON view, but rendered as a key/value layout for readability.
+
+### HTML View on system tiles
+- Each system tile includes an "HTML View" button that opens a key/value popup for the current system's data.
+- If Details are already loaded, it uses those; otherwise it shows Initial data.
+
+### Send Email (server-side mock)
+- Each system tile includes a "Send Email" button.
+- This posts to a Next.js API route instead of opening your inbox.
+- Endpoint: `POST /api/send-email`
+  - Request: `{ to: string, subject: string, body: string, system: string, payload: any }`
+  - Response: `{ ok: true, message: "Email queued (mock)", to, system, timestamp }`
+- Server will log a concise mock entry with recipient, subject, preview of body, a payload snippet, and timestamp.
+
+## Configuration
+
+### Support email mapping
+- Edit `src/lib/support-emails.ts` to change the destination team addresses per system.
+- Helper: `getSupportEmail(system: "ping-directory" | "ping-federate" | "cyberark" | "saviynt" | "azure-ad" | "ping-mfa")`
+
+## Implementation Notes
+
+- File: `src/app/page.tsx`
+  - Added Copy JSON buttons to cards and dialogs
+  - Improved header layout for system tiles
+  - Added Ops-only dual buttons for All Systems (JSON/HTML) with consistent data aggregation
+  - System tile "Send Email" now calls `/api/send-email` instead of `mailto:`
+- File: `src/app/api/send-email/route.ts`
+  - Mock server endpoint that logs email requests and returns success
+
+## Local Dev
+- Frontend: `npm run dev` (Next.js 15)
+- Backend (mock API assumed at localhost:3001 per existing setup)
+
+Notes:
+- If your backend isn't running, the app provides sensible fallbacks/mocks for some views.
+- Styled-JSX is not used anywhere (Tailwind only).
 
 ## TL;DR — Run Locally
 
