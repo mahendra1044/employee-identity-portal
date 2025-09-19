@@ -832,30 +832,31 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Educate Guide Dialog */}
         <Dialog open={educateOpen} onOpenChange={setEducateOpen}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Issue Guide — Where to look</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {EDUCATE_GUIDE.map((g) => (
                 <Card key={g.id} className="border">
                   <CardHeader>
-                    <CardTitle className="text-base flex items-center justify-between">
+                    <CardTitle className="text-base flex items-center justify-between gap-2">
                       <span>{g.title}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded border bg-muted">{SYSTEM_LABELS[g.system]}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded border bg-muted whitespace-nowrap">{SYSTEM_LABELS[g.system]}</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-3">{g.summary}</p>
-                    <div className="flex items-center gap-2">
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground">{g.summary}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {g.actions.viewJson && (
-                        <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(g.sample, null, 2))}>
+                        <Button size="sm" className="w-full" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(g.sample, null, 2))}>
                           Copy sample JSON
                         </Button>
                       )}
                       {g.actions.sendMail && (
                         <Button
                           size="sm"
+                          className="w-full"
                           onClick={async () => {
                             try {
                               const to = getSupportEmail(g.system);
@@ -876,7 +877,10 @@ export default function HomePage() {
                         </Button>
                       )}
                     </div>
-                    <pre className="mt-3 text-xs bg-muted p-2 rounded overflow-x-auto max-h-40">{JSON.stringify(g.sample, null, 2)}</pre>
+                    <details className="group">
+                      <summary className="cursor-pointer text-xs font-medium text-foreground/80 hover:text-foreground select-none">Show sample JSON</summary>
+                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-x-auto max-h-40 font-mono">{JSON.stringify(g.sample, null, 2)}</pre>
+                    </details>
                   </CardContent>
                 </Card>
               ))}
