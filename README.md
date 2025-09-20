@@ -22,6 +22,12 @@
 - Configurable card order (deployment-time)
   - New optional `systemsOrder` array in backend/config/features.json controls the order of the six system cards on the dashboard.
   - Missing or invalid keys are ignored; any systems not listed are appended in the default order.
+- Employee: Ping Federate quick actions (NEW)
+  - On the Ping Federate card, employees now see three buttons next to "Copy JSON":
+    - User Info → opens a popup with mocked Ping Federate UserInfo payload
+    - OIDC → lists all mocked OIDC connections (5 key fields each)
+    - SAML → lists all mocked SAML connections (5 key fields each)
+  - Backed by lightweight mock API routes (see API Overview below)
 
 ## ServiceNow Incidents (SNOW) — Mock Integration
 
@@ -225,6 +231,11 @@ Notes
 - File: `src/app/api/send-email/route.ts`
   - Mock server endpoint that logs email requests and returns success
 
+- File: `src/app/page.tsx` (Ping Federate quick actions)
+  - On Ping Federate card, for role = employee, three small buttons render next to "Copy JSON": User Info, OIDC, SAML
+  - Each opens a dialog that displays either a key/value table (for connection arrays) or JSON
+  - Uses new mock API routes below and includes a per-dialog "Copy JSON" button
+
 ## Local Dev
 - Frontend: `npm run dev` (Next.js 15)
 - Backend (mock API assumed at localhost:3001 per existing setup)
@@ -273,6 +284,7 @@ Frontend (Next.js)
 - Ops View: All users table (50/page) with row-click modal to inspect per-system data
 - Feature-aware UI: If a system is disabled, shows "Feature not enabled" empty state
 - Error + loading states: Friendly errors (403/404), loading indicators
+- Employee PF quick actions: User Info, OIDC, SAML buttons with mock data popups
 
 Backend (Express)
 - JWT Auth: POST /auth/login issues 24h token (mock mode infers role from email)
@@ -593,9 +605,12 @@ Notes
 - GET /api/own-:system/details → extended data for current user
 - GET /api/all-users?limit=50&offset=0 → ops-only list
 - GET /api/search-employee/:query → limited PD + MFA results
+- GET /api/pf/userinfo → mocked Ping Federate UserInfo for current employee (frontend-only mock)
+- GET /api/pf/oidc → mocked list of OIDC connections (5 key fields per connection)
+- GET /api/pf/saml → mocked list of SAML connections (5 key fields per connection)
 
 Responses
-- 200: { data: any } for system endpoints; or domain objects for search/all-users
+- 200: `{ data: any }` for system endpoints; or domain objects for search/all-users
 - 403: RBAC denial (see roles.json)
 - 404: Feature/system disabled (see features.json)
 

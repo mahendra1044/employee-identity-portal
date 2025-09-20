@@ -103,11 +103,13 @@ function SystemCard({
   system,
   enabled,
   token,
+  role,
 }: {
   name: string;
   system: SystemKey;
   enabled: boolean;
   token: string;
+  role: string;
 }) {
   const [data, setData] = useState<any | null>(null);
   const [details, setDetails] = useState<any | null>(null);
@@ -115,6 +117,11 @@ function SystemCard({
   const [error, setError] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [htmlOpen, setHtmlOpen] = useState(false);
+  // PF employee popup state
+  const [pfOpen, setPfOpen] = useState(false);
+  const [pfTitle, setPfTitle] = useState<string>("");
+  const [pfLoading, setPfLoading] = useState(false);
+  const [pfData, setPfData] = useState<any>(null);
 
   const loadInitial = async () => {
     if (!enabled) return;
@@ -312,6 +319,70 @@ function SystemCard({
                     >
                       Copy JSON
                     </Button>
+                    {system === "ping-federate" && role === "employee" && (
+                      <div className="ml-2 flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={async () => {
+                            setPfTitle("Ping Federate — User Info");
+                            setPfOpen(true);
+                            setPfLoading(true);
+                            try {
+                              const res = await fetch("/api/pf/userinfo");
+                              const j = await res.json().catch(() => ({}));
+                              setPfData(j?.data ?? j);
+                            } catch {
+                              setPfData({ error: "Failed to load User Info" });
+                            } finally {
+                              setPfLoading(false);
+                            }
+                          }}
+                        >
+                          User Info
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={async () => {
+                            setPfTitle("Ping Federate — OIDC Connections");
+                            setPfOpen(true);
+                            setPfLoading(true);
+                            try {
+                              const res = await fetch("/api/pf/oidc");
+                              const j = await res.json().catch(() => ({}));
+                              setPfData(j?.data ?? j);
+                            } catch {
+                              setPfData({ error: "Failed to load OIDC connections" });
+                            } finally {
+                              setPfLoading(false);
+                            }
+                          }}
+                        >
+                          OIDC
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={async () => {
+                            setPfTitle("Ping Federate — SAML Connections");
+                            setPfOpen(true);
+                            setPfLoading(true);
+                            try {
+                              const res = await fetch("/api/pf/saml");
+                              const j = await res.json().catch(() => ({}));
+                              setPfData(j?.data ?? j);
+                            } catch {
+                              setPfData({ error: "Failed to load SAML connections" });
+                            } finally {
+                              setPfLoading(false);
+                            }
+                          }}
+                        >
+                          SAML
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
                     {JSON.stringify(data, null, 2)}
@@ -380,6 +451,50 @@ function SystemCard({
               </div>
             );
           })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* PF Employee Dialog */}
+      <Dialog open={pfOpen} onOpenChange={setPfOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between w-full pr-12">
+              <span>{pfTitle || "Ping Federate"}</span>
+              {pfData && (
+                <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfData, null, 2))}>
+                  Copy JSON
+                </Button>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {pfLoading ? (
+            <p className="text-sm animate-pulse">Loading...</p>
+          ) : Array.isArray(pfData) ? (
+            <div className="max-h-[70vh] overflow-y-auto pr-1">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {Object.keys(pfData[0] || {}).map((k) => (
+                      <TableHead key={k} className="capitalize">{k.replace(/([A-Z])/g, ' $1')}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pfData.map((row: any, idx: number) => (
+                    <TableRow key={idx}>
+                      {Object.keys(pfData[0] || {}).map((k) => (
+                        <TableCell key={k} className="text-sm break-words">{String(row[k])}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : pfData ? (
+            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">{JSON.stringify(pfData, null, 2)}</pre>
+          ) : (
+            <p className="text-sm text-muted-foreground">No data available</p>
+          )}
         </DialogContent>
       </Dialog>
     </>
@@ -1570,6 +1685,7 @@ export default function HomePage() {
                     system={sys}
                     enabled={!!enabled[sys]}
                     token={token!}
+                    role={role!}
                   />
                 ))}
               </div>
