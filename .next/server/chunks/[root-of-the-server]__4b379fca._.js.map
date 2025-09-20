@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 60, "column": 0}, "map": {"version":3,"sources":["file:///D:/AI-Workspace/employee-identity-portal/src/app/api/cyberark/safes/route.ts"],"sourcesContent":["import { NextResponse } from \"next/server\";\r\n\r\nexport async function GET() {\r\n  return NextResponse.json({\r\n    data: [\r\n      { name: \"CORP-APP-PROD\", description: \"Production app credentials\" },\r\n      { name: \"CORP-APP-NONPROD\", description: \"Non-prod app credentials\" },\r\n      { name: \"INFRA-SECRETS\", description: \"Infrastructure secrets\" },\r\n    ],\r\n  });\r\n}"],"names":[],"mappings":";;;AAAA;;AAEO,eAAe;IACpB,OAAO,qLAAA,CAAA,eAAY,CAAC,IAAI,CAAC;QACvB,MAAM;YACJ;gBAAE,MAAM;gBAAiB,aAAa;YAA6B;YACnE;gBAAE,MAAM;gBAAoB,aAAa;YAA2B;YACpE;gBAAE,MAAM;gBAAiB,aAAa;YAAyB;SAChE;IACH;AACF","debugId":null}}]
+}

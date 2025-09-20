@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///D:/AI-Workspace/employee-identity-portal/src/app/global-error.tsx"],"sourcesContent":["\"use client\";\r\n\r\nimport ErrorReporter from \"@/components/ErrorReporter\";\r\n\r\nexport default ErrorReporter;\r\n"],"names":[],"mappings":";;;AAEA;AAFA;;uCAIe,2LAAA,CAAA,UAAa","debugId":null}}]
+}

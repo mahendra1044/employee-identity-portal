@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 60, "column": 0}, "map": {"version":3,"sources":["file:///D:/AI-Workspace/employee-identity-portal/src/app/api/pd/audit/route.ts"],"sourcesContent":["import { NextResponse } from \"next/server\";\r\n\r\nexport async function GET() {\r\n  const now = Date.now();\r\n  return NextResponse.json({\r\n    data: [\r\n      { action: \"modify\", attribute: \"title\", old: \"Software Engineer\", new: \"Senior Software Engineer\", actor: \"hr-bot\", timestamp: new Date(now - 3600_000).toISOString() },\r\n      { action: \"add\", attribute: \"group\", new: \"Developers\", actor: \"idm-sync\", timestamp: new Date(now - 7200_000).toISOString() },\r\n      { action: \"modify\", attribute: \"location\", old: \"Remote\", new: \"NYC\", actor: \"self-service\", timestamp: new Date(now - 86_400_000).toISOString() },\r\n    ],\r\n  });\r\n}"],"names":[],"mappings":";;;AAAA;;AAEO,eAAe;IACpB,MAAM,MAAM,KAAK,GAAG;IACpB,OAAO,qLAAA,CAAA,eAAY,CAAC,IAAI,CAAC;QACvB,MAAM;YACJ;gBAAE,QAAQ;gBAAU,WAAW;gBAAS,KAAK;gBAAqB,KAAK;gBAA4B,OAAO;gBAAU,WAAW,IAAI,KAAK,MAAM,UAAU,WAAW;YAAG;YACtK;gBAAE,QAAQ;gBAAO,WAAW;gBAAS,KAAK;gBAAc,OAAO;gBAAY,WAAW,IAAI,KAAK,MAAM,UAAU,WAAW;YAAG;YAC7H;gBAAE,QAAQ;gBAAU,WAAW;gBAAY,KAAK;gBAAU,KAAK;gBAAO,OAAO;gBAAgB,WAAW,IAAI,KAAK,MAAM,YAAY,WAAW;YAAG;SAClJ;IACH;AACF","debugId":null}}]
+}

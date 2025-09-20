@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 60, "column": 0}, "map": {"version":3,"sources":["file:///D:/AI-Workspace/employee-identity-portal/src/app/api/mfa/events/route.ts"],"sourcesContent":["import { NextResponse } from \"next/server\";\r\n\r\nexport async function GET() {\r\n  const now = Date.now();\r\n  return NextResponse.json({\r\n    data: [\r\n      { id: \"evt-1001\", type: \"push\", result: \"timeout\", app: \"Corp SSO\", timestamp: new Date(now - 3 * 60_000).toISOString() },\r\n      { id: \"evt-1000\", type: \"push\", result: \"approved\", app: \"Email\", timestamp: new Date(now - 60 * 60_000).toISOString() },\r\n      { id: \"evt-0999\", type: \"otp\", result: \"approved\", app: \"VPN\", timestamp: new Date(now - 24 * 60 * 60_000).toISOString() },\r\n    ],\r\n  });\r\n}"],"names":[],"mappings":";;;AAAA;;AAEO,eAAe;IACpB,MAAM,MAAM,KAAK,GAAG;IACpB,OAAO,qLAAA,CAAA,eAAY,CAAC,IAAI,CAAC;QACvB,MAAM;YACJ;gBAAE,IAAI;gBAAY,MAAM;gBAAQ,QAAQ;gBAAW,KAAK;gBAAY,WAAW,IAAI,KAAK,MAAM,IAAI,QAAQ,WAAW;YAAG;YACxH;gBAAE,IAAI;gBAAY,MAAM;gBAAQ,QAAQ;gBAAY,KAAK;gBAAS,WAAW,IAAI,KAAK,MAAM,KAAK,QAAQ,WAAW;YAAG;YACvH;gBAAE,IAAI;gBAAY,MAAM;gBAAO,QAAQ;gBAAY,KAAK;gBAAO,WAAW,IAAI,KAAK,MAAM,KAAK,KAAK,QAAQ,WAAW;YAAG;SAC1H;IACH;AACF","debugId":null}}]
+}
