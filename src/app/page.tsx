@@ -301,6 +301,81 @@ function SystemCard({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="flex justify-end mb-2">
+            {data && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}
+              >
+                Copy JSON
+              </Button>
+            )}
+            {system === "ping-federate" && role === "employee" && (
+              <div className="ml-2 flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={async () => {
+                    setPfTitle("Ping Federate — User Info");
+                    setPfOpen(true);
+                    setPfLoading(true);
+                    try {
+                      const res = await fetch("/api/pf/userinfo");
+                      const j = await res.json().catch(() => ({}));
+                      setPfData(j?.data ?? j);
+                    } catch {
+                      setPfData({ error: "Failed to load User Info" });
+                    } finally {
+                      setPfLoading(false);
+                    }
+                  }}
+                >
+                  User Info
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={async () => {
+                    setPfTitle("Ping Federate — OIDC Connections");
+                    setPfOpen(true);
+                    setPfLoading(true);
+                    try {
+                      const res = await fetch("/api/pf/oidc");
+                      const j = await res.json().catch(() => ({}));
+                      setPfData(j?.data ?? j);
+                    } catch {
+                      setPfData({ error: "Failed to load OIDC connections" });
+                    } finally {
+                      setPfLoading(false);
+                    }
+                  }}
+                >
+                  OIDC
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={async () => {
+                    setPfTitle("Ping Federate — SAML Connections");
+                    setPfOpen(true);
+                    setPfLoading(true);
+                    try {
+                      const res = await fetch("/api/pf/saml");
+                      const j = await res.json().catch(() => ({}));
+                      setPfData(j?.data ?? j);
+                    } catch {
+                      setPfData({ error: "Failed to load SAML connections" });
+                    } finally {
+                      setPfLoading(false);
+                    }
+                  }}
+                >
+                  SAML
+                </Button>
+              </div>
+            )}
+          </div>
           {!enabled ? (
             <p className="text-sm text-muted-foreground">Feature not enabled</p>
           ) : loading ? (
@@ -311,79 +386,6 @@ function SystemCard({
             <div className="space-y-3">
               {data ? (
                 <div>
-                  <div className="flex justify-end mb-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}
-                    >
-                      Copy JSON
-                    </Button>
-                    {system === "ping-federate" && role === "employee" && (
-                      <div className="ml-2 flex flex-wrap gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={async () => {
-                            setPfTitle("Ping Federate — User Info");
-                            setPfOpen(true);
-                            setPfLoading(true);
-                            try {
-                              const res = await fetch("/api/pf/userinfo");
-                              const j = await res.json().catch(() => ({}));
-                              setPfData(j?.data ?? j);
-                            } catch {
-                              setPfData({ error: "Failed to load User Info" });
-                            } finally {
-                              setPfLoading(false);
-                            }
-                          }}
-                        >
-                          User Info
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={async () => {
-                            setPfTitle("Ping Federate — OIDC Connections");
-                            setPfOpen(true);
-                            setPfLoading(true);
-                            try {
-                              const res = await fetch("/api/pf/oidc");
-                              const j = await res.json().catch(() => ({}));
-                              setPfData(j?.data ?? j);
-                            } catch {
-                              setPfData({ error: "Failed to load OIDC connections" });
-                            } finally {
-                              setPfLoading(false);
-                            }
-                          }}
-                        >
-                          OIDC
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={async () => {
-                            setPfTitle("Ping Federate — SAML Connections");
-                            setPfOpen(true);
-                            setPfLoading(true);
-                            try {
-                              const res = await fetch("/api/pf/saml");
-                              const j = await res.json().catch(() => ({}));
-                              setPfData(j?.data ?? j);
-                            } catch {
-                              setPfData({ error: "Failed to load SAML connections" });
-                            } finally {
-                              setPfLoading(false);
-                            }
-                          }}
-                        >
-                          SAML
-                        </Button>
-                      </div>
-                    )}
-                  </div>
                   <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
                     {JSON.stringify(data, null, 2)}
                   </pre>
