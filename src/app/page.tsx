@@ -582,6 +582,12 @@ export default function HomePage() {
   // Educate guide state
   const [educateOpen, setEducateOpen] = useState(false);
 
+  // Ops PF quick actions dialog state
+  const [pfOpsOpen, setPfOpsOpen] = useState(false);
+  const [pfOpsTitle, setPfOpsTitle] = useState<string>("");
+  const [pfOpsLoading, setPfOpsLoading] = useState(false);
+  const [pfOpsData, setPfOpsData] = useState<any>(null);
+
   // helper for HTML view in search dialog (global)
   const toPairsGlobal = (obj: any): Array<{ k: string; v: any }> => {
     const out: Array<{ k: string; v: any }> = [];
@@ -776,7 +782,8 @@ export default function HomePage() {
     if (!token || !search.trim()) return;
     setSearchError(null);
     setSearchResults(null);
-    setHasSearched(true);
+    // ensure UI treats this as not completed until success
+    setHasSearched(false);
     try {
       const res = await fetch(`${API_BASE}/api/search-employee/${encodeURIComponent(search)}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -784,6 +791,8 @@ export default function HomePage() {
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Search failed");
       setSearchResults(body);
+      // mark completion only after successful fetch
+      setHasSearched(true);
     } catch (e: any) {
       setSearchError(e.message || "Search failed");
     }
@@ -1586,6 +1595,50 @@ export default function HomePage() {
           </DialogContent>
         </Dialog>
 
+        {/* OPS: Ping Federate quick actions dialog */}
+        <Dialog open={pfOpsOpen} onOpenChange={setPfOpsOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between w-full pr-12">
+                <span>{pfOpsTitle || 'Ping Federate'}</span>
+                {pfOpsData && (
+                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfOpsData, null, 2))}>
+                    Copy JSON
+                  </Button>
+                )}
+              </DialogTitle>
+            </DialogHeader>
+            {pfOpsLoading ? (
+              <p className="text-sm animate-pulse">Loading...</p>
+            ) : Array.isArray(pfOpsData) ? (
+              <div className="max-h-[70vh] overflow-y-auto pr-1">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {Object.keys(pfOpsData[0] || {}).map((k) => (
+                        <TableHead key={k} className="capitalize">{k.replace(/([A-Z])/g, ' $1')}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pfOpsData.map((row: any, idx: number) => (
+                      <TableRow key={idx}>
+                        {Object.keys(pfOpsData[0] || {}).map((k) => (
+                          <TableCell key={k} className="text-sm break-words">{String(row[k])}</TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : pfOpsData ? (
+              <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">{JSON.stringify(pfOpsData, null, 2)}</pre>
+            ) : (
+              <p className="text-sm text-muted-foreground">No data available</p>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Ops Recent Failures Panel */}
         {role === "ops" && (
           <section>
@@ -1608,6 +1661,79 @@ export default function HomePage() {
                   <Button size="sm" onClick={loadRecentFailures} disabled={opsLoading}>Refresh</Button>
                   {opsError && <span className="text-xs text-red-600">{opsError}</span>}
                 </div>
+                {/* OPS PF quick actions - visible after an employee search completes */}
+                {role === "ops" && hasSearched && (
+                  <div className="mb-4 rounded-lg border bg-gradient-to-r from-muted/60 to-background p-3 sm:p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm font-medium">Ping Federate quick actions</div>
+                      <span className="text-xs text-muted-foreground truncate max-w-[60%]">
+                        Target: {resolveSnowEmail() || search || "(unknown)"}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={async () => {
+                          setPfOpsTitle("Ping Federate — User Info");
+                          setPfOpsOpen(true);
+                          setPfOpsLoading(true);
+                          try {
+                            const res = await fetch("/api/pf/userinfo");
+                            const j = await res.json().catch(() => ({}));
+                            setPfOpsData(j?.data ?? j);
+                          } catch {
+                            setPfOpsData({ error: "Failed to load User Info" });
+                          } finally {
+                            setPfOpsLoading(false);
+                          }
+                        }}
+                      >
+                        User Info
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={async () => {
+                          setPfOpsTitle("Ping Federate — OIDC Connections");
+                          setPfOpsOpen(true);
+                          setPfOpsLoading(true);
+                          try {
+                            const res = await fetch("/api/pf/oidc");
+                            const j = await res.json().catch(() => ({}));
+                            setPfOpsData(j?.data ?? j);
+                          } catch {
+                            setPfOpsData({ error: "Failed to load OIDC connections" });
+                          } finally {
+                            setPfOpsLoading(false);
+                          }
+                        }}
+                      >
+                        OIDC
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={async () => {
+                          setPfOpsTitle("Ping Federate — SAML Connections");
+                          setPfOpsOpen(true);
+                          setPfOpsLoading(true);
+                          try {
+                            const res = await fetch("/api/pf/saml");
+                            const j = await res.json().catch(() => ({}));
+                            setPfOpsData(j?.data ?? j);
+                          } catch {
+                            setPfOpsData({ error: "Failed to load SAML connections" });
+                          } finally {
+                            setPfOpsLoading(false);
+                          }
+                        }}
+                      >
+                        SAML
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card>
                     <CardHeader>
