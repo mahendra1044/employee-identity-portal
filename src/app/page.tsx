@@ -23,6 +23,8 @@ type Features = {
   systemsOrder?: SystemKey[]; // NEW: optional preferred order for system cards
   // Employee educate guide (optional, can be toggled at deploy time)
   employeeEducateGuideEnabled?: boolean;
+  // Ops Quick Actions tabs enable/disable per system (deployment-time configurable)
+  quickActionsTabs?: Partial<Record<SystemKey, boolean>>;
 };
 
 type LoginResponse = { token: string; role: string; email: string };
@@ -587,6 +589,8 @@ export default function HomePage() {
   const [pfOpsTitle, setPfOpsTitle] = useState<string>("");
   const [pfOpsLoading, setPfOpsLoading] = useState(false);
   const [pfOpsData, setPfOpsData] = useState<any>(null);
+  // Ops Quick Actions active tab
+  const [qaActive, setQaActive] = useState<SystemKey>("ping-federate");
 
   // helper for HTML view in search dialog (global)
   const toPairsGlobal = (obj: any): Array<{ k: string; v: any }> => {
@@ -726,6 +730,33 @@ export default function HomePage() {
     const all = features?.systems || {};
     return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!all[s] }), {} as Record<SystemKey, boolean>);
   }, [features]);
+
+  // Quick Actions tab enablement (from backend features or NEXT_PUBLIC env flags)
+  const qaEnabledTabs = useMemo(() => {
+    const fromFeatures = features?.quickActionsTabs || {};
+    const envBool = (key: string) => {
+      const v = (process.env[key] || "").toString().toLowerCase();
+      return ["1", "true", "on", "yes", "enabled"].includes(v);
+    };
+    const map: Partial<Record<SystemKey, boolean>> = { ...fromFeatures };
+    for (const sys of SYSTEMS) {
+      const envKey = `NEXT_PUBLIC_QA_${sys.replace(/-/g, "_").toUpperCase()}`;
+      if (process.env.hasOwnProperty(envKey)) {
+        map[sys] = envBool(envKey);
+      }
+      // default to true when unspecified
+      if (typeof map[sys] === "undefined") map[sys] = true;
+    }
+    return map as Record<SystemKey, boolean>;
+  }, [features]);
+
+  // Keep active tab valid when toggles change
+  useEffect(() => {
+    if (!qaEnabledTabs[qaActive]) {
+      const first = SYSTEMS.find((s) => qaEnabledTabs[s]);
+      if (first) setQaActive(first);
+    }
+  }, [qaEnabledTabs, qaActive]);
 
   const anyEnabled = useMemo(() => Object.values(enabled || {}).some(Boolean), [enabled]);
 
@@ -1530,7 +1561,7 @@ export default function HomePage() {
           </Dialog>
         </section>
 
-        {/* Ops Quick Actions - independent card below Search, visible after successful search */}
+        {/* Ops Quick Actions (tabs) - independent card below Search, visible after successful search */}
         {role === "ops" && hasSearched && (
           <section>
             <Card>
@@ -1538,75 +1569,127 @@ export default function HomePage() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm font-medium text-muted-foreground">Ping Federate</div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex flex-wrap gap-1">
+                    {SYSTEMS.filter((s) => qaEnabledTabs[s]).map((s) => (
+                      <Button
+                        key={s}
+                        size="sm"
+                        variant={qaActive === s ? "secondary" : "outline"}
+                        onClick={() => setQaActive(s)}
+                      >
+                        {SYSTEM_LABELS[s]}
+                      </Button>
+                    ))}
+                  </div>
                   <span className="text-xs text-muted-foreground truncate max-w-[60%]">
                     Target: {resolveSnowEmail() || search || "(unknown)"}
                   </span>
                 </div>
+
+                {/* Buttons per active tab (3 each) */}
                 <div className="rounded-lg border bg-gradient-to-r from-muted/60 to-background p-3 sm:p-4">
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={async () => {
-                        setPfOpsTitle("Ping Federate — User Info");
-                        setPfOpsOpen(true);
-                        setPfOpsLoading(true);
-                        try {
-                          const res = await fetch("/api/pf/userinfo");
-                          const j = await res.json().catch(() => ({}));
-                          setPfOpsData(j?.data ?? j);
-                        } catch {
-                          setPfOpsData({ error: "Failed to load User Info" });
-                        } finally {
-                          setPfOpsLoading(false);
-                        }
-                      }}
-                    >
-                      User Info
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={async () => {
-                        setPfOpsTitle("Ping Federate — OIDC Connections");
-                        setPfOpsOpen(true);
-                        setPfOpsLoading(true);
-                        try {
-                          const res = await fetch("/api/pf/oidc");
-                          const j = await res.json().catch(() => ({}));
-                          setPfOpsData(j?.data ?? j);
-                        } catch {
-                          setPfOpsData({ error: "Failed to load OIDC connections" });
-                        } finally {
-                          setPfOpsLoading(false);
-                        }
-                      }}
-                    >
-                      OIDC
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={async () => {
-                        setPfOpsTitle("Ping Federate — SAML Connections");
-                        setPfOpsOpen(true);
-                        setPfOpsLoading(true);
-                        try {
-                          const res = await fetch("/api/pf/saml");
-                          const j = await res.json().catch(() => ({}));
-                          setPfOpsData(j?.data ?? j);
-                        } catch {
-                          setPfOpsData({ error: "Failed to load SAML connections" });
-                        } finally {
-                          setPfOpsLoading(false);
-                        }
-                      }}
-                    >
-                      SAML
-                    </Button>
-                  </div>
+                  {qaActive === "ping-federate" && qaEnabledTabs["ping-federate"] && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping Federate — User Info"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/pf/userinfo"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load User Info" }); } finally { setPfOpsLoading(false); }
+                      }}>User Info</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping Federate — OIDC Connections"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/pf/oidc"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load OIDC connections" }); } finally { setPfOpsLoading(false); }
+                      }}>OIDC</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping Federate — SAML Connections"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/pf/saml"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load SAML connections" }); } finally { setPfOpsLoading(false); }
+                      }}>SAML</Button>
+                    </div>
+                  )}
+
+                  {qaActive === "ping-directory" && qaEnabledTabs["ping-directory"] && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping Directory — Profile"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/pd/profile"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load profile" }); } finally { setPfOpsLoading(false);} 
+                      }}>Profile</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping Directory — Groups"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/pd/groups"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load groups" }); } finally { setPfOpsLoading(false);} 
+                      }}>Groups</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping Directory — Audit"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/pd/audit"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load audit" }); } finally { setPfOpsLoading(false);} 
+                      }}>Audit</Button>
+                    </div>
+                  )}
+
+                  {qaActive === "ping-mfa" && qaEnabledTabs["ping-mfa"] && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping MFA — Status"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/mfa/status"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load status" }); } finally { setPfOpsLoading(false);} 
+                      }}>Status</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping MFA — Devices"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/mfa/devices"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load devices" }); } finally { setPfOpsLoading(false);} 
+                      }}>Devices</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Ping MFA — Events"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/mfa/events"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load events" }); } finally { setPfOpsLoading(false);} 
+                      }}>Events</Button>
+                    </div>
+                  )}
+
+                  {qaActive === "azure-ad" && qaEnabledTabs["azure-ad"] && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Azure AD — User"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/aad/user"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load user" }); } finally { setPfOpsLoading(false);} 
+                      }}>User</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Azure AD — Groups"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/aad/groups"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load groups" }); } finally { setPfOpsLoading(false);} 
+                      }}>Groups</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Azure AD — Sign-ins"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/aad/signins"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load sign-ins" }); } finally { setPfOpsLoading(false);} 
+                      }}>Sign-ins</Button>
+                    </div>
+                  )}
+
+                  {qaActive === "cyberark" && qaEnabledTabs["cyberark"] && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("CyberArk — Safes"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/cyberark/safes"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load safes" }); } finally { setPfOpsLoading(false);} 
+                      }}>Safes</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("CyberArk — Accounts"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/cyberark/accounts"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load accounts" }); } finally { setPfOpsLoading(false);} 
+                      }}>Accounts</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("CyberArk — Activity"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/cyberark/activity"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load activity" }); } finally { setPfOpsLoading(false);} 
+                      }}>Activity</Button>
+                    </div>
+                  )}
+
+                  {qaActive === "saviynt" && qaEnabledTabs["saviynt"] && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Saviynt — Roles"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/saviynt/roles"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load roles" }); } finally { setPfOpsLoading(false);} 
+                      }}>Roles</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Saviynt — Entitlements"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/saviynt/entitlements"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load entitlements" }); } finally { setPfOpsLoading(false);} 
+                      }}>Entitlements</Button>
+                      <Button size="sm" variant="secondary" onClick={async () => {
+                        setPfOpsTitle("Saviynt — Requests"); setPfOpsOpen(true); setPfOpsLoading(true);
+                        try { const r = await fetch("/api/saviynt/requests"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load requests" }); } finally { setPfOpsLoading(false);} 
+                      }}>Requests</Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

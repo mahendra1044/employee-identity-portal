@@ -509,94 +509,102 @@ What each flag does in the UI
   - When `true`: On ops login, the large per-system tiles are hidden until a search has been performed. This keeps the ops dashboard focused on the Recent Failures panel and search-first workflows.
   - When `false` or omitted: Ops tiles behave like other roles (visible whenever the system is enabled).
 
-Scenarios (step-by-step)
-- Goal: Hide CyberArk and Azure AD when an employee searches OTHER users, but keep Ping Directory and Ping MFA visible.
-  - Set in features.json:
-    - `employeeSearchSystems.cyberark = false`
-    - `employeeSearchSystems.azure-ad = false`
-    - `employeeSearchSystems["ping-directory"] = true`
-    - `employeeSearchSystems["ping-mfa"] = true`
-  - Effect in UI:
-    - Employee searches "dana.lee@company.com" → Search grid shows only Ping Directory and Ping MFA cards.
-    - Clicking "View all system details" will NOT include CyberArk and Azure AD panels.
+## Ops Quick Actions (Tabs) — Config and Endpoints (NEW)
 
-- Goal: Allow one specific employee to see everything about themselves while restricting other-employee searches.
-  - No extra setting required beyond `employeeSearchSystems`. The app already treats "self" queries as full visibility.
-  - Effect in UI:
-    - Employee searches their own email (exact match) → All systems show up in the aggregated dialog; PD/MFA cards are visible as normal.
-    - Employee searches a teammate → Only systems with `employeeSearchSystems[system] !== false` are displayed.
+This feature is available ONLY for users with role = ops. The Quick Actions card appears below the Search card AFTER a successful employee search.
 
-- Goal: Ops should see tiles only after search
-  - Set `opsShowTilesAfterSearch = true`.
-  - Effect in UI: On ops login, only Recent Failures and the Search section are visible. After the first search, the system tiles grid appears below.
+- Per-system tabs (6 total): Ping Directory, Ping Federate, CyberArk, Saviynt, Azure AD, Ping MFA
+- Each tab exposes 3 quick-action buttons that call local mock API routes and show results in a dialog
+- Designed to be drop-in replaceable with real APIs later (same response shape `{ data: ... }`)
 
-Notes
-- You can omit `employeeSearchSystems` entirely; defaults apply (PD+MFA visible when employees search others, all systems visible for self).
-- Changes take effect after you update `backend/config/features.json`, restart the backend, and reload the frontend (the frontend reads `GET /config/features`).
+### Enable/Disable tabs (two ways)
 
-#### Examples: Common setups and their UI effects
+Precedence: Environment variables override backend features. If neither is provided for a tab, it defaults to ON.
 
-1) Only Ping Directory for other-employee searches
+1) Environment variables (frontend build-time)
+- Set any of the following to true/false (case-insensitive: 1/0, true/false, on/off, yes/no, enabled/disabled):
+```
+NEXT_PUBLIC_QA_PING_DIRECTORY=true|false
+NEXT_PUBLIC_QA_PING_FEDERATE=true|false
+NEXT_PUBLIC_QA_CYBERARK=true|false
+NEXT_PUBLIC_QA_SAVIYNT=true|false
+NEXT_PUBLIC_QA_AZURE_AD=true|false
+NEXT_PUBLIC_QA_PING_MFA=true|false
+```
+Steps:
+- Update `.env.local` (or deployment env) with the desired flags
+- Rebuild/redeploy the frontend for changes to take effect
+
+2) Backend features (served by GET /config/features)
+- Add the optional `quickActionsTabs` block to `backend/config/features.json`:
 ```
 {
-  "employeeSearchSystems": {
+  // ... keep existing keys ...
+  "quickActionsTabs": {
     "ping-directory": true,
-    "ping-mfa": false,
-    "ping-federate": false,
-    "azure-ad": false,
-    "cyberark": false,
-    "saviynt": false
+    "ping-federate": true,
+    "cyberark": true,
+    "saviynt": true,
+    "azure-ad": true,
+    "ping-mfa": true
   }
 }
 ```
-- Effect: Employees searching others see only the Ping Directory card in the search results. The All Systems dialog hides MFA, Federate, Azure AD, CyberArk, Saviynt panels for other-employee viewing. Self-search still shows all enabled systems.
+Steps:
+- Edit `backend/config/features.json`
+- Restart the backend (`npm run dev:be` or your process manager)
+- Reload the frontend page (ops must log in and perform a search)
 
-2) PD + MFA only for other-employee searches (recommended default)
-```
-{
-  "employeeSearchSystems": {
-    "ping-directory": true,
-    "ping-mfa": true,
-    "ping-federate": false,
-    "azure-ad": false,
-    "cyberark": false,
-    "saviynt": false
-  }
-}
-```
-- Effect: Employees see PD and MFA cards for teammates. The All Systems dialog includes only PD and MFA panels for other-employee viewing. Self-search shows all enabled systems.
+Behavior notes:
+- Tabs are rendered in the UI only if enabled by either method above
+- The active tab auto-switches to the first enabled tab if the current one is disabled
+- The Quick Actions card itself appears only for ops after a successful search
 
-3) Hide everything for other-employee searches (no visibility)
-```
-{
-  "employeeSearchSystems": {
-    "ping-directory": false,
-    "ping-mfa": false,
-    "ping-federate": false,
-    "azure-ad": false,
-    "cyberark": false,
-    "saviynt": false
-  }
-}
-```
-- Effect: Employees cannot see any cards when searching others; the All Systems dialog will have no panels. Self-search remains fully visible for the logged-in employee.
+### Mock API endpoints per button
 
-4) Ops tiles only after search
-```
-{
-  "opsShowTilesAfterSearch": true
-}
-```
-- Effect: Ops land on Recent Failures + Search. After the first search in the session, the big system tiles appear below.
+Ping Federate
+- GET `/api/pf/userinfo` → User info JSON
+- GET `/api/pf/oidc` → Array of OIDC connections
+- GET `/api/pf/saml` → Array of SAML connections
 
-#### Self vs. Others matching rule
-- Self-search is detected when the search query (email or ID) exactly matches the logged-in user's email (case-insensitive). In that case, the employee sees all globally enabled systems in dialogs and tiles.
-- Any other query is considered an "other-employee" search and is restricted by `employeeSearchSystems`.
+Ping Directory
+- GET `/api/pd/profile` → Basic profile JSON
+- GET `/api/pd/groups` → Array of group memberships
+- GET `/api/pd/audit` → Array of recent profile change events
 
-#### How to apply config changes
-1) Edit `backend/config/features.json` with the desired flags.
-2) Restart the backend server (required so `/config/features` reflects changes).
-3) Reload the frontend page. The Employee Search UI will immediately reflect the new visibility rules.
+Ping MFA
+- GET `/api/mfa/status` → Current MFA status
+- GET `/api/mfa/devices` → Array of enrolled devices
+- GET `/api/mfa/events` → Array of recent MFA events
+
+Azure AD
+- GET `/api/aad/user` → AAD user profile
+- GET `/api/aad/groups` → Array of AAD groups
+- GET `/api/aad/signins` → Array of recent sign-ins
+
+CyberArk
+- GET `/api/cyberark/safes` → Array of safes
+- GET `/api/cyberark/accounts` → Array of accounts with status
+- GET `/api/cyberark/activity` → Array of recent activity
+
+Saviynt
+- GET `/api/saviynt/roles` → Array of roles
+- GET `/api/saviynt/entitlements` → Array of entitlements
+- GET `/api/saviynt/requests` → Array of recent access/role requests
+
+All endpoints return `{ data: ... }` to keep the UI contract stable for future real integrations.
+
+### What Ops will see
+- A tab strip with enabled systems
+- For the selected tab, three compact buttons inside a subtle gradient panel
+- Clicking a button opens a dialog that renders a table (for arrays) or JSON (for objects) and includes a Copy JSON button
+
+### Troubleshooting
+- If a button shows an error, verify the corresponding route file exists under `src/app/api/...` and that your frontend has been rebuilt after any env changes
+- If the card doesn't appear, make sure:
+  - You are logged in as ops (e.g., ops@company.com)
+  - You performed a successful search first
+  - At least one tab is enabled (via env or features.json)
 
 ## API Overview
 - POST /auth/login → { token, role, email }
