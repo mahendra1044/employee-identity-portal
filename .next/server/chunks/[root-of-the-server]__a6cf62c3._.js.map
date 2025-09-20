@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 60, "column": 0}, "map": {"version":3,"sources":["file:///D:/AI-Workspace/employee-identity-portal/src/app/api/cyberark/activity/route.ts"],"sourcesContent":["import { NextResponse } from \"next/server\";\r\n\r\nexport async function GET() {\r\n  const now = Date.now();\r\n  return NextResponse.json({\r\n    data: [\r\n      { id: \"act-301\", action: \"checkout\", account: \"svc_corp_app\", actor: \"jane.doe@company.com\", timestamp: new Date(now - 20 * 60_000).toISOString() },\r\n      { id: \"act-300\", action: \"checkin\", account: \"svc_corp_app\", actor: \"jane.doe@company.com\", timestamp: new Date(now - 10 * 60_000).toISOString() },\r\n      { id: \"act-299\", action: \"rotate\", account: \"db_reader\", actor: \"rotate-bot\", timestamp: new Date(now - 24 * 60 * 60_000).toISOString() },\r\n    ],\r\n  });\r\n}"],"names":[],"mappings":";;;AAAA;;AAEO,eAAe;IACpB,MAAM,MAAM,KAAK,GAAG;IACpB,OAAO,qLAAA,CAAA,eAAY,CAAC,IAAI,CAAC;QACvB,MAAM;YACJ;gBAAE,IAAI;gBAAW,QAAQ;gBAAY,SAAS;gBAAgB,OAAO;gBAAwB,WAAW,IAAI,KAAK,MAAM,KAAK,QAAQ,WAAW;YAAG;YAClJ;gBAAE,IAAI;gBAAW,QAAQ;gBAAW,SAAS;gBAAgB,OAAO;gBAAwB,WAAW,IAAI,KAAK,MAAM,KAAK,QAAQ,WAAW;YAAG;YACjJ;gBAAE,IAAI;gBAAW,QAAQ;gBAAU,SAAS;gBAAa,OAAO;gBAAc,WAAW,IAAI,KAAK,MAAM,KAAK,KAAK,QAAQ,WAAW;YAAG;SACzI;IACH;AACF","debugId":null}}]
-}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 60, "column": 0}, "map": {"version":3,"sources":["file:///D:/AI-Workspace/employee-identity-portal/src/app/api/mfa/status/route.ts"],"sourcesContent":["import { NextResponse } from \"next/server\";\r\n\r\nexport async function GET() {\r\n  return NextResponse.json({\r\n    data: {\r\n      userId: \"u12345\",\r\n      status: \"Enabled\",\r\n      lastEvent: \"Push timeout\",\r\n      lastEventAt: new Date().toISOString(),\r\n      enrolledFactorTypes: [\"push\", \"otp\"],\r\n    },\r\n  });\r\n}"],"names":[],"mappings":";;;AAAA;;AAEO,eAAe;IACpB,OAAO,qLAAA,CAAA,eAAY,CAAC,IAAI,CAAC;QACvB,MAAM;YACJ,QAAQ;YACR,QAAQ;YACR,WAAW;YACX,aAAa,IAAI,OAAO,WAAW;YACnC,qBAAqB;gBAAC;gBAAQ;aAAM;QACtC;IACF;AACF","debugId":null}}]
-}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 52, "column": 0}, "map": {"version":3,"sources":["file:///D:/AI-Workspace/employee-identity-portal/src/app/api/pf/userinfo/route.ts"],"sourcesContent":["export async function GET() {\r\n  // Mocked Ping Federate UserInfo response\r\n  const data = {\r\n    sub: \"u12345\",\r\n    name: \"Alice Johnson\",\r\n    preferred_username: \"alice.johnson\",\r\n    email: \"employee@company.com\",\r\n    email_verified: true,\r\n    department: \"Engineering\",\r\n    last_login: new Date().toISOString(),\r\n    issuer: \"https://pingfederate.example.com\"\r\n  };\r\n\r\n  return Response.json({ ok: true, data });\r\n}"],"names":[],"mappings":";;;AAAO,eAAe;IACpB,yCAAyC;IACzC,MAAM,OAAO;QACX,KAAK;QACL,MAAM;QACN,oBAAoB;QACpB,OAAO;QACP,gBAAgB;QAChB,YAAY;QACZ,YAAY,IAAI,OAAO,WAAW;QAClC,QAAQ;IACV;IAEA,OAAO,SAAS,IAAI,CAAC;QAAE,IAAI;QAAM;IAAK;AACxC","debugId":null}}]
-}
