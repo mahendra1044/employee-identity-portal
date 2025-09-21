@@ -1598,14 +1598,11 @@ export default function HomePage() {
                         </TabsTrigger>
                       ))}
                     </TabsList>
-                    <span className="text-xs text-muted-foreground">
-                      Target: {resolveSnowEmail() || search || "(unknown)"}
-                    </span>
                   </div>
                   {SYSTEMS.filter((s) => qaEnabledTabs[s]).map((s) => (
                     <TabsContent key={s} value={s} className="p-0">
                       <div className="p-6">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 justify-items-center">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {s === "ping-federate" && (
                             <>
                               <Button size="sm" variant="secondary" onClick={async () => {
