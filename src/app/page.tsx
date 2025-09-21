@@ -750,6 +750,9 @@ export default function HomePage() {
     return map as Record<SystemKey, boolean>;
   }, [features]);
 
+  const splunkUrl = process.env.NEXT_PUBLIC_SPLUNK_URL || "https://splunk.company.com";
+  const cloudwatchUrl = process.env.NEXT_PUBLIC_CLOUDWATCH_URL || "https://console.aws.amazon.com/cloudwatch/home?region=us-east-1";
+
   // Keep active tab valid when toggles change
   useEffect(() => {
     if (!qaEnabledTabs[qaActive]) {
@@ -1691,6 +1694,28 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
+
+                {role === "ops" && hasSearched && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <h3 className="text-sm font-medium mb-2 text-muted-foreground">Tools</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
+                      >
+                        Take Me to Splunk
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
+                      >
+                        Take Me to Cloud Watch
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </section>

@@ -606,6 +606,35 @@ All endpoints return `{ data: ... }` to keep the UI contract stable for future r
   - You performed a successful search first
   - At least one tab is enabled (via env or features.json)
 
+## Ops Quick Actions Tools Buttons (NEW)
+
+These two additional buttons appear in the Quick Actions card (ops-only, after search) for quick navigation to monitoring tools. They open the URLs in a new browser tab.
+
+### Buttons
+- "Take Me to Splunk": Opens Splunk dashboard.
+- "Take Me to Cloud Watch": Opens AWS Cloud Watch console (us-east-1 default region).
+
+### Configuration (Environment Variables)
+
+URLs are configurable via frontend environment variables (build-time). If not set, defaults apply:
+
+- `NEXT_PUBLIC_SPLUNK_URL`: Splunk app URL (default: "https://splunk.company.com")
+- `NEXT_PUBLIC_CLOUDWATCH_URL`: Cloud Watch URL (default: "https://console.aws.amazon.com/cloudwatch/home?region=us-east-1")
+
+Steps to update:
+1. Add/update in `.env.local` (or deployment env):
+   ```
+   NEXT_PUBLIC_SPLUNK_URL=https://your-splunk-instance.com/app/search
+   NEXT_PUBLIC_CLOUDWATCH_URL=https://console.aws.amazon.com/cloudwatch/home?region=us-west-2
+   ```
+2. Rebuild/redeploy the frontend (`npm run build && npm run start` or your CI/CD).
+3. Log in as ops, perform a search → Quick Actions card shows the buttons with updated URLs.
+
+Notes:
+- Buttons use `window.open(..., "_blank", "noopener,noreferrer")` for security (no referrer, new tab).
+- Visibility: Ops-only, appears after search (same as tabs).
+- No backend involvement; purely frontend navigation.
+
 ## API Overview
 - POST /auth/login → { token, role, email }
 - GET /config/features → feature flags object
