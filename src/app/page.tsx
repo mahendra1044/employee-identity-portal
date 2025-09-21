@@ -1568,8 +1568,24 @@ export default function HomePage() {
         {role === "ops" && hasSearched && (
           <section>
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between p-6 space-y-0">
                 <CardTitle>Quick Actions</CardTitle>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
+                  >
+                    Take Me to Splunk
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
+                  >
+                    Take Me to Cloud Watch
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between mb-3">
@@ -1694,28 +1710,6 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-
-                {role === "ops" && hasSearched && (
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <h3 className="text-sm font-medium mb-2 text-muted-foreground">Tools</h3>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
-                      >
-                        Take Me to Splunk
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
-                      >
-                        Take Me to Cloud Watch
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </section>
