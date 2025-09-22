@@ -1761,7 +1761,7 @@ export default function HomePage() {
                         setPfOpsTitle("CyberArk — Accounts"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/cyberark/accounts"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load accounts" }); } finally { setPfOpsLoading(false);} 
                       }} title="Accounts">
-                        <Account className="h-4 w-4 mr-1" />
+                        <Users className="h-4 w-4 mr-1" />
                         Accounts
                       </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
