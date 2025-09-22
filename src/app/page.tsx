@@ -1069,10 +1069,43 @@ export default function HomePage() {
                     if (isEmployee && !isSelf && !allowPD) return null;
                     return (
                       <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Ping Directory</CardTitle>
+                        <CardHeader className="text-center pb-2">
+                          <CardTitle className="text-base font-semibold">Ping Directory</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-2">
+                          <div className="flex justify-end gap-2">
+                            {final.length > 0 && (
+                              <Button
+                                size="sm"
+                                onClick={async () => {
+                                  const firstUser = final[0];
+                                  const key = firstUser.userId || firstUser.email;
+                                  setSearchDialogTitle(`Ping Directory — ${key || "Details"}`);
+                                  setSearchDialogData(null);
+                                  setSearchDialogLoading(true);
+                                  setSearchDialogOpen(true);
+                                  try {
+                                    const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-directory`;
+                                    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                    if (res.ok) {
+                                      const json = await res.json();
+                                      setSearchDialogData(json.data ?? firstUser);
+                                    } else {
+                                      setSearchDialogData(firstUser);
+                                    }
+                                  } catch {
+                                    setSearchDialogData(firstUser);
+                                  } finally {
+                                    setSearchDialogLoading(false);
+                                  }
+                                }}
+                                title="View detailed information for primary result"
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </Button>
+                            )}
+                          </div>
                           {(() => {
                             const list = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
                             const filtered = role === "ops" && search.trim()
@@ -1088,7 +1121,6 @@ export default function HomePage() {
                                     <TableHead>Name</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead>User ID</TableHead>
-                                    <TableHead className="w-40">Actions</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -1097,36 +1129,6 @@ export default function HomePage() {
                                       <TableCell>{u.name}</TableCell>
                                       <TableCell>{u.email}</TableCell>
                                       <TableCell>{u.userId}</TableCell>
-                                      <TableCell>
-                                        <div className="flex gap-2">
-                                          <Button
-                                            size="sm"
-                                            onClick={async () => {
-                                              const key = u.userId || u.email;
-                                              setSearchDialogTitle(`Ping Directory — ${key || "Details"}`);
-                                              setSearchDialogData(null);
-                                              setSearchDialogLoading(true);
-                                              setSearchDialogOpen(true);
-                                              try {
-                                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-directory`;
-                                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                                if (res.ok) {
-                                                  const json = await res.json();
-                                                  setSearchDialogData(json.data ?? u);
-                                                } else {
-                                                  setSearchDialogData(u);
-                                                }
-                                              } catch {
-                                                setSearchDialogData(u);
-                                              } finally {
-                                                setSearchDialogLoading(false);
-                                              }
-                                            }}
-                                          >
-                                            View Details
-                                          </Button>
-                                        </div>
-                                      </TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
@@ -1148,10 +1150,43 @@ export default function HomePage() {
                     if (isEmployee && !isSelf && !allowMFA) return null;
                     return (
                       <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Ping MFA</CardTitle>
+                        <CardHeader className="text-center pb-2">
+                          <CardTitle className="text-base font-semibold">Ping MFA</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-2">
+                          <div className="flex justify-end gap-2">
+                            {final.length > 0 && (
+                              <Button
+                                size="sm"
+                                onClick={async () => {
+                                  const firstUser = final[0];
+                                  const key = firstUser.userId || firstUser.email;
+                                  setSearchDialogTitle(`Ping MFA — ${firstUser.userId}`);
+                                  setSearchDialogData(null);
+                                  setSearchDialogLoading(true);
+                                  setSearchDialogOpen(true);
+                                  try {
+                                    const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-mfa`;
+                                    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                    if (res.ok) {
+                                      const json = await res.json();
+                                      setSearchDialogData(json.data ?? firstUser);
+                                    } else {
+                                      setSearchDialogData(firstUser);
+                                    }
+                                  } catch {
+                                    setSearchDialogData(firstUser);
+                                  } finally {
+                                    setSearchDialogLoading(false);
+                                  }
+                                }}
+                                title="View detailed information for primary result"
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </Button>
+                            )}
+                          </div>
                           {(() => {
                             const list = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
                             const filtered = role === "ops" && search.trim()
@@ -1164,7 +1199,7 @@ export default function HomePage() {
                                   <TableRow>
                                     <TableHead>User ID</TableHead>
                                     <TableHead>Status</TableHead>
-                                    <TableHead className="w-40">Actions</TableHead>
+                                    <TableHead>Last Event</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -1173,36 +1208,6 @@ export default function HomePage() {
                                       <TableCell>{u.userId}</TableCell>
                                       <TableCell>{u.status}</TableCell>
                                       <TableCell>{u.lastEvent}</TableCell>
-                                      <TableCell>
-                                        <div className="flex gap-2">
-                                          <Button
-                                            size="sm"
-                                            onClick={async () => {
-                                              const key = u.userId || u.email;
-                                              setSearchDialogTitle(`Ping MFA — ${u.userId}`);
-                                              setSearchDialogData(null);
-                                              setSearchDialogLoading(true);
-                                              setSearchDialogOpen(true);
-                                              try {
-                                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-mfa`;
-                                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                                if (res.ok) {
-                                                  const json = await res.json();
-                                                  setSearchDialogData(json.data ?? u);
-                                                } else {
-                                                  setSearchDialogData(u);
-                                                }
-                                              } catch {
-                                                setSearchDialogData(u);
-                                              } finally {
-                                                setSearchDialogLoading(false);
-                                              }
-                                            }}
-                                          >
-                                            View Details
-                                          </Button>
-                                        </div>
-                                      </TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
@@ -1218,205 +1223,216 @@ export default function HomePage() {
 
                   {/* Global View All Systems buttons */}
                   <div className="md:col-span-2">
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Button
-                        className="w-full sm:w-auto"
-                        variant="secondary"
-                        onClick={async () => {
-                          // Determine the best key candidates from search results
-                          const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
-                          const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
-                          const q = String(search).trim().toLowerCase();
-                          const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
-                          const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
-                          const firstPd = pd?.[0];
-                          const firstMfa = mfa?.[0];
-                          // Build candidate identifiers to try per-system (email + userId variants)
-                          const baseCandidates = (
-                            [
-                              exactPd?.email,
-                              exactPd?.userId,
-                              exactMfa?.userId,
-                              firstPd?.email,
-                              firstPd?.userId,
-                              firstMfa?.userId,
-                              firstMfa?.email,
-                              search,
-                            ] as Array<string | undefined | null>
-                          ).filter(Boolean).map((s) => String(s));
-                          const candidateKeys = Array.from(new Set([
-                            ...baseCandidates,
-                            ...baseCandidates.map((k) => k.toLowerCase()),
-                            ...baseCandidates.map((k) => k.toUpperCase()),
-                          ]));
-                          const displayKey = candidateKeys[0] || "";
+                    <Card className="border-0 bg-transparent">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Aggregate All Systems</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-2">
+                        <div className="flex flex-col sm:flex-row justify-center gap-2">
+                          <Button
+                            className="w-full sm:w-auto"
+                            variant="secondary"
+                            onClick={async () => {
+                              // Determine the best key candidates from search results
+                              const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+                              const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
+                              const q = String(search).trim().toLowerCase();
+                              const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
+                              const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
+                              const firstPd = pd?.[0];
+                              const firstMfa = mfa?.[0];
+                              // Build candidate identifiers to try per-system (email + userId variants)
+                              const baseCandidates = (
+                                [
+                                  exactPd?.email,
+                                  exactPd?.userId,
+                                  exactMfa?.userId,
+                                  firstPd?.email,
+                                  firstPd?.userId,
+                                  firstMfa?.userId,
+                                  firstMfa?.email,
+                                  search,
+                                ] as Array<string | undefined | null>
+                              ).filter(Boolean).map((s) => String(s));
+                              const candidateKeys = Array.from(new Set([
+                                ...baseCandidates,
+                                ...baseCandidates.map((k) => k.toLowerCase()),
+                                ...baseCandidates.map((k) => k.toUpperCase()),
+                              ]));
+                              const displayKey = candidateKeys[0] || "";
 
-                          setSearchDialogMode("json");
-                          setSearchDialogTitle(`${role === "ops" ? "All Systems JSON" : "All Systems"} — ${displayKey || "Details"}`);
-                          setSearchDialogData(null);
-                          setSearchDialogLoading(true);
-                          setSearchDialogOpen(true);
-                          try {
-                            const aggregate: Record<string, any> = {};
-                            // fetch all-users once as a fallback source for per-system data
-                            let allUsers: any[] | null = null;
-                            try {
-                              const auRes = await fetch(`${API_BASE}/api/all-users`, {
-                                headers: { Authorization: `Bearer ${token}` },
-                              });
-                              if (auRes.ok) {
-                                const auJson = await auRes.json();
-                                allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
-                              }
-                            } catch {}
-
-                            const isEmployee = role === "employee";
-                            const isSelf = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
-                            const allowMap = features?.employeeSearchSystems || {};
-
-                            for (const sys of SYSTEMS) {
-                              // Employee searching others: respect config by skipping disallowed systems
-                              if (isEmployee && !isSelf && allowMap && allowMap[sys] === false) {
-                                aggregate[sys] = null;
-                                continue;
-                              }
-                              let found: any = undefined;
-                              // Try details endpoint with multiple possible identifiers
-                              for (const key of candidateKeys) {
+                              setSearchDialogMode("json");
+                              setSearchDialogTitle(`${role === "ops" ? "All Systems JSON" : "All Systems"} — ${displayKey || "Details"}`);
+                              setSearchDialogData(null);
+                              setSearchDialogLoading(true);
+                              setSearchDialogOpen(true);
+                              try {
+                                const aggregate: Record<string, any> = {};
+                                // fetch all-users once as a fallback source for per-system data
+                                let allUsers: any[] | null = null;
                                 try {
-                                  const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
-                                  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                  if (res.ok) {
-                                    const json = await res.json();
-                                    if (json?.data) { found = json.data; break; }
+                                  const auRes = await fetch(`${API_BASE}/api/all-users`, {
+                                    headers: { Authorization: `Bearer ${token}` },
+                                  });
+                                  if (auRes.ok) {
+                                    const auJson = await auRes.json();
+                                    allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
                                   }
                                 } catch {}
-                              }
-                              // Fallback to in-memory search results if details not found
-                              if (!found) {
-                                const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
-                                const matched = arr.filter((it: any) =>
-                                  candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
-                                );
-                                if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
-                              }
-                              // Fallback to all-users systems map
-                              if (!found && allUsers) {
-                                const matchedUser = allUsers.find((u: any) =>
-                                  candidateKeys.some(
-                                    (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
-                                  )
-                                );
-                                if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
-                                  found = matchedUser.systems[sys];
+
+                                const isEmployee = role === "employee";
+                                const isSelf = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
+                                const allowMap = features?.employeeSearchSystems || {};
+
+                                for (const sys of SYSTEMS) {
+                                  // Employee searching others: respect config by skipping disallowed systems
+                                  if (isEmployee && !isSelf && allowMap && allowMap[sys] === false) {
+                                    aggregate[sys] = null;
+                                    continue;
+                                  }
+                                  let found: any = undefined;
+                                  // Try details endpoint with multiple possible identifiers
+                                  for (const key of candidateKeys) {
+                                    try {
+                                      const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
+                                      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                      if (res.ok) {
+                                        const json = await res.json();
+                                        if (json?.data) { found = json.data; break; }
+                                      }
+                                    } catch {}
+                                  }
+                                  // Fallback to in-memory search results if details not found
+                                  if (!found) {
+                                    const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
+                                    const matched = arr.filter((it: any) =>
+                                      candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
+                                    );
+                                    if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
+                                  }
+                                  // Fallback to all-users systems map
+                                  if (!found && allUsers) {
+                                    const matchedUser = allUsers.find((u: any) =>
+                                      candidateKeys.some(
+                                        (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
+                                      )
+                                    );
+                                    if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
+                                      found = matchedUser.systems[sys];
+                                    }
+                                  }
+                                  aggregate[sys] = found ?? null;
                                 }
+                                setSearchDialogData(aggregate);
+                              } catch {
+                                setSearchDialogData({ error: "Unable to load aggregated details" });
+                              } finally {
+                                setSearchDialogLoading(false);
                               }
-                              aggregate[sys] = found ?? null;
-                            }
-                            setSearchDialogData(aggregate);
-                          } catch {
-                            setSearchDialogData({ error: "Unable to load aggregated details" });
-                          } finally {
-                            setSearchDialogLoading(false);
-                          }
-                        }}
-                      >
-                        {role === "ops" ? "View all system details JSON" : "View All System Details"}
-                      </Button>
-                      {role === "ops" && (
-                        <Button
-                          className="w-full sm:w-auto"
-                          variant="outline"
-                          onClick={async () => {
-                            // trigger same aggregation then render as HTML
-                            setSearchDialogMode("html");
-                            const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
-                            const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
-                            const q = String(search).trim().toLowerCase();
-                            const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
-                            const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
-                            const firstPd = pd?.[0];
-                            const firstMfa = mfa?.[0];
-                            const baseCandidates = (
-                              [
-                                exactPd?.email,
-                                exactPd?.userId,
-                                exactMfa?.userId,
-                                firstPd?.email,
-                                firstPd?.userId,
-                                firstMfa?.userId,
-                                firstMfa?.email,
-                                search,
-                              ] as Array<string | undefined | null>
-                            ).filter(Boolean).map((s) => String(s));
-                            const candidateKeys = Array.from(new Set([
-                              ...baseCandidates,
-                              ...baseCandidates.map((k) => k.toLowerCase()),
-                              ...baseCandidates.map((k) => k.toUpperCase()),
-                            ]));
-                            const displayKey = candidateKeys[0] || "";
+                            }}
+                            title="View aggregated details across all systems in JSON format"
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            {role === "ops" ? "All Systems (JSON)" : "All Systems"}
+                          </Button>
+                          {role === "ops" && (
+                            <Button
+                              className="w-full sm:w-auto"
+                              variant="outline"
+                              onClick={async () => {
+                                // trigger same aggregation then render as HTML
+                                setSearchDialogMode("html");
+                                const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+                                const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
+                                const q = String(search).trim().toLowerCase();
+                                const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
+                                const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
+                                const firstPd = pd?.[0];
+                                const firstMfa = mfa?.[0];
+                                const baseCandidates = (
+                                  [
+                                    exactPd?.email,
+                                    exactPd?.userId,
+                                    exactMfa?.userId,
+                                    firstPd?.email,
+                                    firstPd?.userId,
+                                    firstMfa?.userId,
+                                    firstMfa?.email,
+                                    search,
+                                  ] as Array<string | undefined | null>
+                                ).filter(Boolean).map((s) => String(s));
+                                const candidateKeys = Array.from(new Set([
+                                  ...baseCandidates,
+                                  ...baseCandidates.map((k) => k.toLowerCase()),
+                                  ...baseCandidates.map((k) => k.toUpperCase()),
+                                ]));
+                                const displayKey = candidateKeys[0] || "";
 
-                            setSearchDialogTitle(`All Systems HTML — ${displayKey || "Details"}`);
-                            setSearchDialogData(null);
-                            setSearchDialogLoading(true);
-                            setSearchDialogOpen(true);
+                                setSearchDialogTitle(`All Systems HTML — ${displayKey || "Details"}`);
+                                setSearchDialogData(null);
+                                setSearchDialogLoading(true);
+                                setSearchDialogOpen(true);
 
-                            try {
-                              const aggregate: Record<string, any> = {};
-                              let allUsers: any[] | null = null;
-                              try {
-                                const auRes = await fetch(`${API_BASE}/api/all-users`, {
-                                  headers: { Authorization: `Bearer ${token}` },
-                                });
-                                if (auRes.ok) {
-                                  const auJson = await auRes.json();
-                                  allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
-                                }
-                              } catch {}
-
-                              for (const sys of SYSTEMS) {
-                                let found: any = undefined;
-                                for (const key of candidateKeys) {
+                                try {
+                                  const aggregate: Record<string, any> = {};
+                                  let allUsers: any[] | null = null;
                                   try {
-                                    const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
-                                    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                    if (res.ok) {
-                                      const json = await res.json();
-                                      if (json?.data) { found = json.data; break; }
+                                    const auRes = await fetch(`${API_BASE}/api/all-users`, {
+                                      headers: { Authorization: `Bearer ${token}` },
+                                    });
+                                    if (auRes.ok) {
+                                      const auJson = await auRes.json();
+                                      allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
                                     }
                                   } catch {}
-                                }
-                                if (!found) {
-                                  const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
-                                  const matched = arr.filter((it: any) =>
-                                    candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
-                                  );
-                                  if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
-                                }
-                                if (!found && allUsers) {
-                                  const matchedUser = allUsers.find((u: any) =>
-                                    candidateKeys.some(
-                                      (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
-                                    )
-                                  );
-                                  if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
-                                    found = matchedUser.systems[sys];
+
+                                  for (const sys of SYSTEMS) {
+                                    let found: any = undefined;
+                                    for (const key of candidateKeys) {
+                                      try {
+                                        const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
+                                        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                        if (res.ok) {
+                                          const json = await res.json();
+                                          if (json?.data) { found = json.data; break; }
+                                        }
+                                      } catch {}
+                                    }
+                                    if (!found) {
+                                      const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
+                                      const matched = arr.filter((it: any) =>
+                                        candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
+                                      );
+                                      if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
+                                    }
+                                    if (!found && allUsers) {
+                                      const matchedUser = allUsers.find((u: any) =>
+                                        candidateKeys.some(
+                                          (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
+                                        )
+                                      );
+                                      if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
+                                        found = matchedUser.systems[sys];
+                                      }
+                                    }
+                                    aggregate[sys] = found ?? null;
                                   }
+                                  setSearchDialogData(aggregate);
+                                } catch {
+                                  setSearchDialogData({ error: "Unable to load aggregated details" });
+                                } finally {
+                                  setSearchDialogLoading(false);
                                 }
-                                aggregate[sys] = found ?? null;
-                              }
-                              setSearchDialogData(aggregate);
-                            } catch {
-                              setSearchDialogData({ error: "Unable to load aggregated details" });
-                            } finally {
-                              setSearchDialogLoading(false);
-                            }
-                          }}
-                        >
-                          View all system details HTML
-                        </Button>
-                      )}
-                    </div>
+                              }}
+                              title="View aggregated details across all systems in HTML format"
+                            >
+                              <Code className="h-4 w-4 mr-2" />
+                              All Systems (HTML)
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
               )}
