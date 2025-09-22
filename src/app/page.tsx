@@ -588,6 +588,10 @@ export default function HomePage() {
   // Ops Quick Actions active tab
   const [qaActive, setQaActive] = useState<SystemKey>("ping-federate");
 
+  const isAggregate = useMemo(() => {
+    return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
+  }, [searchDialogData]);
+
   // helper for HTML view in search dialog (global)
   const toPairsGlobal = (obj: any): Array<{ k: string; v: any }> => {
     const out: Array<{ k: string; v: any }> = [];
@@ -1283,12 +1287,12 @@ export default function HomePage() {
                           } catch {}
 
                           const isEmployee = role === "employee";
-                          const isSelf = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
+                          const isSelfSearch = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
                           const allowMap = features?.employeeSearchSystems || {};
 
                           for (const sys of orderedSystems) {
                             // Employee searching others: respect config by skipping disallowed systems
-                            if (isEmployee && !isSelf && allowMap && allowMap[sys] === false) {
+                            if (isEmployee && !isSelfSearch && allowMap && allowMap[sys] === false) {
                               aggregate[sys] = null;
                               continue;
                             }
@@ -1475,7 +1479,6 @@ export default function HomePage() {
                   </div>
                 ) : searchDialogData ? (
                   (() => {
-                    const isAggregate = searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k));
                     if (isAggregate) {
                       return (
                         <div className={`
