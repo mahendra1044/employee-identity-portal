@@ -189,6 +189,7 @@ No per-user persistence or customization is stored; the guide is the same for al
 Configure both frontend and backend from environment files. Frontend variables must be prefixed with NEXT_PUBLIC_.
 
 - Frontend (Next.js) — create .env.local at repo root (copy from .env.example):
+  - NEXT_PUBLIC_API_BASE — Base URL for backend API (default: http://localhost:3001)
   - NEXT_PUBLIC_EDUCATE_GUIDE=true|false — Toggle the employee "Educate me" guide (env takes precedence over backend features)
   - NEXT_PUBLIC_QA_PING_DIRECTORY=true|false — Enable/disable Ping Directory tab in Ops Quick Actions
   - NEXT_PUBLIC_QA_PING_FEDERATE=true|false — Enable/disable Ping Federate tab
@@ -353,7 +354,7 @@ Health checks
 - In mock mode, role is inferred from email prefix and any password works.
 
 ## Mock test data & scenarios
-- Mock mode is ON by default: backend/config/features.json → `{"useMocks": true, "useMockAuth": true}`
+- Mock mode is ON by default: backend/config/features.json → `{\"useMocks\": true, \"useMockAuth\": true}`
 - Files (backend/mocks):
   - ping-directory-initial.json / ping-directory-details.json
   - ping-federate-initial.json / ping-federate-details.json
@@ -628,70 +629,11 @@ All endpoints return `{ data: ... }` to keep the UI contract stable for future r
 - Clicking a button opens a dialog that renders a table (for arrays) or JSON (for objects) and includes a Copy JSON button
 
 ### Troubleshooting
-- If a button shows an error, verify the corresponding route file exists under `src/app/api/...` and that your frontend has been rebuilt after any env changes
-- If the card doesn't appear, make sure:
-  - You are logged in as ops (e.g., ops@company.com)
-  - You performed a successful search first
-  - At least one tab is enabled (via env or features.json)
-
-## Ops Quick Actions Tools Buttons (NEW)
-
-These two additional buttons appear in the Quick Actions card (ops-only, after search) for quick navigation to monitoring tools. They open the URLs in a new browser tab.
-
-### Buttons
-- "Take Me to Splunk": Opens Splunk dashboard.
-- "Take Me to Cloud Watch": Opens AWS Cloud Watch console (us-east-1 default region).
-
-### Configuration (Environment Variables)
-
-URLs are configurable via frontend environment variables (build-time). If not set, defaults apply:
-
-- `NEXT_PUBLIC_SPLUNK_URL`: Splunk app URL (default: "https://splunk.company.com")
-- `NEXT_PUBLIC_CLOUDWATCH_URL`: Cloud Watch URL (default: "https://console.aws.amazon.com/cloudwatch/home?region=us-east-1")
-
-Steps to update:
-1. Add/update in `.env.local` (or deployment env):
-   ```
-   NEXT_PUBLIC_SPLUNK_URL=https://your-splunk-instance.com/app/search
-   NEXT_PUBLIC_CLOUDWATCH_URL=https://console.aws.amazon.com/cloudwatch/home?region=us-west-2
-   ```
-2. Rebuild/redeploy the frontend (`npm run build && npm run start` or your CI/CD).
-3. Log in as ops, perform a search → Quick Actions card shows the buttons with updated URLs.
-
-Notes:
-- Buttons use `window.open(..., "_blank", "noopener,noreferrer")` for security (no referrer, new tab).
-- Visibility: Ops-only, appears after search (same as tabs).
-- No backend involvement; purely frontend navigation.
-
-## API Overview
-- POST /auth/login → { token, role, email }
-- GET /config/features → feature flags object
-- GET /api/own-:system → initial data for current user
-- GET /api/own-:system/details → extended data for current user
-- GET /api/all-users?limit=50&offset=0 → ops-only list
-- GET /api/search-employee/:query → limited PD + MFA results
-- GET /api/pf/userinfo → mocked Ping Federate UserInfo for current employee (frontend-only mock)
-- GET /api/pf/oidc → mocked list of OIDC connections (5 key fields per connection)
-- GET /api/pf/saml → mocked list of SAML connections (5 key fields per connection)
-
-Responses
-- 200: `{ data: any }` for system endpoints; or domain objects for search/all-users
-- 403: RBAC denial (see roles.json)
-- 404: Feature/system disabled (see features.json)
-
-
-## Scripts
-- npm run dev → Frontend only (Next.js)
-- npm run dev:be → Installs backend deps and starts Express
-- npm run dev:all → Runs frontend + backend together (recommended for local dev)
-
-
-## Troubleshooting
-- CORS/Network: Ensure backend is running on 3001; frontend calls http://localhost:3001 directly
+- CORS/Network: Ensure backend is running on 3001; frontend calls the URL configured in `NEXT_PUBLIC_API_BASE`.
 - 404 errors: Likely system disabled in features.json
 - 403 errors: Role lacks permission in roles.json
 - Token issues: Click "Sign out" (clears localStorage) and log back in
-- Port conflicts: Change PORT in backend/.env and update API_BASE in src/app/page.tsx if needed
+- Port conflicts: Change `PORT` in backend/.env and set `NEXT_PUBLIC_API_BASE` in `.env.local` accordingly
 - Backend not starting: Verify `backend/server.js` exists and that you ran `npm install` at the repo root (or `cd backend && npm install`).
 - Windows path error (ENOENT backend/backend/...): Fixed. The server now resolves paths relative to `backend/server.js`. Pull latest and use `npm run dev:all` (avoid manually changing working directories when starting the backend).
 

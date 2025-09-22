@@ -10,7 +10,7 @@ import { Sun, Moon, User, Copy } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
-const API_BASE = "http://localhost:3001"; // dev: backend server
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // dev: backend server (configurable)
 
 type Features = {
   credentialSource: string;
