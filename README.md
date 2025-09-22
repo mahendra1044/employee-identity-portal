@@ -242,6 +242,47 @@ Getting started:
   3) Edit backend/.env → set PORT, JWT_SECRET, etc.
   4) Restart frontend and backend for changes to take effect
 
+### Example Scenario: Updating API_BASE Didn't Take Effect Until Backend Port Change
+
+**Scenario**: You're viewing the dashboard at route `/` (logged in, seeing system cards). You update `NEXT_PUBLIC_API_BASE=http://localhost:3002` in `.env.local` but API calls (e.g., fetching system data) still fail or use the old port. It only works after editing `backend/.env` to `PORT=3002` and restarting the backend.
+
+**Why This Happens** (Step-by-Step Explanation):
+1. **Frontend Role (`.env.local`)**: This file tells your Next.js app (running on `localhost:3000`) where to send API requests. Updating `NEXT_PUBLIC_API_BASE=http://localhost:3002` changes the `API_BASE` constant in `src/app/page.tsx` to point to port 3002.
+   - Effect: The browser now tries to `fetch("http://localhost:3002/api/own-ping-directory")` instead of 3001.
+   - But: If nothing is listening on port 3002 (your backend is still on 3001), requests fail (e.g., "Failed to fetch" errors in console or "Error loading data" in UI).
+
+2. **Backend Role (`backend/.env`)**: This controls your Express server (separate from frontend).
+   - Default: `PORT=3001` means the backend listens on 3001.
+   - Without changing it, your backend isn't running on 3002—requests to 3002 go nowhere.
+
+3. **The Fix (What Made It Work)**: Editing `PORT=3002` in `backend/.env` and restarting the backend starts it listening on 3002, matching the frontend's new config. Now requests succeed.
+
+**Steps to Reproduce/Test This Scenario**:
+1. Start both servers normally:
+   - Backend on 3001 (`cd backend && node server.js`).
+   - Frontend on 3000 (`npm run dev`).
+   - Login and view dashboard at `/`—API calls work (e.g., system cards load data).
+
+2. Update frontend only:
+   - Edit `.env.local`: `NEXT_PUBLIC_API_BASE=http://localhost:3002`.
+   - Restart frontend (`npm run dev`).
+   - Refresh `/` → System cards show "Error loading data" (requests to empty 3002 fail).
+
+3. Update backend too:
+   - Edit `backend/.env`: `PORT=3002`.
+   - Restart backend (`cd backend && node server.js`—now on 3002).
+   - Refresh `/` → Dashboard works again (frontend hits backend on 3002).
+
+**Key Takeaways**:
+- Frontend env (`.env.local`) = "Where to call" (client-side URLs).
+- Backend env (`backend/.env`) = "Where I listen" (server port).
+- Always match them: Frontend's `NEXT_PUBLIC_API_BASE` must point to backend's `PORT`.
+- Restart *both* after env changes (no hot-reload).
+- Check browser DevTools > Network tab: See exact URLs called and any 404/CORS errors.
+- Production: Frontend deploys to a domain (e.g., Vercel); backend to another (e.g., Render). Set `NEXT_PUBLIC_API_BASE=https://your-backend.com`.
+
+If issues persist (e.g., CORS, wrong URLs), check console logs, restart services, and ensure ports don't conflict (e.g., kill processes on used ports with `lsof -i :3001` on macOS/Linux).
+
 ### Support email mapping
 - Edit `src/lib/support-emails.ts` to change the destination team addresses per system.
 - Helper: `getSupportEmail(system: "ping-directory" | "ping-federate" | "cyberark" | "saviynt" | "azure-ad" | "ping-mfa")`
