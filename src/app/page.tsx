@@ -1645,7 +1645,7 @@ export default function HomePage() {
                 {/* Buttons per active tab (3 each) */}
                 <div className="rounded-lg border bg-gradient-to-r from-muted/60 to-background p-3 sm:p-4">
                   {qaActive === "ping-federate" && qaEnabledTabs["ping-federate"] && (
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-start">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping Federate — User Info"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/pf/userinfo"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load User Info" }); } finally { setPfOpsLoading(false); }
@@ -1671,7 +1671,7 @@ export default function HomePage() {
                   )}
 
                   {qaActive === "ping-directory" && qaEnabledTabs["ping-directory"] && (
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-start">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping Directory — Profile"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/pd/profile"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load profile" }); } finally { setPfOpsLoading(false);} 
@@ -1697,7 +1697,7 @@ export default function HomePage() {
                   )}
 
                   {qaActive === "ping-mfa" && qaEnabledTabs["ping-mfa"] && (
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-start">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping MFA — Status"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/mfa/status"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load status" }); } finally { setPfOpsLoading(false);} 
@@ -1723,7 +1723,7 @@ export default function HomePage() {
                   )}
 
                   {qaActive === "azure-ad" && qaEnabledTabs["azure-ad"] && (
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-start">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Azure AD — User"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/aad/user"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load user" }); } finally { setPfOpsLoading(false);} 
@@ -1749,7 +1749,7 @@ export default function HomePage() {
                   )}
 
                   {qaActive === "cyberark" && qaEnabledTabs["cyberark"] && (
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-start">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("CyberArk — Safes"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/cyberark/safes"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load safes" }); } finally { setPfOpsLoading(false);} 
@@ -1775,7 +1775,7 @@ export default function HomePage() {
                   )}
 
                   {qaActive === "saviynt" && qaEnabledTabs["saviynt"] && (
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    <div className="flex flex-wrap gap-2 justify-start">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Saviynt — Roles"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/saviynt/roles"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load roles" }); } finally { setPfOpsLoading(false);} 
