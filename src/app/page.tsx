@@ -1073,39 +1073,6 @@ export default function HomePage() {
                           <CardTitle className="text-base font-semibold">Ping Directory</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                          <div className="flex justify-end gap-2">
-                            {final.length > 0 && (
-                              <Button
-                                size="sm"
-                                onClick={async () => {
-                                  const firstUser = final[0];
-                                  const key = firstUser.userId || firstUser.email;
-                                  setSearchDialogTitle(`Ping Directory — ${key || "Details"}`);
-                                  setSearchDialogData(null);
-                                  setSearchDialogLoading(true);
-                                  setSearchDialogOpen(true);
-                                  try {
-                                    const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-directory`;
-                                    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                    if (res.ok) {
-                                      const json = await res.json();
-                                      setSearchDialogData(json.data ?? firstUser);
-                                    } else {
-                                      setSearchDialogData(firstUser);
-                                    }
-                                  } catch {
-                                    setSearchDialogData(firstUser);
-                                  } finally {
-                                    setSearchDialogLoading(false);
-                                  }
-                                }}
-                                title="View detailed information for primary result"
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </Button>
-                            )}
-                          </div>
                           {(() => {
                             const list = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
                             const filtered = role === "ops" && search.trim()
@@ -1113,28 +1080,65 @@ export default function HomePage() {
                                   u.userId === search.trim() || u.email?.toLowerCase() === search.trim().toLowerCase()
                                 )
                               : list;
-                            const final = role === "ops" ? filtered.slice(0, 1) : filtered;
-                            return final.length > 0 ? (
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>User ID</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {final.map((u: any) => (
-                                    <TableRow key={`pd-${u.userId}`}>
-                                      <TableCell>{u.name}</TableCell>
-                                      <TableCell>{u.email}</TableCell>
-                                      <TableCell>{u.userId}</TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            ) : (
-                              <p className="text-sm text-muted-foreground">No results</p>
+                            const finalList = role === "ops" ? filtered.slice(0, 1) : filtered;
+                            return (
+                              <>
+                                <div className="flex justify-end gap-2">
+                                  {finalList.length > 0 && (
+                                    <Button
+                                      size="sm"
+                                      onClick={async () => {
+                                        const firstUser = finalList[0];
+                                        const key = firstUser.userId || firstUser.email;
+                                        setSearchDialogTitle(`Ping Directory — ${key || "Details"}`);
+                                        setSearchDialogData(null);
+                                        setSearchDialogLoading(true);
+                                        setSearchDialogOpen(true);
+                                        try {
+                                          const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-directory`;
+                                          const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                          if (res.ok) {
+                                            const json = await res.json();
+                                            setSearchDialogData(json.data ?? firstUser);
+                                          } else {
+                                            setSearchDialogData(firstUser);
+                                          }
+                                        } catch {
+                                          setSearchDialogData(firstUser);
+                                        } finally {
+                                          setSearchDialogLoading(false);
+                                        }
+                                      }}
+                                      title="View detailed information for primary result"
+                                    >
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View Details
+                                    </Button>
+                                  )}
+                                </div>
+                                {finalList.length > 0 ? (
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>User ID</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {finalList.map((u: any) => (
+                                        <TableRow key={`pd-${u.userId}`}>
+                                          <TableCell>{u.name}</TableCell>
+                                          <TableCell>{u.email}</TableCell>
+                                          <TableCell>{u.userId}</TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">No results</p>
+                                )}
+                              </>
                             );
                           })()}
                         </CardContent>
@@ -1154,66 +1158,70 @@ export default function HomePage() {
                           <CardTitle className="text-base font-semibold">Ping MFA</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                          <div className="flex justify-end gap-2">
-                            {final.length > 0 && (
-                              <Button
-                                size="sm"
-                                onClick={async () => {
-                                  const firstUser = final[0];
-                                  const key = firstUser.userId || firstUser.email;
-                                  setSearchDialogTitle(`Ping MFA — ${firstUser.userId}`);
-                                  setSearchDialogData(null);
-                                  setSearchDialogLoading(true);
-                                  setSearchDialogOpen(true);
-                                  try {
-                                    const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-mfa`;
-                                    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                    if (res.ok) {
-                                      const json = await res.json();
-                                      setSearchDialogData(json.data ?? firstUser);
-                                    } else {
-                                      setSearchDialogData(firstUser);
-                                    }
-                                  } catch {
-                                    setSearchDialogData(firstUser);
-                                  } finally {
-                                    setSearchDialogLoading(false);
-                                  }
-                                }}
-                                title="View detailed information for primary result"
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </Button>
-                            )}
-                          </div>
                           {(() => {
                             const list = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
                             const filtered = role === "ops" && search.trim()
-                              ? list.filter((u: any) => u.userId === search.trim())
+                              ? list.filter((u: any) => u.userId === search.trim() || u.email?.toLowerCase() === search.trim().toLowerCase())
                               : list;
-                            const final = role === "ops" ? filtered.slice(0, 1) : filtered;
-                            return final.length > 0 ? (
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>User ID</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Last Event</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {final.map((u: any) => (
-                                    <TableRow key={`mfa-${u.userId}`}>
-                                      <TableCell>{u.userId}</TableCell>
-                                      <TableCell>{u.status}</TableCell>
-                                      <TableCell>{u.lastEvent}</TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            ) : (
-                              <p className="text-sm text-muted-foreground">No results</p>
+                            const finalList = role === "ops" ? filtered.slice(0, 1) : filtered;
+                            return (
+                              <>
+                                <div className="flex justify-end gap-2">
+                                  {finalList.length > 0 && (
+                                    <Button
+                                      size="sm"
+                                      onClick={async () => {
+                                        const firstUser = finalList[0];
+                                        const key = firstUser.userId || firstUser.email;
+                                        setSearchDialogTitle(`Ping MFA — ${firstUser.userId}`);
+                                        setSearchDialogData(null);
+                                        setSearchDialogLoading(true);
+                                        setSearchDialogOpen(true);
+                                        try {
+                                          const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-mfa`;
+                                          const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                          if (res.ok) {
+                                            const json = await res.json();
+                                            setSearchDialogData(json.data ?? firstUser);
+                                          } else {
+                                            setSearchDialogData(firstUser);
+                                          }
+                                        } catch {
+                                          setSearchDialogData(firstUser);
+                                        } finally {
+                                          setSearchDialogLoading(false);
+                                        }
+                                      }}
+                                      title="View detailed information for primary result"
+                                    >
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View Details
+                                    </Button>
+                                  )}
+                                </div>
+                                {finalList.length > 0 ? (
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>User ID</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Last Event</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {finalList.map((u: any) => (
+                                        <TableRow key={`mfa-${u.userId}`}>
+                                          <TableCell>{u.userId}</TableCell>
+                                          <TableCell>{u.status}</TableCell>
+                                          <TableCell>{u.lastEvent}</TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">No results</p>
+                                )}
+                              </>
                             );
                           })()}
                         </CardContent>
