@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sun, Moon, User, Copy } from "lucide-react";
+import { Sun, Moon, User, Copy, RefreshCw } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
@@ -282,8 +282,8 @@ function SystemCard({
           <CardTitle className="flex items-center justify-between gap-3">
             <span className="text-base md:text-lg font-semibold whitespace-normal break-words">{name}</span>
             <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading}>
-                Refresh
+              <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading} title="Refresh data">
+                <RefreshCw className="h-4 w-4" />
               </Button>
               <Button size="sm" onClick={loadDetails} disabled={!enabled || loading}>
                 View Details
@@ -309,6 +309,7 @@ function SystemCard({
                 size="sm"
                 variant="outline"
                 onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}
+                title="Copy JSON to clipboard"
               >
                 <Copy className="h-4 w-4" />
               </Button>
@@ -411,6 +412,7 @@ function SystemCard({
                   size="sm"
                   variant="outline"
                   onClick={() => navigator.clipboard.writeText(JSON.stringify(details, null, 2))}
+                  title="Copy JSON to clipboard"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -465,7 +467,7 @@ function SystemCard({
             <DialogTitle className="flex items-center justify-between w-full pr-12">
               <span>{pfTitle || "Ping Federate"}</span>
               {pfData && (
-                <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfData, null, 2))}>
+                <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfData, null, 2))} title="Copy JSON to clipboard">
                   Copy JSON
                 </Button>
               )}
@@ -1441,6 +1443,7 @@ export default function HomePage() {
                         size="sm"
                         variant="outline"
                         onClick={() => navigator.clipboard.writeText(JSON.stringify(searchDialogData, null, 2))}
+                        title="Copy JSON to clipboard"
                       >
                         Copy JSON
                       </Button>
@@ -1476,7 +1479,7 @@ export default function HomePage() {
                             {val ? (
                               <div className="space-y-2">
                                 <div className="flex justify-end">
-                                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))}>Copy JSON</Button>
+                                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))} title="Copy JSON to clipboard">Copy JSON</Button>
                                 </div>
                                 <div className="max-h-64 overflow-y-auto pr-1">
                                   <dl className="grid grid-cols-1 gap-y-2">
@@ -1517,7 +1520,7 @@ export default function HomePage() {
                                   {enabled[sys] ? 'Enabled' : 'Disabled'}
                                 </span>
                                 {val && (
-                                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))}>Copy JSON</Button>
+                                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))} title="Copy JSON to clipboard">Copy JSON</Button>
                                 )}
                               </div>
                             </div>
@@ -1731,7 +1734,9 @@ export default function HomePage() {
                   <span className="inline-flex items-center rounded border px-2 py-0.5">Total: {snowItems!.length}</span>
                 )}
               </div>
-              <Button size="sm" variant="outline" onClick={openSnowDialog} disabled={snowLoading}>Refresh</Button>
+              <Button size="sm" variant="outline" onClick={openSnowDialog} disabled={snowLoading} title="Refresh incidents">
+                <RefreshCw className="h-4 w-4" />
+              </Button>
             </div>
             {snowLoading ? (
               <p className="text-sm animate-pulse">Loading incidents...</p>
@@ -1786,7 +1791,7 @@ export default function HomePage() {
               <DialogTitle className="flex items-center justify-between w-full pr-12">
                 <span>{pfOpsTitle || 'Ping Federate'}</span>
                 {pfOpsData && (
-                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfOpsData, null, 2))}>
+                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfOpsData, null, 2))} title="Copy JSON to clipboard">
                     Copy JSON
                   </Button>
                 )}
@@ -1842,7 +1847,9 @@ export default function HomePage() {
                       onChange={(e) => setMinutes(Math.max(1, Number(e.target.value)))}
                     />
                   </div>
-                  <Button size="sm" onClick={loadRecentFailures} disabled={opsLoading}>Refresh</Button>
+                  <Button size="sm" onClick={loadRecentFailures} disabled={opsLoading} title="Refresh failures" variant="outline">
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
                   {opsError && <span className="text-xs text-red-600">{opsError}</span>}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
