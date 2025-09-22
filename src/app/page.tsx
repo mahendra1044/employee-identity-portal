@@ -278,40 +278,14 @@ function SystemCard({
   return (
     <>
       <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between gap-3">
-            <span className="text-base md:text-lg font-semibold whitespace-normal break-words">{name}</span>
-            <div className="flex flex-col sm:flex-row flex-wrap items-end sm:items-center gap-2 justify-end">
-              <div className="flex flex-wrap gap-1">
-                <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading} title="Refresh system data">
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Button size="sm" onClick={loadDetails} disabled={!enabled || loading} title="View detailed information">
-                  <Eye className="h-4 w-4 mr-1" />
-                  Details
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading} title="View data in HTML format">
-                  <Code className="h-4 w-4 mr-1" />
-                  HTML
-                </Button>
-                <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled} title="Send support email with current data">
-                  <Mail className="h-4 w-4 mr-1" />
-                  Email
-                </Button>
-                {system === "cyberark" && (
-                  <Button size="sm" variant="destructive" onClick={sendEmailFailTest} disabled={!enabled} title="Test email failure scenario">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
-                    Fail Test
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardTitle>
+        <CardHeader className="text-center pb-3">
+          <CardTitle className="text-lg font-semibold">{name}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex justify-end mb-2 space-x-2">
+        <CardContent className="space-y-4">
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading} title="Refresh system data">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
             {data && (
               <Button
                 size="sm"
@@ -322,97 +296,103 @@ function SystemCard({
                 <Copy className="h-4 w-4" />
               </Button>
             )}
-            {system === "ping-federate" && role === "employee" && (
-              <div className="flex flex-wrap gap-2 ml-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={async () => {
-                    setPfTitle("Ping Federate — User Info");
-                    setPfOpen(true);
-                    setPfLoading(true);
-                    try {
-                      const res = await fetch("/api/pf/userinfo");
-                      const j = await res.json().catch(() => ({}));
-                      setPfData(j?.data ?? j);
-                    } catch {
-                      setPfData({ error: "Failed to load User Info" });
-                    } finally {
-                      setPfLoading(false);
-                    }
-                  }}
-                  title="Fetch and view user information from Ping Federate"
-                >
-                  <User className="h-4 w-4 mr-1" />
-                  User Info
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={async () => {
-                    setPfTitle("Ping Federate — OIDC Connections");
-                    setPfOpen(true);
-                    setPfLoading(true);
-                    try {
-                      const res = await fetch("/api/pf/oidc");
-                      const j = await res.json().catch(() => ({}));
-                      setPfData(j?.data ?? j);
-                    } catch {
-                      setPfData({ error: "Failed to load OIDC connections" });
-                    } finally {
-                      setPfLoading(false);
-                    }
-                  }}
-                  title="View OIDC connections in Ping Federate"
-                >
-                  <Globe className="h-4 w-4 mr-1" />
-                  OIDC
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={async () => {
-                    setPfTitle("Ping Federate — SAML Connections");
-                    setPfOpen(true);
-                    setPfLoading(true);
-                    try {
-                      const res = await fetch("/api/pf/saml");
-                      const j = await res.json().catch(() => ({}));
-                      setPfData(j?.data ?? j);
-                    } catch {
-                      setPfData({ error: "Failed to load SAML connections" });
-                    } finally {
-                      setPfLoading(false);
-                    }
-                  }}
-                  title="View SAML connections in Ping Federate"
-                >
-                  <Shield className="h-4 w-4 mr-1" />
-                  SAML
-                </Button>
-              </div>
+            <Button size="sm" onClick={loadDetails} disabled={!enabled || loading} title="View detailed information">
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading} title="View data in HTML format">
+              <Code className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled} title="Send support email with current data">
+              <Mail className="h-4 w-4" />
+            </Button>
+            {system === "cyberark" && (
+              <Button size="sm" variant="destructive" onClick={sendEmailFailTest} disabled={!enabled} title="Test email failure scenario">
+                <AlertTriangle className="h-4 w-4" />
+              </Button>
             )}
           </div>
-          {!enabled ? (
-            <p className="text-sm text-muted-foreground">Feature not enabled</p>
-          ) : loading ? (
-            <p className="text-sm animate-pulse">Loading...</p>
-          ) : error ? (
-            <p className="text-sm text-red-600">{error}</p>
-          ) : (
-            <div className="space-y-3">
-              {data ? (
-                <div>
-                  <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
-                    {JSON.stringify(data, null, 2)}
-                  </pre>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No data yet</p>
-              )}
-              {/* details moved to dialog to keep the page compact */}
+          {system === "ping-federate" && role === "employee" && (
+            <div className="flex flex-wrap gap-2 justify-center p-3 bg-muted/50 rounded-lg">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={async () => {
+                  setPfTitle("Ping Federate — User Info");
+                  setPfOpen(true);
+                  setPfLoading(true);
+                  try {
+                    const res = await fetch("/api/pf/userinfo");
+                    const j = await res.json().catch(() => ({}));
+                    setPfData(j?.data ?? j);
+                  } catch {
+                    setPfData({ error: "Failed to load User Info" });
+                  } finally {
+                    setPfLoading(false);
+                  }
+                }}
+                title="Fetch and view user information from Ping Federate"
+              >
+                <User className="h-4 w-4 mr-1" />
+                User Info
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={async () => {
+                  setPfTitle("Ping Federate — OIDC Connections");
+                  setPfOpen(true);
+                  setPfLoading(true);
+                  try {
+                    const res = await fetch("/api/pf/oidc");
+                    const j = await res.json().catch(() => ({}));
+                    setPfData(j?.data ?? j);
+                  } catch {
+                    setPfData({ error: "Failed to load OIDC connections" });
+                  } finally {
+                    setPfLoading(false);
+                  }
+                }}
+                title="View OIDC connections in Ping Federate"
+              >
+                <Globe className="h-4 w-4 mr-1" />
+                OIDC
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={async () => {
+                  setPfTitle("Ping Federate — SAML Connections");
+                  setPfOpen(true);
+                  setPfLoading(true);
+                  try {
+                    const res = await fetch("/api/pf/saml");
+                    const j = await res.json().catch(() => ({}));
+                    setPfData(j?.data ?? j);
+                  } catch {
+                    setPfData({ error: "Failed to load SAML connections" });
+                  } finally {
+                    setPfLoading(false);
+                  }
+                }}
+                title="View SAML connections in Ping Federate"
+              >
+                <Shield className="h-4 w-4 mr-1" />
+                SAML
+              </Button>
             </div>
           )}
+          <div className="space-y-3">
+            {data ? (
+              <div>
+                <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+                  {JSON.stringify(data, null, 2)}
+                </pre>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No data yet</p>
+            )}
+            {/* details moved to dialog to keep the page compact */}
+          </div>
         </CardContent>
       </Card>
 
