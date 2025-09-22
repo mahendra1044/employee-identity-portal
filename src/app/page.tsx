@@ -1229,7 +1229,7 @@ export default function HomePage() {
                     );
                   })()}
 
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center mt-4 pt-4 border-t">
+                  <div className="flex flex-col sm:flex-row gap-2 justify-start mt-4 pt-4 border-t">
                     <Button
                       className="flex-1 sm:flex-none min-w-0"
                       variant="secondary"
@@ -1264,7 +1264,7 @@ export default function HomePage() {
                         const displayKey = candidateKeys[0] || "";
 
                         setSearchDialogMode("json");
-                        setSearchDialogTitle(`${role === "ops" ? "All Systems JSON" : "All Systems"} — ${displayKey || "Details"}`);
+                        setSearchDialogTitle(`Consolidated View (JSON) — ${displayKey || "Details"}`);
                         setSearchDialogData(null);
                         setSearchDialogLoading(true);
                         setSearchDialogOpen(true);
@@ -1338,103 +1338,102 @@ export default function HomePage() {
                       <span className="hidden sm:inline">Consolidated View</span>
                       <span className="sm:hidden">View All</span>
                     </Button>
-                    {role === "ops" && (
-                      <Button
-                        className="flex-1 sm:flex-none min-w-0"
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          // trigger same aggregation then render as HTML
-                          setSearchDialogMode("html");
-                          const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
-                          const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
-                          const q = String(search).trim().toLowerCase();
-                          const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
-                          const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
-                          const firstPd = pd?.[0];
-                          const firstMfa = mfa?.[0];
-                          const baseCandidates = (
-                            [
-                              exactPd?.email,
-                              exactPd?.userId,
-                              exactMfa?.userId,
-                              firstPd?.email,
-                              firstPd?.userId,
-                              firstMfa?.userId,
-                              firstMfa?.email,
-                              search,
-                            ] as Array<string | undefined | null>
-                          ).filter(Boolean).map((s) => String(s));
-                          const candidateKeys = Array.from(new Set([
-                            ...baseCandidates,
-                            ...baseCandidates.map((k) => k.toLowerCase()),
-                            ...baseCandidates.map((k) => k.toUpperCase()),
-                          ]));
-                          const displayKey = candidateKeys[0] || "";
+                    <Button
+                      className="flex-1 sm:flex-none min-w-0"
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        // Determine the best key candidates from search results
+                        const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+                        const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
+                        const q = String(search).trim().toLowerCase();
+                        const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
+                        const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
+                        const firstPd = pd?.[0];
+                        const firstMfa = mfa?.[0];
+                        // Build candidate identifiers to try per-system (email + userId variants)
+                        const baseCandidates = (
+                          [
+                            exactPd?.email,
+                            exactPd?.userId,
+                            exactMfa?.userId,
+                            firstPd?.email,
+                            firstPd?.userId,
+                            firstMfa?.userId,
+                            firstMfa?.email,
+                            search,
+                          ] as Array<string | undefined | null>
+                        ).filter(Boolean).map((s) => String(s));
+                        const candidateKeys = Array.from(new Set([
+                          ...baseCandidates,
+                          ...baseCandidates.map((k) => k.toLowerCase()),
+                          ...baseCandidates.map((k) => k.toUpperCase()),
+                        ]));
+                        const displayKey = candidateKeys[0] || "";
 
-                          setSearchDialogTitle(`All Systems HTML — ${displayKey || "Details"}`);
-                          setSearchDialogData(null);
-                          setSearchDialogLoading(true);
-                          setSearchDialogOpen(true);
+                        setSearchDialogMode("html");
+                        setSearchDialogTitle(`Consolidated View (HTML) — ${displayKey || "Details"}`);
+                        setSearchDialogData(null);
+                        setSearchDialogLoading(true);
+                        setSearchDialogOpen(true);
 
+                        try {
+                          const aggregate: Record<string, any> = {};
+                          let allUsers: any[] | null = null;
                           try {
-                            const aggregate: Record<string, any> = {};
-                            let allUsers: any[] | null = null;
-                            try {
-                              const auRes = await fetch(`${API_BASE}/api/all-users`, {
-                                headers: { Authorization: `Bearer ${token}` },
-                              });
-                              if (auRes.ok) {
-                                const auJson = await auRes.json();
-                                allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
-                              }
-                            } catch {}
-
-                            for (const sys of orderedSystems) {
-                              let found: any = undefined;
-                              for (const key of candidateKeys) {
-                                try {
-                                  const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
-                                  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                  if (res.ok) {
-                                    const json = await res.json();
-                                    if (json?.data) { found = json.data; break; }
-                                  }
-                                } catch {}
-                              }
-                              if (!found) {
-                                const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
-                                const matched = arr.filter((it: any) =>
-                                  candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
-                                );
-                                if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
-                              }
-                              if (!found && allUsers) {
-                                const matchedUser = allUsers.find((u: any) =>
-                                  candidateKeys.some(
-                                    (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
-                                  )
-                                );
-                                if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
-                                  found = matchedUser.systems[sys];
-                                }
-                              }
-                              aggregate[sys] = found ?? null;
+                            const auRes = await fetch(`${API_BASE}/api/all-users`, {
+                              headers: { Authorization: `Bearer ${token}` },
+                            });
+                            if (auRes.ok) {
+                              const auJson = await auRes.json();
+                              allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
                             }
-                            setSearchDialogData(aggregate);
-                          } catch {
-                            setSearchDialogData({ error: "Unable to load aggregated details" });
-                          } finally {
-                            setSearchDialogLoading(false);
+                          } catch {}
+
+                          for (const sys of orderedSystems) {
+                            let found: any = undefined;
+                            for (const key of candidateKeys) {
+                              try {
+                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
+                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                                if (res.ok) {
+                                  const json = await res.json();
+                                  if (json?.data) { found = json.data; break; }
+                                }
+                              } catch {}
+                            }
+                            if (!found) {
+                              const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
+                              const matched = arr.filter((it: any) =>
+                                candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
+                              );
+                              if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
+                            }
+                            if (!found && allUsers) {
+                              const matchedUser = allUsers.find((u: any) =>
+                                candidateKeys.some(
+                                  (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
+                                )
+                              );
+                              if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
+                                found = matchedUser.systems[sys];
+                              }
+                            }
+                            aggregate[sys] = found ?? null;
                           }
-                        }}
-                        title="View aggregated details across all systems in formatted layout"
-                      >
-                        <Code className="h-4 w-4 mr-1 flex-shrink-0" />
-                        <span className="hidden sm:inline">Readable Layout</span>
-                        <span className="sm:hidden">Format</span>
-                      </Button>
-                    )}
+                          setSearchDialogData(aggregate);
+                        } catch {
+                          setSearchDialogData({ error: "Unable to load aggregated details" });
+                        } finally {
+                          setSearchDialogLoading(false);
+                        }
+                      }}
+                      title="View aggregated details across all systems in formatted layout"
+                    >
+                      <Code className="h-4 w-4 mr-1 flex-shrink-0" />
+                      <span className="hidden sm:inline">Readable Layout</span>
+                      <span className="sm:hidden">Format</span>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -1447,7 +1446,7 @@ export default function HomePage() {
                 <DialogTitle className="flex items-center justify-between w-full pr-8 text-base">
                   <span>{searchDialogTitle || "Details"}</span>
                   <div className="flex items-center gap-2">
-                    {(searchDialogData && !(searchDialogTitle || "").startsWith("All Systems")) && (
+                    {!isAggregate && searchDialogData && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -1475,106 +1474,111 @@ export default function HomePage() {
                     <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
                   </div>
                 ) : searchDialogData ? (
-                  typeof searchDialogData === "object" && (searchDialogTitle || "").startsWith("All Systems") ? (
-                    <div className={`
-                      ${searchDialogMode === "html" ? "grid grid-cols-1 lg:grid-cols-2" : "grid grid-cols-1"} 
-                      gap-2 p-3 max-h-[70vh] overflow-y-auto
-                    `}>
-                      {orderedSystems.map((sys) => {
-                        const val = (searchDialogData as any)?.[sys] ?? null;
-                        const hasData = val && Object.keys(val).length > 0;
-                        if (!enabled[sys] && !hasData) return null;
-                        const content = searchDialogMode === "html" ? (
-                          <div className="space-y-1.5">
-                            <div className="flex justify-end mb-1">
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                className="h-5 px-1.5 text-xs" 
-                                onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))} 
-                                title="Copy JSON"
-                              >
-                                <Copy className="h-3 w-3" />
-                              </Button>
-                            </div>
-                            <div className="max-h-40 overflow-y-auto pr-0.5 border rounded-sm bg-background p-1.5">
-                              <dl className="grid grid-cols-1 gap-y-1 text-xs">
-                                {val ? toPairsGlobal(val).slice(0, 30).map(({ k, v }) => (
-                                  <div key={k} className="flex flex-col py-0.5 border-b border-border/20 last:border-b-0 last:pb-0">
-                                    <dt className="font-medium text-muted-foreground/90 truncate text-[10px] mb-0.5">{k}</dt>
-                                    <dd className="break-all text-[11px] leading-tight">
-                                      {typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : JSON.stringify(v, null, 2)}
-                                    </dd>
+                  (() => {
+                    const isAggregate = searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k));
+                    if (isAggregate) {
+                      return (
+                        <div className={`
+                          ${searchDialogMode === "html" ? "grid grid-cols-1 lg:grid-cols-2" : "grid grid-cols-1"} 
+                          gap-2 p-3 max-h-[70vh] overflow-y-auto
+                        `}>
+                          {orderedSystems.map((sys) => {
+                            const val = (searchDialogData as any)?.[sys] ?? null;
+                            const hasData = val && Object.keys(val).length > 0;
+                            if (!enabled[sys] && !hasData) return null;
+                            const content = searchDialogMode === "html" ? (
+                              <div className="space-y-1.5">
+                                <div className="flex justify-end mb-1">
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-5 px-1.5 text-xs" 
+                                    onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))} 
+                                    title="Copy JSON"
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                                <div className="max-h-40 overflow-y-auto pr-0.5 border rounded-sm bg-background p-1.5">
+                                  <dl className="grid grid-cols-1 gap-y-1 text-xs">
+                                    {val ? toPairsGlobal(val).slice(0, 30).map(({ k, v }) => (
+                                      <div key={k} className="flex flex-col py-0.5 border-b border-border/20 last:border-b-0 last:pb-0">
+                                        <dt className="font-medium text-muted-foreground/90 truncate text-[10px] mb-0.5">{k}</dt>
+                                        <dd className="break-all text-[11px] leading-tight">
+                                          {typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : JSON.stringify(v, null, 2)}
+                                        </dd>
+                                      </div>
+                                    )) : (
+                                      <p className="text-[10px] text-muted-foreground italic py-2">No data available</p>
+                                    )}
+                                  </dl>
+                                </div>
+                              </div>
+                            ) : (
+                              val ? (
+                                <div className="space-y-1.5">
+                                  <div className="flex justify-end mb-1">
+                                    <Button 
+                                      size="sm" 
+                                      variant="ghost" 
+                                      className="h-5 px-1.5 text-xs" 
+                                      onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))} 
+                                      title="Copy JSON"
+                                    >
+                                      <Copy className="h-3 w-3" />
+                                    </Button>
                                   </div>
-                                )) : (
-                                  <p className="text-[10px] text-muted-foreground italic py-2">No data available</p>
-                                )}
-                              </dl>
-                            </div>
-                          </div>
-                        ) : (
-                          val ? (
-                            <div className="space-y-1.5">
-                              <div className="flex justify-end mb-1">
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="h-5 px-1.5 text-xs" 
-                                  onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))} 
-                                  title="Copy JSON"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </Button>
-                              </div>
-                              <pre className="text-[10px] bg-muted/30 p-1.5 rounded overflow-x-auto max-h-40 overflow-y-auto font-mono leading-tight">{JSON.stringify(val, null, 2)}</pre>
-                            </div>
-                          ) : (
-                            <p className="text-[10px] text-muted-foreground italic py-4 text-center">No details available</p>
-                          )
-                        );
-                        return (
-                          <Card key={sys} className="compact border-border/30 bg-card/50 h-fit">
-                            <CardHeader className="p-2 pb-1.5">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="text-sm font-semibold flex-1 truncate">
-                                  {SYSTEM_LABELS[sys]}
+                                  <pre className="text-[10px] bg-muted/30 p-1.5 rounded overflow-x-auto max-h-40 overflow-y-auto font-mono leading-tight">{JSON.stringify(val, null, 2)}</pre>
                                 </div>
-                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                  {hasData && <span className="text-xs px-2 py-0.5 rounded-full bg-green/20 text-green-600 dark:bg-green/10 dark:text-green-400">OK</span>}
-                                  <span className={`
-                                    text-xs px-1.5 py-0.5 rounded-full border font-medium 
-                                    ${enabled[sys] ? 'text-green-600 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950/20' : 'text-muted-foreground border-muted bg-muted/20 dark:bg-muted/10'}
-                                  `}>
-                                    {enabled[sys] ? 'Enabled' : 'Disabled'}
-                                  </span>
-                                </div>
+                              ) : (
+                                <p className="text-[10px] text-muted-foreground italic py-4 text-center">No details available</p>
+                              )
+                            );
+                            return (
+                              <Card key={sys} className="compact border-border/30 bg-card/50 h-fit">
+                                <CardHeader className="p-2 pb-1.5">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="text-sm font-semibold flex-1 truncate">
+                                      {SYSTEM_LABELS[sys]}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                      {hasData && <span className="text-xs px-2 py-0.5 rounded-full bg-green/20 text-green-600 dark:bg-green/10 dark:text-green-400">OK</span>}
+                                      <span className={`
+                                        text-xs px-1.5 py-0.5 rounded-full border font-medium 
+                                        ${enabled[sys] ? 'text-green-600 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950/20' : 'text-muted-foreground border-muted bg-muted/20 dark:bg-muted/10'}
+                                      `}>
+                                        {enabled[sys] ? 'Enabled' : 'Disabled'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="p-0 pt-1.5">
+                                  {content}
+                                </CardContent>
+                              </Card>
+                            );
+                          }).filter(Boolean)}
+                        </div>
+                      );
+                    } else {
+                      return searchDialogMode === "html" ? (
+                        <div className="max-h-[70vh] overflow-y-auto p-3">
+                          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                            {toPairsGlobal(searchDialogData).slice(0, 80).map(({ k, v }) => (
+                              <div key={k} className="flex flex-col py-1 border-b border-border/20 last:border-b-0">
+                                <dt className="font-medium text-muted-foreground/90 truncate text-[10px] mb-0.5">{k}</dt>
+                                <dd className="break-all text-[11px] leading-tight">{typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : JSON.stringify(v)}</dd>
                               </div>
-                            </CardHeader>
-                            <CardContent className="p-0 pt-1.5">
-                              {content}
-                            </CardContent>
-                          </Card>
-                        );
-                      }).filter(Boolean)}
-                    </div>
-                  ) : (
-                    searchDialogMode === "html" ? (
-                      <div className="max-h-[70vh] overflow-y-auto p-3">
-                        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2 text-xs">
-                          {toPairsGlobal(searchDialogData).slice(0, 80).map(({ k, v }) => (
-                            <div key={k} className="flex flex-col py-1 border-b border-border/20 last:border-b-0">
-                              <dt className="font-medium text-muted-foreground/90 truncate text-[10px] mb-0.5">{k}</dt>
-                              <dd className="break-all text-[11px] leading-tight">{typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : JSON.stringify(v)}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                      </div>
-                    ) : (
-                      <div className="max-h-[70vh] overflow-y-auto p-3">
-                        <pre className="text-xs bg-muted/30 p-2 rounded overflow-x-auto font-mono leading-tight">{JSON.stringify(searchDialogData, null, 2)}</pre>
-                      </div>
-                    )
-                  )
+                            ))}
+                          </dl>
+                        </div>
+                      ) : (
+                        <div className="max-h-[70vh] overflow-y-auto p-3">
+                          <pre className="text-xs bg-muted/30 p-2 rounded overflow-x-auto font-mono leading-tight">{JSON.stringify(searchDialogData, null, 2)}</pre>
+                        </div>
+                      );
+                    }
+                  })()
                 ) : (
                   <div className="flex items-center justify-center h-32">
                     <p className="text-sm text-muted-foreground">No details available</p>
