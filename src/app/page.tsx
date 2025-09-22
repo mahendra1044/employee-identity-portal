@@ -310,7 +310,7 @@ function SystemCard({
                 variant="outline"
                 onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}
               >
-                Copy JSON
+                <Copy className="h-4 w-4" />
               </Button>
             )}
             {system === "ping-federate" && role === "employee" && (
@@ -412,7 +412,7 @@ function SystemCard({
                   variant="outline"
                   onClick={() => navigator.clipboard.writeText(JSON.stringify(details, null, 2))}
                 >
-                  Copy JSON
+                  <Copy className="h-4 w-4" />
                 </Button>
               )}
             </DialogTitle>
@@ -1162,7 +1162,6 @@ export default function HomePage() {
                                   <TableRow>
                                     <TableHead>User ID</TableHead>
                                     <TableHead>Status</TableHead>
-                                    <TableHead>Last Event</TableHead>
                                     <TableHead className="w-40">Actions</TableHead>
                                   </TableRow>
                                 </TableHeader>
