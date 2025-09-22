@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sun, Moon, User, Copy, RefreshCw } from "lucide-react";
+import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
@@ -281,41 +281,51 @@ function SystemCard({
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-3">
             <span className="text-base md:text-lg font-semibold whitespace-normal break-words">{name}</span>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading} title="Refresh data">
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-              <Button size="sm" onClick={loadDetails} disabled={!enabled || loading}>
-                View Details
-              </Button>
-              <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading}>
-                HTML View
-              </Button>
-              <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled}>
-                Send Email
-              </Button>
-              {system === "cyberark" && (
-                <Button size="sm" variant="destructive" onClick={sendEmailFailTest} disabled={!enabled}>
-                  Send Email (Fail test)
+            <div className="flex flex-col sm:flex-row flex-wrap items-end sm:items-center gap-2 justify-end">
+              <div className="flex flex-wrap gap-1">
+                <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading} title="Refresh system data">
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Refresh
                 </Button>
-              )}
+                <Button size="sm" onClick={loadDetails} disabled={!enabled || loading} title="View detailed information">
+                  <Eye className="h-4 w-4 mr-1" />
+                  Details
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading} title="View data in HTML format">
+                  <Code className="h-4 w-4 mr-1" />
+                  HTML
+                </Button>
+                <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled} title="Send support email with current data">
+                  <Mail className="h-4 w-4 mr-1" />
+                  Email
+                </Button>
+                {system === "cyberark" && (
+                  <Button size="sm" variant="destructive" onClick={sendEmailFailTest} disabled={!enabled} title="Test email failure scenario">
+                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    Fail Test
+                  </Button>
+                )}
+              </div>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-end mb-2">
+          <div className="flex justify-end mb-2 space-x-2">
             {data && (
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}
-                title="Copy JSON to clipboard"
+                title="Copy current JSON data to clipboard"
               >
-                <Copy className="h-4 w-4" />
+                <Copy className="h-4 w-4 mr-1" />
+                Copy JSON
               </Button>
             )}
             {system === "ping-federate" && role === "employee" && (
-              <div className="ml-2 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 ml-2">
                 <Button
                   size="sm"
                   variant="secondary"
@@ -333,7 +343,9 @@ function SystemCard({
                       setPfLoading(false);
                     }
                   }}
+                  title="Fetch and view user information from Ping Federate"
                 >
+                  <User className="h-4 w-4 mr-1" />
                   User Info
                 </Button>
                 <Button
@@ -353,7 +365,9 @@ function SystemCard({
                       setPfLoading(false);
                     }
                   }}
+                  title="View OIDC connections in Ping Federate"
                 >
+                  <Globe className="h-4 w-4 mr-1" />
                   OIDC
                 </Button>
                 <Button
@@ -373,7 +387,9 @@ function SystemCard({
                       setPfLoading(false);
                     }
                   }}
+                  title="View SAML connections in Ping Federate"
                 >
+                  <Shield className="h-4 w-4 mr-1" />
                   SAML
                 </Button>
               </div>
@@ -963,13 +979,14 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
             {/* Educate Me (employees only) */}
             {role === "employee" && educateEnabled && (
-              <Button variant="outline" onClick={() => setEducateOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setEducateOpen(true)} title="Access educational guides for common issues">
+                <BookOpen className="h-4 w-4 mr-1" />
                 Educate me
               </Button>
             )}
@@ -977,16 +994,21 @@ export default function HomePage() {
             {(
               role !== 'ops' || (hasSearched && !!resolveSnowEmail())
             ) && (
-              <Button variant="outline" onClick={openSnowDialog} title={role === 'ops' ? (resolveSnowEmail() || undefined) : undefined}>
-                <span className="mr-2">Show SNOW tickets</span>
-                {typeof snowCount === 'number' && (
-                  <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">
+              <Button variant="outline" size="sm" onClick={openSnowDialog} title={role === 'ops' ? (resolveSnowEmail() || undefined) : "View your ServiceNow incidents"}>
+                <FileText className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">SNOW tickets</span>
+                <span className="sm:hidden">SNOW</span>
+                {typeof snowCount === 'number' && snowCount > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-destructive px-2 py-0.5 text-[11px] text-destructive-foreground ml-1">
                     {snowCount}
                   </span>
                 )}
               </Button>
             )}
-            <Button variant="secondary" onClick={logout}>Sign out</Button>
+            <Button variant="secondary" size="sm" onClick={logout} title="Sign out of the portal">
+              <LogOut className="h-4 w-4 mr-1" />
+              Sign out
+            </Button>
           </div>
         </div>
       </header>
@@ -1592,16 +1614,19 @@ export default function HomePage() {
               <CardContent>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex flex-wrap gap-1">
-                    {SYSTEMS.filter((s) => qaEnabledTabs[s]).map((s) => (
-                      <Button
-                        key={s}
-                        size="sm"
-                        variant={qaActive === s ? "secondary" : "outline"}
-                        onClick={() => setQaActive(s)}
-                      >
-                        {SYSTEM_LABELS[s]}
-                      </Button>
-                    ))}
+                    <div className="flex flex-wrap gap-1 items-center">
+                      {SYSTEMS.filter((s) => qaEnabledTabs[s]).map((s) => (
+                        <Button
+                          key={s}
+                          size="sm"
+                          variant={qaActive === s ? "default" : "outline"}
+                          onClick={() => setQaActive(s)}
+                          className="whitespace-nowrap"
+                        >
+                          {SYSTEM_LABELS[s]}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                   <span className="text-xs text-muted-foreground truncate max-w-[60%]">
                     Target: {resolveSnowEmail() || search || "(unknown)"}
@@ -1611,104 +1636,158 @@ export default function HomePage() {
                 {/* Buttons per active tab (3 each) */}
                 <div className="rounded-lg border bg-gradient-to-r from-muted/60 to-background p-3 sm:p-4">
                   {qaActive === "ping-federate" && qaEnabledTabs["ping-federate"] && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 justify-center">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping Federate — User Info"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/pf/userinfo"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load User Info" }); } finally { setPfOpsLoading(false); }
-                      }}>User Info</Button>
+                      }} title="User information">
+                        <User className="h-4 w-4 mr-1" />
+                        User Info
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping Federate — OIDC Connections"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/pf/oidc"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load OIDC connections" }); } finally { setPfOpsLoading(false); }
-                      }}>OIDC</Button>
+                      }} title="OIDC connections">
+                        <Globe className="h-4 w-4 mr-1" />
+                        OIDC
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping Federate — SAML Connections"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/pf/saml"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load SAML connections" }); } finally { setPfOpsLoading(false); }
-                      }}>SAML</Button>
+                      }} title="SAML connections">
+                        <Shield className="h-4 w-4 mr-1" />
+                        SAML
+                      </Button>
                     </div>
                   )}
 
                   {qaActive === "ping-directory" && qaEnabledTabs["ping-directory"] && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 justify-center">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping Directory — Profile"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/pd/profile"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load profile" }); } finally { setPfOpsLoading(false);} 
-                      }}>Profile</Button>
+                      }} title="Profile">
+                        <Database className="h-4 w-4 mr-1" />
+                        Profile
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping Directory — Groups"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/pd/groups"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load groups" }); } finally { setPfOpsLoading(false);} 
-                      }}>Groups</Button>
+                      }} title="Groups">
+                        <Users className="h-4 w-4 mr-1" />
+                        Groups
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping Directory — Audit"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/pd/audit"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load audit" }); } finally { setPfOpsLoading(false);} 
-                      }}>Audit</Button>
+                      }} title="Audit">
+                        <History className="h-4 w-4 mr-1" />
+                        Audit
+                      </Button>
                     </div>
                   )}
 
                   {qaActive === "ping-mfa" && qaEnabledTabs["ping-mfa"] && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 justify-center">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping MFA — Status"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/mfa/status"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load status" }); } finally { setPfOpsLoading(false);} 
-                      }}>Status</Button>
+                      }} title="Status">
+                        <Status className="h-4 w-4 mr-1" />
+                        Status
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping MFA — Devices"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/mfa/devices"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load devices" }); } finally { setPfOpsLoading(false);} 
-                      }}>Devices</Button>
+                      }} title="Devices">
+                        <Device className="h-4 w-4 mr-1" />
+                        Devices
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Ping MFA — Events"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/mfa/events"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load events" }); } finally { setPfOpsLoading(false);} 
-                      }}>Events</Button>
+                      }} title="Events">
+                        <Event className="h-4 w-4 mr-1" />
+                        Events
+                      </Button>
                     </div>
                   )}
 
                   {qaActive === "azure-ad" && qaEnabledTabs["azure-ad"] && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 justify-center">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Azure AD — User"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/aad/user"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load user" }); } finally { setPfOpsLoading(false);} 
-                      }}>User</Button>
+                      }} title="User">
+                        <User className="h-4 w-4 mr-1" />
+                        User
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Azure AD — Groups"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/aad/groups"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load groups" }); } finally { setPfOpsLoading(false);} 
-                      }}>Groups</Button>
+                      }} title="Groups">
+                        <Users className="h-4 w-4 mr-1" />
+                        Groups
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Azure AD — Sign-ins"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/aad/signins"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load sign-ins" }); } finally { setPfOpsLoading(false);} 
-                      }}>Sign-ins</Button>
+                      }} title="Sign-ins">
+                        <Signin className="h-4 w-4 mr-1" />
+                        Sign-ins
+                      </Button>
                     </div>
                   )}
 
                   {qaActive === "cyberark" && qaEnabledTabs["cyberark"] && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 justify-center">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("CyberArk — Safes"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/cyberark/safes"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load safes" }); } finally { setPfOpsLoading(false);} 
-                      }}>Safes</Button>
+                      }} title="Safes">
+                        <Vault className="h-4 w-4 mr-1" />
+                        Safes
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("CyberArk — Accounts"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/cyberark/accounts"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load accounts" }); } finally { setPfOpsLoading(false);} 
-                      }}>Accounts</Button>
+                      }} title="Accounts">
+                        <Account className="h-4 w-4 mr-1" />
+                        Accounts
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("CyberArk — Activity"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/cyberark/activity"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load activity" }); } finally { setPfOpsLoading(false);} 
-                      }}>Activity</Button>
+                      }} title="Activity">
+                        <Activity className="h-4 w-4 mr-1" />
+                        Activity
+                      </Button>
                     </div>
                   )}
 
                   {qaActive === "saviynt" && qaEnabledTabs["saviynt"] && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 justify-center">
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Saviynt — Roles"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/saviynt/roles"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load roles" }); } finally { setPfOpsLoading(false);} 
-                      }}>Roles</Button>
+                      }} title="Roles">
+                        <Role className="h-4 w-4 mr-1" />
+                        Roles
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Saviynt — Entitlements"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/saviynt/entitlements"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load entitlements" }); } finally { setPfOpsLoading(false);} 
-                      }}>Entitlements</Button>
+                      }} title="Entitlements">
+                        <Entitlement className="h-4 w-4 mr-1" />
+                        Entitlements
+                      </Button>
                       <Button size="sm" variant="secondary" onClick={async () => {
                         setPfOpsTitle("Saviynt — Requests"); setPfOpsOpen(true); setPfOpsLoading(true);
                         try { const r = await fetch("/api/saviynt/requests"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load requests" }); } finally { setPfOpsLoading(false);} 
-                      }}>Requests</Button>
+                      }} title="Requests">
+                        <Request className="h-4 w-4 mr-1" />
+                        Requests
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -1847,8 +1926,9 @@ export default function HomePage() {
                       onChange={(e) => setMinutes(Math.max(1, Number(e.target.value)))}
                     />
                   </div>
-                  <Button size="sm" onClick={loadRecentFailures} disabled={opsLoading} title="Refresh failures" variant="outline">
-                    <RefreshCw className="h-4 w-4" />
+                  <Button size="sm" variant="outline" onClick={loadRecentFailures} disabled={opsLoading} title="Refresh recent failures data">
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Refresh
                   </Button>
                   {opsError && <span className="text-xs text-red-600">{opsError}</span>}
                 </div>
