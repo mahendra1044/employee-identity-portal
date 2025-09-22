@@ -213,6 +213,35 @@ Getting started:
 - cp .env.example .env.local (root) and adjust as needed
 - Ensure backend/.env exists (sample already provided)
 
+### Environment files: what goes where (Education)
+
+- .env.local (frontend)
+  - Path: ./ .env.local (repo root)
+  - Used by: Next.js frontend
+  - Exposure: Only variables starting with NEXT_PUBLIC_ are bundled into the browser. Never put secrets here without NEXT_PUBLIC_ intent.
+  - Typical values: NEXT_PUBLIC_API_BASE, NEXT_PUBLIC_* feature flags, public URLs (Splunk/CloudWatch)
+
+- backend/.env (backend)
+  - Path: ./backend/.env
+  - Used by: Express server only (server-side)
+  - Exposure: NOT exposed to the browser. Safe place for secrets.
+  - Typical values: PORT, JWT_SECRET, LOG_LEVEL, and any system credentials (e.g., PING_DIR_API_KEY, service tokens)
+
+- What goes where
+  - Public config needed by the browser/UI → .env.local with NEXT_PUBLIC_ prefix
+  - Secrets and server-only settings (API keys, tokens) → backend/.env without NEXT_PUBLIC_
+
+- Deployment guidance
+  - Frontend hosting (e.g., Vercel/Netlify): set NEXT_PUBLIC_* variables in the host's UI (build-time env)
+  - Backend hosting (e.g., Node server/PM2/Docker): set backend/.env values on the server or secret manager
+  - Keep prefixes consistent: if a value must be read in the browser, it must be prefixed NEXT_PUBLIC_
+
+- Quick setup steps
+  1) cp .env.example .env.local (at repo root)
+  2) Edit .env.local → set NEXT_PUBLIC_API_BASE=http://localhost:3001 (or your backend URL)
+  3) Edit backend/.env → set PORT, JWT_SECRET, etc.
+  4) Restart frontend and backend for changes to take effect
+
 ### Support email mapping
 - Edit `src/lib/support-emails.ts` to change the destination team addresses per system.
 - Helper: `getSupportEmail(system: "ping-directory" | "ping-federate" | "cyberark" | "saviynt" | "azure-ad" | "ping-mfa")`
