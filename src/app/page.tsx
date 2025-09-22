@@ -284,8 +284,7 @@ function SystemCard({
             <div className="flex flex-col sm:flex-row flex-wrap items-end sm:items-center gap-2 justify-end">
               <div className="flex flex-wrap gap-1">
                 <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading} title="Refresh system data">
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                  Refresh
+                  <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Button size="sm" onClick={loadDetails} disabled={!enabled || loading} title="View detailed information">
                   <Eye className="h-4 w-4 mr-1" />
@@ -320,8 +319,7 @@ function SystemCard({
                 onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}
                 title="Copy current JSON data to clipboard"
               >
-                <Copy className="h-4 w-4 mr-1" />
-                Copy JSON
+                <Copy className="h-4 w-4" />
               </Button>
             )}
             {system === "ping-federate" && role === "employee" && (
@@ -484,7 +482,7 @@ function SystemCard({
               <span>{pfTitle || "Ping Federate"}</span>
               {pfData && (
                 <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfData, null, 2))} title="Copy JSON to clipboard">
-                  Copy JSON
+                  <Copy className="h-4 w-4" />
                 </Button>
               )}
             </DialogTitle>
@@ -1035,15 +1033,15 @@ export default function HomePage() {
                       {g.actions.viewJson && (
                         <Button
                           size="sm"
-                          className="w-full justify-center gap-2"
+                          className="w-full justify-center"
                           variant="secondary"
                           onClick={() => {
                             navigator.clipboard.writeText(JSON.stringify(g.sample, null, 2));
                             toast.success("Sample JSON copied");
                           }}
+                          title="Copy sample JSON"
                         >
                           <Copy className="h-4 w-4" />
-                          Copy sample
                         </Button>
                       )}
                     </div>
@@ -1467,7 +1465,7 @@ export default function HomePage() {
                         onClick={() => navigator.clipboard.writeText(JSON.stringify(searchDialogData, null, 2))}
                         title="Copy JSON to clipboard"
                       >
-                        Copy JSON
+                        <Copy className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
@@ -1871,7 +1869,7 @@ export default function HomePage() {
                 <span>{pfOpsTitle || 'Ping Federate'}</span>
                 {pfOpsData && (
                   <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfOpsData, null, 2))} title="Copy JSON to clipboard">
-                    Copy JSON
+                    <Copy className="h-4 w-4" />
                   </Button>
                 )}
               </DialogTitle>
@@ -1927,8 +1925,7 @@ export default function HomePage() {
                     />
                   </div>
                   <Button size="sm" variant="outline" onClick={loadRecentFailures} disabled={opsLoading} title="Refresh recent failures data">
-                    <RefreshCw className="h-4 w-4 mr-1" />
-                    Refresh
+                    <RefreshCw className="h-4 w-4" />
                   </Button>
                   {opsError && <span className="text-xs text-red-600">{opsError}</span>}
                 </div>
