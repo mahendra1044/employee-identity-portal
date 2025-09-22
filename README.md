@@ -184,6 +184,34 @@ No per-user persistence or customization is stored; the guide is the same for al
 
 ## Configuration
 
+### Environment Variables (.env)
+
+Configure both frontend and backend from environment files. Frontend variables must be prefixed with NEXT_PUBLIC_.
+
+- Frontend (Next.js) — create .env.local at repo root (copy from .env.example):
+  - NEXT_PUBLIC_EDUCATE_GUIDE=true|false — Toggle the employee "Educate me" guide (env takes precedence over backend features)
+  - NEXT_PUBLIC_QA_PING_DIRECTORY=true|false — Enable/disable Ping Directory tab in Ops Quick Actions
+  - NEXT_PUBLIC_QA_PING_FEDERATE=true|false — Enable/disable Ping Federate tab
+  - NEXT_PUBLIC_QA_CYBERARK=true|false — Enable/disable CyberArk tab
+  - NEXT_PUBLIC_QA_SAVIYNT=true|false — Enable/disable Saviynt tab
+  - NEXT_PUBLIC_QA_AZURE_AD=true|false — Enable/disable Azure AD tab
+  - NEXT_PUBLIC_QA_PING_MFA=true|false — Enable/disable Ping MFA tab
+  - NEXT_PUBLIC_SPLUNK_URL — URL for "Take Me to Splunk" (default: https://splunk.company.com)
+  - NEXT_PUBLIC_CLOUDWATCH_URL — URL for "Take Me to Cloud Watch" (default: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1)
+
+Notes:
+- Only NEXT_PUBLIC_* variables are exposed to the browser.
+- Update .env.local and rebuild/redeploy to apply changes in production builds.
+
+- Backend (Express) — edit backend/.env:
+  - PORT — Express server port (default: 3001)
+  - JWT_SECRET — JWT signing secret for mock auth (change for production)
+  - LOG_LEVEL — Winston log level (error|warn|info|http|verbose|debug|silly)
+
+Getting started:
+- cp .env.example .env.local (root) and adjust as needed
+- Ensure backend/.env exists (sample already provided)
+
 ### Support email mapping
 - Edit `src/lib/support-emails.ts` to change the destination team addresses per system.
 - Helper: `getSupportEmail(system: "ping-directory" | "ping-federate" | "cyberark" | "saviynt" | "azure-ad" | "ping-mfa")`
