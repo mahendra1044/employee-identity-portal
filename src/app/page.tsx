@@ -235,7 +235,10 @@ function SystemCard({
   };
 
   useEffect(() => {
-    loadInitial(false);
+    // Only auto-load for non-search mode (own data) or if no searchKey
+    if (!searchKey || role !== "ops") {
+      loadInitial(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, enabled, searchKey]);
 
@@ -1521,14 +1524,14 @@ export default function HomePage() {
                           const allowMap = features?.employeeSearchSystems || {};
 
                           for (const sys of orderedSystems) {
-                            // Employee searching others: respect config by skipping disallowed systems
                             if (isEmployee && !isSelfSearch && allowMap && allowMap[sys] === false) {
                               aggregate[sys] = null;
                               continue;
                             }
                             let found: any = undefined;
-                            // Try details endpoint with multiple possible identifiers
-                            for (const key of candidateKeys) {
+                            // Limit to top 2 candidates to reduce calls
+                            const limitedKeys = candidateKeys.slice(0, 2);
+                            for (const key of limitedKeys) {
                               try {
                                 const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
                                 const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -1537,7 +1540,10 @@ export default function HomePage() {
                                 let json;
                                 try {
                                   json = JSON.parse(resText);
-                                  if (json?.data) { found = json.data; break; }
+                                  if (json?.data) { 
+                                    found = json.data; 
+                                    break; 
+                                  }
                                 } catch {
                                   console.warn(`Invalid JSON for ${sys} with key ${key}:`, resText.substring(0, 100));
                                   continue;
@@ -1564,6 +1570,11 @@ export default function HomePage() {
                               }
                             }
                             aggregate[sys] = found ?? null;
+
+                            // Add 300ms delay between systems to avoid rate limits
+                            if (sys !== orderedSystems[orderedSystems.length - 1]) {
+                              await new Promise(resolve => setTimeout(resolve, 300));
+                            }
                           }
                           setSearchDialogData(aggregate);
                         } catch (e: any) {
@@ -1681,6 +1692,11 @@ export default function HomePage() {
                               }
                             }
                             aggregate[sys] = found ?? null;
+
+                            // Add 300ms delay between systems to avoid rate limits
+                            if (sys !== orderedSystems[orderedSystems.length - 1]) {
+                              await new Promise(resolve => setTimeout(resolve, 300));
+                            }
                           }
                           setSearchDialogData(aggregate);
                         } catch (e: any) {
