@@ -164,7 +164,7 @@ function SystemCard({
     setError(null);
     try {
       const endpoint = searchKey
-        ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}/details?system=${system}`
+        ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}?system=${system}`
         : `${API_BASE}/api/own-${system}`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
@@ -257,12 +257,13 @@ function SystemCard({
   };
 
   useEffect(() => {
-    if (searchKey) return; // No auto-load in search mode - manual only
-    if (!searchKey && role !== "ops") { // Auto-load only own data for non-ops
+    if (!searchKey && role !== "ops") {
+      loadInitial(false);
+    } else if (searchKey && role === "ops" && enabled) {
       loadInitial(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, enabled]);
+  }, [token, enabled, searchKey, role]);
 
   // helper to flatten JSON into key/value pairs for readable HTML view
   const toPairs = (obj: any): Array<{ k: string; v: any }> => {
@@ -2190,7 +2191,7 @@ export default function HomePage() {
                   .filter(sys => visibleSystems.includes(sys))
                   .map((sys) => (
                   <SystemCard
-                    key={`${sys}-${showOpsTiles ? (currentSearchKey || search || 'searching') : 'self'}-${Date.now()}`}
+                    key={`${sys}-${showOpsTiles ? (currentSearchKey || search || 'searching') : 'self'}`}
                     name={SYSTEM_LABELS[sys]}
                     system={sys}
                     enabled={!!enabled[sys]}

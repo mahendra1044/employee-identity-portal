@@ -194,6 +194,9 @@ app.get('/api/search-employee/:query', authRequired, (req, res) => {
   if (!pdEnabled && !mfaEnabled) return res.status(404).json({ error: 'Feature not enabled' });
   if (!pdAllowed && !mfaAllowed) return res.status(403).json({ error: 'Forbidden' });
 
+  const system = req.query.system;
+  if (system && !systems.includes(system)) return res.status(400).json({ error: 'Invalid system' });
+
   const pd = pdEnabled && pdAllowed ? loadMock('ping-directory-search.json') : [];
   const mfa = mfaEnabled && mfaAllowed ? loadMock('ping-mfa-search.json') : [];
 
@@ -204,12 +207,59 @@ app.get('/api/search-employee/:query', authRequired, (req, res) => {
       return hay.includes(q.toLowerCase());
     });
 
-  const results = {
-    'ping-directory': filter(pd).map((u) => ({ name: u.name, email: u.email, userId: u.userId })),
-    'ping-mfa': filter(mfa).map((u) => ({ userId: u.userId, status: u.status, lastEvent: u.lastEvent })),
-  };
+  let results;
+  if (system) {
+    if (system === 'ping-directory' && pdEnabled && pdAllowed) {
+      results = { 'ping-directory': filter(pd).map((u) => ({ name: u.name, email: u.email, userId: u.userId })) };
+    } else if (system === 'ping-mfa' && mfaEnabled && mfaAllowed) {
+      results = { 'ping-mfa': filter(mfa).map((u) => ({ userId: u.userId, status: u.status, lastEvent: u.lastEvent })) };
+    } else {
+      return res.status(404).json({ error: 'System not enabled for search' });
+    }
+  } else {
+    results = {
+      'ping-directory': pdEnabled && pdAllowed ? filter(pd).map((u) => ({ name: u.name, email: u.email, userId: u.userId })) : [],
+      'ping-mfa': mfaEnabled && mfaAllowed ? filter(mfa).map((u) => ({ userId: u.userId, status: u.status, lastEvent: u.lastEvent })) : [],
+    };
+  }
 
   return res.json(results);
+});
+
+// NEW: Per-system search details (for consolidated view and cards)
+app.get('/api/search-employee/:query/details', authRequired, (req, res) => {
+  const q = sanitize(req.params.query);
+  const system = req.query.system;
+  if (!system || !systems.includes(system)) return res.status(400).json({ error: 'System required and must be valid' });
+
+  const role = (req.user && req.user.role) || 'employee';
+
+  // RBAC: require 'all' for full details (ops), or 'own' if query matches self email
+  const selfEmail = String((req.user && req.user.email) || '').toLowerCase();
+  const isSelf = selfEmail && selfEmail === q.toLowerCase();
+  const requiredPerm = isSelf ? 'own' : 'all';
+  if (!hasPermission(role, system, requiredPerm)) {
+    return isSelf ? res.status(403).json({ error: 'Access denied - even for own data' }) : res.status(403).json({ error: 'Forbidden - requires ops role for other users' });
+  }
+
+  if (!featureEnabled(system)) return res.status(404).json({ error: 'Feature not enabled' });
+
+  if (!FEATURES.useMocks) return res.status(501).json({ error: 'Real API not implemented' });
+
+  const detailsMock = loadMock(`${system}-details.json`);
+  if (!detailsMock) return res.status(500).json({ error: 'Mock data not found' });
+
+  // For demo: assume mock is single user data, or filter if array
+  let data = detailsMock;
+  if (Array.isArray(detailsMock)) {
+    // Filter by matching userId or email to query
+    const haystack = `${(data.find(u => (u.userId || '') === q || (u.email || '').toLowerCase() === q.toLowerCase()) || {})}`;
+    data = detailsMock.find(u => (u.userId || '') === q || (u.email || '').toLowerCase() === q.toLowerCase()) || null;
+  }
+
+  if (!data) return res.status(404).json({ error: 'User details not found' });
+
+  return res.json({ system, query: q, isSelf, data });
 });
 
 // NEW: Mock ServiceNow incidents endpoint
