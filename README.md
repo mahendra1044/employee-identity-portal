@@ -244,6 +244,7 @@ Configure both frontend and backend from environment files. Frontend variables m
   - NEXT_PUBLIC_CLOUDWATCH_URL — URL for "Take Me to Cloud Watch" (default: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1)
   - NEXT_PUBLIC_SYSTEM_CARD_CLOSE=true|false — Enable/disable close buttons on system cards (session-only hide). If set, this overrides backend feature flag
   - NEXT_PUBLIC_SESSION_CARDS_TOGGLE=true|false — Enable/disable the master session toggle to hide/show all system cards (default: true)
+  - NEXT_PUBLIC_SYSTEMS_SETTINGS=true|false — Enable/disable per-user system tile settings UI (default: true)
 
 Notes:
 - Only NEXT_PUBLIC_* variables are exposed to the browser.
@@ -841,3 +842,29 @@ All endpoints return `{ data: ... }` to keep the UI contract stable for future r
 - Real SSO (when useMockAuth=false)
 - Replace mocks with live system connectors (when useMocks=false)
 - Additional filters and CSV export for Ops
+
+## Configuration
+
+### User Systems Settings (NEW: Granular tile control)
+- **Purpose**: Allows users to toggle individual system tiles on/off via a settings dialog (header button). Persists per-user in localStorage until logout. Respects global `systems` enables (can't show disabled systems). Provides absolute granular control without session-only limits.
+- **Sources** (requires redeploy/restart):
+  - Frontend env (precedence): `NEXT_PUBLIC_SYSTEMS_SETTINGS=true|false`
+  - Backend features fallback: Add to `config/features.json`:
+    ```json
+    {
+      "userSystemsSettingsEnabled": true  // Default: true; false disables settings UI/button
+    }
+    ```
+- **Behavior**:
+  - Dialog shows toggles for all systems; checkboxes default to global `enabled` state.
+  - Persisted key: `visible:systemsPrefs:<userEmail>` (e.g., `{ "ping-directory": true, "cyberark": false }`).
+  - Interactions: Works with per-card closes (session-only) and master toggle (session-wide). Ops gating (`opsShowTilesAfterSearch`) still applies first.
+  - Reset button in dialog restores to global defaults.
+- **Example** (enable feature, hide CyberArk by default via prefs, but user can override):
+  - `.env.local`: `NEXT_PUBLIC_SYSTEMS_SETTINGS=true`
+  - User logs in → Settings → Unchecks CyberArk → Tile hidden until reset/logout.
+
+### Existing Toggles (unchanged)
+- **Session-wide tiles toggle**: `NEXT_PUBLIC_SESSION_CARDS_TOGGLE=true|false` (or `sessionCardsToggleEnabled` in features.json). Master hide/show all (session-only).
+- **Per-card close buttons**: `NEXT_PUBLIC_SYSTEM_CARD_CLOSE=true|false` (or `systemCardCloseEnabled`). Session-only per-tile X buttons.
+- **Ops tiles after search**: `opsShowTilesAfterSearch` in features.json (true = gated by search; false = immediate).

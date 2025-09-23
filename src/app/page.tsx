@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, X, Settings } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
@@ -27,6 +28,8 @@ type Features = {
   quickActionsTabs?: Partial<Record<SystemKey, boolean>>;
   // NEW: Toggle session close buttons on system cards (deployment-time)
   systemCardCloseEnabled?: boolean;
+  // NEW: user systems settings (deployment-time)
+  userSystemsSettingsEnabled?: boolean;
 };
 
 type LoginResponse = { token: string; role: string; email: string };
@@ -610,6 +613,10 @@ export default function HomePage() {
   const [hiddenSystems, setHiddenSystems] = useState<Record<SystemKey, boolean>>({} as Record<SystemKey, boolean>);
   // NEW: session-wide tiles visibility toggle
   const [sessionCardsVisible, setSessionCardsVisible] = useState<boolean>(true);
+  // NEW: settings dialog
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  // NEW: user prefs (all true by default)
+  const [userVisibleSystems, setUserVisibleSystems] = useState<Record<SystemKey, boolean>>({});
 
   // Compute toggle for close buttons (env takes precedence)
   const closeButtonsEnabled = useMemo(() => {
@@ -624,6 +631,13 @@ export default function HomePage() {
     if (env) return ["1", "true", "on", "yes", "enabled"].includes(env);
     // fallback to backend features
     return (features as any)?.sessionCardsToggleEnabled ?? true;
+  }, [features]);
+
+  // NEW: compute availability of user settings feature (env > features)
+  const settingsEnabled = useMemo(() => {
+    const env = (process.env.NEXT_PUBLIC_SYSTEMS_SETTINGS || "").toString().trim().toLowerCase();
+    if (env) return ["1", "true", "on", "yes", "enabled"].includes(env);
+    return features?.userSystemsSettingsEnabled ?? true;
   }, [features]);
 
   // Initialize hidden systems from sessionStorage when email changes
@@ -669,6 +683,29 @@ export default function HomePage() {
     sessionStorage.setItem(`hidden:systemCards:${userKey}`, JSON.stringify(list));
   };
 
+  // Helper to persist session-wide visibility
+  const persistSessionVisibility = (next: boolean) => {
+    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
+    if (!userKey) return;
+    sessionStorage.setItem(`session:showSystemCards:${userKey}`, String(next));
+  };
+
+  // Helper to persist user prefs to localStorage
+  const persistUserPrefs = (next: Record<SystemKey, boolean>) => {
+    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
+    if (!userKey) return;
+    localStorage.setItem(`visible:sytemsPrefs:${userKey}`, JSON.stringify(next));
+  };
+
+  // Helper: toggle individual system in user prefs
+  const toggleUserVisible = (sys: SystemKey, visible: boolean) => {
+    setUserVisibleSystems((prev) => {
+      const next = { ...prev, [sys]: visible };
+      persistUserPrefs(next);
+      return next;
+    });
+  };
+
   const hideSystem = (sys: SystemKey) => {
     setHiddenSystems((prev) => {
       const next = { ...(prev || {}) } as Record<SystemKey, boolean>;
@@ -678,11 +715,12 @@ export default function HomePage() {
     });
   };
 
-  // Helper to persist session-wide visibility
-  const persistSessionVisibility = (next: boolean) => {
-    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
-    if (!userKey) return;
-    sessionStorage.setItem(`session:showSystemCards:${userKey}`, String(next));
+  // NEW: all-systems reset function (in settings)
+  const resetUserPrefs = () => {
+    const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
+    setUserVisibleSystems(defaults);
+    persistUserPrefs(defaults);
+    toast.success("Preferences reset to defaults");
   };
 
   const isAggregate = useMemo(() => {
@@ -868,10 +906,32 @@ export default function HomePage() {
     return [...valid, ...remaining];
   }, [features]);
 
+  // NEW: load user prefs from localStorage on email change (persistent across sessions)
+  useEffect(() => {
+    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
+    if (!userKey) return;
+    try {
+      const raw = localStorage.getItem(`visible:sytemsPrefs:${userKey}`);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Record<SystemKey, boolean>;
+        const valid = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: parsed[s] ?? true }), {} as Record<SystemKey, boolean>);
+        setUserVisibleSystems(valid);
+      } else {
+        // default: all visible (respect enabled)
+        const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
+        setUserVisibleSystems(defaults);
+      }
+    } catch {
+      // fallback defaults
+      const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
+      setUserVisibleSystems(defaults);
+    }
+  }, [email, enabled]);
+
   // Visible systems after applying session hidden map
   const visibleSystems = useMemo(() => {
-    return orderedSystems.filter((s) => !hiddenSystems[s]);
-  }, [orderedSystems, hiddenSystems]);
+    return orderedSystems.filter((s) => !hiddenSystems[s] && userVisibleSystems[s]);
+  }, [orderedSystems, hiddenSystems, userVisibleSystems]);
 
   // Respect opsShowTilesAfterSearch flag: for ops, show tiles only after a search when enabled (default: true)
   const shouldShowSystemCards = useMemo(() => {
@@ -1083,6 +1143,12 @@ export default function HomePage() {
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
+            {settingsEnabled && (
+              <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} title="Customize visible system tiles">
+                <Settings className="h-4 w-4 mr-1" />
+                Settings
+              </Button>
+            )}
             {/* Educate Me (employees only) */}
             {role === "employee" && educateEnabled && (
               <Button variant="outline" size="sm" onClick={() => setEducateOpen(true)} title="Access educational guides for common issues">
@@ -2026,6 +2092,34 @@ export default function HomePage() {
             ) : (
               <p className="text-sm text-muted-foreground">No data available</p>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>System Tiles Visibility</DialogTitle>
+              <p className="text-sm text-muted-foreground">Toggle which tiles to show. Changes persist until logout.</p>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              {SYSTEMS.map((sys) => (
+                <div key={sys} className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <label className="text-sm font-medium">{SYSTEM_LABELS[sys]}</label>
+                    <p className="text-xs text-muted-foreground">{enabled[sys] ? "Enabled globally" : "Disabled globally"}</p>
+                  </div>
+                  <Checkbox
+                    checked={userVisibleSystems[sys] ?? !!enabled[sys]}
+                    onCheckedChange={(checked) => toggleUserVisible(sys, !!checked)}
+                    disabled={!enabled[sys]}
+                  />
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={resetUserPrefs} className="w-full">
+                Reset to Defaults
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
 
