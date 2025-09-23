@@ -571,7 +571,22 @@ function LoginCard({ onLogin }: { onLogin: (email: string, password: string) => 
 
 export default function HomePage() {
   const { token, role, email, login, logout } = useAuth();
-  const [features, setFeatures] = useState<Features | null>(null);
+
+  // Set initial fallback features state to ensure cards always show (all systems enabled)
+  const [features, setFeatures] = useState<Features>(() => ({
+    credentialSource: "env",
+    useMocks: true,
+    useMockAuth: true,
+    systems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
+    opsShowTilesAfterSearch: false,
+    employeeSearchSystems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
+    employeeEducateGuideEnabled: true,
+    systemCardCloseEnabled: true,
+    userSystemsSettingsEnabled: true,
+    quickActionsTabs: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
+    systemsOrder: SYSTEMS,
+  }));
+
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -841,21 +856,10 @@ export default function HomePage() {
         if (res.ok) {
           const f = await res.json();
           setFeatures(f);
-        } else {
-          setFeatures({
-            credentialSource: "env",
-            useMocks: true,
-            useMockAuth: true,
-            systems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
-          });
         }
-      } catch {
-        setFeatures({
-          credentialSource: "env",
-          useMocks: true,
-          useMockAuth: true,
-          systems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
-        });
+        // No fallback needed in catch since initial state provides it
+      } catch (e) {
+        console.warn("Features load failed, using defaults");
       }
     };
     run();
@@ -933,21 +937,10 @@ export default function HomePage() {
     return orderedSystems.filter((s) => !hiddenSystems[s] && (userVisibleSystems[s] ?? !!enabled[s])); // added fallback !!enabled[s] to prevent empty grid
   }, [orderedSystems, hiddenSystems, userVisibleSystems, enabled]); // added enabled dep
 
-  // Respect opsShowTilesAfterSearch flag: for ops, show tiles only after a search when enabled (default: true)
-  const shouldShowSystemCards = useMemo(() => {
-    if (role === "ops") {
-      const gated = typeof features?.opsShowTilesAfterSearch === "boolean" ? features.opsShowTilesAfterSearch : true;
-      return gated ? hasSearched : true;
-    }
-    return true;
-  }, [role, features, hasSearched]);
+  // Always show system cards for authenticated users (remove all gating)
+  const shouldShowSystemCards = true;
 
-  // Combine ops gating with user session toggle
-  const effectiveShouldShowCards = useMemo(() => {
-    if (!shouldShowSystemCards) return false; // ops gating always honored first
-    if (!sessionToggleEnabled) return true; // feature disabled => always show
-    return !!sessionCardsVisible;
-  }, [shouldShowSystemCards, sessionToggleEnabled, sessionCardsVisible]);
+  const effectiveShouldShowCards = shouldShowSystemCards && (!!sessionCardsVisible || !sessionToggleEnabled);
 
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
@@ -2123,79 +2116,7 @@ export default function HomePage() {
           </DialogContent>
         </Dialog>
 
-        {/* Ops Recent Failures Panel */}
-        {role === "ops" && (
-          <section>
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Failures (last {minutes} min)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm">Window (minutes)</label>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="w-28"
-                      value={minutes}
-                      onChange={(e) => setMinutes(Math.max(1, Number(e.target.value)))}
-                    />
-                  </div>
-                  <Button size="sm" variant="outline" onClick={loadRecentFailures} disabled={opsLoading} title="Refresh recent failures data">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                  {opsError && <span className="text-xs text-red-600">{opsError}</span>}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Ping Federate – Login Failures</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {opsLoading ? (
-                        <p className="text-sm animate-pulse">Loading...</p>
-                      ) : (failFed?.length || 0) > 0 ? (
-                        <ul className="text-sm list-disc pl-4 space-y-1">
-                          {failFed!.slice(0, 25).map((it: any, idx: number) => (
-                            <li key={`fed-${idx}`}>
-                              {it.userId || it.email || "unknown"} — {it.reason || it.error || "failure"} — {it.time || it.timestamp || ""}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No failures in window</p>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Ping MFA – Verification Failures</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {opsLoading ? (
-                        <p className="text-sm animate-pulse">Loading...</p>
-                      ) : (failMfa?.length || 0) > 0 ? (
-                        <ul className="text-sm list-disc pl-4 space-y-1">
-                          {failMfa!.slice(0, 25).map((it: any, idx: number) => (
-                            <li key={`mfa-${idx}`}>
-                              {it.userId || it.email || "unknown"} — {it.reason || it.error || "failure"} — {it.time || it.timestamp || ""}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No failures in window</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        )}
-
-        {/* System Cards (respect opsShowTilesAfterSearch for ops) */}
+        {/* System Cards - always render if enabled systems exist */}
         <section>
           {sessionToggleEnabled && (
             <div className="flex justify-end mb-2">
@@ -2215,71 +2136,55 @@ export default function HomePage() {
               </Button>
             </div>
           )}
-          {(() => {
-            if (role === "ops" && !shouldShowSystemCards) {
-              return (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System tiles hidden</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Run a search to display system tiles (controlled by opsShowTilesAfterSearch).
-                    </p>
+          {effectiveShouldShowCards ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {visibleSystems.map((sys) => (
+                <SystemCard
+                  key={sys}
+                  name={SYSTEM_LABELS[sys]}
+                  system={sys}
+                  enabled={!!enabled[sys]}
+                  token={token!}
+                  role={role!}
+                  showClose={closeButtonsEnabled}
+                  onClose={() => hideSystem(sys)}
+                />
+              ))}
+              {visibleSystems.length === 0 && (
+                <Card className="col-span-full">
+                  <CardContent className="p-6 text-center">
+                    <p className="text-sm text-muted-foreground">No visible systems (check settings or session hides)</p>
                   </CardContent>
                 </Card>
-              );
-            }
-
-            if (sessionToggleEnabled && !sessionCardsVisible) {
-              return (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System tiles hidden for this session</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">Use the button above to show tiles again for this session.</p>
-                      <Button size="sm" onClick={() => { setSessionCardsVisible(true); persistSessionVisibility(true); }}>
-                        Show tiles
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }
-
-            if (!anyEnabled) {
-              return (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>No systems enabled</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Feature not enabled. Please contact your administrator or update features.json.
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            }
-            return (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {visibleSystems.map((sys) => (
-                  <SystemCard
-                    key={sys}
-                    name={SYSTEM_LABELS[sys]}
-                    system={sys}
-                    enabled={!!enabled[sys]}
-                    token={token!}
-                    role={role!}
-                    showClose={closeButtonsEnabled}
-                    onClose={() => hideSystem(sys)}
-                  />
-                ))}
-              </div>
-            );
-          })()}
+              )}
+            </div>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>System tiles hidden for this session</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Use the button above to show tiles again for this session.</p>
+                  <Button size="sm" onClick={() => { setSessionCardsVisible(true); persistSessionVisibility(true); }}>
+                    Show tiles
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {!anyEnabled && (
+            <Card>
+              <CardHeader>
+                <CardTitle>No systems enabled</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Feature not enabled. Please contact your administrator or update features.json.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </section>
 
         {/* All Users feature removed as requested */}
