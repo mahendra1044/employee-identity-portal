@@ -191,34 +191,82 @@ app.get('/api/all-users', authRequired, (req, res) => {
   return res.json({ total: list.length, limit, offset, results: paged });
 });
 
-// Search employees (limited: ping-directory + ping-mfa)
-app.get('/api/search-employee/:query', authRequired, (req, res) => {
-  const q = sanitize(req.params.query);
-  const role = (req.user && req.user.role) || 'employee';
-  const pdEnabled = featureEnabled('ping-directory');
-  const mfaEnabled = featureEnabled('ping-mfa');
-  const pdAllowed = hasPermission(role, 'ping-directory', 'search');
-  const mfaAllowed = hasPermission(role, 'ping-mfa', 'search');
+// Update the search-employee route to handle ?system param for initial data
+app.get('/api/search-employee/:id', authRequired, async (req, res) => {
+  try {
+    const id = sanitize(req.params.id);
+    const system = req.query.system;
+    const role = req.user && req.user.role || 'employee';
 
-  if (!pdEnabled && !mfaEnabled) return res.status(404).json({ error: 'Feature not enabled' });
-  if (!pdAllowed && !mfaAllowed) return res.status(403).json({ error: 'Forbidden' });
+    const pdEnabled = featureEnabled('ping-directory');
+    const mfaEnabled = featureEnabled('ping-mfa');
+    const pdAllowed = hasPermission(role, 'ping-directory', 'search');
+    const mfaAllowed = hasPermission(role, 'ping-mfa', 'search');
 
-  const pd = pdEnabled && pdAllowed ? loadMock('ping-directory-search.json') : [];
-  const mfa = mfaEnabled && mfaAllowed ? loadMock('ping-mfa-search.json') : [];
+    if (system) {
+      // Specific system initial data for the user ID
+      if (!systems.includes(system)) {
+        return res.status(400).json({ error: 'Invalid system' });
+      }
+      if (!featureEnabled(system)) {
+        return res.status(404).json({ error: 'Feature not enabled' });
+      }
+      const perm = role === 'ops' ? 'all' : 'search';
+      if (!hasPermission(role, system, perm)) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+      if (!FEATURES.useMocks) {
+        return res.status(501).json({ error: 'Real API not implemented' });
+      }
+      // Load mock for system initial or generate fallback
+      const mockFile = `${system}-initial.json`;
+      let data = loadMock(mockFile);
+      if (!data) {
+        // Generate basic mock data
+        data = {
+          userId: id,
+          email: id.includes('@') ? id : `${id}@company.com`,
+          system: system,
+          status: 'Active',
+          lastUpdated: new Date().toISOString(),
+          // Add more generic fields as needed
+          name: id.includes('@') ? id.split('@')[0].replace(/\./g, ' ').replace(/(^|\s)[a-z]/g, c => c.toUpperCase()) : id.toUpperCase(),
+        };
+      } else {
+        // Inject user-specific info
+        if (typeof data === 'object') {
+          data.userId = id;
+          data.email = id.includes('@') ? id : `${data.email || `${id}@company.com`}`;
+        }
+      }
+      logger.info({ msg: 'user initial lookup', system, id: id.includes('@') ? '[EMAIL]' : id, role });
+      return res.json({ data });
+    } else {
+      // Original search logic (limited to ping-directory and ping-mfa)
+      if (!pdEnabled && !mfaEnabled) return res.status(404).json({ error: 'Feature not enabled' });
+      if (!pdAllowed && !mfaAllowed) return res.status(403).json({ error: 'Forbidden' });
 
-  // Simple filter by substring match on name/email/userId
-  const filter = (arr) =>
-    (arr || []).filter((u) => {
-      const hay = `${u.name || ''} ${u.email || ''} ${u.userId || ''} ${(u.status || '')}`.toLowerCase();
-      return hay.includes(q.toLowerCase());
-    });
+      const pd = pdEnabled && pdAllowed ? loadMock('ping-directory-search.json') : [];
+      const mfa = mfaEnabled && mfaAllowed ? loadMock('ping-mfa-search.json') : [];
 
-  const results = {
-    'ping-directory': filter(pd).map((u) => ({ name: u.name, email: u.email, userId: u.userId })),
-    'ping-mfa': filter(mfa).map((u) => ({ userId: u.userId, status: u.status, lastEvent: u.lastEvent })),
-  };
+      // Simple filter by substring match on name/email/userId
+      const filter = (arr) =>
+        (arr || []).filter((u) => {
+          const hay = `${u.name || ''} ${u.email || ''} ${u.userId || ''} ${(u.status || '')}`.toLowerCase();
+          return hay.includes(id.toLowerCase());
+        });
 
-  return res.json(results);
+      const results = {
+        'ping-directory': filter(pd).map((u) => ({ name: u.name, email: u.email, userId: u.userId })),
+        'ping-mfa': filter(mfa).map((u) => ({ userId: u.userId, status: u.status, lastEvent: u.lastEvent })),
+      };
+
+      return res.json(results);
+    }
+  } catch (error) {
+    logger.error({ msg: 'search-employee error', error });
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // NEW: Mock ServiceNow incidents endpoint
