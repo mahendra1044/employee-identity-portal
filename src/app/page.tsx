@@ -139,6 +139,7 @@ function SystemCard({
   const [pfData, setPfData] = useState<any>(null);
   const [description, setDescription] = useState("");
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
+  const [detailCache, setDetailCache] = useState<Record<string, any>>({});
 
   const loadInitial = async (showToast = true) => {
     if (!enabled) return;
@@ -146,11 +147,19 @@ function SystemCard({
     if (showToast) {
       refreshToast = toast.loading(`Refreshing ${name}...`);
     }
+    const cacheKey = searchKey ? `${searchKey}-initial-${system}` : `own-initial-${system}`;
+    if (detailCache[cacheKey]) {
+      setData(detailCache[cacheKey]);
+      if (showToast) {
+        toast.success(`Loaded from cache: ${name}`, { id: refreshToast });
+      }
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    setData(null); // Clear old data before fetching new
+    setData(null);
     setError(null);
     try {
-      // UPDATED: For search mode, use details endpoint to fetch per-system data for the searched user
       const endpoint = searchKey
         ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}/details?system=${system}`
         : `${API_BASE}/api/own-${system}`;
@@ -180,7 +189,9 @@ function SystemCard({
         }
         return;
       }
-      setData(json.data);
+      const fetchedData = json.data;
+      setData(fetchedData);
+      setDetailCache(prev => ({ ...prev, [cacheKey]: fetchedData }));
       if (showToast) {
         toast.success(`Refreshed ${name}`, { id: refreshToast });
       }
@@ -197,8 +208,14 @@ function SystemCard({
   const loadDetails = async () => {
     setLoading(true);
     setError(null);
+    const cacheKey = searchKey ? `${searchKey}-details-${system}` : `own-details-${system}`;
+    if (detailCache[cacheKey]) {
+      setDetails(detailCache[cacheKey]);
+      setDetailsOpen(true);
+      setLoading(false);
+      return;
+    }
     try {
-      // For search mode, use details endpoint; for own, use /details
       const detailsEndpoint = searchKey
         ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}/details?system=${system}`
         : `${API_BASE}/api/own-${system}/details`;
@@ -225,7 +242,9 @@ function SystemCard({
         setError(`Invalid JSON from server: ${snippet}...`);
         return;
       }
-      setDetails(json.data);
+      const fetchedDetails = json.data;
+      setDetails(fetchedDetails);
+      setDetailCache(prev => ({ ...prev, [cacheKey]: fetchedDetails }));
       setDetailsOpen(true);
     } catch (e: any) {
       setError(e.message || "Error loading details");
@@ -235,12 +254,12 @@ function SystemCard({
   };
 
   useEffect(() => {
-    // Only auto-load for non-search mode (own data) or if no searchKey
-    if (!searchKey || role !== "ops") {
+    if (searchKey) return; // No auto-load in search mode - manual only
+    if (!searchKey && role !== "ops") { // Auto-load only own data for non-ops
       loadInitial(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, enabled, searchKey]);
+  }, [token, enabled]);
 
   // helper to flatten JSON into key/value pairs for readable HTML view
   const toPairs = (obj: any): Array<{ k: string; v: any }> => {
@@ -1105,6 +1124,13 @@ export default function HomePage() {
     }
   }, [searchResults, hasSearched, effectiveRole, search]);
 
+  // Clear cache on new search or role change to avoid stale data
+  useEffect(() => {
+    if (hasSearched || effectiveRole) {
+      setDetailCache({});
+    }
+  }, [hasSearched, effectiveRole, search]);
+
   if (!token) {
     return <LoginCard onLogin={login} />;
   }
@@ -1462,118 +1488,60 @@ export default function HomePage() {
                       variant="secondary"
                       size="sm"
                       onClick={async () => {
-                        // Determine the best key candidates from search results
-                        const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
-                        const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
-                        const q = String(search).trim().toLowerCase();
-                        const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
-                        const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
-                        const firstPd = pd?.[0];
-                        const firstMfa = mfa?.[0];
-                        // Build candidate identifiers to try per-system (email + userId variants)
-                        const baseCandidates = (
-                          [
-                            exactPd?.email,
-                            exactPd?.userId,
-                            exactMfa?.userId,
-                            firstPd?.email,
-                            firstPd?.userId,
-                            firstMfa?.userId,
-                            firstMfa?.email,
-                            search,
-                          ] as Array<string | undefined | null>
-                        ).filter(Boolean).map((s) => String(s));
-                        const candidateKeys = Array.from(new Set([
-                          ...baseCandidates,
-                          ...baseCandidates.map((k) => k.toLowerCase()),
-                          ...baseCandidates.map((k) => k.toUpperCase()),
-                        ]));
-                        const displayKey = candidateKeys[0] || "";
-
+                        const displayKey = currentSearchKey || search || "";
+                        if (!displayKey) {
+                          toast.error("No valid search key found");
+                          return;
+                        }
                         setSearchDialogMode("json");
-                        setSearchDialogTitle(`Consolidated View (JSON) — ${displayKey || "Details"}`);
+                        setSearchDialogTitle(`Consolidated View (JSON) — ${displayKey}`);
+                        const aggregate: Record<string, any> = {};
                         setSearchDialogData(null);
                         setSearchDialogLoading(true);
                         setSearchDialogOpen(true);
                         try {
-                          const aggregate: Record<string, any> = {};
-                          // fetch all-users once as a fallback source for per-system data
-                          let allUsers: any[] | null = null;
-                          try {
-                            const auRes = await fetch(`${API_BASE}/api/all-users`, {
-                              headers: { Authorization: `Bearer ${token}` },
-                            });
-                            if (!auRes.ok) {
-                              const auText = await auRes.text();
-                              console.warn("All-users fetch failed:", auRes.status, auText.substring(0, 100));
-                            } else {
-                              const auText = await auRes.text();
-                              let auJson;
-                              try {
-                                auJson = JSON.parse(auText);
-                              } catch {
-                                console.warn("Invalid JSON from all-users:", auText.substring(0, 100));
-                                auJson = null;
-                              }
-                              allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
-                            }
-                          } catch {}
-
+                          // Pre-populate from cache for enabled systems only
                           const isEmployee = effectiveRole === "employee";
-                          const isSelfSearch = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
+                          const isSelfSearch = displayKey.toLowerCase() === String(email || "").toLowerCase();
                           const allowMap = features?.employeeSearchSystems || {};
-
-                          for (const sys of orderedSystems) {
-                            if (isEmployee && !isSelfSearch && allowMap && allowMap[sys] === false) {
+                          for (const sys of orderedSystems.filter(s => enabled[s])) {
+                            if (isEmployee && !isSelfSearch && allowMap[sys] === false) {
                               aggregate[sys] = null;
                               continue;
                             }
-                            let found: any = undefined;
-                            // Limit to top 2 candidates to reduce calls
-                            const limitedKeys = candidateKeys.slice(0, 2);
-                            for (const key of limitedKeys) {
+                            const cacheKey = `${displayKey}-details-${sys}`;
+                            if (detailCache[cacheKey]) {
+                              aggregate[sys] = detailCache[cacheKey];
+                              continue;
+                            }
+                            // Fetch only if cache miss
+                            const url = `${API_BASE}/api/search-employee/${encodeURIComponent(displayKey)}/details?system=${sys}`;
+                            const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                            if (!res.ok) {
+                              const text = await res.text();
+                              let errMsg = `HTTP ${res.status}`;
                               try {
-                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
-                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                if (!res.ok) continue;
-                                const resText = await res.text();
-                                let json;
-                                try {
-                                  json = JSON.parse(resText);
-                                  if (json?.data) { 
-                                    found = json.data; 
-                                    break; 
-                                  }
-                                } catch {
-                                  console.warn(`Invalid JSON for ${sys} with key ${key}:`, resText.substring(0, 100));
-                                  continue;
-                                }
+                                const j = JSON.parse(text);
+                                errMsg = j?.error || errMsg;
                               } catch {}
+                              console.warn(`${sys} fetch failed: ${errMsg}`);
+                              aggregate[sys] = null;
+                              continue;
                             }
-                            // Fallback to in-memory search results if details not found
-                            if (!found) {
-                              const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
-                              const matched = arr.filter((it: any) =>
-                                candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
-                              );
-                              if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
+                            const text = await res.text();
+                            let json;
+                            try {
+                              json = JSON.parse(text);
+                              const fetched = json.data;
+                              aggregate[sys] = fetched;
+                              setDetailCache(prev => ({ ...prev, [cacheKey]: fetched }));
+                            } catch {
+                              console.warn(`Invalid JSON for ${sys}:`, text.substring(0, 100));
+                              aggregate[sys] = null;
                             }
-                            // Fallback to all-users systems map
-                            if (!found && allUsers) {
-                              const matchedUser = allUsers.find((u: any) =>
-                                candidateKeys.some(
-                                  (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
-                                )
-                              );
-                              if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
-                                found = matchedUser.systems[sys];
-                              }
-                            }
-                            aggregate[sys] = found ?? null;
-
-                            // Add 300ms delay between systems to avoid rate limits
+                            // 800ms delay between fetches to respect rate limits
                             if (sys !== orderedSystems[orderedSystems.length - 1]) {
-                              await new Promise(resolve => setTimeout(resolve, 300));
+                              await new Promise(resolve => setTimeout(resolve, 800));
                             }
                           }
                           setSearchDialogData(aggregate);
@@ -1595,107 +1563,60 @@ export default function HomePage() {
                       variant="outline"
                       size="sm"
                       onClick={async () => {
-                        // Determine the best key candidates from search results
-                        const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
-                        const mfa = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
-                        const q = String(search).trim().toLowerCase();
-                        const exactPd = pd.find((u: any) => u?.email?.toLowerCase?.() === q || u?.userId === search.trim());
-                        const exactMfa = mfa.find((u: any) => u?.userId === search.trim());
-                        const firstPd = pd?.[0];
-                        const firstMfa = mfa?.[0];
-                        // Build candidate identifiers to try per-system (email + userId variants)
-                        const baseCandidates = (
-                          [
-                            exactPd?.email,
-                            exactPd?.userId,
-                            exactMfa?.userId,
-                            firstPd?.email,
-                            firstPd?.userId,
-                            firstMfa?.userId,
-                            firstMfa?.email,
-                            search,
-                          ] as Array<string | undefined | null>
-                        ).filter(Boolean).map((s) => String(s));
-                        const candidateKeys = Array.from(new Set([
-                          ...baseCandidates,
-                          ...baseCandidates.map((k) => k.toLowerCase()),
-                          ...baseCandidates.map((k) => k.toUpperCase()),
-                        ]));
-                        const displayKey = candidateKeys[0] || "";
-
+                        const displayKey = currentSearchKey || search || "";
+                        if (!displayKey) {
+                          toast.error("No valid search key found");
+                          return;
+                        }
                         setSearchDialogMode("html");
-                        setSearchDialogTitle(`Consolidated View (HTML) — ${displayKey || "Details"}`);
+                        setSearchDialogTitle(`Consolidated View (HTML) — ${displayKey}`);
+                        const aggregate: Record<string, any> = {};
                         setSearchDialogData(null);
                         setSearchDialogLoading(true);
                         setSearchDialogOpen(true);
-
                         try {
-                          const aggregate: Record<string, any> = {};
-                          let allUsers: any[] | null = null;
-                          try {
-                            const auRes = await fetch(`${API_BASE}/api/all-users`, {
-                              headers: { Authorization: `Bearer ${token}` },
-                            });
-                            if (!auRes.ok) {
-                              const auText = await auRes.text();
-                              console.warn("All-users fetch failed:", auRes.status, auText.substring(0, 100));
-                            } else {
-                              const auText = await auRes.text();
-                              let auJson;
-                              try {
-                                auJson = JSON.parse(auText);
-                              } catch {
-                                console.warn("Invalid JSON from all-users:", auText.substring(0, 100));
-                                auJson = null;
-                              }
-                              allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
-                            }
-                          } catch {}
-
-                          for (const sys of orderedSystems) {
-                            if (isEmployee && !isSelfSearch && allowMap && allowMap[sys] === false) {
+                          // Pre-populate from cache for enabled systems only
+                          const isEmployee = effectiveRole === "employee";
+                          const isSelfSearch = displayKey.toLowerCase() === String(email || "").toLowerCase();
+                          const allowMap = features?.employeeSearchSystems || {};
+                          for (const sys of orderedSystems.filter(s => enabled[s])) {
+                            if (isEmployee && !isSelfSearch && allowMap[sys] === false) {
                               aggregate[sys] = null;
                               continue;
                             }
-                            let found: any = undefined;
-                            for (const key of candidateKeys) {
+                            const cacheKey = `${displayKey}-details-${sys}`;
+                            if (detailCache[cacheKey]) {
+                              aggregate[sys] = detailCache[cacheKey];
+                              continue;
+                            }
+                            // Fetch only if cache miss
+                            const url = `${API_BASE}/api/search-employee/${encodeURIComponent(displayKey)}/details?system=${sys}`;
+                            const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                            if (!res.ok) {
+                              const text = await res.text();
+                              let errMsg = `HTTP ${res.status}`;
                               try {
-                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
-                                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                if (!res.ok) continue;
-                                const resText = await res.text();
-                                let json;
-                                try {
-                                  json = JSON.parse(resText);
-                                  if (json?.data) { found = json.data; break; }
-                                } catch {
-                                  console.warn(`Invalid JSON for ${sys} with key ${key}:`, resText.substring(0, 100));
-                                  continue;
-                                }
+                                const j = JSON.parse(text);
+                                errMsg = j?.error || errMsg;
                               } catch {}
+                              console.warn(`${sys} fetch failed: ${errMsg}`);
+                              aggregate[sys] = null;
+                              continue;
                             }
-                            if (!found) {
-                              const arr = Array.isArray((searchResults as any)?.[sys]) ? (searchResults as any)[sys] : [];
-                              const matched = arr.filter((it: any) =>
-                                candidateKeys.some((k) => it.userId === k || it.email?.toLowerCase?.() === String(k).toLowerCase())
-                              );
-                              if (matched.length > 0) found = matched.length === 1 ? matched[0] : matched;
+                            const text = await res.text();
+                            let json;
+                            try {
+                              json = JSON.parse(text);
+                              const fetched = json.data;
+                              aggregate[sys] = fetched;
+                              setDetailCache(prev => ({ ...prev, [cacheKey]: fetched }));
+                            } catch {
+                              console.warn(`Invalid JSON for ${sys}:`, text.substring(0, 100));
+                              aggregate[sys] = null;
                             }
-                            if (!found && allUsers) {
-                              const matchedUser = allUsers.find((u: any) =>
-                                candidateKeys.some(
-                                  (k) => u?.userId === k || u?.email?.toLowerCase?.() === String(k).toLowerCase()
-                                )
-                              );
-                              if (matchedUser && matchedUser.systems && sys in matchedUser.systems) {
-                                found = matchedUser.systems[sys];
-                              }
-                            }
-                            aggregate[sys] = found ?? null;
-
-                            // Add 300ms delay between systems to avoid rate limits
+                            // 800ms delay between fetches to respect rate limits
                             if (sys !== orderedSystems[orderedSystems.length - 1]) {
-                              await new Promise(resolve => setTimeout(resolve, 300));
+                              await new Promise(resolve => setTimeout(resolve, 800));
                             }
                           }
                           setSearchDialogData(aggregate);
