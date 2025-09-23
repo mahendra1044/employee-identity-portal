@@ -85,6 +85,34 @@ Example mock (already provided):
   - `number`, `short_description`, `state` (open|in_progress|closed), `priority`, `updatedAt`, `assigned_to`
 - Save and restart backend; reload the app.
 
+## Mock Ticket Submission
+
+The `/api/submit-snow-ticket` endpoint simulates ServiceNow ticket creation for demo purposes. It generates mock ticket numbers and logs details to the console.
+
+### Configuration
+- **Environment Variable**: Set `MOCK_FAILURE_SYSTEMS` in `.env.local` to comma-separated systems that should simulate ticket creation failures (e.g., `MOCK_FAILURE_SYSTEMS=ping-federate`).
+  - Default: `['ping-federate']` (failure for Ping Federate).
+  - Ping Directory always succeeds with detailed mock ticket data.
+
+### Scenarios
+- **Success (Ping Directory)**:
+  - When submitting from a Ping Directory card, it creates a mock ticket (e.g., `INC-ABC12345`).
+  - Logs full mock ticket object to console, including payload excerpt, status, priority, etc.
+  - Returns ticket details in response for frontend toast.
+
+- **Failure (Ping Federate)**:
+  - When submitting from a Ping Federate card, simulates failure (HTTP 500).
+  - Logs error details to console with reason "Mock failure scenario".
+  - Frontend shows error toast; useful for testing error handling.
+
+### Testing
+1. Login as employee/ops.
+2. Load data for Ping Directory → Click "Submit SNOW ticket" → Check console for success log and toast "SNOW ticket submitted: INC-...".
+3. Load data for Ping Federate → Click "Submit SNOW ticket" → Check console for failure log and error toast.
+4. To customize failures: Edit `.env.local` with `MOCK_FAILURE_SYSTEMS=system1,system2`, restart dev server.
+
+This setup allows extending to real ServiceNow integration by replacing the mock logic while reusing the configurable failure simulation for testing.
+
 ## How to Use
 
 ### Copy JSON
@@ -199,6 +227,7 @@ Configure both frontend and backend from environment files. Frontend variables m
   - NEXT_PUBLIC_QA_PING_MFA=true|false — Enable/disable Ping MFA tab
   - NEXT_PUBLIC_SPLUNK_URL — URL for "Take Me to Splunk" (default: https://splunk.company.com)
   - NEXT_PUBLIC_CLOUDWATCH_URL — URL for "Take Me to Cloud Watch" (default: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1)
+  - MOCK_FAILURE_SYSTEMS — Comma-separated systems to simulate ticket creation failures (default: ping-federate)
 
 Notes:
 - Only NEXT_PUBLIC_* variables are exposed to the browser.
