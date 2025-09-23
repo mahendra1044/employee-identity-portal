@@ -159,18 +159,22 @@ function SystemCard({
       });
       if (!res.ok) {
         let message = "Failed";
+        const text = await res.text();
         try {
-          const j = await res.json();
+          const j = JSON.parse(text);
           message = j?.error || message;
         } catch {
-          try {
-            const t = await res.text();
-            message = t || message;
-          } catch {}
+          message = text || message;
         }
         throw new Error(message);
       }
-      const json = await res.json();
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid JSON response");
+      }
       setData(json.data);
       if (showToast) {
         toast.success(`Refreshed ${name}`, { id: refreshToast });
@@ -198,18 +202,22 @@ function SystemCard({
       });
       if (!res.ok) {
         let message = "Failed";
+        const text = await res.text();
         try {
-          const j = await res.json();
+          const j = JSON.parse(text);
           message = j?.error || message;
         } catch {
-          try {
-            const t = await res.text();
-            message = t || message;
-          } catch {}
+          message = text || message;
         }
         throw new Error(message);
       }
-      const json = await res.json();
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid JSON response");
+      }
       setDetails(json.data);
       setDetailsOpen(true);
     } catch (e: any) {
@@ -924,7 +932,13 @@ export default function HomePage() {
       const res = await fetch(`${API_BASE}/api/search-employee/${encodeURIComponent(search)}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const body = await res.json();
+      const text = await res.text();
+      let body;
+      try {
+        body = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid JSON response");
+      }
       if (!res.ok) throw new Error(body.error || "Search failed");
       setSearchResults(body);
       // mark completion only after successful fetch
