@@ -149,9 +149,9 @@ function SystemCard({
     setLoading(true);
     setError(null);
     try {
-      // UPDATED: Use search endpoint if searchKey provided (ops search mode)
+      // UPDATED: Use search endpoint if searchKey provided (ops search mode); without /details for initial
       const endpoint = searchKey
-        ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}/details?system=${system}`
+        ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}?system=${system}`
         : `${API_BASE}/api/own-${system}`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
@@ -2213,7 +2213,7 @@ export default function HomePage() {
                   .filter(sys => visibleSystems.includes(sys))
                   .map((sys) => (
                   <SystemCard
-                    key={sys}
+                    key={`${sys}-${showOpsTiles ? currentSearchKey || 'searching' : 'self'}`}
                     name={SYSTEM_LABELS[sys]}
                     system={sys}
                     enabled={!!enabled[sys]}
