@@ -8,8 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
-import { getSupportEmail } from "@/lib/support-emails";
+import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
@@ -115,12 +114,14 @@ function SystemCard({
   enabled,
   token,
   role,
+  email,
 }: {
   name: string;
   system: SystemKey;
   enabled: boolean;
   token: string;
   role: string;
+  email: string;
 }) {
   const [data, setData] = useState<any | null>(null);
   const [details, setDetails] = useState<any | null>(null);
@@ -287,59 +288,6 @@ function SystemCard({
     }
   };
 
-  const sendEmail = async () => {
-    if (!email) {
-      toast.error("Email not available - please log in again");
-      return;
-    }
-    const to = getSupportEmail(system);
-    const subject = `[${name}] Help request`;
-    const payload = details || data || {};
-    const body = `Hello ${name} Support,\n\nPlease assist with an issue on ${name}.\n\nContext (JSON excerpt):\n\n${JSON.stringify(payload, null, 2).slice(0, 1500)}\n\nThank you.`;
-    try {
-      const res = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to, subject, body, system, payload }),
-      });
-      const result = await res.json();
-      if (res.ok) {
-        toast.success("Email sent successfully");
-        // Log only if needed for debugging; remove in production
-        console.info('Email Success:', { to, subject, system });
-      } else {
-        toast.error(result.error || "Failed to send email");
-        console.warn('Email Failure:', { to, system, status: res.status, error: result.error });
-      }
-    } catch (error) {
-      toast.error("Failed to send email");
-      console.error('Email Error:', { system, error: (error as Error).message });
-    }
-  };
-
-  // Add a negative scenario trigger for CyberArk to simulate a failed send
-  const sendEmailFailTest = async () => {
-    const to = "invalid"; // intentionally invalid to force backend validation failure
-    const subject = `[${name}] Help request (Fail Test)`;
-    const payload = details || data || {};
-    const body = `This is a negative test for ${name} email sending.`;
-    try {
-      const res = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Force-Fail": "1" }, // header hint if backend supports it
-        body: JSON.stringify({ to, subject, body, system, payload, forceFail: true }),
-      });
-      if (res.ok) {
-        // If backend didn't fail, still inform the user this was a fail test
-        toast.warning("Email unexpectedly succeeded (fail test)");
-      } else {
-        toast.error("Failed to send email (expected for test)");
-      }
-    } catch {
-      toast.error("Failed to send email (expected for test)");
-    }
-  };
-
   return (
     <>
       <Card className="shadow-sm">
@@ -366,9 +314,6 @@ function SystemCard({
             </Button>
             <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading} title="View data in HTML format">
               <Code className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled} title="Send email with current data">
-              <Mail className="h-4 w-4" />
             </Button>
             <Button size="sm" variant="outline" onClick={submitSnowTicket} disabled={!enabled} title="Submit SNOW ticket with current data">
               <FileText className="h-4 w-4" />
@@ -2165,6 +2110,7 @@ export default function HomePage() {
                     enabled={!!enabled[sys]}
                     token={token!}
                     role={role!}
+                    email={email!}
                   />
                 ))}
               </div>
