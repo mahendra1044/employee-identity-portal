@@ -250,7 +250,9 @@ function SystemCard({
       return;
     }
     const payload = details || data || {};
-    const ticketDesc = description?.trim() || `Access issue investigation request for user ${email} in ${system} system. Please review attached payload for details.`;
+    const defaultDesc = `Access issue investigation request for user ${email} in ${system} system. Please review attached payload for details.`;
+    const additional = description?.trim() ? `\n\nAdditional information:\n${description.trim()}` : '';
+    const ticketDesc = defaultDesc + additional;
     try {
       const res = await fetch("/api/submit-snow-ticket", {
         method: "POST",
@@ -261,14 +263,14 @@ function SystemCard({
       if (res.ok) {
         const { ticketNumber } = result;
         toast.success(`SNOW ticket submitted: ${ticketNumber}`);
-        console.info('SNOW Ticket Success:', { ticketNumber, system, userEmail: email, description: ticketDesc });
+        console.info('SNOW Ticket Success:', { ticketNumber, system, userEmail: email, description: ticketDesc, payload });
       } else {
         toast.error(result.error || "Failed to submit SNOW ticket");
-        console.warn('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: result.error || await res.text(), description: ticketDesc });
+        console.warn('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: result.error || await res.text(), description: ticketDesc, payload });
       }
     } catch (error) {
       toast.error("Failed to submit SNOW ticket");
-      console.error('SNOW Ticket Error:', { system, userEmail: email, error: (error as Error).message, description: ticketDesc });
+      console.error('SNOW Ticket Error:', { system, userEmail: email, error: (error as Error).message, description: ticketDesc, payload });
     }
   };
 
