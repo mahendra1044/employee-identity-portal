@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // dev: backend server (configurable)
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ""; // FIXED: Use relative API paths for Next.js routes (localhost:3000/api)
 
 type Features = {
   credentialSource: string;
@@ -116,7 +116,7 @@ function SystemCard({
   token,
   role,
   email,
-  userKey, // NEW: optional user key for searched user
+  userKey,
 }: {
   name: string;
   system: SystemKey;
@@ -151,6 +151,7 @@ function SystemCard({
     try {
       let endpoint;
       if (userKey) {
+        // FIXED: Use details endpoint for searched user initial data (assumes backend supports it with limited fields or full)
         endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
       } else {
         endpoint = `/api/own-${system}`;
@@ -192,6 +193,7 @@ function SystemCard({
     try {
       let endpoint;
       if (userKey) {
+        // Use details endpoint only for explicit details view
         endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
       } else {
         endpoint = `/api/own-${system}/details`;
@@ -225,7 +227,7 @@ function SystemCard({
   useEffect(() => {
     loadInitial(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, enabled, userKey]); // ADD: depend on userKey
+  }, [token, enabled, userKey]);
 
   // helper to flatten JSON into key/value pairs for readable HTML view
   const toPairs = (obj: any): Array<{ k: string; v: any }> => {
@@ -418,7 +420,12 @@ function SystemCard({
             </div>
           )}
           <div className="space-y-3">
-            {data ? (
+            {/* FIXED: Add loading and error states to card display */}
+            {loading ? (
+              <p className="text-sm text-muted-foreground animate-pulse">Loading data...</p>
+            ) : error ? (
+              <p className="text-sm text-red-600">{error}</p>
+            ) : data ? (
               <div>
                 <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
                   {JSON.stringify(data, null, 2)}
@@ -427,7 +434,6 @@ function SystemCard({
             ) : (
               <p className="text-sm text-muted-foreground">No data yet</p>
             )}
-            {/* details moved to dialog to keep the page compact */}
           </div>
         </CardContent>
       </Card>

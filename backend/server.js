@@ -287,6 +287,60 @@ app.get('/api/snow/incidents', authRequired, (req, res) => {
   return res.json({ email: targetEmail, ...counts, items });
 });
 
+// Add new route for search details after the search-employee route
+systems.forEach((system) => {
+  // Search details for specific system (ops: full details; employee: limited if permitted)
+  app.get(`/api/search-employee/:query/details`, authRequired, (req, res) => {
+    const q = sanitize(req.params.query);
+    const sys = req.query.system;
+    if (!systems.includes(sys)) return res.status(400).json({ error: 'Invalid system' });
+    if (!featureEnabled(sys)) return res.status(404).json({ error: 'Feature not enabled' });
+    
+    const role = (req.user && req.user.role) || 'employee';
+    const perm = role === 'ops' ? 'all' : 'search';
+    if (!hasPermission(role, sys, perm)) return res.status(403).json({ error: 'Forbidden' });
+    
+    if (!FEATURES.useMocks) return res.status(501).json({ error: 'Real API not implemented' });
+    
+    // For employee search, limit to summary if not own (but since search is others, limited)
+    // For simplicity, use details mock (in real, would query with query param)
+    const mock = role === 'ops' ? `${sys}-details.json` : `${sys}-search.json`;
+    let data = loadMock(mock);
+    
+    if (!data) {
+      // Fallback to search mock if details not found
+      const fallback = loadMock(`${sys}-search.json`);
+      data = Array.isArray(fallback) ? fallback[0] || null : fallback;
+    }
+    
+    // FIXED: Inject user-specific info based on query to make it feel updated/non-stale
+    if (data && q) {
+      if (typeof data === 'object') {
+        // Assume object and update common fields
+        data.userId = q;
+        if (q.includes('@')) {
+          data.email = q;
+          // Extract name if possible, or set default
+          data.name = q.split('@')[0].replace(/\./g, ' ').replace(/^(.)| [a-z]/g, c => c.toUpperCase());
+        } else {
+          data.email = `${q}@company.com`;
+          data.name = q.toUpperCase();
+        }
+        // For arrays, if needed, but keep simple
+      } else if (Array.isArray(data)) {
+        // If array, update first item
+        if (data.length > 0) {
+          data[0].userId = q;
+          if (q.includes('@')) data[0].email = q;
+          else data[0].email = `${q}@company.com`;
+        }
+      }
+    }
+    
+    return res.json({ query: q, system: sys, data });
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   logger.info({ msg: `backend listening on ${PORT}` });
