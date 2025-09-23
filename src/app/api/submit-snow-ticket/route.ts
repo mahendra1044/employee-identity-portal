@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Success case, especially for ping-directory
-    const ticketNumber = `INC-${uuidv4().slice(0, 8).toUpperCase()}`;
+    const ticketId = randomUUID().slice(0, 8).toUpperCase();
+    const ticketNumber = `INC-${ticketId}`;
     const timestamp = new Date().toISOString();
     
     // Mock ticket data
