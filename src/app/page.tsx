@@ -643,6 +643,22 @@ export default function HomePage() {
     }
   }, []);
 
+  // Apply theme class to root element and persist to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && theme) {
+      let classes = '';
+      if (theme === 'light') {
+        classes = '';
+      } else if (theme === 'dark') {
+        classes = 'dark';
+      } else if (theme === 'navy') {
+        classes = 'dark navy';
+      }
+      document.documentElement.className = classes;
+      localStorage.setItem("theme", theme);
+    }
+  }, [theme]);
+
   const isAggregate = useMemo(() => {
     return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
   }, [searchDialogData]);
