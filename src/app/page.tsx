@@ -116,6 +116,7 @@ function SystemCard({
   token,
   role,
   email,
+  userKey, // NEW: optional user key for searched user
 }: {
   name: string;
   system: SystemKey;
@@ -123,6 +124,7 @@ function SystemCard({
   token: string;
   role: string;
   email: string;
+  userKey?: string;
 }) {
   const [data, setData] = useState<any | null>(null);
   const [details, setDetails] = useState<any | null>(null);
@@ -142,12 +144,18 @@ function SystemCard({
     if (!enabled) return;
     let refreshToast;
     if (showToast) {
-      refreshToast = toast.loading(`Refreshing ${name}...`);
+      refreshToast = toast.loading(`Refreshing ${name}${userKey ? ` for ${userKey}` : ''}...`);
     }
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/own-${system}`, {
+      let endpoint;
+      if (userKey) {
+        endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
+      } else {
+        endpoint = `/api/own-${system}`;
+      }
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -164,9 +172,9 @@ function SystemCard({
         throw new Error(message);
       }
       const json = await res.json();
-      setData(json.data);
+      setData(json.data || json); // Handle both {data: ...} and direct
       if (showToast) {
-        toast.success(`Refreshed ${name}`, { id: refreshToast });
+        toast.success(`Refreshed ${name}${userKey ? ` for ${userKey}` : ''}`, { id: refreshToast });
       }
     } catch (e: any) {
       setError(e.message || "Error loading data");
@@ -182,7 +190,13 @@ function SystemCard({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/own-${system}/details`, {
+      let endpoint;
+      if (userKey) {
+        endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
+      } else {
+        endpoint = `/api/own-${system}/details`;
+      }
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -199,7 +213,7 @@ function SystemCard({
         throw new Error(message);
       }
       const json = await res.json();
-      setDetails(json.data);
+      setDetails(json.data || json);
       setDetailsOpen(true);
     } catch (e: any) {
       setError(e.message || "Error loading details");
@@ -211,7 +225,7 @@ function SystemCard({
   useEffect(() => {
     loadInitial(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, enabled]);
+  }, [token, enabled, userKey]); // ADD: depend on userKey
 
   // helper to flatten JSON into key/value pairs for readable HTML view
   const toPairs = (obj: any): Array<{ k: string; v: any }> => {
@@ -296,7 +310,12 @@ function SystemCard({
 
   return (
     <>
-      <Card className="shadow-sm">
+      <Card className="shadow-sm relative">
+        {userKey && (
+          <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded opacity-90">
+            For: {userKey}
+          </div>
+        )}
         <CardHeader className="text-center pb-3">
           <CardTitle className="text-lg font-semibold">{name}</CardTitle>
         </CardHeader>
@@ -804,43 +823,6 @@ export default function HomePage() {
     return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!all[s] }), {} as Record<SystemKey, boolean>);
   }, [features]);
 
-  // Combined visibility: enabled && userToggles
-  const visibleSystems = useMemo(() => {
-    return SYSTEMS.filter(s => enabled[s] && userToggles[s]);
-  }, [enabled, userToggles]);
-
-  // Quick Actions tab enablement (from backend features or NEXT_PUBLIC env flags)
-  const qaEnabledTabs = useMemo(() => {
-    const fromFeatures = features?.quickActionsTabs || {};
-    const envBool = (key: string) => {
-      const v = (process.env[key] || "").toString().toLowerCase();
-      return ["1", "true", "on", "yes", "enabled"].includes(v);
-    };
-    const map: Partial<Record<SystemKey, boolean>> = { ...fromFeatures };
-    for (const sys of SYSTEMS) {
-      const envKey = `NEXT_PUBLIC_QA_${sys.replace(/-/g, "_").toUpperCase()}`;
-      if (process.env.hasOwnProperty(envKey)) {
-        map[sys] = envBool(envKey);
-      }
-      // default to true when unspecified
-      if (typeof map[sys] === "undefined") map[sys] = true;
-    }
-    return map as Record<SystemKey, boolean>;
-  }, [features]);
-
-  const splunkUrl = process.env.NEXT_PUBLIC_SPLUNK_URL || "https://splunk.company.com";
-  const cloudwatchUrl = process.env.NEXT_PUBLIC_CLOUDWATCH_URL || "https://console.aws.amazon.com/cloudwatch/home?region=us-east-1";
-
-  // Keep active tab valid when toggles change
-  useEffect(() => {
-    if (!qaEnabledTabs[qaActive]) {
-      const first = SYSTEMS.find((s) => qaEnabledTabs[s]);
-      if (first) setQaActive(first);
-    }
-  }, [qaEnabledTabs, qaActive]);
-
-  const anyEnabled = useMemo(() => Object.values(enabled || {}).some(Boolean), [enabled]);
-
   // Determine the order of system cards based on features.systemsOrder (if provided)
   const orderedSystems = useMemo<SystemKey[]>(() => {
     const order = features?.systemsOrder || [];
@@ -848,6 +830,34 @@ export default function HomePage() {
     const remaining = SYSTEMS.filter((s) => !valid.includes(s));
     return [...valid, ...remaining];
   }, [features]);
+
+  const [searchKey, setSearchKey] = useState<string | null>(null);
+
+  const resolveUserKey = useMemo(() => {
+    const q = String(search || '').trim().toLowerCase();
+    const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+    const exact = pd.find((u: any) => 
+      String(u?.email || '').toLowerCase() === q || 
+      String(u?.userId || '') === q
+    );
+    if (exact?.userId || exact?.email) return exact.userId || exact.email;
+    if (pd[0]?.userId || pd[0]?.email) return pd[0].userId || pd[0].email;
+    return q;
+  }, [search, searchResults]);
+
+  // Clear currentUserKey when search empties (ops only)
+  useEffect(() => {
+    if (role === "ops" && !search.trim()) {
+      setSearchKey(null);
+    }
+  }, [search, role]);
+
+  // Set currentUserKey after successful search (ops only)
+  useEffect(() => {
+    if (role === "ops" && hasSearched && searchResults && !searchError) {
+      setSearchKey(resolveUserKey);
+    }
+  }, [hasSearched, searchResults, searchError, resolveUserKey, role]);
 
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
@@ -894,7 +904,6 @@ export default function HomePage() {
     if (!token || !search.trim()) return;
     setSearchError(null);
     setSearchResults(null);
-    // ensure UI treats this as not completed until success
     setHasSearched(false);
     try {
       const res = await fetch(`${API_BASE}/api/search-employee/${encodeURIComponent(search)}`, {
@@ -903,10 +912,31 @@ export default function HomePage() {
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Search failed");
       setSearchResults(body);
-      // mark completion only after successful fetch
+      if (role === "ops") {
+        const q = search.trim().toLowerCase();
+        let key: string | null = null;
+        if (q.includes('@') && q.includes('.')) {
+          key = q;
+        } else {
+          const pd = Array.isArray(body?.["ping-directory"]) ? body["ping-directory"] : [];
+          const exact = pd.find((u: any) => 
+            String(u?.email || '').toLowerCase() === q || 
+            String(u?.userId || u?.name || '').toLowerCase() === q
+          );
+          if (exact) {
+            key = exact.userId || exact.email || q;
+          } else if (pd[0]) {
+            key = pd[0].userId || pd[0].email || q;
+          } else {
+            key = q;
+          }
+        }
+        setSearchKey(key);
+      }
       setHasSearched(true);
     } catch (e: any) {
       setSearchError(e.message || "Search failed");
+      setSearchKey(null);
     }
   };
 
@@ -2112,8 +2142,6 @@ export default function HomePage() {
         {/* System Cards (hide by default for ops) */}
         <section>
           {(() => {
-            const showOpsTiles = role === "ops" && !!features?.opsShowTilesAfterSearch && hasSearched;
-            const isOps = role === "ops";
             const anyVisible = visibleSystems.length > 0;
             if (!anyEnabled) {
               return (
@@ -2129,9 +2157,6 @@ export default function HomePage() {
                 </Card>
               );
             }
-            if (isOps && !showOpsTiles) {
-              return <></>;
-            }
             if (!anyVisible) {
               return (
                 <Card>
@@ -2140,7 +2165,10 @@ export default function HomePage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      All system cards are hidden via settings. Open Settings to enable some.
+                      {role === "ops" 
+                        ? "System cards appear after a successful search." 
+                        : "All system cards are hidden via settings. Open Settings to enable some."
+                      }
                     </p>
                   </CardContent>
                 </Card>
@@ -2151,16 +2179,17 @@ export default function HomePage() {
                 {orderedSystems
                   .filter(sys => visibleSystems.includes(sys))
                   .map((sys) => (
-                  <SystemCard
-                    key={sys}
-                    name={SYSTEM_LABELS[sys]}
-                    system={sys}
-                    enabled={!!enabled[sys]}
-                    token={token!}
-                    role={role!}
-                    email={email!}
-                  />
-                ))}
+                    <SystemCard
+                      key={sys}
+                      name={SYSTEM_LABELS[sys]}
+                      system={sys}
+                      enabled={!!enabled[sys]}
+                      token={token!}
+                      role={role!}
+                      email={email!}
+                      userKey={role === "ops" && searchKey ? searchKey : undefined}
+                    />
+                  ))}
               </div>
             );
           })()}
