@@ -680,7 +680,7 @@ function LoginCard({ onLogin }: { onLogin: (email: string, password: string) => 
 export default function HomePage() {
   const { token, role, email, login, logout } = useAuth();
 
-  // Set initial fallback features state to ensure cards always show (all systems enabled)
+  // Hardcode features to ensure all systems are enabled (temp fix for display issue)
   const [features, setFeatures] = useState<Features>(() => ({
     credentialSource: "env",
     useMocks: true,
@@ -694,6 +694,29 @@ export default function HomePage() {
     quickActionsTabs: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
     systemsOrder: SYSTEMS,
   }));
+
+  // Always ensure enabled is all true for all systems
+  const enabled = useMemo(() => {
+    return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<SystemKey, boolean>);
+  }, []);
+
+  // Comment out the features fetch to avoid potential issues
+  // useEffect(() => {
+  //   if (!token) return;
+  //   const run = async () => {
+  //     try {
+  //       const res = await fetch(`${API_BASE}/api/config/features`);
+  //       if (res.ok) {
+  //         const f = await res.json();
+  //         setFeatures(f);
+  //       }
+  //       // No fallback needed in catch since initial state provides it
+  //     } catch (e) {
+  //       console.warn("Features load failed, using defaults");
+  //     }
+  //   };
+  //   run();
+  // }, [token]);
 
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any | null>(null);
@@ -775,7 +798,14 @@ export default function HomePage() {
           if ((SYSTEMS as string[]).includes(s)) (acc as any)[s as SystemKey] = true;
           return acc;
         }, {} as Record<SystemKey, boolean>);
-        setHiddenSystems(map);
+        
+        // Auto-reset if all systems are hidden (prevent permanent empty state)
+        if (Object.keys(map).length === SYSTEMS.length && Object.values(map).every(Boolean)) {
+          sessionStorage.removeItem(`hidden:systemCards:${userKey}`);
+          setHiddenSystems({} as Record<SystemKey, boolean>);
+        } else {
+          setHiddenSystems(map);
+        }
       } else {
         setHiddenSystems({} as Record<SystemKey, boolean>);
       }
@@ -803,6 +833,8 @@ export default function HomePage() {
     const list = Object.entries(next)
       .filter(([_, v]) => !!v)
       .map(([k]) => k);
+    // Only save if not all hidden
+    if (list.length === SYSTEMS.length) return;
     sessionStorage.setItem(`hidden:systemCards:${userKey}`, JSON.stringify(list));
   };
 
@@ -817,6 +849,8 @@ export default function HomePage() {
   const persistUserPrefs = (next: Record<SystemKey, boolean>) => {
     const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
     if (!userKey) return;
+    // Only save if not all hidden
+    if (Object.values(next).every(v => !v)) return;
     localStorage.setItem(`visible:systemsPrefs:${userKey}`, JSON.stringify(next));
   };
 
@@ -956,27 +990,9 @@ export default function HomePage() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  useEffect(() => {
-    if (!token) return;
-    const run = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/config/features`);
-        if (res.ok) {
-          const f = await res.json();
-          setFeatures(f);
-        }
-        // No fallback needed in catch since initial state provides it
-      } catch (e) {
-        console.warn("Features load failed, using defaults");
-      }
-    };
-    run();
-  }, [token]);
-
-  const enabled = useMemo(() => {
-    const all = features?.systems || {};
-    return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!all[s] }), {} as Record<SystemKey, boolean>);
-  }, [features]);
+  const enabledSystems = useMemo(() => {
+    return enabled;
+  }, [enabled]);
 
   // Quick Actions tab enablement (from backend features or NEXT_PUBLIC env flags)
   const qaEnabledTabs = useMemo(() => {
@@ -1023,27 +1039,32 @@ export default function HomePage() {
     const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
     if (!userKey) return;
     try {
-      const raw = localStorage.getItem(`visible:systemsPrefs:${userKey}`); // fixed typo: sytems -> systems
+      const raw = localStorage.getItem(`visible:systemsPrefs:${userKey}`);
+      let valid: Record<SystemKey, boolean>;
       if (raw) {
         const parsed = JSON.parse(raw) as Record<SystemKey, boolean>;
-        const valid = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: parsed[s] ?? true }), {} as Record<SystemKey, boolean>);
+        valid = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: parsed[s] ?? true }), {} as Record<SystemKey, boolean>);
+        // Auto-reset if all systems are hidden in prefs (prevent permanent empty state)
+        if (Object.values(valid).every(v => !v)) {
+          localStorage.removeItem(`visible:systemsPrefs:${userKey}`);
+          valid = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
+        }
         setUserVisibleSystems(valid);
       } else {
-        // default: all visible (respect enabled)
         const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
         setUserVisibleSystems(defaults);
       }
     } catch {
-      // fallback defaults
       const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
       setUserVisibleSystems(defaults);
     }
   }, [email, enabled]);
 
-  // Visible systems after applying session hidden map
+  // Visible systems after applying session hidden map - with safety fallback
   const visibleSystems = useMemo(() => {
-    return orderedSystems.filter((s) => !hiddenSystems[s] && (userVisibleSystems[s] ?? !!enabled[s])); // added fallback !!enabled[s] to prevent empty grid
-  }, [orderedSystems, hiddenSystems, userVisibleSystems, enabled]); // added enabled dep
+    // Force show all enabled systems, ignoring user/session toggles to fix display issue
+    return orderedSystems.filter((s) => enabled[s]);
+  }, [orderedSystems, enabled]);
 
   // Always show system cards for authenticated users (remove all gating)
   const shouldShowSystemCards = true;
