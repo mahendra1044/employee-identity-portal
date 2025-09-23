@@ -117,6 +117,8 @@ function SystemCard({
   role,
   email,
   searchKey,
+  detailCache,
+  setDetailCache,
 }: {
   name: string;
   system: SystemKey;
@@ -125,6 +127,8 @@ function SystemCard({
   role: string;
   email: string;
   searchKey?: string;
+  detailCache: Record<string, any>;
+  setDetailCache: React.Dispatch<React.SetStateAction<Record<string, any>>>;
 }) {
   const [data, setData] = useState<any | null>(null);
   const [details, setDetails] = useState<any | null>(null);
@@ -139,7 +143,6 @@ function SystemCard({
   const [pfData, setPfData] = useState<any>(null);
   const [description, setDescription] = useState("");
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
-  const [detailCache, setDetailCache] = useState<Record<string, any>>({});
 
   const loadInitial = async (showToast = true) => {
     if (!enabled) return;
@@ -688,6 +691,9 @@ export default function HomePage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userToggles, setUserToggles] = useState<Record<SystemKey, boolean>>({});
 
+  // Shared detail cache for SystemCards
+  const [detailCache, setDetailCache] = useState<Record<string, any>>({});
+
   // Initialize user toggles from localStorage on mount (client-side only)
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -1083,10 +1089,11 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, effectiveRole]);
 
-  // Handle logout: clear toggles
+  // Handle logout: clear toggles and cache
   const handleLogout = () => {
     localStorage.removeItem("systemToggles");
     setUserToggles({});
+    setDetailCache({});
     logout();
   };
 
@@ -2227,6 +2234,8 @@ export default function HomePage() {
                     role={effectiveRole!}
                     email={email!}
                     searchKey={showOpsTiles ? (currentSearchKey || search) : undefined}
+                    detailCache={detailCache}
+                    setDetailCache={setDetailCache}
                   />
                 ))}
               </div>
