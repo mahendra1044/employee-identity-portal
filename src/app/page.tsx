@@ -65,13 +65,15 @@ function useAuth() {
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    const t = localStorage.getItem("token");
-    const r = localStorage.getItem("role");
-    const e = localStorage.getItem("email");
-    if (t && r && e) {
-      setToken(t);
-      setRole(r);
-      setEmail(e);
+    if (typeof window !== 'undefined') {
+      const t = localStorage.getItem("token");
+      const r = localStorage.getItem("role");
+      const e = localStorage.getItem("email");
+      if (t && r && e) {
+        setToken(t);
+        setRole(r);
+        setEmail(e);
+      }
     }
   }, []);
 
@@ -83,18 +85,22 @@ function useAuth() {
     });
     if (!res.ok) throw new Error("Login failed");
     const data: LoginResponse = await res.json();
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.role);
-    localStorage.setItem("email", data.email);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("email", data.email);
+    }
     setToken(data.token);
     setRole(data.role);
     setEmail(data.email);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("email");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("email");
+    }
     setToken(null);
     setRole(null);
     setEmail(null);
@@ -637,10 +643,24 @@ export default function HomePage() {
 
   // Settings state for system card visibility
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [userToggles, setUserToggles] = useState<Record<SystemKey, boolean>>(() => {
-    const stored = localStorage.getItem("systemToggles");
-    return stored ? JSON.parse(stored) : {};
-  });
+  const [userToggles, setUserToggles] = useState<Record<SystemKey, boolean>>({});
+
+  // Initialize user toggles from localStorage on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("systemToggles");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setUserToggles(parsed);
+        } catch {
+          // Invalid JSON, reset to empty
+          localStorage.removeItem("systemToggles");
+          setUserToggles({});
+        }
+      }
+    }
+  }, []);
 
   const isAggregate = useMemo(() => {
     return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
@@ -714,24 +734,17 @@ export default function HomePage() {
 
   useEffect(() => {
     // init theme from localStorage; default to light regardless of system
-    const stored = localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark" || stored === "navy") {
-      setTheme(stored);
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("theme");
+      if (stored === "light" || stored === "dark" || stored === "navy") {
+        setTheme(stored);
+      } else {
+        setTheme("light");
+      }
     } else {
       setTheme("light");
     }
   }, []);
-
-  useEffect(() => {
-    if (!theme) return;
-    const root = document.documentElement;
-    // reset theme classes first
-    root.classList.remove("dark");
-    root.classList.remove("navy");
-    if (theme === "dark") root.classList.add("dark");
-    if (theme === "navy") root.classList.add("navy");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
   useEffect(() => {
     if (!token) return;
@@ -765,11 +778,15 @@ export default function HomePage() {
   useEffect(() => {
     if (!features || !token) return;
     const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!(features.systems[s] ?? false) }), {} as Record<SystemKey, boolean>);
-    const stored = localStorage.getItem("systemToggles");
-    const parsed = stored ? JSON.parse(stored) : {};
-    const updatedToggles = { ...defaults, ...parsed };
-    setUserToggles(updatedToggles);
-    localStorage.setItem("systemToggles", JSON.stringify(updatedToggles));
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("systemToggles");
+      const parsed = stored ? JSON.parse(stored) : {};
+      const updatedToggles = { ...defaults, ...parsed };
+      setUserToggles(updatedToggles);
+      localStorage.setItem("systemToggles", JSON.stringify(updatedToggles));
+    } else {
+      setUserToggles(defaults);
+    }
   }, [features, token]);
 
   const enabled = useMemo(() => {
