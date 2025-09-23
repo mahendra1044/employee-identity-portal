@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
+import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
@@ -269,25 +269,6 @@ function SystemCard({
     }
   };
 
-  // Add a negative scenario trigger for CyberArk to simulate a failed send
-  const submitSnowTicketFailTest = async () => {
-    const payload = details || data || {};
-    try {
-      const res = await fetch("/api/submit-snow-ticket", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Force-Fail": "1" },
-        body: JSON.stringify({ system, payload, userEmail: "invalid@test.com", forceFail: true }),
-      });
-      if (res.ok) {
-        toast.warning("SNOW ticket unexpectedly succeeded (fail test)");
-      } else {
-        toast.error("Failed to submit SNOW ticket (expected for test)");
-      }
-    } catch {
-      toast.error("Failed to submit SNOW ticket (expected for test)");
-    }
-  };
-
   return (
     <>
       <Card className="shadow-sm">
@@ -318,11 +299,6 @@ function SystemCard({
             <Button size="sm" variant="outline" onClick={submitSnowTicket} disabled={!enabled} title="Submit SNOW ticket with current data">
               <FileText className="h-4 w-4" />
             </Button>
-            {system === "cyberark" && (
-              <Button size="sm" variant="destructive" onClick={submitSnowTicketFailTest} disabled={!enabled} title="Test SNOW ticket failure scenario">
-                <AlertTriangle className="h-4 w-4" />
-              </Button>
-            )}
           </div>
           {system === "ping-federate" && role === "employee" && (
             <div className="flex flex-wrap gap-2 justify-center p-3 bg-muted/50 rounded-lg">
