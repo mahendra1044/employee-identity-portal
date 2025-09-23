@@ -844,6 +844,15 @@ export default function HomePage() {
     return orderedSystems.filter((s) => !hiddenSystems[s]);
   }, [orderedSystems, hiddenSystems]);
 
+  // Respect opsShowTilesAfterSearch flag: for ops, show tiles only after a search when enabled (default: true)
+  const shouldShowSystemCards = useMemo(() => {
+    if (role === "ops") {
+      const gated = typeof features?.opsShowTilesAfterSearch === "boolean" ? features.opsShowTilesAfterSearch : true;
+      return gated ? hasSearched : true;
+    }
+    return true;
+  }, [role, features, hasSearched]);
+
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
     setOpsLoading(true);
@@ -2056,9 +2065,24 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* System Cards (now for all roles) */}
+        {/* System Cards (respect opsShowTilesAfterSearch for ops) */}
         <section>
           {(() => {
+            if (role === "ops" && !shouldShowSystemCards) {
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>System tiles hidden</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Run a search to display system tiles (controlled by opsShowTilesAfterSearch).
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            }
+
             if (!anyEnabled) {
               return (
                 <Card>

@@ -647,6 +647,49 @@ What each flag does in the UI
   - When `true`: On ops login, the large per-system tiles are hidden until a search has been performed. This keeps the ops dashboard focused on the Recent Failures panel and search-first workflows.
   - When `false` or omitted: Ops tiles behave like other roles (visible whenever the system is enabled).
 
+## Ops tiles visibility after search (important)
+
+For Ops role, showing system tiles after an employee search can be gated by a deployment-time flag served from your backend features endpoint.
+
+- Flag: `opsShowTilesAfterSearch` (boolean)
+- Source: `/config/features` response (your backend)
+- Default: `true` (tiles are hidden until a successful search for Ops)
+- Behavior:
+  - When `true`: Ops will see an info card prompting to run a search. System tiles render only after a successful search.
+  - When `false`: Ops see system tiles immediately (no search required).
+- Redeploy/restart: Required (the flag is read from the backend features payload at runtime; update your backend config and redeploy).
+
+Example `features.json` (backend):
+```json
+{
+  "credentialSource": "env",
+  "useMocks": true,
+  "useMockAuth": true,
+  "systems": {
+    "ping-directory": true,
+    "ping-federate": true,
+    "cyberark": true,
+    "saviynt": true,
+    "azure-ad": true,
+    "ping-mfa": true
+  },
+  "opsShowTilesAfterSearch": true
+}
+```
+
+Notes:
+- This flag only applies to Ops. Employees continue to see their own system tiles as usual.
+- Related behaviors already gated by search for Ops (unchanged):
+  - Quick Actions tabs section appears after a successful search.
+  - SNOW tickets button becomes available after a search resolves a valid target.
+
+## System card close buttons (session-only)
+
+- Toggle: `NEXT_PUBLIC_SYSTEM_CARD_CLOSE` env (takes precedence) or `systemCardCloseEnabled` in `/config/features`.
+- Behavior: Adds an X button to each system card, letting users hide a card for the current browser session. Hidden state is per-user and stored in `sessionStorage` under `hidden:systemCards:<email>`.
+- Default: Enabled if not specified.
+- Requires redeploy/restart to change the toggle.
+
 ## Ops Quick Actions (Tabs) — Config and Endpoints (NEW)
 
 This feature is available ONLY for users with role = ops. The Quick Actions card appears below the Search card AFTER a successful employee search.
