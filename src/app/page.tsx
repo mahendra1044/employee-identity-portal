@@ -157,14 +157,14 @@ function SystemCard({
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      let message = "Failed";
       if (!res.ok) {
-        let message = "Failed";
         const text = await res.text();
         try {
           const j = JSON.parse(text);
           message = j?.error || message;
         } catch {
-          message = text || message;
+          message = `HTTP ${res.status}: ${text.substring(0, 200)}...`;
         }
         throw new Error(message);
       }
@@ -173,7 +173,12 @@ function SystemCard({
       try {
         json = JSON.parse(text);
       } catch {
-        throw new Error("Invalid JSON response");
+        const snippet = text.substring(0, 200);
+        setError(`Invalid JSON from server: ${snippet}...`);
+        if (showToast) {
+          toast.error(`Failed to refresh ${name}: Invalid response format`, { id: refreshToast });
+        }
+        return;
       }
       setData(json.data);
       if (showToast) {
@@ -200,14 +205,14 @@ function SystemCard({
       const res = await fetch(detailsEndpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      let message = "Failed";
       if (!res.ok) {
-        let message = "Failed";
         const text = await res.text();
         try {
           const j = JSON.parse(text);
           message = j?.error || message;
         } catch {
-          message = text || message;
+          message = `HTTP ${res.status}: ${text.substring(0, 200)}...`;
         }
         throw new Error(message);
       }
@@ -216,7 +221,9 @@ function SystemCard({
       try {
         json = JSON.parse(text);
       } catch {
-        throw new Error("Invalid JSON response");
+        const snippet = text.substring(0, 200);
+        setError(`Invalid JSON from server: ${snippet}...`);
+        return;
       }
       setDetails(json.data);
       setDetailsOpen(true);
@@ -932,14 +939,23 @@ export default function HomePage() {
       const res = await fetch(`${API_BASE}/api/search-employee/${encodeURIComponent(search)}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) {
+        const text = await res.text();
+        let body;
+        try {
+          body = JSON.parse(text);
+        } catch {
+          body = { error: `HTTP ${res.status}: ${text.substring(0, 200)}...` };
+        }
+        throw new Error(body.error || "Search failed");
+      }
       const text = await res.text();
       let body;
       try {
         body = JSON.parse(text);
       } catch {
-        throw new Error("Invalid JSON response");
+        throw new Error(`Invalid JSON response: ${text.substring(0, 200)}...`);
       }
-      if (!res.ok) throw new Error(body.error || "Search failed");
       setSearchResults(body);
       // mark completion only after successful fetch
       setHasSearched(true);
@@ -1484,8 +1500,18 @@ export default function HomePage() {
                             const auRes = await fetch(`${API_BASE}/api/all-users`, {
                               headers: { Authorization: `Bearer ${token}` },
                             });
-                            if (auRes.ok) {
-                              const auJson = await auRes.json();
+                            if (!auRes.ok) {
+                              const auText = await auRes.text();
+                              console.warn("All-users fetch failed:", auRes.status, auText.substring(0, 100));
+                            } else {
+                              const auText = await auRes.text();
+                              let auJson;
+                              try {
+                                auJson = JSON.parse(auText);
+                              } catch {
+                                console.warn("Invalid JSON from all-users:", auText.substring(0, 100));
+                                auJson = null;
+                              }
                               allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
                             }
                           } catch {}
@@ -1506,9 +1532,15 @@ export default function HomePage() {
                               try {
                                 const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
                                 const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                if (res.ok) {
-                                  const json = await res.json();
+                                if (!res.ok) continue;
+                                const resText = await res.text();
+                                let json;
+                                try {
+                                  json = JSON.parse(resText);
                                   if (json?.data) { found = json.data; break; }
+                                } catch {
+                                  console.warn(`Invalid JSON for ${sys} with key ${key}:`, resText.substring(0, 100));
+                                  continue;
                                 }
                               } catch {}
                             }
@@ -1534,8 +1566,9 @@ export default function HomePage() {
                             aggregate[sys] = found ?? null;
                           }
                           setSearchDialogData(aggregate);
-                        } catch {
-                          setSearchDialogData({ error: "Unable to load aggregated details" });
+                        } catch (e: any) {
+                          console.error("Consolidated view error:", e);
+                          setSearchDialogData({ error: `Failed to load: ${e.message}` });
                         } finally {
                           setSearchDialogLoading(false);
                         }
@@ -1592,21 +1625,41 @@ export default function HomePage() {
                             const auRes = await fetch(`${API_BASE}/api/all-users`, {
                               headers: { Authorization: `Bearer ${token}` },
                             });
-                            if (auRes.ok) {
-                              const auJson = await auRes.json();
+                            if (!auRes.ok) {
+                              const auText = await auRes.text();
+                              console.warn("All-users fetch failed:", auRes.status, auText.substring(0, 100));
+                            } else {
+                              const auText = await auRes.text();
+                              let auJson;
+                              try {
+                                auJson = JSON.parse(auText);
+                              } catch {
+                                console.warn("Invalid JSON from all-users:", auText.substring(0, 100));
+                                auJson = null;
+                              }
                               allUsers = Array.isArray(auJson?.data) ? auJson.data : Array.isArray(auJson) ? auJson : null;
                             }
                           } catch {}
 
                           for (const sys of orderedSystems) {
+                            if (isEmployee && !isSelfSearch && allowMap && allowMap[sys] === false) {
+                              aggregate[sys] = null;
+                              continue;
+                            }
                             let found: any = undefined;
                             for (const key of candidateKeys) {
                               try {
                                 const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
                                 const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-                                if (res.ok) {
-                                  const json = await res.json();
+                                if (!res.ok) continue;
+                                const resText = await res.text();
+                                let json;
+                                try {
+                                  json = JSON.parse(resText);
                                   if (json?.data) { found = json.data; break; }
+                                } catch {
+                                  console.warn(`Invalid JSON for ${sys} with key ${key}:`, resText.substring(0, 100));
+                                  continue;
                                 }
                               } catch {}
                             }
@@ -1630,8 +1683,9 @@ export default function HomePage() {
                             aggregate[sys] = found ?? null;
                           }
                           setSearchDialogData(aggregate);
-                        } catch {
-                          setSearchDialogData({ error: "Unable to load aggregated details" });
+                        } catch (e: any) {
+                          console.error("Consolidated view error:", e);
+                          setSearchDialogData({ error: `Failed to load: ${e.message}` });
                         } finally {
                           setSearchDialogLoading(false);
                         }
