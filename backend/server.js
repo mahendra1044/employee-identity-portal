@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
@@ -46,14 +45,6 @@ let ROLES = JSON.parse(fs.readFileSync(rolesPath, 'utf-8'));
 app.use(helmet());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
-app.use(
-  rateLimit({
-    windowMs: 60 * 1000,
-    max: 100,
-    standardHeaders: true,
-    legacyHeaders: false,
-  })
-);
 
 // Helpers
 const sanitize = (s = '') => String(s).replace(/[^\w@.\-\s]/g, '').trim();

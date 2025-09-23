@@ -1516,22 +1516,10 @@ export default function HomePage() {
                               aggregate[sys] = null;
                               continue;
                             }
-                            const cacheKey = `${displayKey}-details-${sys}`;
-                            if (detailCache[cacheKey]) {
-                              aggregate[sys] = detailCache[cacheKey];
-                              continue;
-                            }
-                            // Fetch only if cache miss
                             const url = `${API_BASE}/api/search-employee/${encodeURIComponent(displayKey)}/details?system=${sys}`;
                             const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                             if (!res.ok) {
-                              const text = await res.text();
-                              let errMsg = `HTTP ${res.status}`;
-                              try {
-                                const j = JSON.parse(text);
-                                errMsg = j?.error || errMsg;
-                              } catch {}
-                              console.warn(`${sys} fetch failed: ${errMsg}`);
+                              console.warn(`${sys} fetch failed`);
                               aggregate[sys] = null;
                               continue;
                             }
@@ -1539,16 +1527,10 @@ export default function HomePage() {
                             let json;
                             try {
                               json = JSON.parse(text);
-                              const fetched = json.data;
-                              aggregate[sys] = fetched;
-                              setDetailCache(prev => ({ ...prev, [cacheKey]: fetched }));
+                              aggregate[sys] = json.data;
                             } catch {
-                              console.warn(`Invalid JSON for ${sys}:`, text.substring(0, 100));
+                              console.warn(`Invalid JSON for ${sys}`);
                               aggregate[sys] = null;
-                            }
-                            // 800ms delay between fetches to respect rate limits
-                            if (sys !== orderedSystems[orderedSystems.length - 1]) {
-                              await new Promise(resolve => setTimeout(resolve, 800));
                             }
                           }
                           setSearchDialogData(aggregate);
@@ -1591,22 +1573,10 @@ export default function HomePage() {
                               aggregate[sys] = null;
                               continue;
                             }
-                            const cacheKey = `${displayKey}-details-${sys}`;
-                            if (detailCache[cacheKey]) {
-                              aggregate[sys] = detailCache[cacheKey];
-                              continue;
-                            }
-                            // Fetch only if cache miss
                             const url = `${API_BASE}/api/search-employee/${encodeURIComponent(displayKey)}/details?system=${sys}`;
                             const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                             if (!res.ok) {
-                              const text = await res.text();
-                              let errMsg = `HTTP ${res.status}`;
-                              try {
-                                const j = JSON.parse(text);
-                                errMsg = j?.error || errMsg;
-                              } catch {}
-                              console.warn(`${sys} fetch failed: ${errMsg}`);
+                              console.warn(`${sys} fetch failed`);
                               aggregate[sys] = null;
                               continue;
                             }
@@ -1614,16 +1584,10 @@ export default function HomePage() {
                             let json;
                             try {
                               json = JSON.parse(text);
-                              const fetched = json.data;
-                              aggregate[sys] = fetched;
-                              setDetailCache(prev => ({ ...prev, [cacheKey]: fetched }));
+                              aggregate[sys] = json.data;
                             } catch {
-                              console.warn(`Invalid JSON for ${sys}:`, text.substring(0, 100));
+                              console.warn(`Invalid JSON for ${sys}`);
                               aggregate[sys] = null;
-                            }
-                            // 800ms delay between fetches to respect rate limits
-                            if (sys !== orderedSystems[orderedSystems.length - 1]) {
-                              await new Promise(resolve => setTimeout(resolve, 800));
                             }
                           }
                           setSearchDialogData(aggregate);
