@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault } from "lucide-react";
+import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
@@ -588,6 +589,13 @@ export default function HomePage() {
   // Ops Quick Actions active tab
   const [qaActive, setQaActive] = useState<SystemKey>("ping-federate");
 
+  // Settings state for system card visibility
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [userToggles, setUserToggles] = useState<Record<SystemKey, boolean>>(() => {
+    const stored = localStorage.getItem("systemToggles");
+    return stored ? JSON.parse(stored) : {};
+  });
+
   const isAggregate = useMemo(() => {
     return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
   }, [searchDialogData]);
@@ -726,10 +734,26 @@ export default function HomePage() {
     run();
   }, [token]);
 
+  // Initialize user toggles to defaults after features load
+  useEffect(() => {
+    if (!features || !token) return;
+    const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!(features.systems[s] ?? false) }), {} as Record<SystemKey, boolean>);
+    const stored = localStorage.getItem("systemToggles");
+    const parsed = stored ? JSON.parse(stored) : {};
+    const updatedToggles = { ...defaults, ...parsed };
+    setUserToggles(updatedToggles);
+    localStorage.setItem("systemToggles", JSON.stringify(updatedToggles));
+  }, [features, token]);
+
   const enabled = useMemo(() => {
     const all = features?.systems || {};
     return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!all[s] }), {} as Record<SystemKey, boolean>);
   }, [features]);
+
+  // Combined visibility: enabled && userToggles
+  const visibleSystems = useMemo(() => {
+    return SYSTEMS.filter(s => enabled[s] && userToggles[s]);
+  }, [enabled, userToggles]);
 
   // Quick Actions tab enablement (from backend features or NEXT_PUBLIC env flags)
   const qaEnabledTabs = useMemo(() => {
@@ -929,6 +953,20 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, role]);
 
+  // Handle logout: clear toggles
+  const handleLogout = () => {
+    localStorage.removeItem("systemToggles");
+    setUserToggles({});
+    logout();
+  };
+
+  // Handle toggle change
+  const handleToggleChange = (system: SystemKey, checked: boolean) => {
+    const updated = { ...userToggles, [system]: checked };
+    setUserToggles(updated);
+    localStorage.setItem("systemToggles", JSON.stringify(updated));
+  };
+
   if (!token) {
     return <LoginCard onLogin={login} />;
   }
@@ -965,6 +1003,11 @@ export default function HomePage() {
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
+            {/* Settings button */}
+            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} title="Settings">
+              <SettingsIcon className="h-4 w-4 mr-1" />
+              Settings
+            </Button>
             {/* Educate Me (employees only) */}
             {role === "employee" && educateEnabled && (
               <Button variant="outline" size="sm" onClick={() => setEducateOpen(true)} title="Access educational guides for common issues">
@@ -987,7 +1030,7 @@ export default function HomePage() {
                 )}
               </Button>
             )}
-            <Button variant="secondary" size="sm" onClick={logout} title="Sign out of the portal">
+            <Button variant="secondary" size="sm" onClick={handleLogout} title="Sign out of the portal">
               <LogOut className="h-4 w-4 mr-1" />
               Sign out
             </Button>
@@ -996,6 +1039,43 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+        {/* Settings Dialog */}
+        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>System Card Visibility</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <p className="text-sm text-muted-foreground">Toggle which system cards to display. Defaults reset on logout/login.</p>
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                {SYSTEMS.map((sys) => (
+                  <div key={sys} className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">{SYSTEM_LABELS[sys]}</label>
+                      <p className="text-xs text-muted-foreground">
+                        {enabled[sys] ? "Enabled" : "Disabled by admin"}
+                      </p>
+                    </div>
+                    <Checkbox
+                      checked={userToggles[sys] ?? false}
+                      onCheckedChange={(checked) => handleToggleChange(sys, !!checked)}
+                      disabled={!enabled[sys]}
+                    />
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" onClick={() => {
+                const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: enabled[s] }), {} as Record<SystemKey, boolean>);
+                setUserToggles(defaults);
+                localStorage.setItem("systemToggles", JSON.stringify(defaults));
+                toast.success("Reset to defaults");
+              }} className="w-full">
+                Reset to Defaults
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Educate Guide Dialog */}
         <Dialog open={educateOpen} onOpenChange={setEducateOpen}>
           <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -1988,6 +2068,7 @@ export default function HomePage() {
           {(() => {
             const showOpsTiles = role === "ops" && !!features?.opsShowTilesAfterSearch && hasSearched;
             const isOps = role === "ops";
+            const anyVisible = visibleSystems.length > 0;
             if (!anyEnabled) {
               return (
                 <Card>
@@ -2005,9 +2086,25 @@ export default function HomePage() {
             if (isOps && !showOpsTiles) {
               return <></>;
             }
+            if (!anyVisible) {
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>No cards visible</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      All system cards are hidden via settings. Open Settings to enable some.
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            }
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {orderedSystems.map((sys) => (
+                {orderedSystems
+                  .filter(sys => visibleSystems.includes(sys))
+                  .map((sys) => (
                   <SystemCard
                     key={sys}
                     name={SYSTEM_LABELS[sys]}
