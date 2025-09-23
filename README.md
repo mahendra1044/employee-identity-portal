@@ -15,10 +15,6 @@
 - System tile header layout (employee view)
   - Buttons are now consistently aligned and wrap nicely on smaller screens
   - System name is more prominent and always visible (truncates gracefully)
-- Server-side email endpoint (mock)
-  - Replaced mailto with a server API to record email requests for audit/debug
-  - Route: `POST /api/send-email`
-  - Logs mock payloads to the server console and returns `{ ok: true }`
 - Configurable card order (deployment-time)
   - New optional `systemsOrder` array in backend/config/features.json controls the order of the six system cards on the dashboard.
   - Missing or invalid keys are ignored; any systems not listed are appended in the default order.
@@ -90,25 +86,25 @@ Example mock (already provided):
 The `/api/submit-snow-ticket` endpoint simulates ServiceNow ticket creation for demo purposes. It generates mock ticket numbers and logs details to the console.
 
 ### Configuration
-- **Environment Variable**: Set `MOCK_FAILURE_SYSTEMS` in `.env.local` to comma-separated systems that should simulate ticket creation failures (e.g., `MOCK_FAILURE_SYSTEMS=ping-federate`).
-  - Default: `['ping-federate']` (failure for Ping Federate).
-  - Ping Directory always succeeds with detailed mock ticket data.
+- **Environment Variable**: Set `MOCK_FAILURE_SYSTEMS` in `.env.local` to comma-separated systems that should simulate ticket creation failures (e.g., `MOCK_FAILURE_SYSTEMS=cyberark`).
+  - Default: `['cyberark']` (failure for CyberArk).
+  - All other systems always succeed with detailed mock ticket data.
 
 ### Scenarios
-- **Success (Ping Directory)**:
-  - When submitting from a Ping Directory card, it creates a mock ticket (e.g., `INC-ABC12345`).
+- **Success (any system except CyberArk)**:
+  - When submitting from a system card (e.g., Ping Directory, Ping MFA), it creates a mock ticket (e.g., `INC-ABC12345`).
   - Logs full mock ticket object to console, including payload excerpt, status, priority, etc.
   - Returns ticket details in response for frontend toast.
 
-- **Failure (Ping Federate)**:
-  - When submitting from a Ping Federate card, simulates failure (HTTP 500).
+- **Failure (CyberArk)**:
+  - When submitting from a CyberArk card, simulates failure (HTTP 500).
   - Logs error details to console with reason "Mock failure scenario".
   - Frontend shows error toast; useful for testing error handling.
 
 ### Testing
 1. Login as employee/ops.
-2. Load data for Ping Directory → Click "Submit SNOW ticket" → Check console for success log and toast "SNOW ticket submitted: INC-...".
-3. Load data for Ping Federate → Click "Submit SNOW ticket" → Check console for failure log and error toast.
+2. Load data for any system (e.g., Ping Directory) → Click "Submit SNOW ticket" → Check console for success log and toast "SNOW ticket submitted: INC-...".
+3. Load data for CyberArk → Click "Submit SNOW ticket" → Check console for failure log and error toast.
 4. To customize failures: Edit `.env.local` with `MOCK_FAILURE_SYSTEMS=system1,system2`, restart dev server.
 
 This setup allows extending to real ServiceNow integration by replacing the mock logic while reusing the configurable failure simulation for testing.
@@ -128,13 +124,14 @@ This setup allows extending to real ServiceNow integration by replacing the mock
 - Each system tile includes an "HTML View" button that opens a key/value popup for the current system's data.
 - If Details are already loaded, it uses those; otherwise it shows Initial data.
 
-### Send Email (server-side mock)
-- Each system tile includes a "Send Email" button.
-- This posts to a Next.js API route instead of opening your inbox.
-- Endpoint: `POST /api/send-email`
-  - Request: `{ to: string, subject: string, body: string, system: string, payload: any }`
-  - Response: `{ ok: true, message: "Email queued (mock)", to, system, timestamp }`
-- Server will log a concise mock entry with recipient, subject, preview of body, a payload snippet, and timestamp.
+### Submit SNOW Ticket
+- Each system tile includes a "Submit SNOW ticket" button.
+- This posts to a Next.js API route that simulates ticket creation.
+- Endpoint: `POST /api/submit-snow-ticket`
+  - Request: `{ system: string, payload: any, userEmail: string }`
+  - Response: `{ ticketNumber: string, ok: true }` on success, or error details on failure.
+- Server will log the submission details (system, email, payload snippet) to console.
+- CyberArk includes an additional "Test failure" button for error scenario testing.
 
 ## Employee "Educate me" guide
 
@@ -142,9 +139,7 @@ A lightweight user guide is available for employees to quickly learn which ident
 
 - Location: Header → "Educate me" (only visible for role = employee)
 - Behavior: Opens a dialog with categorized cards (MFA, Safe/Vault, Directory)
-  - Each card includes a short summary, a sample JSON snippet, and actions:
-    - Copy sample JSON
-    - Send mail to the appropriate support queue (uses existing /api/send-email)
+  - Each card includes a short summary and a sample JSON snippet.
 
 ### Configure at deploy time
 
@@ -192,7 +187,6 @@ Categories currently included (all with shared mock data):
 
 Actions:
 - Copy sample JSON: copies the rendered mock snippet
-- Send mail to support: posts to /api/send-email with the relevant support address and the sample payload
 
 No per-user persistence or customization is stored; the guide is the same for all employees by design.
 
@@ -202,7 +196,6 @@ No per-user persistence or customization is stored; the guide is the same for al
 - Login with an employee account (any email not starting with ops@ or management@)
 - Confirm the header shows the "Educate me" button; click to open the guide
 - Click "Copy sample JSON" and verify your clipboard contents
-- Click "Send mail to support" to exercise /api/send-email
 
 ### Notes
 
@@ -227,7 +220,7 @@ Configure both frontend and backend from environment files. Frontend variables m
   - NEXT_PUBLIC_QA_PING_MFA=true|false — Enable/disable Ping MFA tab
   - NEXT_PUBLIC_SPLUNK_URL — URL for "Take Me to Splunk" (default: https://splunk.company.com)
   - NEXT_PUBLIC_CLOUDWATCH_URL — URL for "Take Me to Cloud Watch" (default: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1)
-  - MOCK_FAILURE_SYSTEMS — Comma-separated systems to simulate ticket creation failures (default: ping-federate)
+  - MOCK_FAILURE_SYSTEMS — Comma-separated systems to simulate ticket creation failures (default: cyberark)
 
 Notes:
 - Only NEXT_PUBLIC_* variables are exposed to the browser.
@@ -312,9 +305,8 @@ Getting started:
 
 If issues persist (e.g., CORS, wrong URLs), check console logs, restart services, and ensure ports don't conflict (e.g., kill processes on used ports with `lsof -i :3001` on macOS/Linux).
 
-### Support email mapping
-- Edit `src/lib/support-emails.ts` to change the destination team addresses per system.
-- Helper: `getSupportEmail(system: "ping-directory" | "ping-federate" | "cyberark" | "saviynt" | "azure-ad" | "ping-mfa")`
+### Support Configuration
+- No per-system support email mapping is currently implemented. For support workflows, use the SNOW ticket submission feature.
 
 ### Card layout order (NEW)
 
@@ -355,9 +347,6 @@ Notes
   - The card grid now renders by mapping over `orderedSystems`, using a `SYSTEM_LABELS` map for human-friendly names.
   - This is read from `GET http://localhost:3001/config/features` post-login, so changes take effect when users log in or refresh.
 - No backend code change is required beyond supplying `systemsOrder` in `backend/config/features.json`.
-
-- File: `src/app/api/send-email/route.ts`
-  - Mock server endpoint that logs email requests and returns success
 
 - File: `src/app/page.tsx` (Ping Federate quick actions)
   - On Ping Federate card, for role = employee, three small buttons render next to "Copy JSON": User Info, OIDC, SAML
