@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, X, Settings } from "lucide-react";
+import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, X } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ""; // changed from "http://localhost:3001" to relative for Next.js API routes
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // dev: backend server (configurable)
 
 type Features = {
   credentialSource: string;
@@ -28,8 +27,6 @@ type Features = {
   quickActionsTabs?: Partial<Record<SystemKey, boolean>>;
   // NEW: Toggle session close buttons on system cards (deployment-time)
   systemCardCloseEnabled?: boolean;
-  // NEW: user systems settings (deployment-time)
-  userSystemsSettingsEnabled?: boolean;
 };
 
 type LoginResponse = { token: string; role: string; email: string };
@@ -78,15 +75,12 @@ function useAuth() {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || "Login failed");
-    }
+    if (!res.ok) throw new Error("Login failed");
     const data: LoginResponse = await res.json();
     localStorage.setItem("token", data.token);
     localStorage.setItem("role", data.role);
@@ -114,6 +108,7 @@ function SystemCard({
   enabled,
   token,
   role,
+  // NEW: close control
   showClose,
   onClose,
 }: {
@@ -131,180 +126,67 @@ function SystemCard({
   const [error, setError] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [htmlOpen, setHtmlOpen] = useState(false);
+  // PF employee popup state
   const [pfOpen, setPfOpen] = useState(false);
   const [pfTitle, setPfTitle] = useState<string>("");
   const [pfLoading, setPfLoading] = useState(false);
   const [pfData, setPfData] = useState<any>(null);
 
-  // Mock data for immediate display
-  const mockInitialData = useMemo(() => {
-    const mocks: Record<SystemKey, any> = {
-      "ping-directory": {
-        userId: "u12345",
-        name: "John Doe",
-        email: "john.doe@company.com",
-        department: "Engineering",
-        status: "active",
-        title: "Software Engineer",
-        manager: "Jane Smith",
-        location: "New York",
-        employeeId: "EMP-12345",
-        lastLogin: new Date().toISOString(),
-      },
-      "ping-federate": {
-        userId: "u12345",
-        lastLogin: new Date().toISOString(),
-        tokenStatus: "active",
-        ssoProvider: "saml",
-        lastAccess: "2024-09-20T10:30:00Z",
-        sessionId: "session-abc123",
-        ipAddress: "192.168.1.100",
-        userAgent: "Chrome/120.0",
-        authenticationMethod: "password",
-        mfaStatus: "passed",
-      },
-      "cyberark": {
-        userId: "u12345",
-        safe: "CORP-APP-PROD",
-        account: "svc_corp_app",
-        access: "granted",
-        credentialStatus: "available",
-        lastChecked: new Date().toISOString(),
-        permissions: ["view", "use"],
-        vaultId: "vault-001",
-        platform: "Windows",
-        address: "10.0.0.50",
-      },
-      "saviynt": {
-        userId: "u12345",
-        roles: ["ROLE_ENGINEER", "ROLE_DEVOPS"],
-        entitlements: 5,
-        requests: 2,
-        status: "provisioned",
-        lastReview: new Date().toISOString(),
-        compliance: "compliant",
-        accessLevel: "standard",
-        managerApproval: "approved",
-        certification: "passed",
-      },
-      "azure-ad": {
-        userId: "u12345@company.com",
-        displayName: "John Doe",
-        jobTitle: "Software Engineer",
-        department: "Engineering",
-        groups: 3,
-        signInCount: 150,
-        lastSignIn: new Date().toISOString(),
-        accountEnabled: true,
-        mfaStatus: "enabled",
-        conditionalAccess: "passed",
-      },
-      "ping-mfa": {
-        userId: "u12345",
-        status: "enabled",
-        enrolledDevices: ["iPhone 14"],
-        lastEvent: "login",
-        lastEventTime: new Date().toISOString(),
-        backupCodes: 3,
-        recoveryEnabled: true,
-        pushNotifications: true,
-        adminOverride: false,
-      },
-    };
-    return mocks[system] || { message: "Mock data not available" };
-  }, [system]);
-
   const loadInitial = async () => {
     if (!enabled) return;
     setLoading(true);
     setError(null);
-    
-    // First set mock data immediately
-    setData(mockInitialData);
-    
-    // Then attempt real fetch if token available
     try {
       const res = await fetch(`${API_BASE}/api/own-${system}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const json = await res.json();
-        setData(json.data || mockInitialData); // fallback to mock if empty
+      if (!res.ok) {
+        let message = "Failed";
+        try {
+          const j = await res.json();
+          message = j?.error || message;
+        } catch {
+          try {
+            const t = await res.text();
+            message = t || message;
+          } catch {}
+        }
+        throw new Error(message);
       }
+      const json = await res.json();
+      setData(json.data);
     } catch (e: any) {
-      console.warn(`Fetch failed for ${system}, using mock:`, e.message);
-      setData(mockInitialData);
+      setError(e.message || "Error loading data");
     } finally {
       setLoading(false);
     }
   };
 
-  const mockDetailsData = useMemo(() => {
-    const mocks: Record<SystemKey, any> = {
-      "ping-directory": {
-        ...mockInitialData,
-        phone: "+1-555-0123",
-        hireDate: "2020-01-15",
-        groups: ["engineers", "devops"],
-        attributes: { custom1: "value1", custom2: "value2" },
-        audit: { createdAt: "2020-01-15", modifiedAt: "2024-09-20" },
-      },
-      "ping-federate": {
-        ...mockInitialData,
-        connections: ["saml-corp", "oidc-app"],
-        policies: ["mfa-required", "sso-enforced"],
-        events: [{ type: "login", timestamp: "2024-09-20T10:30:00Z" }],
-        auditLog: "Full audit events...",
-      },
-      "cyberark": {
-        ...mockInitialData,
-        history: [{ action: "checkout", timestamp: "2024-09-20T09:00:00Z" }],
-        policies: ["safe-member", "account-owner"],
-        secrets: "Redacted for security",
-      },
-      "saviynt": {
-        ...mockInitialData,
-        roleDetails: [{ id: "role1", name: "ROLE_ENGINEER", granted: "2023-01-01" }],
-        pendingRequests: [{ id: "req1", type: "role_add", status: "pending" }],
-        audit: "Compliance audit logs...",
-      },
-      "azure-ad": {
-        ...mockInitialData,
-        groupsList: ["engineers", "devops", "it"],
-        signInLogs: [{ time: "2024-09-20T10:00:00Z", ip: "192.168.1.100", app: "Microsoft Teams" }],
-        policies: ["mfa-policy", "conditional-access"],
-        audit: "Azure audit events...",
-      },
-      "ping-mfa": {
-        ...mockInitialData,
-        devices: [{ id: "dev1", type: "mobile", enrolled: "2023-01-01", lastUsed: "2024-09-20" }],
-        events: [{ type: "push_sent", time: "2024-09-20T10:00:00Z", success: true }],
-        policies: ["multi-factor", "device-trust"],
-      },
-    };
-    return mocks[system] || { message: "Mock details not available" };
-  }, [system, mockInitialData]);
-
   const loadDetails = async () => {
     setLoading(true);
     setError(null);
-    
-    // Set mock details immediately
-    setDetails(mockDetailsData);
-    setDetailsOpen(true);
-    
-    // Attempt real fetch
     try {
       const res = await fetch(`${API_BASE}/api/own-${system}/details`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const json = await res.json();
-        setDetails(json.data || mockDetailsData);
+      if (!res.ok) {
+        let message = "Failed";
+        try {
+          const j = await res.json();
+          message = j?.error || message;
+        } catch {
+          try {
+            const t = await res.text();
+            message = t || message;
+          } catch {}
+        }
+        throw new Error(message);
       }
+      const json = await res.json();
+      setDetails(json.data);
+      setDetailsOpen(true);
     } catch (e: any) {
-      console.warn(`Details fetch failed for ${system}, using mock:`, e.message);
-      setDetails(mockDetailsData);
+      setError(e.message || "Error loading details");
     } finally {
       setLoading(false);
     }
@@ -312,6 +194,7 @@ function SystemCard({
 
   useEffect(() => {
     loadInitial();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, enabled]);
 
   // helper to flatten JSON into key/value pairs for readable HTML view
@@ -346,6 +229,7 @@ function SystemCard({
   };
 
   const openHtmlView = async () => {
+    // ensure we have something to show; try initial if nothing loaded yet
     if (!details && !data && enabled && !loading) {
       try {
         await loadInitial();
@@ -375,18 +259,20 @@ function SystemCard({
     }
   };
 
+  // Add a negative scenario trigger for CyberArk to simulate a failed send
   const sendEmailFailTest = async () => {
-    const to = "invalid";
+    const to = "invalid"; // intentionally invalid to force backend validation failure
     const subject = `[${name}] Help request (Fail Test)`;
     const payload = details || data || {};
     const body = `This is a negative test for ${name} email sending.`;
     try {
       const res = await fetch("/api/send-email", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-Force-Fail": "1" },
+        headers: { "Content-Type": "application/json", "X-Force-Fail": "1" }, // header hint if backend supports it
         body: JSON.stringify({ to, subject, body, system, payload, forceFail: true }),
       });
       if (res.ok) {
+        // If backend didn't fail, still inform the user this was a fail test
         toast.warning("Email unexpectedly succeeded (fail test)");
       } else {
         toast.error("Failed to send email (expected for test)");
@@ -514,9 +400,7 @@ function SystemCard({
             </div>
           )}
           <div className="space-y-3">
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
-            ) : data ? (
+            {data ? (
               <div>
                 <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
                   {JSON.stringify(data, null, 2)}
@@ -525,6 +409,7 @@ function SystemCard({
             ) : (
               <p className="text-sm text-muted-foreground">No data yet</p>
             )}
+            {/* details moved to dialog to keep the page compact */}
           </div>
         </CardContent>
       </Card>
@@ -566,7 +451,7 @@ function SystemCard({
           {(() => {
             const payload = details || data;
             if (!payload) return <p className="text-sm text-muted-foreground">No data available to display</p>;
-            const pairs = toPairs(payload).slice(0, 1000);
+            const pairs = toPairs(payload).slice(0, 1000); // safety cap
             return (
               <div className="max-h-[70vh] overflow-y-auto pr-1">
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
@@ -587,6 +472,7 @@ function SystemCard({
         </DialogContent>
       </Dialog>
 
+      {/* PF Employee Dialog */}
       <Dialog open={pfOpen} onOpenChange={setPfOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -682,45 +568,7 @@ function LoginCard({ onLogin }: { onLogin: (email: string, password: string) => 
 
 export default function HomePage() {
   const { token, role, email, login, logout } = useAuth();
-
-  // Hardcode features to ensure all systems are enabled (temp fix for display issue)
-  const [features, setFeatures] = useState<Features>(() => ({
-    credentialSource: "env",
-    useMocks: true,
-    useMockAuth: true,
-    systems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
-    opsShowTilesAfterSearch: false,
-    employeeSearchSystems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
-    employeeEducateGuideEnabled: true,
-    systemCardCloseEnabled: true,
-    userSystemsSettingsEnabled: true,
-    quickActionsTabs: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
-    systemsOrder: SYSTEMS,
-  }));
-
-  // Always ensure enabled is all true for all systems
-  const enabled = useMemo(() => {
-    return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<SystemKey, boolean>);
-  }, []);
-
-  // Comment out the features fetch to avoid potential issues
-  // useEffect(() => {
-  //   if (!token) return;
-  //   const run = async () => {
-  //     try {
-  //       const res = await fetch(`${API_BASE}/api/config/features`);
-  //       if (res.ok) {
-  //         const f = await res.json();
-  //         setFeatures(f);
-  //       }
-  //       // No fallback needed in catch since initial state provides it
-  //     } catch (e) {
-  //       console.warn("Features load failed, using defaults");
-  //     }
-  //   };
-  //   run();
-  // }, [token]);
-
+  const [features, setFeatures] = useState<Features | null>(null);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -760,33 +608,12 @@ export default function HomePage() {
 
   // NEW: per-session hidden systems (by user)
   const [hiddenSystems, setHiddenSystems] = useState<Record<SystemKey, boolean>>({} as Record<SystemKey, boolean>);
-  // NEW: session-wide tiles visibility toggle
-  const [sessionCardsVisible, setSessionCardsVisible] = useState<boolean>(true);
-  // NEW: settings dialog
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  // NEW: user prefs (all true by default)
-  const [userVisibleSystems, setUserVisibleSystems] = useState<Record<SystemKey, boolean>>(() => SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {}) as Record<SystemKey, boolean>);
 
   // Compute toggle for close buttons (env takes precedence)
   const closeButtonsEnabled = useMemo(() => {
     const env = (process.env.NEXT_PUBLIC_SYSTEM_CARD_CLOSE || "").toString().trim().toLowerCase();
     if (env) return ["1", "true", "on", "yes", "enabled"].includes(env);
     return features?.systemCardCloseEnabled ?? true; // default ON
-  }, [features]);
-
-  // NEW: compute availability of the session-wide tiles toggle (env takes precedence)
-  const sessionToggleEnabled = useMemo(() => {
-    const env = (process.env.NEXT_PUBLIC_SESSION_CARDS_TOGGLE || "").toString().trim().toLowerCase();
-    if (env) return ["1", "true", "on", "yes", "enabled"].includes(env);
-    // fallback to backend features
-    return (features as any)?.sessionCardsToggleEnabled ?? true;
-  }, [features]);
-
-  // NEW: compute availability of user settings feature (env > features)
-  const settingsEnabled = useMemo(() => {
-    const env = (process.env.NEXT_PUBLIC_SYSTEMS_SETTINGS || "").toString().trim().toLowerCase();
-    if (env) return ["1", "true", "on", "yes", "enabled"].includes(env);
-    return features?.userSystemsSettingsEnabled ?? true;
   }, [features]);
 
   // Initialize hidden systems from sessionStorage when email changes
@@ -801,28 +628,9 @@ export default function HomePage() {
           if ((SYSTEMS as string[]).includes(s)) (acc as any)[s as SystemKey] = true;
           return acc;
         }, {} as Record<SystemKey, boolean>);
-        
-        // Auto-reset if all systems are hidden (prevent permanent empty state)
-        if (Object.keys(map).length === SYSTEMS.length && Object.values(map).every(Boolean)) {
-          sessionStorage.removeItem(`hidden:systemCards:${userKey}`);
-          setHiddenSystems({} as Record<SystemKey, boolean>);
-        } else {
-          setHiddenSystems(map);
-        }
+        setHiddenSystems(map);
       } else {
         setHiddenSystems({} as Record<SystemKey, boolean>);
-      }
-
-      // initialize session-wide visibility (default true)
-      try {
-        const visRaw = sessionStorage.getItem(`session:showSystemCards:${userKey}`);
-        if (visRaw === null || visRaw === undefined) {
-          setSessionCardsVisible(true);
-        } else {
-          setSessionCardsVisible(String(visRaw).toLowerCase() !== "false");
-        }
-      } catch {
-        setSessionCardsVisible(true);
       }
     } catch {
       setHiddenSystems({} as Record<SystemKey, boolean>);
@@ -836,34 +644,7 @@ export default function HomePage() {
     const list = Object.entries(next)
       .filter(([_, v]) => !!v)
       .map(([k]) => k);
-    // Only save if not all hidden
-    if (list.length === SYSTEMS.length) return;
     sessionStorage.setItem(`hidden:systemCards:${userKey}`, JSON.stringify(list));
-  };
-
-  // Helper to persist session-wide visibility
-  const persistSessionVisibility = (next: boolean) => {
-    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
-    if (!userKey) return;
-    sessionStorage.setItem(`session:showSystemCards:${userKey}`, String(next));
-  };
-
-  // Helper to persist user prefs to localStorage
-  const persistUserPrefs = (next: Record<SystemKey, boolean>) => {
-    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
-    if (!userKey) return;
-    // Only save if not all hidden
-    if (Object.values(next).every(v => !v)) return;
-    localStorage.setItem(`visible:systemsPrefs:${userKey}`, JSON.stringify(next));
-  };
-
-  // Helper: toggle individual system in user prefs
-  const toggleUserVisible = (sys: SystemKey, visible: boolean) => {
-    setUserVisibleSystems((prev) => {
-      const next = { ...prev, [sys]: visible };
-      persistUserPrefs(next);
-      return next;
-    });
   };
 
   const hideSystem = (sys: SystemKey) => {
@@ -873,14 +654,6 @@ export default function HomePage() {
       persistHidden(next);
       return next;
     });
-  };
-
-  // NEW: all-systems reset function (in settings)
-  const resetUserPrefs = () => {
-    const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
-    setUserVisibleSystems(defaults);
-    persistUserPrefs(defaults);
-    toast.success("Preferences reset to defaults");
   };
 
   const isAggregate = useMemo(() => {
@@ -993,9 +766,38 @@ export default function HomePage() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const enabledSystems = useMemo(() => {
-    return enabled;
-  }, [enabled]);
+  useEffect(() => {
+    if (!token) return;
+    const run = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/config/features`);
+        if (res.ok) {
+          const f = await res.json();
+          setFeatures(f);
+        } else {
+          setFeatures({
+            credentialSource: "env",
+            useMocks: true,
+            useMockAuth: true,
+            systems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
+          });
+        }
+      } catch {
+        setFeatures({
+          credentialSource: "env",
+          useMocks: true,
+          useMockAuth: true,
+          systems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
+        });
+      }
+    };
+    run();
+  }, [token]);
+
+  const enabled = useMemo(() => {
+    const all = features?.systems || {};
+    return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!all[s] }), {} as Record<SystemKey, boolean>);
+  }, [features]);
 
   // Quick Actions tab enablement (from backend features or NEXT_PUBLIC env flags)
   const qaEnabledTabs = useMemo(() => {
@@ -1037,42 +839,19 @@ export default function HomePage() {
     return [...valid, ...remaining];
   }, [features]);
 
-  // NEW: load user prefs from localStorage on email change (persistent across sessions)
-  useEffect(() => {
-    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
-    if (!userKey) return;
-    try {
-      const raw = localStorage.getItem(`visible:systemsPrefs:${userKey}`);
-      let valid: Record<SystemKey, boolean>;
-      if (raw) {
-        const parsed = JSON.parse(raw) as Record<SystemKey, boolean>;
-        valid = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: parsed[s] ?? true }), {} as Record<SystemKey, boolean>);
-        // Auto-reset if all systems are hidden in prefs (prevent permanent empty state)
-        if (Object.values(valid).every(v => !v)) {
-          localStorage.removeItem(`visible:systemsPrefs:${userKey}`);
-          valid = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
-        }
-        setUserVisibleSystems(valid);
-      } else {
-        const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
-        setUserVisibleSystems(defaults);
-      }
-    } catch {
-      const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!enabled[s] }), {} as Record<SystemKey, boolean>);
-      setUserVisibleSystems(defaults);
-    }
-  }, [email, enabled]);
-
-  // Visible systems after applying session hidden map - with safety fallback
+  // Visible systems after applying session hidden map
   const visibleSystems = useMemo(() => {
-    // Force show all enabled systems, ignoring user/session toggles to fix display issue
-    return orderedSystems.filter((s) => enabled[s]);
-  }, [orderedSystems, enabled]);
+    return orderedSystems.filter((s) => !hiddenSystems[s]);
+  }, [orderedSystems, hiddenSystems]);
 
-  // Always show system cards for authenticated users (remove all gating)
-  const shouldShowSystemCards = true;
-
-  const effectiveShouldShowCards = shouldShowSystemCards && (!!sessionCardsVisible || !sessionToggleEnabled);
+  // Respect opsShowTilesAfterSearch flag: for ops, show tiles only after a search when enabled (default: true)
+  const shouldShowSystemCards = useMemo(() => {
+    if (role === "ops") {
+      const gated = typeof features?.opsShowTilesAfterSearch === "boolean" ? features.opsShowTilesAfterSearch : true;
+      return gated ? hasSearched : true;
+    }
+    return true;
+  }, [role, features, hasSearched]);
 
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
@@ -1268,12 +1047,6 @@ export default function HomePage() {
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
-            {settingsEnabled && (
-              <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} title="Customize visible system tiles">
-                <Settings className="h-4 w-4 mr-1" />
-                Settings
-              </Button>
-            )}
             {/* Educate Me (employees only) */}
             {role === "employee" && educateEnabled && (
               <Button variant="outline" size="sm" onClick={() => setEducateOpen(true)} title="Access educational guides for common issues">
@@ -2220,103 +1993,127 @@ export default function HomePage() {
           </DialogContent>
         </Dialog>
 
-        {/* Settings Dialog */}
-        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>System Tiles Visibility</DialogTitle>
-              <p className="text-sm text-muted-foreground">Toggle which tiles to show. Changes persist until logout.</p>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              {SYSTEMS.map((sys) => (
-                <div key={sys} className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <label className="text-sm font-medium">{SYSTEM_LABELS[sys]}</label>
-                    <p className="text-xs text-muted-foreground">{enabled[sys] ? "Enabled globally" : "Disabled globally"}</p>
+        {/* Ops Recent Failures Panel */}
+        {role === "ops" && (
+          <section>
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Failures (last {minutes} min)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm">Window (minutes)</label>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="w-28"
+                      value={minutes}
+                      onChange={(e) => setMinutes(Math.max(1, Number(e.target.value)))}
+                    />
                   </div>
-                  <Checkbox
-                    checked={userVisibleSystems[sys] ?? !!enabled[sys]}
-                    onCheckedChange={(checked) => toggleUserVisible(sys, !!checked)}
-                    disabled={!enabled[sys]}
-                  />
+                  <Button size="sm" variant="outline" onClick={loadRecentFailures} disabled={opsLoading} title="Refresh recent failures data">
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                  {opsError && <span className="text-xs text-red-600">{opsError}</span>}
                 </div>
-              ))}
-              <Button variant="outline" size="sm" onClick={resetUserPrefs} className="w-full">
-                Reset to Defaults
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Ping Federate – Login Failures</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {opsLoading ? (
+                        <p className="text-sm animate-pulse">Loading...</p>
+                      ) : (failFed?.length || 0) > 0 ? (
+                        <ul className="text-sm list-disc pl-4 space-y-1">
+                          {failFed!.slice(0, 25).map((it: any, idx: number) => (
+                            <li key={`fed-${idx}`}>
+                              {it.userId || it.email || "unknown"} — {it.reason || it.error || "failure"} — {it.time || it.timestamp || ""}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No failures in window</p>
+                      )}
+                    </CardContent>
+                  </Card>
 
-        {/* System Cards - always render if enabled systems exist */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Ping MFA – Verification Failures</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {opsLoading ? (
+                        <p className="text-sm animate-pulse">Loading...</p>
+                      ) : (failMfa?.length || 0) > 0 ? (
+                        <ul className="text-sm list-disc pl-4 space-y-1">
+                          {failMfa!.slice(0, 25).map((it: any, idx: number) => (
+                            <li key={`mfa-${idx}`}>
+                              {it.userId || it.email || "unknown"} — {it.reason || it.error || "failure"} — {it.time || it.timestamp || ""}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No failures in window</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {/* System Cards (respect opsShowTilesAfterSearch for ops) */}
         <section>
-          {sessionToggleEnabled && (
-            <div className="flex justify-end mb-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setSessionCardsVisible((prev) => {
-                    const next = !prev;
-                    persistSessionVisibility(next);
-                    return next;
-                  });
-                }}
-                title={sessionCardsVisible ? "Hide system tiles for this session" : "Show system tiles for this session"}
-              >
-                {sessionCardsVisible ? "Hide tiles (session)" : "Show tiles (session)"}
-              </Button>
-            </div>
-          )}
-          {effectiveShouldShowCards ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visibleSystems.map((sys) => (
-                <SystemCard
-                  key={sys}
-                  name={SYSTEM_LABELS[sys]}
-                  system={sys}
-                  enabled={!!enabled[sys]}
-                  token={token!}
-                  role={role!}
-                  showClose={closeButtonsEnabled}
-                  onClose={() => hideSystem(sys)}
-                />
-              ))}
-              {visibleSystems.length === 0 && (
-                <Card className="col-span-full">
-                  <CardContent className="p-6 text-center">
-                    <p className="text-sm text-muted-foreground">No visible systems (check settings or session hides)</p>
+          {(() => {
+            if (role === "ops" && !shouldShowSystemCards) {
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>System tiles hidden</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Run a search to display system tiles (controlled by opsShowTilesAfterSearch).
+                    </p>
                   </CardContent>
                 </Card>
-              )}
-            </div>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>System tiles hidden for this session</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Use the button above to show tiles again for this session.</p>
-                  <Button size="sm" onClick={() => { setSessionCardsVisible(true); persistSessionVisibility(true); }}>
-                    Show tiles
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {!anyEnabled && (
-            <Card>
-              <CardHeader>
-                <CardTitle>No systems enabled</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Feature not enabled. Please contact your administrator or update features.json.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+              );
+            }
+
+            if (!anyEnabled) {
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>No systems enabled</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Feature not enabled. Please contact your administrator or update features.json.
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            }
+            return (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {visibleSystems.map((sys) => (
+                  <SystemCard
+                    key={sys}
+                    name={SYSTEM_LABELS[sys]}
+                    system={sys}
+                    enabled={!!enabled[sys]}
+                    token={token!}
+                    role={role!}
+                    showClose={closeButtonsEnabled}
+                    onClose={() => hideSystem(sys)}
+                  />
+                ))}
+              </div>
+            );
+          })()}
         </section>
 
         {/* All Users feature removed as requested */}
