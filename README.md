@@ -28,6 +28,11 @@
     - OIDC → lists all mocked OIDC connections (5 key fields each)
     - SAML → lists all mocked SAML connections (5 key fields each)
   - Backed by lightweight mock API routes (see API Overview below)
+- Session-based close buttons on system cards (NEW)
+  - Each system card now has a close button (top-right). Closing hides that card for the current session only.
+  - Hidden state is scoped to the signed-in user and resets on sign out or new browser session.
+  - Feature is deployment-time configurable (see Configuration → System card close toggle).
+  - System cards are now available for all roles (employees, management, ops). Previous ops-only-after-search restriction has been removed.
 
 ## ServiceNow Incidents (SNOW) — Mock Integration
 
@@ -199,6 +204,7 @@ Configure both frontend and backend from environment files. Frontend variables m
   - NEXT_PUBLIC_QA_PING_MFA=true|false — Enable/disable Ping MFA tab
   - NEXT_PUBLIC_SPLUNK_URL — URL for "Take Me to Splunk" (default: https://splunk.company.com)
   - NEXT_PUBLIC_CLOUDWATCH_URL — URL for "Take Me to Cloud Watch" (default: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1)
+  - NEXT_PUBLIC_SYSTEM_CARD_CLOSE=true|false — Enable/disable close buttons on system cards (session-only hide). If set, this overrides backend feature flag.
 
 Notes:
 - Only NEXT_PUBLIC_* variables are exposed to the browser.
@@ -212,6 +218,39 @@ Notes:
 Getting started:
 - cp .env.example .env.local (root) and adjust as needed
 - Ensure backend/.env exists (sample already provided)
+
+### System card close toggle (deployment-time)
+
+Configure whether users can temporarily hide system cards using the close button. This affects UI only and stores state per-session (sessionStorage), per-user (keyed by email).
+
+Precedence: Environment variable overrides backend features.
+
+1) Frontend env (preferred for deployments)
+```
+NEXT_PUBLIC_SYSTEM_CARD_CLOSE=true   # enable close buttons (default)
+# or
+NEXT_PUBLIC_SYSTEM_CARD_CLOSE=false  # disable close buttons entirely
+```
+- Requires rebuild/redeploy of the frontend.
+
+2) Backend features (served by GET /config/features)
+- Add the optional `systemCardCloseEnabled` boolean in `backend/config/features.json`:
+```
+{
+  // ... keep existing keys ...
+  "systemCardCloseEnabled": true
+}
+```
+- Requires backend restart. Effective only when `NEXT_PUBLIC_SYSTEM_CARD_CLOSE` is NOT set.
+
+Behavior
+- When enabled, each system card shows a close (X) icon in the top-right corner.
+- Clicking the close hides that card for the remainder of the browser session for the current user.
+- Hidden list is stored in sessionStorage under key `hidden:systemCards:<userEmail>` and is cleared on sign out or new browser session.
+- Does not modify backend configuration — purely a UI preference.
+
+Visibility change for Ops
+- System cards are now rendered for all roles by default. The previous behavior (ops tiles visible only after search via `opsShowTilesAfterSearch`) has been removed in favor of consistent visibility.
 
 ### Environment files: what goes where (Education)
 
