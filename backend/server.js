@@ -287,6 +287,51 @@ app.get('/api/snow/incidents', authRequired, (req, res) => {
   return res.json({ email: targetEmail, ...counts, items });
 });
 
+// Add new route for system-specific user initial data after the search-employee routes
+app.get('/api/search-employee/:id/:system', authRequired, (req, res) => {
+  const id = sanitize(req.params.id);
+  const system = req.params.system;
+  if (!systems.includes(system)) {
+    return res.status(400).json({ error: 'Invalid system' });
+  }
+  const role = req.user.role || 'employee';
+  const isOps = role === 'ops';
+  const isOwn = id === sanitize(req.user.email);
+  // For employees, only own data
+  if (!isOps && !isOwn) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  if (!featureEnabled(system)) {
+    return res.status(404).json({ error: 'Feature not enabled' });
+  }
+  if (!FEATURES.useMocks) {
+    return res.status(501).json({ error: 'Real API not implemented' });
+  }
+  // Load mock for system initial or generate fallback
+  const mockFile = `${system}-initial.json`;
+  let data = loadMock(mockFile);
+  if (!data) {
+    // Generate basic mock data
+    data = {
+      userId: id,
+      email: id.includes('@') ? id : `${id}@company.com`,
+      system: system,
+      status: 'Active',
+      lastUpdated: new Date().toISOString(),
+      // Add more generic fields as needed
+      name: id.includes('@') ? id.split('@')[0].replace(/\./g, ' ').replace(/(^|\s)[a-z]/g, c => c.toUpperCase()) : id.toUpperCase(),
+    };
+  } else {
+    // Inject user-specific info
+    if (typeof data === 'object') {
+      data.userId = id;
+      data.email = id.includes('@') ? id : `${data.email || `${id}@company.com`}`;
+    }
+  }
+  logger.info({ msg: 'user initial lookup', system, id: id.includes('@') ? '[EMAIL]' : id, role });
+  return res.json({ data });
+});
+
 // Add new route for search details after the search-employee route
 systems.forEach((system) => {
   // Search details for specific system (ops: full details; employee: limited if permitted)

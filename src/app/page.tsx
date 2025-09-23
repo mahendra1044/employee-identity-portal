@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ""; // FIXED: Use relative API paths for Next.js routes (localhost:3000/api)
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // Backend API base for auth/search/own/config calls
 
 type Features = {
   credentialSource: string;
@@ -151,8 +151,8 @@ function SystemCard({
     try {
       let endpoint;
       if (userKey) {
-        // FIXED: Use details endpoint for searched user initial data (assumes backend supports it with limited fields or full)
-        endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
+        // FIXED: Use dedicated system-specific endpoint for searched user initial data
+        endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/${system}`;
       } else {
         endpoint = `/api/own-${system}`;
       }
