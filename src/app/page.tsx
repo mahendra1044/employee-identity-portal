@@ -460,19 +460,20 @@ function SystemCard({
 
       {/* Ticket Dialog */}
       <Dialog open={ticketDialogOpen} onOpenChange={setTicketDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="max-h-[80vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Create SNOW Ticket for {name}</DialogTitle>
             <DialogDescription>Enter additional details if needed. This will be included in the ticket description.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="flex-1 space-y-4 overflow-y-auto p-6">
             <Textarea
               placeholder="Optional: Add more information about the access issue or investigation needed..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
+              rows={6}
+              className="min-h-[120px] resize-none"
             />
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-2 flex-shrink-0 pt-2">
               <Button type="button" variant="outline" onClick={() => setTicketDialogOpen(false)}>
                 Cancel
               </Button>
