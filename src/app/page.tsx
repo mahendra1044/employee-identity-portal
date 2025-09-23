@@ -116,6 +116,7 @@ function SystemCard({
   token,
   role,
   email,
+  searchKey, // NEW: optional search key for ops search mode
 }: {
   name: string;
   system: SystemKey;
@@ -123,6 +124,7 @@ function SystemCard({
   token: string;
   role: string;
   email: string;
+  searchKey?: string; // NEW
 }) {
   const [data, setData] = useState<any | null>(null);
   const [details, setDetails] = useState<any | null>(null);
@@ -147,7 +149,11 @@ function SystemCard({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/own-${system}`, {
+      // UPDATED: Use search endpoint if searchKey provided (ops search mode)
+      const endpoint = searchKey
+        ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}/details?system=${system}`
+        : `${API_BASE}/api/own-${system}`;
+      const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -182,7 +188,11 @@ function SystemCard({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/own-${system}/details`, {
+      // UPDATED: Use search endpoint if searchKey provided
+      const detailsEndpoint = searchKey
+        ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}/details?system=${system}`
+        : `${API_BASE}/api/own-${system}/details`;
+      const res = await fetch(detailsEndpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -211,7 +221,7 @@ function SystemCard({
   useEffect(() => {
     loadInitial(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, enabled]);
+  }, [token, enabled, searchKey]); // UPDATED: add searchKey to deps
 
   // helper to flatten JSON into key/value pairs for readable HTML view
   const toPairs = (obj: any): Array<{ k: string; v: any }> => {
@@ -1033,6 +1043,33 @@ export default function HomePage() {
     setUserToggles(updated);
     localStorage.setItem("systemToggles", JSON.stringify(updated));
   };
+
+  // NEW: Track search user key for ops cards
+  const [currentSearchKey, setCurrentSearchKey] = useState<string | null>(null);
+
+  // NEW: Extract search key after successful search (for ops cards)
+  useEffect(() => {
+    if (hasSearched && effectiveRole === "ops" && searchResults) {
+      const pd = Array.isArray(searchResults["ping-directory"]) ? searchResults["ping-directory"] : [];
+      const mfa = Array.isArray(searchResults["ping-mfa"]) ? searchResults["ping-mfa"] : [];
+      const q = search.trim();
+      let key: string;
+      const exactPd = pd.find((u: any) => (u.userId || "") === q || (u.email || "").toLowerCase() === q.toLowerCase());
+      if (exactPd) {
+        key = exactPd.userId || exactPd.email || q;
+      } else {
+        const exactMfa = mfa.find((u: any) => (u.userId || "") === q);
+        if (exactMfa) {
+          key = exactMfa.userId || q;
+        } else {
+          key = q;
+        }
+      }
+      setCurrentSearchKey(key);
+    } else {
+      setCurrentSearchKey(null);
+    }
+  }, [searchResults, hasSearched, effectiveRole, search]);
 
   if (!token) {
     return <LoginCard onLogin={login} />;
@@ -2183,6 +2220,7 @@ export default function HomePage() {
                     token={token!}
                     role={effectiveRole!}
                     email={email!}
+                    searchKey={showOpsTilesAfterSearch ? currentSearchKey : undefined} // NEW: pass search key for ops search mode
                   />
                 ))}
               </div>
