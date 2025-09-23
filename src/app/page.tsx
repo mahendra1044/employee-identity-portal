@@ -138,9 +138,12 @@ function SystemCard({
   const [description, setDescription] = useState("");
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
 
-  const loadInitial = async () => {
+  const loadInitial = async (showToast = true) => {
     if (!enabled) return;
-    const refreshToast = toast.loading(`Refreshing ${name}...`);
+    let refreshToast;
+    if (showToast) {
+      refreshToast = toast.loading(`Refreshing ${name}...`);
+    }
     setLoading(true);
     setError(null);
     try {
@@ -162,10 +165,14 @@ function SystemCard({
       }
       const json = await res.json();
       setData(json.data);
-      toast.success(`Refreshed ${name}`, { id: refreshToast });
+      if (showToast) {
+        toast.success(`Refreshed ${name}`, { id: refreshToast });
+      }
     } catch (e: any) {
       setError(e.message || "Error loading data");
-      toast.error(`Failed to refresh ${name}: ${e.message}`, { id: refreshToast });
+      if (showToast) {
+        toast.error(`Failed to refresh ${name}: ${e.message}`, { id: refreshToast });
+      }
     } finally {
       setLoading(false);
     }
@@ -202,7 +209,7 @@ function SystemCard({
   };
 
   useEffect(() => {
-    loadInitial();
+    loadInitial(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, enabled]);
 
@@ -295,7 +302,7 @@ function SystemCard({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-end gap-2">
-            <Button size="sm" variant="secondary" onClick={loadInitial} disabled={!enabled || loading} title="Refresh system data">
+            <Button size="sm" variant="secondary" onClick={() => loadInitial(true)} disabled={!enabled || loading} title="Refresh system data">
               <RefreshCw className="h-4 w-4" />
             </Button>
             {data && (
