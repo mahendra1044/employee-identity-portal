@@ -694,7 +694,7 @@ export default function HomePage() {
   const persistUserPrefs = (next: Record<SystemKey, boolean>) => {
     const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
     if (!userKey) return;
-    localStorage.setItem(`visible:sytemsPrefs:${userKey}`, JSON.stringify(next));
+    localStorage.setItem(`visible:systemsPrefs:${userKey}`, JSON.stringify(next));
   };
 
   // Helper: toggle individual system in user prefs
@@ -911,7 +911,7 @@ export default function HomePage() {
     const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
     if (!userKey) return;
     try {
-      const raw = localStorage.getItem(`visible:sytemsPrefs:${userKey}`);
+      const raw = localStorage.getItem(`visible:systemsPrefs:${userKey}`); // fixed typo: sytems -> systems
       if (raw) {
         const parsed = JSON.parse(raw) as Record<SystemKey, boolean>;
         const valid = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: parsed[s] ?? true }), {} as Record<SystemKey, boolean>);
@@ -930,8 +930,8 @@ export default function HomePage() {
 
   // Visible systems after applying session hidden map
   const visibleSystems = useMemo(() => {
-    return orderedSystems.filter((s) => !hiddenSystems[s] && userVisibleSystems[s]);
-  }, [orderedSystems, hiddenSystems, userVisibleSystems]);
+    return orderedSystems.filter((s) => !hiddenSystems[s] && (userVisibleSystems[s] ?? !!enabled[s])); // added fallback !!enabled[s] to prevent empty grid
+  }, [orderedSystems, hiddenSystems, userVisibleSystems, enabled]); // added enabled dep
 
   // Respect opsShowTilesAfterSearch flag: for ops, show tiles only after a search when enabled (default: true)
   const shouldShowSystemCards = useMemo(() => {
