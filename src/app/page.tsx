@@ -234,6 +234,44 @@ function SystemCard({
     setHtmlOpen(true);
   };
 
+  const submitSnowTicket = async () => {
+    const payload = details || data || {};
+    try {
+      const res = await fetch("/api/submit-snow-ticket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ system, payload, userEmail: email }),
+      });
+      if (res.ok) {
+        const { ticketNumber } = await res.json();
+        toast.success(`SNOW ticket submitted: ${ticketNumber}`);
+      } else {
+        toast.error("Failed to submit SNOW ticket");
+      }
+    } catch {
+      toast.error("Failed to submit SNOW ticket");
+    }
+  };
+
+  // Add a negative scenario trigger for CyberArk to simulate a failed send
+  const submitSnowTicketFailTest = async () => {
+    const payload = details || data || {};
+    try {
+      const res = await fetch("/api/submit-snow-ticket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Force-Fail": "1" },
+        body: JSON.stringify({ system, payload, userEmail: "invalid@test.com", forceFail: true }),
+      });
+      if (res.ok) {
+        toast.warning("SNOW ticket unexpectedly succeeded (fail test)");
+      } else {
+        toast.error("Failed to submit SNOW ticket (expected for test)");
+      }
+    } catch {
+      toast.error("Failed to submit SNOW ticket (expected for test)");
+    }
+  };
+
   const sendEmail = async () => {
     const to = getSupportEmail(system);
     const subject = `[${name}] Help request`;
@@ -305,11 +343,11 @@ function SystemCard({
             <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading} title="View data in HTML format">
               <Code className="h-4 w-4" />
             </Button>
-            <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled} title="Send support email with current data">
-              <Mail className="h-4 w-4" />
+            <Button size="sm" variant="outline" onClick={submitSnowTicket} disabled={!enabled} title="Submit SNOW ticket with current data">
+              <FileText className="h-4 w-4" />
             </Button>
             {system === "cyberark" && (
-              <Button size="sm" variant="destructive" onClick={sendEmailFailTest} disabled={!enabled} title="Test email failure scenario">
+              <Button size="sm" variant="destructive" onClick={submitSnowTicketFailTest} disabled={!enabled} title="Test SNOW ticket failure scenario">
                 <AlertTriangle className="h-4 w-4" />
               </Button>
             )}
