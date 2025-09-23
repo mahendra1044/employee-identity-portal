@@ -245,11 +245,15 @@ function SystemCard({
       if (res.ok) {
         const { ticketNumber } = await res.json();
         toast.success(`SNOW ticket submitted: ${ticketNumber}`);
+        console.log('SNOW Ticket Success:', { ticketNumber, system, userEmail: email, payload });
       } else {
+        const errorText = await res.text();
         toast.error("Failed to submit SNOW ticket");
+        console.error('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: errorText });
       }
-    } catch {
+    } catch (error) {
       toast.error("Failed to submit SNOW ticket");
+      console.error('SNOW Ticket Error:', { system, userEmail: email, payload, error });
     }
   };
 
