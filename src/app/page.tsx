@@ -83,7 +83,10 @@ function useAuth() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error("Login failed");
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || "Login failed");
+    }
     const data: LoginResponse = await res.json();
     localStorage.setItem("token", data.token);
     localStorage.setItem("role", data.role);
