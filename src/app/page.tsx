@@ -596,7 +596,8 @@ function LoginCard({ onLogin }: { onLogin: (email: string, password: string) => 
 }
 
 export default function HomePage() {
-  const { token, role, email, login, logout } = useAuth();
+  const { token, role: originalRole, email, login, logout } = useAuth();
+  const [effectiveRole, setEffectiveRole] = useState(originalRole);
   const [features, setFeatures] = useState<Features | null>(null);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any | null>(null);
@@ -671,6 +672,18 @@ export default function HomePage() {
       localStorage.setItem("theme", theme);
     }
   }, [theme]);
+
+  // Sync effectiveRole with originalRole changes (e.g., after login)
+  useEffect(() => {
+    setEffectiveRole(originalRole);
+  }, [originalRole]);
+
+  const toggleRole = () => {
+    if (originalRole !== 'ops') return; // Only allow for ops
+    const newRole = effectiveRole === 'ops' ? 'employee' : 'ops';
+    setEffectiveRole(newRole);
+    toast.success(`Switched to ${newRole} mode`);
+  };
 
   const isAggregate = useMemo(() => {
     return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
@@ -850,7 +863,7 @@ export default function HomePage() {
   }, [features]);
 
   const loadRecentFailures = async () => {
-    if (!token || role !== "ops") return;
+    if (!token || effectiveRole !== "ops") return;
     setOpsLoading(true);
     setOpsError(null);
     try {
@@ -913,7 +926,7 @@ export default function HomePage() {
   // Helper: decide which email to use for SNOW incidents based on role/search
   const resolveSnowEmail = (): string | null => {
     const self = String(email || (typeof window !== 'undefined' ? localStorage.getItem("email") : '') || '').toLowerCase();
-    if (role === 'ops') {
+    if (effectiveRole === 'ops') {
       // Only after a search should ops see/incidents for a user
       if (!hasSearched) return null;
       const q = String(search || '').trim().toLowerCase();
@@ -934,7 +947,7 @@ export default function HomePage() {
     if (!token) return;
     const target = resolveSnowEmail();
     // Only block when ops has no valid searched target; employees can proceed (backend uses self email)
-    if (role === 'ops' && !target) {
+    if (effectiveRole === 'ops' && !target) {
       toast.error('No target user found for SNOW incidents');
       return;
     }
@@ -944,10 +957,10 @@ export default function HomePage() {
     setSnowItems(null);
     // For employees, prefer server-returned email; prefill with best-known fallback
     const selfFallback = (typeof window !== 'undefined' ? localStorage.getItem('email') : '') || email || '';
-    setSnowEmail(role === 'ops' ? target : (target || String(selfFallback).toLowerCase()))
+    setSnowEmail(effectiveRole === 'ops' ? target : (target || String(selfFallback).toLowerCase()))
     try {
       const base = `${API_BASE}/api/snow/incidents`;
-      const url = role === 'ops' ? `${base}?email=${encodeURIComponent(String(target))}` : base;
+      const url = effectiveRole === 'ops' ? `${base}?email=${encodeURIComponent(String(target))}` : base;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json?.error || 'Failed to load incidents');
@@ -990,22 +1003,22 @@ export default function HomePage() {
 
   // Reset SNOW context on ops search changes to avoid stale counts/targets
   useEffect(() => {
-    if (role === 'ops') {
+    if (effectiveRole === 'ops') {
       setSnowCount(null);
       setSnowEmail(null);
       setSnowItems(null);
     }
-  }, [role, hasSearched, search]);
+  }, [effectiveRole, hasSearched, search]);
 
   // removed loadAllUsers (feature deprecated)
 
   useEffect(() => {
-    if (token && role === "ops") {
+    if (token && effectiveRole === "ops") {
       // do not auto-load all users; show recent failures panel instead
       loadRecentFailures();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, role]);
+  }, [token, effectiveRole]);
 
   // Handle logout: clear toggles
   const handleLogout = () => {
@@ -1041,19 +1054,30 @@ export default function HomePage() {
                 <span
                   className={
                     `inline-flex items-center rounded-full px-2 py-0.5 text-[10px] border ` +
-                    (role === "ops"
+                    (effectiveRole === "ops"
                       ? "border-purple-200 text-purple-700 bg-purple-50 dark:bg-purple-900/20"
-                      : role === "employee"
+                      : effectiveRole === "employee"
                       ? "border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-900/20"
                       : "border-amber-200 text-amber-700 bg-amber-50 dark:bg-amber-900/20")
                   }
                 >
-                  {role}
+                  {effectiveRole}
                 </span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
+            {/* Role toggle button - only for original ops */}
+            {originalRole === 'ops' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleRole}
+                title={`Switch to ${effectiveRole === 'ops' ? 'Employee' : 'Ops'} mode`}
+              >
+                <Users className="h-4 w-4" />
+              </Button>
+            )}
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
@@ -1063,7 +1087,7 @@ export default function HomePage() {
               Settings
             </Button>
             {/* Educate Me (employees only) */}
-            {role === "employee" && educateEnabled && (
+            {effectiveRole === "employee" && educateEnabled && (
               <Button variant="outline" size="sm" onClick={() => setEducateOpen(true)} title="Access educational guides for common issues">
                 <BookOpen className="h-4 w-4 mr-1" />
                 Educate me
@@ -1071,9 +1095,9 @@ export default function HomePage() {
             )}
             {/* Show SNOW tickets button with dynamic count (ops: visible only after search) */}
             {(
-              role !== 'ops' || (hasSearched && !!resolveSnowEmail())
+              effectiveRole !== 'ops' || (hasSearched && !!resolveSnowEmail())
             ) && (
-              <Button variant="outline" size="sm" onClick={openSnowDialog} title={role === 'ops' ? (resolveSnowEmail() || undefined) : "View your ServiceNow incidents"}>
+              <Button variant="outline" size="sm" onClick={openSnowDialog} title={effectiveRole === 'ops' ? (resolveSnowEmail() || undefined) : "View your ServiceNow incidents"}>
                 <FileText className="h-4 w-4 mr-1" />
                 <span className="hidden sm:inline">SNOW tickets</span>
                 <span className="sm:hidden">SNOW</span>
@@ -1195,7 +1219,7 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   {/* Ping Directory card (respect employee search config when not self) */}
                   {(() => {
-                    const isEmployee = role === "employee";
+                    const isEmployee = effectiveRole === "employee";
                     const isSelf = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
                     const allowPD = features?.employeeSearchSystems?.["ping-directory"] ?? true;
                     if (isEmployee && !isSelf && !allowPD) return null;
@@ -1207,12 +1231,12 @@ export default function HomePage() {
                         <CardContent className="space-y-2">
                           {(() => {
                             const list = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
-                            const filtered = role === "ops" && search.trim()
+                            const filtered = effectiveRole === "ops" && search.trim()
                               ? list.filter((u: any) =>
                                   u.userId === search.trim() || u.email?.toLowerCase() === search.trim().toLowerCase()
                                 )
                               : list;
-                            const finalList = role === "ops" ? filtered.slice(0, 1) : filtered;
+                            const finalList = effectiveRole === "ops" ? filtered.slice(0, 1) : filtered;
                             return (
                               <>
                                 <div className="flex justify-end gap-2">
@@ -1280,7 +1304,7 @@ export default function HomePage() {
 
                   {/* Ping MFA card (respect employee search config when not self) */}
                   {(() => {
-                    const isEmployee = role === "employee";
+                    const isEmployee = effectiveRole === "employee";
                     const isSelf = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
                     const allowMFA = features?.employeeSearchSystems?.["ping-mfa"] ?? true;
                     if (isEmployee && !isSelf && !allowMFA) return null;
@@ -1292,10 +1316,10 @@ export default function HomePage() {
                         <CardContent className="space-y-2">
                           {(() => {
                             const list = Array.isArray(searchResults?.["ping-mfa"]) ? searchResults["ping-mfa"] : [];
-                            const filtered = role === "ops" && search.trim()
+                            const filtered = effectiveRole === "ops" && search.trim()
                               ? list.filter((u: any) => u.userId === search.trim() || u.email?.toLowerCase() === search.trim().toLowerCase())
                               : list;
-                            const finalList = role === "ops" ? filtered.slice(0, 1) : filtered;
+                            const finalList = effectiveRole === "ops" ? filtered.slice(0, 1) : filtered;
                             return (
                               <>
                                 <div className="flex justify-end gap-2">
@@ -1414,7 +1438,7 @@ export default function HomePage() {
                             }
                           } catch {}
 
-                          const isEmployee = role === "employee";
+                          const isEmployee = effectiveRole === "employee";
                           const isSelfSearch = String(search).trim().toLowerCase() === String(email || "").toLowerCase();
                           const allowMap = features?.employeeSearchSystems || {};
 
@@ -1717,7 +1741,7 @@ export default function HomePage() {
         </section>
 
         {/* Ops Quick Actions (tabs) - independent card below Search, visible after successful search */}
-        {role === "ops" && hasSearched && (
+        {effectiveRole === "ops" && hasSearched && (
           <section>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between p-6 space-y-0">
@@ -2038,7 +2062,7 @@ export default function HomePage() {
         </Dialog>
 
         {/* Ops Recent Failures Panel */}
-        {role === "ops" && (
+        {effectiveRole === "ops" && (
           <section>
             <Card>
               <CardHeader>
@@ -2112,8 +2136,8 @@ export default function HomePage() {
         {/* System Cards (hide by default for ops) */}
         <section>
           {(() => {
-            const showOpsTiles = role === "ops" && !!features?.opsShowTilesAfterSearch && hasSearched;
-            const isOps = role === "ops";
+            const showOpsTiles = effectiveRole === "ops" && !!features?.opsShowTilesAfterSearch && hasSearched;
+            const isOps = effectiveRole === "ops";
             const anyVisible = visibleSystems.length > 0;
             if (!anyEnabled) {
               return (
@@ -2157,7 +2181,7 @@ export default function HomePage() {
                     system={sys}
                     enabled={!!enabled[sys]}
                     token={token!}
-                    role={role!}
+                    role={effectiveRole!}
                     email={email!}
                   />
                 ))}

@@ -2,6 +2,27 @@
 
 ## New Features (Sept 2025)
 
+- **Role Toggle for Ops (NEW)**:
+  - Ops users can now toggle between "Ops mode" and "Employee mode" via a button in the header (near the theme toggle).
+  - **Purpose**: Allows ops team members to quickly switch UI perspectives without logging out/re-logging in, since ops roles inherently include employee capabilities.
+  - **Visibility**: Icon button (Users icon) appears only for users with original role = "ops".
+  - **Behavior**:
+    - Toggles the effective role between "ops" and "employee".
+    - Updates the role badge in the header to reflect the current mode.
+    - Shows a success toast: "Switched to [mode] mode".
+    - **UI Changes**:
+      - Ops mode: Shows Recent Failures panel, Quick Actions (after search), and system cards (after search if configured).
+      - Employee mode: Hides ops-specific sections; shows "Educate me" button and employee-only Ping Federate quick actions.
+    - **Backend Consistency**: API calls always use the original JWT role ("ops"), so full access is preserved. The toggle affects only frontend UI rendering.
+    - **Persistence**: Resets to original role on page refresh or logout. No localStorage storage to avoid sync issues.
+    - **Limitations**: Only available for original "ops" role (inferred from login email). Employees and other roles cannot toggle.
+  - **Testing**:
+    1. Login as ops (e.g., ops@company.com).
+    2. Click the Users icon button → switches to Employee mode (badge changes to blue "employee", Recent Failures hides, Educate button appears).
+    3. Click again → switches back to Ops mode.
+    4. Refresh page → reverts to original Ops mode.
+    5. In Employee mode, search and view results as an employee would (limited systems).
+
 - Copy JSON everywhere
   - Added "Copy JSON" buttons to all places where JSON is rendered:
     - System tiles (initial data)
