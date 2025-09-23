@@ -116,7 +116,7 @@ function SystemCard({
   token,
   role,
   email,
-  searchKey, // NEW: optional search key for ops search mode
+  searchKey,
 }: {
   name: string;
   system: SystemKey;
@@ -124,7 +124,7 @@ function SystemCard({
   token: string;
   role: string;
   email: string;
-  searchKey?: string; // NEW
+  searchKey?: string;
 }) {
   const [data, setData] = useState<any | null>(null);
   const [details, setDetails] = useState<any | null>(null);
@@ -147,11 +147,12 @@ function SystemCard({
       refreshToast = toast.loading(`Refreshing ${name}...`);
     }
     setLoading(true);
+    setData(null); // Clear old data before fetching new
     setError(null);
     try {
-      // UPDATED: Use search endpoint if searchKey provided (ops search mode); without /details for initial
+      // UPDATED: For search mode, use details endpoint to fetch per-system data for the searched user
       const endpoint = searchKey
-        ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}?system=${system}`
+        ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}/details?system=${system}`
         : `${API_BASE}/api/own-${system}`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
@@ -188,7 +189,7 @@ function SystemCard({
     setLoading(true);
     setError(null);
     try {
-      // UPDATED: Use search endpoint if searchKey provided
+      // For search mode, use details endpoint; for own, use /details
       const detailsEndpoint = searchKey
         ? `${API_BASE}/api/search-employee/${encodeURIComponent(searchKey)}/details?system=${system}`
         : `${API_BASE}/api/own-${system}/details`;
@@ -221,7 +222,7 @@ function SystemCard({
   useEffect(() => {
     loadInitial(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, enabled, searchKey]); // UPDATED: add searchKey to deps
+  }, [token, enabled, searchKey]);
 
   // helper to flatten JSON into key/value pairs for readable HTML view
   const toPairs = (obj: any): Array<{ k: string; v: any }> => {
@@ -2213,14 +2214,14 @@ export default function HomePage() {
                   .filter(sys => visibleSystems.includes(sys))
                   .map((sys) => (
                   <SystemCard
-                    key={`${sys}-${showOpsTiles ? currentSearchKey || 'searching' : 'self'}`}
+                    key={`${sys}-${showOpsTiles ? (currentSearchKey || search || 'searching') : 'self'}-${Date.now()}`}
                     name={SYSTEM_LABELS[sys]}
                     system={sys}
                     enabled={!!enabled[sys]}
                     token={token!}
                     role={effectiveRole!}
                     email={email!}
-                    searchKey={showOpsTiles ? currentSearchKey : undefined}
+                    searchKey={showOpsTiles ? (currentSearchKey || search) : undefined}
                   />
                 ))}
               </div>
