@@ -400,7 +400,7 @@ function SystemCard({
       </Card>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between w-full pr-12">
               <span>{name} — Details</span>
@@ -419,7 +419,7 @@ function SystemCard({
           {loading ? (
             <p className="text-sm animate-pulse">Loading details...</p>
           ) : details ? (
-            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">
+            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[80vh] overflow-y-auto">
               {JSON.stringify(details, null, 2)}
             </pre>
           ) : (
@@ -429,7 +429,7 @@ function SystemCard({
       </Dialog>
 
       <Dialog open={htmlOpen} onOpenChange={setHtmlOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="pr-12">{name} — HTML View</DialogTitle>
           </DialogHeader>
@@ -438,8 +438,8 @@ function SystemCard({
             if (!payload) return <p className="text-sm text-muted-foreground">No data available to display</p>;
             const pairs = toPairs(payload).slice(0, 1000); // safety cap
             return (
-              <div className="max-h-[70vh] overflow-y-auto pr-1">
-                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+              <div className="max-h-[80vh] overflow-y-auto pr-1">
+                <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
                   {pairs.map(({ k, v }) => (
                     <div key={k} className="flex flex-col py-1 border-b last:border-b-0 border-border/60">
                       <dt className="text-xs font-medium text-muted-foreground truncate">{k}</dt>
@@ -459,7 +459,7 @@ function SystemCard({
 
       {/* PF Employee Dialog */}
       <Dialog open={pfOpen} onOpenChange={setPfOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between w-full pr-12">
               <span>{pfTitle || "Ping Federate"}</span>
@@ -473,7 +473,7 @@ function SystemCard({
           {pfLoading ? (
             <p className="text-sm animate-pulse">Loading...</p>
           ) : Array.isArray(pfData) ? (
-            <div className="max-h-[70vh] overflow-y-auto pr-1">
+            <div className="max-h-[80vh] overflow-y-auto pr-1">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -494,7 +494,7 @@ function SystemCard({
               </Table>
             </div>
           ) : pfData ? (
-            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">{JSON.stringify(pfData, null, 2)}</pre>
+            <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[80vh] overflow-y-auto">{JSON.stringify(pfData, null, 2)}</pre>
           ) : (
             <p className="text-sm text-muted-foreground">No data available</p>
           )}
@@ -1502,7 +1502,7 @@ export default function HomePage() {
           </Card>
           {/* Search result details dialog */}
           <Dialog open={searchDialogOpen} onOpenChange={setSearchDialogOpen}>
-            <DialogContent className="max-w-6xl max-h-[85vh]">
+            <DialogContent className="max-w-7xl max-h-[90vh]">
               <DialogHeader className="pb-3">
                 <DialogTitle className="flex items-center justify-between w-full pr-8 text-base">
                   <span>{searchDialogTitle || "Details"}</span>
@@ -1539,8 +1539,8 @@ export default function HomePage() {
                     if (isAggregate) {
                       return (
                         <div className={`
-                          ${searchDialogMode === "html" ? "grid grid-cols-1 lg:grid-cols-2" : "grid grid-cols-1"} 
-                          gap-2 p-3 max-h-[70vh] overflow-y-auto
+                          ${searchDialogMode === "html" ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" : "grid grid-cols-1"} 
+                          gap-2 p-3 max-h-[80vh] overflow-y-auto
                         `}>
                           {orderedSystems.map((sys) => {
                             const val = (searchDialogData as any)?.[sys] ?? null;
@@ -1559,7 +1559,7 @@ export default function HomePage() {
                                     <Copy className="h-3 w-3" />
                                   </Button>
                                 </div>
-                                <div className="max-h-40 overflow-y-auto pr-0.5 border rounded-sm bg-background p-1.5">
+                                <div className="max-h-48 overflow-y-auto pr-0.5 border rounded-sm bg-background p-1.5">
                                   <dl className="grid grid-cols-1 gap-y-1 text-xs">
                                     {val ? toPairsGlobal(val).slice(0, 30).map(({ k, v }) => (
                                       <div key={k} className="flex flex-col py-0.5 border-b border-border/20 last:border-b-0 last:pb-0">
@@ -1588,7 +1588,7 @@ export default function HomePage() {
                                       <Copy className="h-3 w-3" />
                                     </Button>
                                   </div>
-                                  <pre className="text-[10px] bg-muted/30 p-1.5 rounded overflow-x-auto max-h-40 overflow-y-auto font-mono leading-tight">{JSON.stringify(val, null, 2)}</pre>
+                                  <pre className="text-[10px] bg-muted/30 p-1.5 rounded overflow-x-auto max-h-48 overflow-y-auto font-mono leading-tight">{JSON.stringify(val, null, 2)}</pre>
                                 </div>
                               ) : (
                                 <p className="text-[10px] text-muted-foreground italic py-4 text-center">No details available</p>
@@ -1622,8 +1622,8 @@ export default function HomePage() {
                       );
                     } else {
                       return searchDialogMode === "html" ? (
-                        <div className="max-h-[70vh] overflow-y-auto p-3">
-                          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                        <div className="max-h-[80vh] overflow-y-auto p-3">
+                          <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-2 text-xs">
                             {toPairsGlobal(searchDialogData).slice(0, 80).map(({ k, v }) => (
                               <div key={k} className="flex flex-col py-1 border-b border-border/20 last:border-b-0">
                                 <dt className="font-medium text-muted-foreground/90 truncate text-[10px] mb-0.5">{k}</dt>
@@ -1633,7 +1633,7 @@ export default function HomePage() {
                           </dl>
                         </div>
                       ) : (
-                        <div className="max-h-[70vh] overflow-y-auto p-3">
+                        <div className="max-h-[80vh] overflow-y-auto p-3">
                           <pre className="text-xs bg-muted/30 p-2 rounded overflow-x-auto font-mono leading-tight">{JSON.stringify(searchDialogData, null, 2)}</pre>
                         </div>
                       );
@@ -1859,7 +1859,7 @@ export default function HomePage() {
 
         {/* SNOW incidents dialog */}
         <Dialog open={snowOpen} onOpenChange={setSnowOpen}>
-          <DialogContent className="max-w-3xl space-y-4">
+          <DialogContent className="max-w-5xl space-y-4">
             <DialogHeader>
               <DialogTitle className="pr-12">
                 ServiceNow Incidents{snowEmail ? ` — ${snowEmail}` : ''}
@@ -1883,7 +1883,7 @@ export default function HomePage() {
             ) : snowError ? (
               <p className="text-sm text-red-600">{snowError}</p>
             ) : (snowItems?.length || 0) > 0 ? (
-              <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-[80vh] overflow-y-auto pr-1">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1926,7 +1926,7 @@ export default function HomePage() {
 
         {/* OPS: Ping Federate quick actions dialog */}
         <Dialog open={pfOpsOpen} onOpenChange={setPfOpsOpen}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-5xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center justify-between w-full pr-12">
                 <span>{pfOpsTitle || 'Ping Federate'}</span>
@@ -1940,7 +1940,7 @@ export default function HomePage() {
             {pfOpsLoading ? (
               <p className="text-sm animate-pulse">Loading...</p>
             ) : Array.isArray(pfOpsData) ? (
-              <div className="max-h-[70vh] overflow-y-auto pr-1">
+              <div className="max-h-[80vh] overflow-y-auto pr-1">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1961,7 +1961,7 @@ export default function HomePage() {
                 </Table>
               </div>
             ) : pfOpsData ? (
-              <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[70vh] overflow-y-auto">{JSON.stringify(pfOpsData, null, 2)}</pre>
+              <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-[80vh] overflow-y-auto">{JSON.stringify(pfOpsData, null, 2)}</pre>
             ) : (
               <p className="text-sm text-muted-foreground">No data available</p>
             )}
