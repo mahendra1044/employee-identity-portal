@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
+import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // dev: backend server (configurable)
 
@@ -635,28 +636,28 @@ export default function HomePage() {
   // Static, shared mock guide (same for all employees)
   const EDUCATE_GUIDE = useMemo(() => ({
     "ping-directory": {
-      title: "Ping Directory — Profile / Directory Attribute Issues",
-      summary: "Verify core user attributes like name, email, department, and account status in Ping Directory. Common issues include missing or outdated attributes affecting authentication or access.",
+      title: "Ping Directory",
+      summary: "",
     },
     "ping-federate": {
-      title: "Ping Federate — SSO / Federation Issues",
-      summary: "Check Ping Federate for SSO configuration, last login details, and connection status (OIDC/SAML). Issues often relate to token expiration, connection misconfigurations, or federation errors.",
+      title: "Ping Federate",
+      summary: "",
     },
     "cyberark": {
-      title: "CyberArk — Safe / Vault Access Issues",
-      summary: "Review CyberArk for Safe membership, account credentials, and access permissions. Common problems include pending approvals, expired credentials, or Safe restrictions.",
+      title: "CyberArk",
+      summary: "",
     },
     "saviynt": {
-      title: "Saviynt — Role / Entitlement Assignment Issues",
-      summary: "Examine Saviynt for assigned roles, entitlements, and access requests. Issues may involve role conflicts, pending requests, or entitlement mismatches affecting application access.",
+      title: "Saviynt",
+      summary: "",
     },
     "azure-ad": {
-      title: "Azure AD — Group Membership / Sign-in Issues",
-      summary: "Inspect Azure AD for group memberships, sign-in history, and profile details. Problems often stem from group access denials, conditional access policies, or sign-in failures.",
+      title: "Azure AD",
+      summary: "",
     },
     "ping-mfa": {
-      title: "Ping MFA — Multi-Factor Authentication Issues",
-      summary: "Check Ping MFA for enrollment status, enrolled devices, and recent events. Common issues include device not enrolled, push timeouts, or verification failures.",
+      title: "Ping MFA",
+      summary: "",
     },
   }), [email]);
 
@@ -1067,17 +1068,26 @@ export default function HomePage() {
             <div className="space-y-0">
               <Accordion type="single" collapsible className="w-full">
                 {SYSTEMS.map((sys) => {
-                  const guide = EDUCATE_GUIDE[sys];
+                  const points = EDUCATE_CONFIG[sys as keyof typeof EDUCATE_CONFIG] || [];
+                  const guide = EDUCATE_GUIDE[sys as SystemKey];
                   return (
                     <AccordionItem key={sys} value={sys}>
                       <AccordionTrigger className="text-left hover:no-underline">
                         <div className="flex items-center justify-between w-full">
-                          <span className="font-medium">{guide.title}</span>
+                          <span className="font-medium">{SYSTEM_LABELS[sys as SystemKey]}</span>
                           <span className="text-xs px-2 py-0.5 rounded border bg-muted ml-auto whitespace-nowrap">{sys.replace(/-/g, ' ').toUpperCase()}</span>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="space-y-3 pt-3">
-                        <p className="text-sm text-muted-foreground">{guide.summary}</p>
+                        {points.length > 0 ? (
+                          <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                            {points.map((point: string, idx: number) => (
+                              <li key={idx} className="text-sm">{point}</li>
+                            ))}
+                          </ol>
+                        ) : (
+                          <p className="text-sm text-muted-foreground italic">No educational points configured for this system.</p>
+                        )}
                       </AccordionContent>
                     </AccordionItem>
                   );
