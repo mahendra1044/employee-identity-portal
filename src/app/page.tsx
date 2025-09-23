@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
@@ -632,51 +633,85 @@ export default function HomePage() {
   };
 
   // Static, shared mock guide (same for all employees)
-  const EDUCATE_GUIDE = useMemo(() => (
-    [
-      {
-        id: "mfa",
-        title: "MFA related issues",
-        system: "ping-mfa" as SystemKey,
-        summary: "Check Ping MFA JSON logs for enrollment, device, and last event details.",
-        sample: {
-          userId: "u12345",
-          status: "Enabled",
-          enrolledDevices: ["iPhone 14"],
-          lastEvent: "Push timeout",
-          lastEventAt: new Date().toISOString(),
-        },
-        actions: { viewJson: true, sendMail: true },
+  const EDUCATE_GUIDE = useMemo(() => ({
+    "ping-directory": {
+      title: "Ping Directory — Profile / Directory Attribute Issues",
+      summary: "Verify core user attributes like name, email, department, and account status in Ping Directory. Common issues include missing or outdated attributes affecting authentication or access.",
+      sample: {
+        name: "Employee Name",
+        email: String(email || localStorage.getItem("email") || "").toLowerCase(),
+        department: "Engineering",
+        status: "active",
+        uid: "u12345",
+        employeeId: "EMP-45678",
+        lastModified: new Date().toISOString(),
       },
-      {
-        id: "safe",
-        title: "Safe / Vault access issues",
-        system: "cyberark" as SystemKey,
-        summary: "Review CyberArk JSON to understand Safe membership and credential status.",
-        sample: {
-          safe: "CORP-APP-PROD",
-          account: "svc_corp_app",
-          access: "requested",
-          reason: "Pending approval",
-          lastChecked: new Date().toISOString(),
-        },
-        actions: { viewJson: true, sendMail: true },
+      actions: { viewJson: true, sendMail: false },
+    },
+    "ping-federate": {
+      title: "Ping Federate — SSO / Federation Issues",
+      summary: "Check Ping Federate for SSO configuration, last login details, and connection status (OIDC/SAML). Issues often relate to token expiration, connection misconfigurations, or federation errors.",
+      sample: {
+        userId: "u12345",
+        lastLogin: new Date(Date.now() - 3600000).toISOString(),
+        connections: ["OIDC-Google", "SAML-Internal"],
+        tokenStatus: "Valid",
+        sessionActive: true,
+        ipAddress: "192.168.1.100",
       },
-      {
-        id: "directory",
-        title: "Profile / directory attribute issues",
-        system: "ping-directory" as SystemKey,
-        summary: "Verify core attributes in Ping Directory (email, department, status).",
-        sample: {
-          name: "Employee Name",
-          email: String(email || localStorage.getItem("email") || "").toLowerCase(),
-          department: "Engineering",
-          status: "active",
-        },
-        actions: { viewJson: true, sendMail: false },
+      actions: { viewJson: true, sendMail: true },
+    },
+    "cyberark": {
+      title: "CyberArk — Safe / Vault Access Issues",
+      summary: "Review CyberArk for Safe membership, account credentials, and access permissions. Common problems include pending approvals, expired credentials, or Safe restrictions.",
+      sample: {
+        safe: "CORP-APP-PROD",
+        account: "svc_corp_app",
+        access: "requested",
+        reason: "Pending approval",
+        lastChecked: new Date().toISOString(),
+        credentialStatus: "Available",
       },
-    ]
-  ), [email]);
+      actions: { viewJson: true, sendMail: true },
+    },
+    "saviynt": {
+      title: "Saviynt — Role / Entitlement Assignment Issues",
+      summary: "Examine Saviynt for assigned roles, entitlements, and access requests. Issues may involve role conflicts, pending requests, or entitlement mismatches affecting application access.",
+      sample: {
+        userId: "u12345",
+        roles: ["App_Admin", "IT_Support"],
+        entitlements: 12,
+        requests: { pending: 1, approved: 5 },
+        lastUpdate: new Date().toISOString(),
+      },
+      actions: { viewJson: true, sendMail: true },
+    },
+    "azure-ad": {
+      title: "Azure AD — Group Membership / Sign-in Issues",
+      summary: "Inspect Azure AD for group memberships, sign-in history, and profile details. Problems often stem from group access denials, conditional access policies, or sign-in failures.",
+      sample: {
+        userId: "u12345@company.com",
+        groups: ["IT_Group", "Engineering_Team"],
+        signins: 15,
+        lastSignin: new Date().toISOString(),
+        mfaStatus: "Enforced",
+        conditionalAccess: "Passed",
+      },
+      actions: { viewJson: true, sendMail: true },
+    },
+    "ping-mfa": {
+      title: "Ping MFA — Multi-Factor Authentication Issues",
+      summary: "Check Ping MFA for enrollment status, enrolled devices, and recent events. Common issues include device not enrolled, push timeouts, or verification failures.",
+      sample: {
+        userId: "u12345",
+        status: "Enabled",
+        enrolledDevices: ["iPhone 14"],
+        lastEvent: "Push timeout",
+        lastEventAt: new Date().toISOString(),
+      },
+      actions: { viewJson: true, sendMail: true },
+    },
+  }), [email]);
 
   // Deployment-time toggle: env overrides features when provided
   const educateEnabled = useMemo(() => {
@@ -1078,44 +1113,65 @@ export default function HomePage() {
 
         {/* Educate Guide Dialog */}
         <Dialog open={educateOpen} onOpenChange={setEducateOpen}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Issue Guide — Where to look</DialogTitle>
+              <DialogTitle>Educational Guides — By System</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {EDUCATE_GUIDE.map((g) => (
-                <Card key={g.id} className="border">
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center justify-between gap-2">
-                      <span>{g.title}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded border bg-muted whitespace-nowrap">{SYSTEM_LABELS[g.system]}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-sm text-muted-foreground">{g.summary}</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {g.actions.viewJson && (
-                        <Button
-                          size="sm"
-                          className="w-full justify-center"
-                          variant="secondary"
-                          onClick={() => {
-                            navigator.clipboard.writeText(JSON.stringify(g.sample, null, 2));
-                            toast.success("Sample JSON copied");
-                          }}
-                          title="Copy sample JSON"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                    <details className="group">
-                      <summary className="cursor-pointer text-xs font-medium text-foreground/80 hover:text-foreground select-none">Show sample JSON</summary>
-                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-x-auto overflow-y-auto max-h-40 font-mono whitespace-pre-wrap break-words max-w-full">{JSON.stringify(g.sample, null, 2)}</pre>
-                    </details>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="space-y-0">
+              <Accordion type="single" collapsible className="w-full">
+                {SYSTEMS.map((sys) => {
+                  const guide = EDUCATE_GUIDE[sys];
+                  return (
+                    <AccordionItem key={sys} value={sys}>
+                      <AccordionTrigger className="text-left hover:no-underline">
+                        <div className="flex items-center justify-between w-full">
+                          <span className="font-medium">{guide.title}</span>
+                          <span className="text-xs px-2 py-0.5 rounded border bg-muted ml-auto whitespace-nowrap">{sys.replace(/-/g, ' ').toUpperCase()}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-3 pt-3">
+                        <p className="text-sm text-muted-foreground">{guide.summary}</p>
+                        <div className="flex gap-2">
+                          {guide.actions.viewJson && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => {
+                                navigator.clipboard.writeText(JSON.stringify(guide.sample, null, 2));
+                                toast.success("Sample JSON copied");
+                              }}
+                              title="Copy sample JSON"
+                            >
+                              <Copy className="h-4 w-4 mr-1" />
+                              Copy Sample
+                            </Button>
+                          )}
+                          {guide.actions.sendMail && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                // Placeholder for send email with sample - can integrate similar to SystemCard
+                                toast.info("Support email feature coming soon for guides");
+                              }}
+                              title="Send to support"
+                            >
+                              <Mail className="h-4 w-4 mr-1" />
+                              Contact Support
+                            </Button>
+                          )}
+                        </div>
+                        <details className="group">
+                          <summary className="cursor-pointer text-xs font-medium text-foreground/80 hover:text-foreground select-none mb-1">Show sample data</summary>
+                          <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-32 overflow-y-auto font-mono whitespace-pre-wrap break-words">
+                            {JSON.stringify(guide.sample, null, 2)}
+                          </pre>
+                        </details>
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
             </div>
           </DialogContent>
         </Dialog>
