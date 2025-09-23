@@ -2220,7 +2220,7 @@ export default function HomePage() {
                     token={token!}
                     role={effectiveRole!}
                     email={email!}
-                    searchKey={showOpsTilesAfterSearch ? currentSearchKey : undefined} // NEW: pass search key for ops search mode
+                    searchKey={showOpsTiles ? currentSearchKey : undefined}
                   />
                 ))}
               </div>
