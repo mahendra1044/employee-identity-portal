@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
+import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon, Textarea } from "lucide-react";
 import { toast } from "sonner";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
@@ -134,6 +134,8 @@ function SystemCard({
   const [pfTitle, setPfTitle] = useState<string>("");
   const [pfLoading, setPfLoading] = useState(false);
   const [pfData, setPfData] = useState<any>(null);
+  const [description, setDescription] = useState("");
+  const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
 
   const loadInitial = async () => {
     if (!enabled) return;
@@ -241,32 +243,42 @@ function SystemCard({
     setHtmlOpen(true);
   };
 
-  const submitSnowTicket = async () => {
+  const submitSnowTicket = async (description?: string) => {
     if (!email) {
       toast.error("Email not available - please log in again");
       return;
     }
     const payload = details || data || {};
+    const ticketDesc = description?.trim() || `Access issue investigation request for user ${email} in ${system} system. Please review attached payload for details.`;
     try {
       const res = await fetch("/api/submit-snow-ticket", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system, payload, userEmail: email }),
+        body: JSON.stringify({ system, payload, userEmail: email, description: ticketDesc }),
       });
       const result = await res.json();
       if (res.ok) {
         const { ticketNumber } = result;
         toast.success(`SNOW ticket submitted: ${ticketNumber}`);
-        // Log only if needed; adjust as per user request
-        console.info('SNOW Ticket Success:', { ticketNumber, system, userEmail: email });
+        console.info('SNOW Ticket Success:', { ticketNumber, system, userEmail: email, description: ticketDesc });
       } else {
         toast.error(result.error || "Failed to submit SNOW ticket");
-        console.warn('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: result.error || await res.text() });
+        console.warn('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: result.error || await res.text(), description: ticketDesc });
       }
     } catch (error) {
       toast.error("Failed to submit SNOW ticket");
-      console.error('SNOW Ticket Error:', { system, userEmail: email, error: (error as Error).message });
+      console.error('SNOW Ticket Error:', { system, userEmail: email, error: (error as Error).message, description: ticketDesc });
     }
+  };
+
+  const openTicketDialog = () => {
+    setDescription("");
+    setTicketDialogOpen(true);
+  };
+
+  const handleSubmitTicket = () => {
+    submitSnowTicket(description);
+    setTicketDialogOpen(false);
   };
 
   return (
@@ -296,7 +308,7 @@ function SystemCard({
             <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading} title="View data in HTML format">
               <Code className="h-4 w-4" />
             </Button>
-            <Button size="sm" variant="outline" onClick={submitSnowTicket} disabled={!enabled} title="Submit SNOW ticket with current data">
+            <Button size="sm" variant="outline" onClick={openTicketDialog} disabled={!enabled} title="Submit SNOW ticket with current data">
               <FileText className="h-4 w-4" />
             </Button>
           </div>
@@ -440,6 +452,32 @@ function SystemCard({
               </div>
             );
           })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Ticket Dialog */}
+      <Dialog open={ticketDialogOpen} onOpenChange={setTicketDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create SNOW Ticket for {name}</DialogTitle>
+            <DialogDescription>Enter additional details if needed. This will be included in the ticket description.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              placeholder="Optional: Add more information about the access issue or investigation needed..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+            />
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setTicketDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={handleSubmitTicket}>
+                Submit Ticket
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
