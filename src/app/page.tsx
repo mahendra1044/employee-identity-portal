@@ -831,6 +831,25 @@ export default function HomePage() {
     return [...valid, ...remaining];
   }, [features]);
 
+  const anyEnabled = useMemo(() => Object.values(enabled).some(Boolean), [enabled]);
+
+  const visibleSystems = useMemo(() => 
+    orderedSystems.filter((sys: SystemKey) => 
+      enabled[sys] && 
+      userToggles[sys] && 
+      (role !== "ops" || hasSearched)
+    ), 
+    [orderedSystems, enabled, userToggles, role, hasSearched]
+  );
+
+  const qaEnabledTabs = useMemo(() => ({
+    ...enabled,
+    ...(features?.quickActionsTabs || {})
+  }), [enabled, features]);
+
+  const splunkUrl = "https://splunk.company.com";
+  const cloudwatchUrl = "https://console.aws.amazon.com/cloudwatch/home";
+
   const [searchKey, setSearchKey] = useState<string | null>(null);
 
   const resolveUserKey = useMemo(() => {
@@ -2142,7 +2161,6 @@ export default function HomePage() {
         {/* System Cards (hide by default for ops) */}
         <section>
           {(() => {
-            const anyVisible = visibleSystems.length > 0;
             if (!anyEnabled) {
               return (
                 <Card>
@@ -2157,7 +2175,7 @@ export default function HomePage() {
                 </Card>
               );
             }
-            if (!anyVisible) {
+            if (visibleSystems.length === 0) {
               return (
                 <Card>
                   <CardHeader>
@@ -2176,20 +2194,18 @@ export default function HomePage() {
             }
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {orderedSystems
-                  .filter(sys => visibleSystems.includes(sys))
-                  .map((sys) => (
-                    <SystemCard
-                      key={sys}
-                      name={SYSTEM_LABELS[sys]}
-                      system={sys}
-                      enabled={!!enabled[sys]}
-                      token={token!}
-                      role={role!}
-                      email={email!}
-                      userKey={role === "ops" && searchKey ? searchKey : undefined}
-                    />
-                  ))}
+                {visibleSystems.map((sys) => (
+                  <SystemCard
+                    key={sys}
+                    name={SYSTEM_LABELS[sys]}
+                    system={sys}
+                    enabled={!!enabled[sys]}
+                    token={token!}
+                    role={role!}
+                    email={email!}
+                    userKey={role === "ops" ? searchKey : undefined}
+                  />
+                ))}
               </div>
             );
           })()}
