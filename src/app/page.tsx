@@ -608,12 +608,22 @@ export default function HomePage() {
 
   // NEW: per-session hidden systems (by user)
   const [hiddenSystems, setHiddenSystems] = useState<Record<SystemKey, boolean>>({} as Record<SystemKey, boolean>);
+  // NEW: session-wide tiles visibility toggle
+  const [sessionCardsVisible, setSessionCardsVisible] = useState<boolean>(true);
 
   // Compute toggle for close buttons (env takes precedence)
   const closeButtonsEnabled = useMemo(() => {
     const env = (process.env.NEXT_PUBLIC_SYSTEM_CARD_CLOSE || "").toString().trim().toLowerCase();
     if (env) return ["1", "true", "on", "yes", "enabled"].includes(env);
     return features?.systemCardCloseEnabled ?? true; // default ON
+  }, [features]);
+
+  // NEW: compute availability of the session-wide tiles toggle (env takes precedence)
+  const sessionToggleEnabled = useMemo(() => {
+    const env = (process.env.NEXT_PUBLIC_SESSION_CARDS_TOGGLE || "").toString().trim().toLowerCase();
+    if (env) return ["1", "true", "on", "yes", "enabled"].includes(env);
+    // fallback to backend features
+    return (features as any)?.sessionCardsToggleEnabled ?? true;
   }, [features]);
 
   // Initialize hidden systems from sessionStorage when email changes
@@ -631,6 +641,18 @@ export default function HomePage() {
         setHiddenSystems(map);
       } else {
         setHiddenSystems({} as Record<SystemKey, boolean>);
+      }
+
+      // initialize session-wide visibility (default true)
+      try {
+        const visRaw = sessionStorage.getItem(`session:showSystemCards:${userKey}`);
+        if (visRaw === null || visRaw === undefined) {
+          setSessionCardsVisible(true);
+        } else {
+          setSessionCardsVisible(String(visRaw).toLowerCase() !== "false");
+        }
+      } catch {
+        setSessionCardsVisible(true);
       }
     } catch {
       setHiddenSystems({} as Record<SystemKey, boolean>);
@@ -654,6 +676,13 @@ export default function HomePage() {
       persistHidden(next);
       return next;
     });
+  };
+
+  // Helper to persist session-wide visibility
+  const persistSessionVisibility = (next: boolean) => {
+    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
+    if (!userKey) return;
+    sessionStorage.setItem(`session:showSystemCards:${userKey}`, String(next));
   };
 
   const isAggregate = useMemo(() => {
@@ -852,6 +881,13 @@ export default function HomePage() {
     }
     return true;
   }, [role, features, hasSearched]);
+
+  // Combine ops gating with user session toggle
+  const effectiveShouldShowCards = useMemo(() => {
+    if (!shouldShowSystemCards) return false; // ops gating always honored first
+    if (!sessionToggleEnabled) return true; // feature disabled => always show
+    return !!sessionCardsVisible;
+  }, [shouldShowSystemCards, sessionToggleEnabled, sessionCardsVisible]);
 
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
@@ -2067,6 +2103,24 @@ export default function HomePage() {
 
         {/* System Cards (respect opsShowTilesAfterSearch for ops) */}
         <section>
+          {sessionToggleEnabled && (
+            <div className="flex justify-end mb-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSessionCardsVisible((prev) => {
+                    const next = !prev;
+                    persistSessionVisibility(next);
+                    return next;
+                  });
+                }}
+                title={sessionCardsVisible ? "Hide system tiles for this session" : "Show system tiles for this session"}
+              >
+                {sessionCardsVisible ? "Hide tiles (session)" : "Show tiles (session)"}
+              </Button>
+            </div>
+          )}
           {(() => {
             if (role === "ops" && !shouldShowSystemCards) {
               return (
@@ -2078,6 +2132,24 @@ export default function HomePage() {
                     <p className="text-sm text-muted-foreground">
                       Run a search to display system tiles (controlled by opsShowTilesAfterSearch).
                     </p>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            if (sessionToggleEnabled && !sessionCardsVisible) {
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>System tiles hidden for this session</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">Use the button above to show tiles again for this session.</p>
+                      <Button size="sm" onClick={() => { setSessionCardsVisible(true); persistSessionVisibility(true); }}>
+                        Show tiles
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               );

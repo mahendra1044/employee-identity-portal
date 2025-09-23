@@ -34,6 +34,44 @@
   - Feature is deployment-time configurable (see Configuration → System card close toggle).
   - System cards are now available for all roles (employees, management, ops). Previous ops-only-after-search restriction has been removed.
 
+## Session tiles visibility toggle (NEW)
+Give users control to show/hide ALL system cards for the current session.
+
+- Behavior
+  - A button appears above the "System Cards" section: "Hide tiles (session)" / "Show tiles (session)".
+  - The choice is saved per-user in sessionStorage and resets on sign-out, new tab, or browser session end.
+  - Storage key: `session:showSystemCards:<userEmail>` with value `"true"|"false"`.
+
+- Configuration (requires redeploy/restart)
+  - Frontend env (takes precedence):
+    - `NEXT_PUBLIC_SESSION_CARDS_TOGGLE=true|false`
+      - true → show the session toggle in UI (default if not set in backend)
+      - false → hide the toggle, tiles always visible (subject to other rules)
+  - Backend features (fallback if env not set):
+    - `sessionCardsToggleEnabled: true|false`
+    - Served from `GET /config/features`
+
+- Precedence
+  - If `NEXT_PUBLIC_SESSION_CARDS_TOGGLE` is set, it overrides backend features.
+  - Otherwise, uses `features.sessionCardsToggleEnabled`.
+
+- Interaction with Ops gating
+  - Ops tiles are still governed by `opsShowTilesAfterSearch`.
+    - If `opsShowTilesAfterSearch: true` (default), ops must run a successful search before tiles appear.
+    - The session toggle cannot override this gating; it only applies after the ops gating condition is met.
+
+### Example backend features.json
+```json
+{
+  "sessionCardsToggleEnabled": true,
+  "opsShowTilesAfterSearch": true
+}
+```
+
+### Related environment variables
+- `NEXT_PUBLIC_SYSTEM_CARD_CLOSE=true|false` — enables the per-card close (X) button; session-only hiding per card
+- `NEXT_PUBLIC_SESSION_CARDS_TOGGLE=true|false` — enables the master session toggle to hide/show all system cards
+
 ## ServiceNow Incidents (SNOW) — Mock Integration
 
 This app includes a mock ServiceNow incidents feature used by the header button "Show SNOW tickets". It works in all roles and respects access rules.
@@ -204,7 +242,8 @@ Configure both frontend and backend from environment files. Frontend variables m
   - NEXT_PUBLIC_QA_PING_MFA=true|false — Enable/disable Ping MFA tab
   - NEXT_PUBLIC_SPLUNK_URL — URL for "Take Me to Splunk" (default: https://splunk.company.com)
   - NEXT_PUBLIC_CLOUDWATCH_URL — URL for "Take Me to Cloud Watch" (default: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1)
-  - NEXT_PUBLIC_SYSTEM_CARD_CLOSE=true|false — Enable/disable close buttons on system cards (session-only hide). If set, this overrides backend feature flag.
+  - NEXT_PUBLIC_SYSTEM_CARD_CLOSE=true|false — Enable/disable close buttons on system cards (session-only hide). If set, this overrides backend feature flag
+  - NEXT_PUBLIC_SESSION_CARDS_TOGGLE=true|false — Enable/disable the master session toggle to hide/show all system cards (default: true)
 
 Notes:
 - Only NEXT_PUBLIC_* variables are exposed to the browser.
@@ -569,7 +608,9 @@ All config lives in the backend folder. Changes require restarting the backend s
     "saviynt",
     "azure-ad",
     "ping-mfa"
-  ]
+  ],
+  "sessionCardsToggleEnabled": true,
+  "opsShowTilesAfterSearch": true
 }
 ```
 - Flip behaviors:
@@ -578,6 +619,7 @@ All config lives in the backend folder. Changes require restarting the backend s
   - Switch auth mode: set useMockAuth=false → backend expects real SSO (placeholder), UI still posts to /auth/login
   - Credential source: set credentialSource=cyberArkCcp to fetch secrets from CCP (fallback to env if fails)
   - Card order: set `systemsOrder` as shown above to control dashboard tile order
+  - Session toggle: set `sessionCardsToggleEnabled` to true/false to enable/disable the master session toggle
 
 2) backend/config/roles.json
 - Define which roles can access own/all/search for each system. 403 when denied.
