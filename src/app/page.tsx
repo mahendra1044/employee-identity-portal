@@ -474,7 +474,7 @@ function SystemCard({
                 className="w-full min-h-[120px] resize-none"
               />
             </div>
-            <div className="flex justify-end space-x-2 p-6 pt-0 border-t flex-shrink-0">
+            <div className="flex justify-end gap-3 p-6 pt-4 border-t flex-shrink-0">
               <Button type="button" variant="outline" onClick={() => setTicketDialogOpen(false)}>
                 Cancel
               </Button>
