@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, X } from "lucide-react";
+import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, Mail, AlertTriangle, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault } from "lucide-react";
 import { getSupportEmail } from "@/lib/support-emails";
 import { toast } from "sonner";
 
@@ -25,8 +25,6 @@ type Features = {
   employeeEducateGuideEnabled?: boolean;
   // Ops Quick Actions tabs enable/disable per system (deployment-time configurable)
   quickActionsTabs?: Partial<Record<SystemKey, boolean>>;
-  // NEW: Toggle session close buttons on system cards (deployment-time)
-  systemCardCloseEnabled?: boolean;
 };
 
 type LoginResponse = { token: string; role: string; email: string };
@@ -108,17 +106,12 @@ function SystemCard({
   enabled,
   token,
   role,
-  // NEW: close control
-  showClose,
-  onClose,
 }: {
   name: string;
   system: SystemKey;
   enabled: boolean;
   token: string;
   role: string;
-  showClose?: boolean;
-  onClose?: () => void;
 }) {
   const [data, setData] = useState<any | null>(null);
   const [details, setDetails] = useState<any | null>(null);
@@ -284,18 +277,7 @@ function SystemCard({
 
   return (
     <>
-      <Card className="shadow-sm relative">
-        {showClose && (
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute top-2 right-2 h-7 w-7 text-muted-foreground hover:text-foreground"
-            onClick={onClose}
-            title="Hide this card for this session"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
+      <Card className="shadow-sm">
         <CardHeader className="text-center pb-3">
           <CardTitle className="text-lg font-semibold">{name}</CardTitle>
         </CardHeader>
@@ -606,56 +588,6 @@ export default function HomePage() {
   // Ops Quick Actions active tab
   const [qaActive, setQaActive] = useState<SystemKey>("ping-federate");
 
-  // NEW: per-session hidden systems (by user)
-  const [hiddenSystems, setHiddenSystems] = useState<Record<SystemKey, boolean>>({} as Record<SystemKey, boolean>);
-
-  // Compute toggle for close buttons (env takes precedence)
-  const closeButtonsEnabled = useMemo(() => {
-    const env = (process.env.NEXT_PUBLIC_SYSTEM_CARD_CLOSE || "").toString().trim().toLowerCase();
-    if (env) return ["1", "true", "on", "yes", "enabled"].includes(env);
-    return features?.systemCardCloseEnabled ?? true; // default ON
-  }, [features]);
-
-  // Initialize hidden systems from sessionStorage when email changes
-  useEffect(() => {
-    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
-    if (!userKey) return;
-    try {
-      const raw = sessionStorage.getItem(`hidden:systemCards:${userKey}`);
-      if (raw) {
-        const parsed = JSON.parse(raw) as string[];
-        const map = (parsed || []).reduce((acc, s) => {
-          if ((SYSTEMS as string[]).includes(s)) (acc as any)[s as SystemKey] = true;
-          return acc;
-        }, {} as Record<SystemKey, boolean>);
-        setHiddenSystems(map);
-      } else {
-        setHiddenSystems({} as Record<SystemKey, boolean>);
-      }
-    } catch {
-      setHiddenSystems({} as Record<SystemKey, boolean>);
-    }
-  }, [email]);
-
-  // Helper to persist hidden systems
-  const persistHidden = (next: Record<SystemKey, boolean>) => {
-    const userKey = String(email || localStorage.getItem("email") || "").toLowerCase();
-    if (!userKey) return;
-    const list = Object.entries(next)
-      .filter(([_, v]) => !!v)
-      .map(([k]) => k);
-    sessionStorage.setItem(`hidden:systemCards:${userKey}`, JSON.stringify(list));
-  };
-
-  const hideSystem = (sys: SystemKey) => {
-    setHiddenSystems((prev) => {
-      const next = { ...(prev || {}) } as Record<SystemKey, boolean>;
-      next[sys] = true;
-      persistHidden(next);
-      return next;
-    });
-  };
-
   const isAggregate = useMemo(() => {
     return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
   }, [searchDialogData]);
@@ -838,20 +770,6 @@ export default function HomePage() {
     const remaining = SYSTEMS.filter((s) => !valid.includes(s));
     return [...valid, ...remaining];
   }, [features]);
-
-  // Visible systems after applying session hidden map
-  const visibleSystems = useMemo(() => {
-    return orderedSystems.filter((s) => !hiddenSystems[s]);
-  }, [orderedSystems, hiddenSystems]);
-
-  // Respect opsShowTilesAfterSearch flag: for ops, show tiles only after a search when enabled (default: true)
-  const shouldShowSystemCards = useMemo(() => {
-    if (role === "ops") {
-      const gated = typeof features?.opsShowTilesAfterSearch === "boolean" ? features.opsShowTilesAfterSearch : true;
-      return gated ? hasSearched : true;
-    }
-    return true;
-  }, [role, features, hasSearched]);
 
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
@@ -2065,24 +1983,11 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* System Cards (respect opsShowTilesAfterSearch for ops) */}
+        {/* System Cards (hide by default for ops) */}
         <section>
           {(() => {
-            if (role === "ops" && !shouldShowSystemCards) {
-              return (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System tiles hidden</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Run a search to display system tiles (controlled by opsShowTilesAfterSearch).
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            }
-
+            const showOpsTiles = role === "ops" && !!features?.opsShowTilesAfterSearch && hasSearched;
+            const isOps = role === "ops";
             if (!anyEnabled) {
               return (
                 <Card>
@@ -2097,9 +2002,12 @@ export default function HomePage() {
                 </Card>
               );
             }
+            if (isOps && !showOpsTiles) {
+              return <></>;
+            }
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {visibleSystems.map((sys) => (
+                {orderedSystems.map((sys) => (
                   <SystemCard
                     key={sys}
                     name={SYSTEM_LABELS[sys]}
@@ -2107,8 +2015,6 @@ export default function HomePage() {
                     enabled={!!enabled[sys]}
                     token={token!}
                     role={role!}
-                    showClose={closeButtonsEnabled}
-                    onClose={() => hideSystem(sys)}
                   />
                 ))}
               </div>
