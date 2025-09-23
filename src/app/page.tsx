@@ -140,6 +140,7 @@ function SystemCard({
 
   const loadInitial = async () => {
     if (!enabled) return;
+    const refreshToast = toast.loading(`Refreshing ${name}...`);
     setLoading(true);
     setError(null);
     try {
@@ -161,8 +162,10 @@ function SystemCard({
       }
       const json = await res.json();
       setData(json.data);
+      toast.success(`Refreshed ${name}`, { id: refreshToast });
     } catch (e: any) {
       setError(e.message || "Error loading data");
+      toast.error(`Failed to refresh ${name}: ${e.message}`, { id: refreshToast });
     } finally {
       setLoading(false);
     }
@@ -299,7 +302,10 @@ function SystemCard({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}
+                onClick={() => {
+                  navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+                  toast.success(`Copied ${name} JSON to clipboard`);
+                }}
                 title="Copy current JSON data to clipboard"
               >
                 <Copy className="h-4 w-4" />
