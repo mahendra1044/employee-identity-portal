@@ -241,6 +241,10 @@ function SystemCard({
   };
 
   const submitSnowTicket = async () => {
+    if (!email) {
+      toast.error("Email not available - please log in again");
+      return;
+    }
     const payload = details || data || {};
     try {
       const res = await fetch("/api/submit-snow-ticket", {
@@ -248,18 +252,19 @@ function SystemCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ system, payload, userEmail: email }),
       });
+      const result = await res.json();
       if (res.ok) {
-        const { ticketNumber } = await res.json();
+        const { ticketNumber } = result;
         toast.success(`SNOW ticket submitted: ${ticketNumber}`);
-        console.log('SNOW Ticket Success:', { ticketNumber, system, userEmail: email, payload });
+        // Log only if needed; adjust as per user request
+        console.info('SNOW Ticket Success:', { ticketNumber, system, userEmail: email });
       } else {
-        const errorText = await res.text();
-        toast.error("Failed to submit SNOW ticket");
-        console.error('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: errorText });
+        toast.error(result.error || "Failed to submit SNOW ticket");
+        console.warn('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: result.error || await res.text() });
       }
     } catch (error) {
       toast.error("Failed to submit SNOW ticket");
-      console.error('SNOW Ticket Error:', { system, userEmail: email, payload, error });
+      console.error('SNOW Ticket Error:', { system, userEmail: email, error: (error as Error).message });
     }
   };
 
@@ -283,6 +288,10 @@ function SystemCard({
   };
 
   const sendEmail = async () => {
+    if (!email) {
+      toast.error("Email not available - please log in again");
+      return;
+    }
     const to = getSupportEmail(system);
     const subject = `[${name}] Help request`;
     const payload = details || data || {};
@@ -293,13 +302,18 @@ function SystemCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to, subject, body, system, payload }),
       });
+      const result = await res.json();
       if (res.ok) {
         toast.success("Email sent successfully");
+        // Log only if needed for debugging; remove in production
+        console.info('Email Success:', { to, subject, system });
       } else {
-        toast.error("Failed to send email");
+        toast.error(result.error || "Failed to send email");
+        console.warn('Email Failure:', { to, system, status: res.status, error: result.error });
       }
-    } catch {
+    } catch (error) {
       toast.error("Failed to send email");
+      console.error('Email Error:', { system, error: (error as Error).message });
     }
   };
 
@@ -352,6 +366,9 @@ function SystemCard({
             </Button>
             <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading} title="View data in HTML format">
               <Code className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="outline" onClick={sendEmail} disabled={!enabled} title="Send email with current data">
+              <Mail className="h-4 w-4" />
             </Button>
             <Button size="sm" variant="outline" onClick={submitSnowTicket} disabled={!enabled} title="Submit SNOW ticket with current data">
               <FileText className="h-4 w-4" />
