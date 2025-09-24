@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { searchParams } = new URL(request.url);
   const system = searchParams.get('system');
-  const url = `${API_BASE}/api/search-employee/${params.id}/details${system ? `?system=${system}` : ''}`;
+  const url = `${API_BASE}/api/search-employee/${params.id}${system ? `?system=${system}` : ''}`;
 
   try {
     const response = await fetch(url, {
@@ -20,7 +20,7 @@ export async function GET(
     const data = await response.json();
 
     if (!response.ok) {
-      return NextResponse.json({ error: data.error || 'Failed to fetch employee details' }, { status: response.status });
+      return NextResponse.json({ error: data.error || 'Failed to fetch search employee data' }, { status: response.status });
     }
 
     return NextResponse.json(data);

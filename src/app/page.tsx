@@ -1483,7 +1483,7 @@ export default function HomePage() {
                             // Try details endpoint with multiple possible identifiers
                             for (const key of candidateKeys) {
                               try {
-                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details/${sys}`;
+                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
                                 const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                                 if (res.ok) {
                                   const json = await res.json();
@@ -1581,7 +1581,7 @@ export default function HomePage() {
                             let found: any = undefined;
                             for (const key of candidateKeys) {
                               try {
-                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details/${sys}`;
+                                const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=${sys}`;
                                 const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
                                 if (res.ok) {
                                   const json = await res.json();
