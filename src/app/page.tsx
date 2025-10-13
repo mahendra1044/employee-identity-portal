@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // dev: backend server (configurable)
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // Backend API base for auth/search/own/config calls
 
 type Features = {
   credentialSource: string;
@@ -116,6 +116,7 @@ function SystemCard({
   token,
   role,
   email,
+  userKey,
 }: {
   name: string;
   system: SystemKey;
@@ -123,6 +124,7 @@ function SystemCard({
   token: string;
   role: string;
   email: string;
+  userKey?: string;
 }) {
   const [data, setData] = useState<any | null>(null);
   const [details, setDetails] = useState<any | null>(null);
@@ -139,17 +141,30 @@ function SystemCard({
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
 
   const loadInitial = async (showToast = true) => {
-    if (!enabled) return;
+    console.log(`🔄 [${system}] loadInitial called - enabled:`, enabled, 'userKey:', userKey, 'showToast:', showToast);
+    if (!enabled) {
+      console.log(`⏭️ [${system}] Skipping load - system not enabled`);
+      return;
+    }
     let refreshToast;
     if (showToast) {
-      refreshToast = toast.loading(`Refreshing ${name}...`);
+      refreshToast = toast.loading(`Refreshing ${name}${userKey ? ` for ${userKey}` : ''}...`);
     }
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/own-${system}`, {
+      let endpoint;
+      if (userKey) {
+        // For searched users, use details endpoint with system parameter for per-system data
+        endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
+      } else {
+        endpoint = `/api/own-${system}`;
+      }
+      console.log(`📡 [${system}] Fetching from:`, `${API_BASE}${endpoint}`);
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(`📥 [${system}] Response status:`, res.status, res.statusText);
       if (!res.ok) {
         let message = "Failed";
         try {
@@ -161,20 +176,25 @@ function SystemCard({
             message = t || message;
           } catch {}
         }
+        console.error(`❌ [${system}] Request failed:`, message);
         throw new Error(message);
       }
       const json = await res.json();
-      setData(json.data);
+      console.log(`✅ [${system}] Data received:`, json);
+      setData(json.data || json); // Handle both {data: ...} and direct
+      console.log(`💾 [${system}] Data state updated successfully`);
       if (showToast) {
-        toast.success(`Refreshed ${name}`, { id: refreshToast });
+        toast.success(`Refreshed ${name}${userKey ? ` for ${userKey}` : ''}`, { id: refreshToast });
       }
     } catch (e: any) {
+      console.error(`❌ [${system}] Error in loadInitial:`, e.message);
       setError(e.message || "Error loading data");
       if (showToast) {
         toast.error(`Failed to refresh ${name}: ${e.message}`, { id: refreshToast });
       }
     } finally {
       setLoading(false);
+      console.log(`🏁 [${system}] loadInitial completed`);
     }
   };
 
@@ -182,7 +202,14 @@ function SystemCard({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/own-${system}/details`, {
+      let endpoint;
+      if (userKey) {
+        // Use details endpoint only for explicit details view
+        endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
+      } else {
+        endpoint = `/api/own-${system}/details`;
+      }
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -199,7 +226,7 @@ function SystemCard({
         throw new Error(message);
       }
       const json = await res.json();
-      setDetails(json.data);
+      setDetails(json.data || json);
       setDetailsOpen(true);
     } catch (e: any) {
       setError(e.message || "Error loading details");
@@ -209,9 +236,10 @@ function SystemCard({
   };
 
   useEffect(() => {
+    console.log(`🔁 [${system}] useEffect triggered - token:`, !!token, 'enabled:', enabled, 'userKey:', userKey);
     loadInitial(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, enabled]);
+  }, [token, enabled, userKey]);
 
   // helper to flatten JSON into key/value pairs for readable HTML view
   const toPairs = (obj: any): Array<{ k: string; v: any }> => {
@@ -296,7 +324,12 @@ function SystemCard({
 
   return (
     <>
-      <Card className="shadow-sm">
+      <Card className="shadow-sm relative">
+        {userKey && (
+          <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded opacity-90">
+            For: {userKey}
+          </div>
+        )}
         <CardHeader className="text-center pb-3">
           <CardTitle className="text-lg font-semibold">{name}</CardTitle>
         </CardHeader>
@@ -399,7 +432,12 @@ function SystemCard({
             </div>
           )}
           <div className="space-y-3">
-            {data ? (
+            {/* FIXED: Add loading and error states to card display */}
+            {loading ? (
+              <p className="text-sm text-muted-foreground animate-pulse">Loading data...</p>
+            ) : error ? (
+              <p className="text-sm text-red-600">{error}</p>
+            ) : data ? (
               <div>
                 <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
                   {JSON.stringify(data, null, 2)}
@@ -408,7 +446,6 @@ function SystemCard({
             ) : (
               <p className="text-sm text-muted-foreground">No data yet</p>
             )}
-            {/* details moved to dialog to keep the page compact */}
           </div>
         </CardContent>
       </Card>
@@ -804,43 +841,6 @@ export default function HomePage() {
     return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!all[s] }), {} as Record<SystemKey, boolean>);
   }, [features]);
 
-  // Combined visibility: enabled && userToggles
-  const visibleSystems = useMemo(() => {
-    return SYSTEMS.filter(s => enabled[s] && userToggles[s]);
-  }, [enabled, userToggles]);
-
-  // Quick Actions tab enablement (from backend features or NEXT_PUBLIC env flags)
-  const qaEnabledTabs = useMemo(() => {
-    const fromFeatures = features?.quickActionsTabs || {};
-    const envBool = (key: string) => {
-      const v = (process.env[key] || "").toString().toLowerCase();
-      return ["1", "true", "on", "yes", "enabled"].includes(v);
-    };
-    const map: Partial<Record<SystemKey, boolean>> = { ...fromFeatures };
-    for (const sys of SYSTEMS) {
-      const envKey = `NEXT_PUBLIC_QA_${sys.replace(/-/g, "_").toUpperCase()}`;
-      if (process.env.hasOwnProperty(envKey)) {
-        map[sys] = envBool(envKey);
-      }
-      // default to true when unspecified
-      if (typeof map[sys] === "undefined") map[sys] = true;
-    }
-    return map as Record<SystemKey, boolean>;
-  }, [features]);
-
-  const splunkUrl = process.env.NEXT_PUBLIC_SPLUNK_URL || "https://splunk.company.com";
-  const cloudwatchUrl = process.env.NEXT_PUBLIC_CLOUDWATCH_URL || "https://console.aws.amazon.com/cloudwatch/home?region=us-east-1";
-
-  // Keep active tab valid when toggles change
-  useEffect(() => {
-    if (!qaEnabledTabs[qaActive]) {
-      const first = SYSTEMS.find((s) => qaEnabledTabs[s]);
-      if (first) setQaActive(first);
-    }
-  }, [qaEnabledTabs, qaActive]);
-
-  const anyEnabled = useMemo(() => Object.values(enabled || {}).some(Boolean), [enabled]);
-
   // Determine the order of system cards based on features.systemsOrder (if provided)
   const orderedSystems = useMemo<SystemKey[]>(() => {
     const order = features?.systemsOrder || [];
@@ -848,6 +848,58 @@ export default function HomePage() {
     const remaining = SYSTEMS.filter((s) => !valid.includes(s));
     return [...valid, ...remaining];
   }, [features]);
+
+  const anyEnabled = useMemo(() => Object.values(enabled).some(Boolean), [enabled]);
+
+  const visibleSystems = useMemo(() => {
+    const result = orderedSystems.filter((sys: SystemKey) => 
+      enabled[sys] && 
+      userToggles[sys] && 
+      (role !== "ops" || hasSearched)
+    );
+    console.log('👁️ [VISIBLE SYSTEMS] Calculated visible systems:', result);
+    console.log('👁️ [VISIBLE SYSTEMS] Filters - role:', role, 'hasSearched:', hasSearched);
+    return result;
+  }, [orderedSystems, enabled, userToggles, role, hasSearched]);
+
+  const qaEnabledTabs = useMemo(() => ({
+    ...enabled,
+    ...(features?.quickActionsTabs || {})
+  }), [enabled, features]);
+
+  const splunkUrl = "https://splunk.company.com";
+  const cloudwatchUrl = "https://console.aws.amazon.com/cloudwatch/home";
+
+  const [searchKey, setSearchKey] = useState<string | null>(null);
+
+  const resolveUserKey = useMemo(() => {
+    const q = String(search || '').trim().toLowerCase();
+    const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+    const exact = pd.find((u: any) => 
+      String(u?.email || '').toLowerCase() === q || 
+      String(u?.userId || '') === q
+    );
+    if (exact?.userId || exact?.email) return exact.userId || exact.email;
+    if (pd[0]?.userId || pd[0]?.email) return pd[0].userId || pd[0].email;
+    return q;
+  }, [search, searchResults]);
+
+  // Clear currentUserKey when search empties (ops only)
+  useEffect(() => {
+    if (role === "ops" && !search.trim()) {
+      console.log('🧹 [SEARCH KEY] Clearing searchKey (empty search)');
+      setSearchKey(null);
+    }
+  }, [search, role]);
+
+  // Set currentUserKey after successful search (ops only)
+  useEffect(() => {
+    console.log('🔄 [SEARCH KEY] useEffect check - role:', role, 'hasSearched:', hasSearched, 'hasResults:', !!searchResults, 'hasError:', !!searchError, 'resolveUserKey:', resolveUserKey);
+    if (role === "ops" && hasSearched && searchResults && !searchError) {
+      console.log('✅ [SEARCH KEY] Setting searchKey to:', resolveUserKey);
+      setSearchKey(resolveUserKey);
+    }
+  }, [hasSearched, searchResults, searchError, resolveUserKey, role]);
 
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
@@ -892,21 +944,29 @@ export default function HomePage() {
 
   const doSearch = async () => {
     if (!token || !search.trim()) return;
+    console.log('🔍 [SEARCH] Starting search for:', search);
+    console.log('🔍 [SEARCH] Current role:', role);
     setSearchError(null);
     setSearchResults(null);
-    // ensure UI treats this as not completed until success
     setHasSearched(false);
+    setSearchKey(null); // Clear previous search key
+    console.log('🧹 [SEARCH] Cleared previous search state');
     try {
       const res = await fetch(`${API_BASE}/api/search-employee/${encodeURIComponent(search)}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const body = await res.json();
+      console.log('🔍 [SEARCH] Response received:', body);
       if (!res.ok) throw new Error(body.error || "Search failed");
       setSearchResults(body);
-      // mark completion only after successful fetch
+      console.log('💾 [SEARCH] Search results saved to state');
       setHasSearched(true);
+      console.log('✅ [SEARCH] Search completed successfully, hasSearched set to true');
+      console.log('⏳ [SEARCH] searchKey will be set by useEffect after state updates');
     } catch (e: any) {
+      console.error('❌ [SEARCH] Search failed:', e.message);
       setSearchError(e.message || "Search failed");
+      setSearchKey(null);
     }
   };
 
@@ -2112,9 +2172,7 @@ export default function HomePage() {
         {/* System Cards (hide by default for ops) */}
         <section>
           {(() => {
-            const showOpsTiles = role === "ops" && !!features?.opsShowTilesAfterSearch && hasSearched;
-            const isOps = role === "ops";
-            const anyVisible = visibleSystems.length > 0;
+            console.log('🎨 [RENDER] System cards section - anyEnabled:', anyEnabled, 'visibleSystems.length:', visibleSystems.length, 'searchKey:', searchKey);
             if (!anyEnabled) {
               return (
                 <Card>
@@ -2129,10 +2187,7 @@ export default function HomePage() {
                 </Card>
               );
             }
-            if (isOps && !showOpsTiles) {
-              return <></>;
-            }
-            if (!anyVisible) {
+            if (visibleSystems.length === 0) {
               return (
                 <Card>
                   <CardHeader>
@@ -2140,27 +2195,33 @@ export default function HomePage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      All system cards are hidden via settings. Open Settings to enable some.
+                      {role === "ops" 
+                        ? "System cards appear after a successful search." 
+                        : "All system cards are hidden via settings. Open Settings to enable some."
+                      }
                     </p>
                   </CardContent>
                 </Card>
               );
             }
+            console.log('🎴 [RENDER] Rendering system cards with userKey:', role === "ops" ? searchKey : undefined);
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {orderedSystems
-                  .filter(sys => visibleSystems.includes(sys))
-                  .map((sys) => (
-                  <SystemCard
-                    key={sys}
-                    name={SYSTEM_LABELS[sys]}
-                    system={sys}
-                    enabled={!!enabled[sys]}
-                    token={token!}
-                    role={role!}
-                    email={email!}
-                  />
-                ))}
+                {visibleSystems.map((sys) => {
+                  console.log(`🎴 [RENDER] Rendering card for ${sys} with userKey:`, role === "ops" ? searchKey : undefined);
+                  return (
+                    <SystemCard
+                      key={sys}
+                      name={SYSTEM_LABELS[sys]}
+                      system={sys}
+                      enabled={!!enabled[sys]}
+                      token={token!}
+                      role={role!}
+                      email={email!}
+                      userKey={role === "ops" ? searchKey : undefined}
+                    />
+                  );
+                })}
               </div>
             );
           })()}
