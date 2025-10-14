@@ -141,60 +141,82 @@ function SystemCard({
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
 
   const loadInitial = async (showToast = true) => {
-    console.log(`🔄 [${system}] loadInitial called - enabled:`, enabled, 'userKey:', userKey, 'showToast:', showToast);
+    console.log(`🔄 [${system}] loadInitial START - enabled:`, enabled, 'userKey:', userKey, 'token:', !!token);
+    
     if (!enabled) {
-      console.log(`⏭️ [${system}] Skipping load - system not enabled`);
+      console.log(`⏭️ [${system}] SKIP - system not enabled`);
       return;
     }
+    
+    if (!token) {
+      console.log(`⏭️ [${system}] SKIP - no token`);
+      return;
+    }
+    
     let refreshToast;
     if (showToast) {
       refreshToast = toast.loading(`Refreshing ${name}${userKey ? ` for ${userKey}` : ''}...`);
     }
+    
     setLoading(true);
     setError(null);
+    setData(null); // Clear previous data
+    
     try {
       let endpoint;
       if (userKey) {
-        // For searched users, use details endpoint with system parameter for per-system data
+        // For searched users, use search endpoint with system parameter
         endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
       } else {
+        // For own data
         endpoint = `/api/own-${system}`;
       }
-      console.log(`📡 [${system}] Fetching from:`, `${API_BASE}${endpoint}`);
-      const res = await fetch(`${API_BASE}${endpoint}`, {
+      
+      const fullUrl = `${API_BASE}${endpoint}`;
+      console.log(`📡 [${system}] FETCH START:`, fullUrl);
+      
+      const res = await fetch(fullUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(`📥 [${system}] Response status:`, res.status, res.statusText);
+      
+      console.log(`📥 [${system}] RESPONSE:`, res.status, res.statusText, res.ok);
+      
       if (!res.ok) {
-        let message = "Failed";
+        let message = `HTTP ${res.status}`;
         try {
           const j = await res.json();
-          message = j?.error || message;
+          message = j?.error || j?.message || message;
         } catch {
           try {
             const t = await res.text();
             message = t || message;
           } catch {}
         }
-        console.error(`❌ [${system}] Request failed:`, message);
+        console.error(`❌ [${system}] FETCH FAILED:`, message);
         throw new Error(message);
       }
+      
       const json = await res.json();
-      console.log(`✅ [${system}] Data received:`, json);
-      setData(json.data || json); // Handle both {data: ...} and direct
-      console.log(`💾 [${system}] Data state updated successfully`);
+      console.log(`✅ [${system}] DATA RECEIVED:`, json);
+      
+      const extractedData = json.data || json;
+      console.log(`💾 [${system}] EXTRACTED DATA:`, extractedData);
+      
+      setData(extractedData);
+      console.log(`🎉 [${system}] STATE UPDATED - data is now set`);
+      
       if (showToast) {
         toast.success(`Refreshed ${name}${userKey ? ` for ${userKey}` : ''}`, { id: refreshToast });
       }
     } catch (e: any) {
-      console.error(`❌ [${system}] Error in loadInitial:`, e.message);
+      console.error(`❌ [${system}] ERROR:`, e.message);
       setError(e.message || "Error loading data");
       if (showToast) {
         toast.error(`Failed to refresh ${name}: ${e.message}`, { id: refreshToast });
       }
     } finally {
       setLoading(false);
-      console.log(`🏁 [${system}] loadInitial completed`);
+      console.log(`🏁 [${system}] loadInitial COMPLETE - loading:false, hasData:${!!data}, hasError:${!!error}`);
     }
   };
 
@@ -236,7 +258,15 @@ function SystemCard({
   };
 
   useEffect(() => {
-    console.log(`🔁 [${system}] useEffect triggered - token:`, !!token, 'enabled:', enabled, 'userKey:', userKey);
+    console.log(`🔁 [${system}] useEffect TRIGGERED - token:${!!token}, enabled:${enabled}, userKey:"${userKey}"`);
+    
+    // Reset state when userKey changes
+    if (userKey !== undefined) {
+      console.log(`🔄 [${system}] UserKey changed to "${userKey}", resetting and loading...`);
+      setData(null);
+      setError(null);
+    }
+    
     loadInitial(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, enabled, userKey]);
@@ -432,19 +462,29 @@ function SystemCard({
             </div>
           )}
           <div className="space-y-3">
-            {/* FIXED: Add loading and error states to card display */}
             {loading ? (
-              <p className="text-sm text-muted-foreground animate-pulse">Loading data...</p>
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground animate-pulse">Loading data...</p>
+                {userKey && <p className="text-xs text-muted-foreground mt-1">Fetching data for {userKey}</p>}
+              </div>
             ) : error ? (
-              <p className="text-sm text-red-600">{error}</p>
+              <div className="text-center py-4">
+                <p className="text-sm text-red-600">{error}</p>
+                <Button size="sm" variant="outline" onClick={() => loadInitial(true)} className="mt-2">
+                  Retry
+                </Button>
+              </div>
             ) : data ? (
               <div>
-                <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+                <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-96">
                   {JSON.stringify(data, null, 2)}
                 </pre>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No data yet</p>
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">No data yet</p>
+                {userKey && <p className="text-xs text-muted-foreground mt-1">Expected data for {userKey}</p>}
+              </div>
             )}
           </div>
         </CardContent>
@@ -872,21 +912,42 @@ export default function HomePage() {
 
   // FIXED: Remove searchKey state - just use resolveUserKey directly
   const resolveUserKey = useMemo(() => {
+    console.log('🔑 [RESOLVE KEY] Starting - hasSearched:', hasSearched, 'hasResults:', !!searchResults, 'search:', search);
+    
     // Only resolve user key for ALL roles if search was performed
-    if (!hasSearched || !searchResults) return undefined;
+    if (!hasSearched || !searchResults) {
+      console.log('🔑 [RESOLVE KEY] No search performed yet, returning undefined');
+      return undefined;
+    }
     
     const q = String(search || '').trim().toLowerCase();
+    console.log('🔑 [RESOLVE KEY] Search query (lowercase):', q);
+    
     const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
+    console.log('🔑 [RESOLVE KEY] Ping Directory results:', pd);
+    
     const exact = pd.find((u: any) => 
       String(u?.email || '').toLowerCase() === q || 
-      String(u?.userId || '').toLowerCase() === q  // FIXED: Make userId comparison case-insensitive
+      String(u?.userId || '').toLowerCase() === q
     );
-    if (exact?.userId || exact?.email) return exact.userId || exact.email;
-    if (pd[0]?.userId || pd[0]?.email) return pd[0].userId || pd[0].email;
-    return q || undefined;  // FIXED: Return undefined instead of empty string
+    
+    if (exact?.userId || exact?.email) {
+      const resolved = exact.userId || exact.email;
+      console.log('🔑 [RESOLVE KEY] Found exact match:', resolved);
+      return resolved;
+    }
+    
+    if (pd[0]?.userId || pd[0]?.email) {
+      const resolved = pd[0].userId || pd[0].email;
+      console.log('🔑 [RESOLVE KEY] Using first result:', resolved);
+      return resolved;
+    }
+    
+    console.log('🔑 [RESOLVE KEY] Falling back to search query:', q);
+    return q || undefined;
   }, [search, searchResults, hasSearched]);
 
-  console.log('🔑 [USER KEY] Current resolveUserKey:', resolveUserKey, 'hasSearched:', hasSearched);
+  console.log('🎯 [MAIN RENDER] resolveUserKey:', resolveUserKey, 'hasSearched:', hasSearched);
 
   // Clear currentUserKey when search empties (ops only)
   // Remove old searchKey useEffects - no longer needed
@@ -2159,7 +2220,8 @@ export default function HomePage() {
         {/* System Cards (hide by default for ops) */}
         <section>
           {(() => {
-            console.log('🎨 [RENDER] System cards section - anyEnabled:', anyEnabled, 'visibleSystems.length:', visibleSystems.length, 'searchKey:', resolveUserKey);
+            console.log('🎨 [CARDS RENDER] anyEnabled:', anyEnabled, 'visibleSystems:', visibleSystems.length, 'resolveUserKey:', resolveUserKey);
+            
             if (!anyEnabled) {
               return (
                 <Card>
@@ -2174,6 +2236,7 @@ export default function HomePage() {
                 </Card>
               );
             }
+            
             if (visibleSystems.length === 0) {
               return (
                 <Card>
@@ -2191,11 +2254,13 @@ export default function HomePage() {
                 </Card>
               );
             }
-            console.log('🎴 [RENDER] Rendering system cards with userKey:', resolveUserKey);
+            
+            console.log('🎴 [CARDS RENDER] Rendering', visibleSystems.length, 'cards with userKey:', resolveUserKey);
+            
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {visibleSystems.map((sys) => {
-                  console.log(`🎴 [RENDER] Rendering card for ${sys} with userKey:`, resolveUserKey);
+                  console.log(`🎴 [CARD RENDER] ${sys} - key: ${sys}-${resolveUserKey || 'own'}, userKey: ${resolveUserKey}`);
                   return (
                     <SystemCard
                       key={`${sys}-${resolveUserKey || 'own'}`}
