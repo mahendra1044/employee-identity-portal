@@ -873,17 +873,17 @@ export default function HomePage() {
   // FIXED: Remove searchKey state - just use resolveUserKey directly
   const resolveUserKey = useMemo(() => {
     // Only resolve user key for ALL roles if search was performed
-    if (!hasSearched || !searchResults) return null;
+    if (!hasSearched || !searchResults) return undefined;
     
     const q = String(search || '').trim().toLowerCase();
     const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
     const exact = pd.find((u: any) => 
       String(u?.email || '').toLowerCase() === q || 
-      String(u?.userId || '') === q
+      String(u?.userId || '').toLowerCase() === q  // FIXED: Make userId comparison case-insensitive
     );
     if (exact?.userId || exact?.email) return exact.userId || exact.email;
     if (pd[0]?.userId || pd[0]?.email) return pd[0].userId || pd[0].email;
-    return q;
+    return q || undefined;  // FIXED: Return undefined instead of empty string
   }, [search, searchResults, hasSearched]);
 
   console.log('🔑 [USER KEY] Current resolveUserKey:', resolveUserKey, 'hasSearched:', hasSearched);
@@ -2198,7 +2198,7 @@ export default function HomePage() {
                   console.log(`🎴 [RENDER] Rendering card for ${sys} with userKey:`, resolveUserKey);
                   return (
                     <SystemCard
-                      key={sys}
+                      key={`${sys}-${resolveUserKey || 'own'}`}
                       name={SYSTEM_LABELS[sys]}
                       system={sys}
                       enabled={!!enabled[sys]}
