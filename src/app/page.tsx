@@ -870,9 +870,11 @@ export default function HomePage() {
   const splunkUrl = "https://splunk.company.com";
   const cloudwatchUrl = "https://console.aws.amazon.com/cloudwatch/home";
 
-  const [searchKey, setSearchKey] = useState<string | null>(null);
-
+  // FIXED: Remove searchKey state - just use resolveUserKey directly
   const resolveUserKey = useMemo(() => {
+    // Only resolve user key for ALL roles if search was performed
+    if (!hasSearched || !searchResults) return null;
+    
     const q = String(search || '').trim().toLowerCase();
     const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
     const exact = pd.find((u: any) => 
@@ -882,24 +884,12 @@ export default function HomePage() {
     if (exact?.userId || exact?.email) return exact.userId || exact.email;
     if (pd[0]?.userId || pd[0]?.email) return pd[0].userId || pd[0].email;
     return q;
-  }, [search, searchResults]);
+  }, [search, searchResults, hasSearched]);
+
+  console.log('🔑 [USER KEY] Current resolveUserKey:', resolveUserKey, 'hasSearched:', hasSearched);
 
   // Clear currentUserKey when search empties (ops only)
-  useEffect(() => {
-    if (role === "ops" && !search.trim()) {
-      console.log('🧹 [SEARCH KEY] Clearing searchKey (empty search)');
-      setSearchKey(null);
-    }
-  }, [search, role]);
-
-  // Set currentUserKey after successful search (ALL roles, not just ops)
-  useEffect(() => {
-    console.log('🔄 [SEARCH KEY] useEffect check - role:', role, 'hasSearched:', hasSearched, 'hasResults:', !!searchResults, 'hasError:', !!searchError, 'resolveUserKey:', resolveUserKey);
-    if (hasSearched && searchResults && !searchError) {
-      console.log('✅ [SEARCH KEY] Setting searchKey to:', resolveUserKey);
-      setSearchKey(resolveUserKey);
-    }
-  }, [hasSearched, searchResults, searchError, resolveUserKey, role]);
+  // Remove old searchKey useEffects - no longer needed
 
   const loadRecentFailures = async () => {
     if (!token || role !== "ops") return;
@@ -949,7 +939,6 @@ export default function HomePage() {
     setSearchError(null);
     setSearchResults(null);
     setHasSearched(false);
-    setSearchKey(null); // Clear previous search key
     console.log('🧹 [SEARCH] Cleared previous search state');
     try {
       const res = await fetch(`${API_BASE}/api/search-employee/${encodeURIComponent(search)}`, {
@@ -962,11 +951,9 @@ export default function HomePage() {
       console.log('💾 [SEARCH] Search results saved to state');
       setHasSearched(true);
       console.log('✅ [SEARCH] Search completed successfully, hasSearched set to true');
-      console.log('⏳ [SEARCH] searchKey will be set by useEffect after state updates');
     } catch (e: any) {
       console.error('❌ [SEARCH] Search failed:', e.message);
       setSearchError(e.message || "Search failed");
-      setSearchKey(null);
     }
   };
 
@@ -2172,7 +2159,7 @@ export default function HomePage() {
         {/* System Cards (hide by default for ops) */}
         <section>
           {(() => {
-            console.log('🎨 [RENDER] System cards section - anyEnabled:', anyEnabled, 'visibleSystems.length:', visibleSystems.length, 'searchKey:', searchKey);
+            console.log('🎨 [RENDER] System cards section - anyEnabled:', anyEnabled, 'visibleSystems.length:', visibleSystems.length, 'searchKey:', resolveUserKey);
             if (!anyEnabled) {
               return (
                 <Card>
@@ -2204,11 +2191,11 @@ export default function HomePage() {
                 </Card>
               );
             }
-            console.log('🎴 [RENDER] Rendering system cards with userKey:', searchKey || undefined);
+            console.log('🎴 [RENDER] Rendering system cards with userKey:', resolveUserKey);
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {visibleSystems.map((sys) => {
-                  console.log(`🎴 [RENDER] Rendering card for ${sys} with userKey:`, searchKey || undefined);
+                  console.log(`🎴 [RENDER] Rendering card for ${sys} with userKey:`, resolveUserKey);
                   return (
                     <SystemCard
                       key={sys}
@@ -2218,7 +2205,7 @@ export default function HomePage() {
                       token={token!}
                       role={role!}
                       email={email!}
-                      userKey={searchKey || undefined}
+                      userKey={resolveUserKey}
                     />
                   );
                 })}
