@@ -892,10 +892,10 @@ export default function HomePage() {
     }
   }, [search, role]);
 
-  // Set currentUserKey after successful search (ops only)
+  // Set currentUserKey after successful search (ALL roles, not just ops)
   useEffect(() => {
     console.log('🔄 [SEARCH KEY] useEffect check - role:', role, 'hasSearched:', hasSearched, 'hasResults:', !!searchResults, 'hasError:', !!searchError, 'resolveUserKey:', resolveUserKey);
-    if (role === "ops" && hasSearched && searchResults && !searchError) {
+    if (hasSearched && searchResults && !searchError) {
       console.log('✅ [SEARCH KEY] Setting searchKey to:', resolveUserKey);
       setSearchKey(resolveUserKey);
     }
@@ -2204,11 +2204,11 @@ export default function HomePage() {
                 </Card>
               );
             }
-            console.log('🎴 [RENDER] Rendering system cards with userKey:', role === "ops" ? searchKey : undefined);
+            console.log('🎴 [RENDER] Rendering system cards with userKey:', searchKey || undefined);
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {visibleSystems.map((sys) => {
-                  console.log(`🎴 [RENDER] Rendering card for ${sys} with userKey:`, role === "ops" ? searchKey : undefined);
+                  console.log(`🎴 [RENDER] Rendering card for ${sys} with userKey:`, searchKey || undefined);
                   return (
                     <SystemCard
                       key={sys}
@@ -2218,7 +2218,7 @@ export default function HomePage() {
                       token={token!}
                       role={role!}
                       email={email!}
-                      userKey={role === "ops" ? searchKey : undefined}
+                      userKey={searchKey || undefined}
                     />
                   );
                 })}
