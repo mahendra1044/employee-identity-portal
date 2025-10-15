@@ -165,14 +165,15 @@ function SystemCard({
     try {
       let endpoint;
       if (userKey) {
-        // For searched users, use search endpoint with system parameter
+        // FIXED: Use relative URL for Next.js API routes (search-employee exists only in Next.js, not Express backend)
         endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
       } else {
-        // For own data
+        // Use backend for own-* endpoints
         endpoint = `/api/own-${system}`;
       }
       
-      const fullUrl = `${API_BASE}${endpoint}`;
+      // FIXED: Only use API_BASE for backend endpoints (own-*), not Next.js routes (search-employee)
+      const fullUrl = userKey ? endpoint : `${API_BASE}${endpoint}`;
       console.log(`📡 [${system}] FETCH START:`, fullUrl);
       
       const res = await fetch(fullUrl, {
@@ -226,12 +227,14 @@ function SystemCard({
     try {
       let endpoint;
       if (userKey) {
-        // Use details endpoint only for explicit details view
+        // FIXED: Use relative URL for Next.js API routes
         endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
       } else {
         endpoint = `/api/own-${system}/details`;
       }
-      const res = await fetch(`${API_BASE}${endpoint}`, {
+      // FIXED: Only use API_BASE for backend (own-*) endpoints
+      const fullUrl = userKey ? endpoint : `${API_BASE}${endpoint}`;
+      const res = await fetch(fullUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
