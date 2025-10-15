@@ -22,6 +22,48 @@
     3. Click again → switches back to Ops mode.
     4. Refresh page → reverts to original Ops mode.
     5. In Employee mode, search and view results as an employee would (limited systems).
+   
+    Implementation Summary
+1. Role Management:
+
+Renamed role from useAuth() to originalRole to preserve the actual JWT role
+Added effectiveRole state to track the current UI mode
+Computed role variable that UI components use: effectiveRole || originalRole
+2. Toggle Button:
+
+Added icon button with Users icon in the header (right after theme toggle)
+Only visible when originalRole === "ops"
+Shows tooltip indicating which mode it will switch to
+Positioned near the theme toggle as requested
+3. Toggle Behavior:
+
+toggleRole() function switches between "ops" and "employee" modes
+Shows success toast: "Switched to [mode] mode"
+Updates role badge automatically (already reflects the current role)
+4. UI Changes by Mode:
+
+Ops Mode:
+
+✅ Shows Recent Failures panel
+✅ Shows Quick Actions (after search)
+✅ Shows system cards (after search)
+✅ Hides "Educate me" button
+Employee Mode:
+
+✅ Hides Recent Failures panel
+✅ Hides Quick Actions
+✅ Shows "Educate me" button
+✅ Shows employee-only Ping Federate quick actions in system cards
+5. Persistence:
+
+Resets to original role on page refresh (via useEffect that syncs effectiveRole with originalRole)
+No localStorage to avoid sync issues
+Resets on logout automatically
+6. Backend Consistency:
+
+All API calls use the original JWT token (unchanged)
+Toggle only affects frontend UI rendering
+Full ops access preserved via original JWT role
 
 - Copy JSON everywhere
   - Added "Copy JSON" buttons to all places where JSON is rendered:
