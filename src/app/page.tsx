@@ -676,12 +676,11 @@ function LoginCard({ onLogin }: { onLogin: (email: string, password: string) => 
 }
 
 export default function HomePage() {
-  const { token, role, email, login, logout } = useAuth();
+  const { token, role: originalRole, email, login, logout } = useAuth();
   const [features, setFeatures] = useState<Features | null>(null);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
-  // removed All Users feature and related state
   const [hasSearched, setHasSearched] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "navy">();
   const [minutes, setMinutes] = useState<number>(10);
@@ -689,35 +688,45 @@ export default function HomePage() {
   const [failMfa, setFailMfa] = useState<any[] | null>(null);
   const [opsLoading, setOpsLoading] = useState(false);
   const [opsError, setOpsError] = useState<string | null>(null);
-  // search result detail dialog
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [searchDialogTitle, setSearchDialogTitle] = useState<string>("");
   const [searchDialogData, setSearchDialogData] = useState<any | null>(null);
   const [searchDialogLoading, setSearchDialogLoading] = useState(false);
   const [searchDialogMode, setSearchDialogMode] = useState<"json" | "html">("json");
-  
-  // SNOW incidents state
   const [snowOpen, setSnowOpen] = useState(false);
   const [snowLoading, setSnowLoading] = useState(false);
   const [snowError, setSnowError] = useState<string | null>(null);
   const [snowCount, setSnowCount] = useState<number | null>(null);
   const [snowItems, setSnowItems] = useState<any[] | null>(null);
   const [snowEmail, setSnowEmail] = useState<string | null>(null);
-
-  // Educate guide state
   const [educateOpen, setEducateOpen] = useState(false);
-
-  // Ops PF quick actions dialog state
   const [pfOpsOpen, setPfOpsOpen] = useState(false);
   const [pfOpsTitle, setPfOpsTitle] = useState<string>("");
   const [pfOpsLoading, setPfOpsLoading] = useState(false);
   const [pfOpsData, setPfOpsData] = useState<any>(null);
-  // Ops Quick Actions active tab
   const [qaActive, setQaActive] = useState<SystemKey>("ping-federate");
-
-  // Settings state for system card visibility
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userToggles, setUserToggles] = useState<Record<SystemKey, boolean>>({});
+
+  // Role toggle state - effective role for UI rendering (resets on refresh)
+  const [effectiveRole, setEffectiveRole] = useState<string | null>(null);
+
+  // Initialize effective role when originalRole changes (on login or refresh)
+  useEffect(() => {
+    setEffectiveRole(originalRole);
+  }, [originalRole]);
+
+  // Current role for UI rendering (effectiveRole if set, otherwise originalRole)
+  const role = effectiveRole || originalRole;
+
+  // Toggle between ops and employee mode (only available for original ops users)
+  const toggleRole = () => {
+    if (originalRole !== "ops") return;
+    
+    const newRole = effectiveRole === "ops" ? "employee" : "ops";
+    setEffectiveRole(newRole);
+    toast.success(`Switched to ${newRole} mode`);
+  };
 
   // Initialize user toggles from localStorage on mount (client-side only)
   useEffect(() => {
@@ -1168,6 +1177,18 @@ export default function HomePage() {
             <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
+            {/* Role Toggle for Ops (only visible for original ops users) */}
+            {originalRole === "ops" && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                aria-label="Toggle role mode" 
+                onClick={toggleRole}
+                title={`Switch to ${effectiveRole === "ops" ? "Employee" : "Ops"} mode`}
+              >
+                <Users className="h-4 w-4" />
+              </Button>
+            )}
             {/* Settings button */}
             <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} title="Settings">
               <SettingsIcon className="h-4 w-4 mr-1" />
