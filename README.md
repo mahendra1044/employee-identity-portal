@@ -798,3 +798,33 @@ All endpoints return `{ data: ... }` to keep the UI contract stable for future r
 - Real SSO (when useMockAuth=false)
 - Replace mocks with live system connectors (when useMocks=false)
 - Additional filters and CSV export for Ops
+
+
+##10/16 - Updated header and footer
+Summary of Changes
+1. Header Branding (Both Dashboard & Login)
+
+✅ Company logo added on the far left (8x8 on dashboard, 10x10 on login)
+✅ "Identity Sphere" product name displayed next to logo
+✅ User information (email + role badges) positioned below the product name on dashboard
+✅ Professional layout with proper spacing and responsive design
+2. Footer Component (Both Dashboard & Login)
+
+✅ Footer added with:
+Privacy Policy link (stubbed, hover effect)
+Support link (stubbed, hover effect)
+Copyright message: "© 2025 Identity Sphere. All rights reserved."
+✅ Consistent styling with border-t, bg-background/80 backdrop-blur
+✅ Centered layout with proper spacing
+3. Layout Structure
+
+✅ Dashboard uses flex flex-col with flex-1 main section to push footer to bottom
+✅ Login page uses same structure for consistent presentation
+✅ Sticky header on dashboard for better UX during scrolling
+4. Design Details
+
+Professional color scheme with text-muted-foreground for footer links
+Hover transitions on footer links for better interactivity
+Proper visual hierarchy with logo, branding, user info, and actions
+Responsive design that adapts to different screen sizes
+The Identity Sphere portal now has a polished, professional appearance with consistent branding across both the login and dashboard screens!
