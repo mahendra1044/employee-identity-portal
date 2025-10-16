@@ -700,29 +700,58 @@ function LoginCard({ onLogin }: { onLogin: (email: string, password: string) => 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-[400px]">
-        <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={submit} className="space-y-3">
-            <div>
-              <label className="block text-sm mb-1">Email</label>
-              <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ops@company.com" />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">Password</label>
-              <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-            </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
-            </Button>
-            <p className="text-xs text-muted-foreground">Mock auth: role inferred by email prefix (ops@, management@, else employee).</p>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen flex flex-col">
+      {/* Login Header with Branding */}
+      <header className="border-b bg-background/80 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
+          <img 
+            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" 
+            alt="Company Logo" 
+            className="w-10 h-10 rounded"
+          />
+          <div className="font-semibold text-xl">Identity Sphere</div>
+        </div>
+      </header>
+
+      {/* Login Form */}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-[400px]">
+          <CardHeader>
+            <CardTitle>Sign in</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={submit} className="space-y-3">
+              <div>
+                <label className="block text-sm mb-1">Email</label>
+                <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ops@company.com" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Password</label>
+                <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              </div>
+              {error && <p className="text-sm text-red-600">{error}</p>}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing in..." : "Sign in"}
+              </Button>
+              <p className="text-xs text-muted-foreground">Mock auth: role inferred by email prefix (ops@, management@, else employee).</p>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Login Footer */}
+      <footer className="border-t bg-background/80 backdrop-blur py-6">
+        <div className="max-w-7xl mx-auto px-4 text-center space-y-3">
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <button className="hover:text-foreground transition-colors">Privacy Policy</button>
+            <span className="text-border">•</span>
+            <button className="hover:text-foreground transition-colors">Support</button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} Identity Sphere. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -1198,17 +1227,23 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" alt="Logo" className="w-8 h-8 rounded" />
-            <div>
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          {/* Left: Branding Section */}
+          <div className="flex items-center gap-3 min-w-0">
+            <img 
+              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" 
+              alt="Company Logo" 
+              className="w-8 h-8 rounded flex-shrink-0" 
+            />
+            <div className="min-w-0">
               <div className="font-semibold">Identity Sphere</div>
-              {/* Signed-in badge with improved role display */}
+              {/* User info badges */}
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground border border-border/50">
-                  <User className="h-3 w-3" /> {email}
+                  <User className="h-3 w-3 flex-shrink-0" /> 
+                  <span className="truncate">{email}</span>
                 </span>
                 <span
                   className={
@@ -1226,6 +1261,8 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+
+          {/* Right: Action Buttons */}
           <div className="flex items-center gap-2 flex-wrap justify-end">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -1318,7 +1355,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Settings Dialog */}
         <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
           <DialogContent className="max-w-md">
@@ -2400,8 +2437,18 @@ export default function HomePage() {
         {/* All Users feature removed as requested */}
       </main>
 
-      <footer className="py-8 text-center text-sm text-muted-foreground">
-        Read-only demo • Mocks enabled • Local dev
+      {/* Dashboard Footer */}
+      <footer className="border-t bg-background/80 backdrop-blur py-6 mt-8">
+        <div className="max-w-7xl mx-auto px-4 text-center space-y-3">
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <button className="hover:text-foreground transition-colors">Privacy Policy</button>
+            <span className="text-border">•</span>
+            <button className="hover:text-foreground transition-colors">Support</button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} Identity Sphere. All rights reserved.
+          </p>
+        </div>
       </footer>
     </div>
   );
