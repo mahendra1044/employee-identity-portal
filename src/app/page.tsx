@@ -1204,7 +1204,7 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" alt="Logo" className="w-8 h-8 rounded" />
             <div>
-              <div className="font-semibold">Identity Portal</div>
+              <div className="font-semibold">Identity Sphere</div>
               {/* Signed-in badge with improved role display */}
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground border border-border/50">

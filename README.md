@@ -1,4 +1,4 @@
-# Identity Portal (Next.js 15 + shadcn/ui)
+# Identity Sphere (Next.js 15 + shadcn/ui)
 
 ## New Features (Sept 2025)
 
