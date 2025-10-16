@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, BookOpen, FileText, LogOut, Globe, Shield, Database, Users, History, CheckCircle as Status, Smartphone as Device, Calendar as Event, LogIn as Signin, Activity, Badge as Role, Key as Entitlement, Send as Request, Vault, Settings as SettingsIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // Backend API base for auth/search/own/config calls
@@ -58,6 +59,23 @@ const SYSTEM_LABELS: Record<SystemKey, string> = {
   "azure-ad": "Azure AD",
   "ping-mfa": "Ping MFA",
 };
+
+// Helper function to format role names professionally
+function formatRoleName(role: string): string {
+  const roleMap: Record<string, string> = {
+    "ops": "Operations Team",
+    "employee": "Employee Access",
+    "management": "Management",
+  };
+  return roleMap[role] || role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+// Helper function to get role icon
+function getRoleIcon(role: string) {
+  if (role === "ops") return <Users className="h-3 w-3" />;
+  if (role === "employee") return <User className="h-3 w-3" />;
+  return <User className="h-3 w-3" />;
+}
 
 function useAuth() {
   const [token, setToken] = useState<string | null>(null);
@@ -368,31 +386,65 @@ function SystemCard({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-end gap-2">
-            <Button size="sm" variant="secondary" onClick={() => loadInitial(true)} disabled={!enabled || loading} title="Refresh system data">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="secondary" onClick={() => loadInitial(true)} disabled={!enabled || loading}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Refresh system data</p>
+              </TooltipContent>
+            </Tooltip>
             {data && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-                  toast.success(`Copied ${name} JSON to clipboard`);
-                }}
-                title="Copy current JSON data to clipboard"
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+                      toast.success(`Copied ${name} JSON to clipboard`);
+                    }}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Copy JSON to clipboard</p>
+                </TooltipContent>
+              </Tooltip>
             )}
-            <Button size="sm" onClick={loadDetails} disabled={!enabled || loading} title="View detailed information">
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading} title="View data in HTML format">
-              <Code className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="outline" onClick={openTicketDialog} disabled={!enabled} title="Submit SNOW ticket with current data">
-              <FileText className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" onClick={loadDetails} disabled={!enabled || loading}>
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>View detailed information</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading}>
+                  <Code className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>View in readable format</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="outline" onClick={openTicketDialog} disabled={!enabled}>
+                  <FileText className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Create ServiceNow ticket</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           {system === "ping-federate" && role === "employee" && (
             <div className="flex flex-wrap gap-2 justify-center p-3 bg-muted/50 rounded-lg">
@@ -1153,73 +1205,115 @@ export default function HomePage() {
             <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" alt="Logo" className="w-8 h-8 rounded" />
             <div>
               <div className="font-semibold">Identity Portal</div>
-              {/* Signed-in badge */}
+              {/* Signed-in badge with improved role display */}
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground border border-border/50">
                   <User className="h-3 w-3" /> {email}
                 </span>
                 <span
                   className={
-                    `inline-flex items-center rounded-full px-2 py-0.5 text-[10px] border ` +
+                    `inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border shadow-sm ` +
                     (role === "ops"
-                      ? "border-purple-200 text-purple-700 bg-purple-50 dark:bg-purple-900/20"
+                      ? "border-purple-300 text-purple-800 bg-purple-100 dark:border-purple-700 dark:text-purple-200 dark:bg-purple-900/30"
                       : role === "employee"
-                      ? "border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-900/20"
-                      : "border-amber-200 text-amber-700 bg-amber-50 dark:bg-amber-900/20")
+                      ? "border-blue-300 text-blue-800 bg-blue-100 dark:border-blue-700 dark:text-blue-200 dark:bg-blue-900/30"
+                      : "border-amber-300 text-amber-800 bg-amber-100 dark:border-amber-700 dark:text-amber-200 dark:bg-amber-900/30")
                   }
                 >
-                  {role}
+                  {getRoleIcon(role)}
+                  {formatRoleName(role)}
                 </span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
-            <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
-              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
+                  {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Switch theme</p>
+              </TooltipContent>
+            </Tooltip>
             {/* Role Toggle for Ops (only visible for original ops users) */}
             {originalRole === "ops" && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                aria-label="Toggle role mode" 
-                onClick={toggleRole}
-                title={`Switch to ${effectiveRole === "ops" ? "Employee" : "Ops"} mode`}
-              >
-                <Users className="h-4 w-4" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    aria-label="Toggle role mode" 
+                    onClick={toggleRole}
+                  >
+                    <Users className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Switch to {effectiveRole === "ops" ? "Employee" : "Operations"} view</p>
+                </TooltipContent>
+              </Tooltip>
             )}
             {/* Settings button */}
-            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} title="Settings">
-              <SettingsIcon className="h-4 w-4 mr-1" />
-              Settings
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)}>
+                  <SettingsIcon className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Settings</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Manage system visibility</p>
+              </TooltipContent>
+            </Tooltip>
             {/* Educate Me (employees only) */}
             {role === "employee" && educateEnabled && (
-              <Button variant="outline" size="sm" onClick={() => setEducateOpen(true)} title="Access educational guides for common issues">
-                <BookOpen className="h-4 w-4 mr-1" />
-                Educate me
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" onClick={() => setEducateOpen(true)}>
+                    <BookOpen className="h-4 w-4 mr-1" />
+                    <span className="hidden sm:inline">Educate me</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View troubleshooting guides</p>
+                </TooltipContent>
+              </Tooltip>
             )}
             {/* Show SNOW tickets button with dynamic count (ops: visible only after search) */}
             {(
               role !== 'ops' || (hasSearched && !!resolveSnowEmail())
             ) && (
-              <Button variant="outline" size="sm" onClick={openSnowDialog} title={role === 'ops' ? (resolveSnowEmail() || undefined) : "View your ServiceNow incidents"}>
-                <FileText className="h-4 w-4 mr-1" />
-                <span className="hidden sm:inline">SNOW tickets</span>
-                <span className="sm:hidden">SNOW</span>
-                {typeof snowCount === 'number' && snowCount > 0 && (
-                  <span className="inline-flex items-center rounded-full bg-destructive px-2 py-0.5 text-[11px] text-destructive-foreground ml-1">
-                    {snowCount}
-                  </span>
-                )}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" onClick={openSnowDialog}>
+                    <FileText className="h-4 w-4 mr-1" />
+                    <span className="hidden sm:inline">SNOW tickets</span>
+                    <span className="sm:hidden">SNOW</span>
+                    {typeof snowCount === 'number' && snowCount > 0 && (
+                      <span className="inline-flex items-center rounded-full bg-destructive px-2 py-0.5 text-[11px] text-destructive-foreground ml-1">
+                        {snowCount}
+                      </span>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{role === 'ops' ? `View incidents for ${resolveSnowEmail()}` : "View your ServiceNow incidents"}</p>
+                </TooltipContent>
+              </Tooltip>
             )}
-            <Button variant="secondary" size="sm" onClick={handleLogout} title="Sign out of the portal">
-              <LogOut className="h-4 w-4 mr-1" />
-              Sign out
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="secondary" size="sm" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Sign out</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Sign out of the portal</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </header>
