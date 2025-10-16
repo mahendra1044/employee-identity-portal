@@ -1727,7 +1727,7 @@ export default function HomePage() {
                           setSearchDialogLoading(false);
                         }
                       }}
-                      title="View aggregated details across all systems in JSON format"
+                      title="View all system data in JSON format"
                     >
                       <FileText className="h-4 w-4 mr-1 flex-shrink-0" />
                       <span className="hidden sm:inline">Consolidated View</span>
@@ -1823,7 +1823,7 @@ export default function HomePage() {
                           setSearchDialogLoading(false);
                         }
                       }}
-                      title="View aggregated details across all systems in formatted layout"
+                      title="View data in structured, human-readable format"
                     >
                       <Code className="h-4 w-4 mr-1 flex-shrink-0" />
                       <span className="hidden sm:inline">Readable Layout</span>
@@ -1863,7 +1863,7 @@ export default function HomePage() {
                   </div>
                 </DialogTitle>
               </DialogHeader>
-              <div className="flex-1 overflow-auto rounded-md border border-border/20 bg-muted/10">
+              <div className="flex-1 overflow-auto">
                 {searchDialogLoading ? (
                   <div className="flex items-center justify-center h-32">
                     <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
@@ -1872,99 +1872,120 @@ export default function HomePage() {
                   (() => {
                     if (isAggregate) {
                       return (
-                        <div className={`
-                          ${searchDialogMode === "html" ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-3" : "p-3"} 
-                          max-h-full
-                        `}>
+                        <div className="space-y-6 p-4">
                           {orderedSystems.map((sys) => {
                             const val = (searchDialogData as any)?.[sys] ?? null;
                             const hasData = val && Object.keys(val).length > 0;
                             if (!enabled[sys] && !hasData) return null;
+                            
                             const content = searchDialogMode === "html" ? (
-                              <div key={sys} className="space-y-1.5 max-h-48 overflow-y-auto">
-                                <div className="flex justify-end mb-1">
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    className="h-5 px-1.5 text-xs" 
-                                    onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))} 
-                                    title="Copy JSON"
-                                  >
-                                    <Copy className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                                <div className="border rounded-sm bg-background p-1.5">
-                                  <dl className="grid grid-cols-1 gap-y-1 text-xs">
-                                    {val ? toPairsGlobal(val).slice(0, 30).map(({ k, v }) => (
-                                      <div key={k} className="flex flex-col py-0.5 border-b border-border/20 last:border-b-0 last:pb-0">
-                                        <dt className="font-medium text-muted-foreground/90 truncate text-[10px] mb-0.5">{k}</dt>
-                                        <dd className="break-all text-[11px] leading-tight">
-                                          {typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : JSON.stringify(v, null, 2)}
-                                        </dd>
-                                      </div>
-                                    )) : (
-                                      <p className="text-[10px] text-muted-foreground italic py-2">No data available</p>
-                                    )}
-                                  </dl>
-                                </div>
+                              <div className="space-y-3">
+                                {val ? (
+                                  <div className="bg-card border rounded-lg p-4">
+                                    <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      {toPairsGlobal(val).slice(0, 50).map(({ k, v }, idx) => (
+                                        <div key={idx} className="space-y-1.5 pb-3 border-b last:border-b-0">
+                                          <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                            {k}
+                                          </dt>
+                                          <dd className="text-sm font-medium break-words leading-relaxed">
+                                            {typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' 
+                                              ? String(v) 
+                                              : JSON.stringify(v, null, 2)
+                                            }
+                                          </dd>
+                                        </div>
+                                      ))}
+                                    </dl>
+                                  </div>
+                                ) : (
+                                  <div className="bg-muted/30 border border-dashed rounded-lg p-6 text-center">
+                                    <p className="text-sm text-muted-foreground italic">No data available</p>
+                                  </div>
+                                )}
                               </div>
                             ) : (
-                              <div key={sys} className="space-y-1.5 max-h-48 overflow-y-auto">
-                                <div className="flex justify-end mb-1">
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    className="h-5 px-1.5 text-xs" 
-                                    onClick={() => navigator.clipboard.writeText(JSON.stringify(val, null, 2))} 
-                                    title="Copy JSON"
-                                  >
-                                    <Copy className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                                <pre className="text-[10px] bg-muted/30 p-1.5 rounded overflow-auto font-mono leading-tight m-0">{JSON.stringify(val, null, 2)}</pre>
+                              <div className="bg-card border rounded-lg p-4">
+                                <pre className="text-xs bg-muted/30 p-3 rounded overflow-auto font-mono leading-relaxed">
+                                  {JSON.stringify(val, null, 2)}
+                                </pre>
                               </div>
                             );
+                            
                             return (
-                              <Card className="compact border-border/30 bg-card/50 h-fit">
-                                <CardHeader className="p-2 pb-1.5">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <div className="text-sm font-semibold flex-1 truncate">
+                              <div key={sys} className="space-y-3">
+                                {/* System Header */}
+                                <div className="flex items-center justify-between border-b pb-3">
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="text-lg font-bold text-foreground">
                                       {SYSTEM_LABELS[sys]}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                                      {hasData && <span className="text-xs px-2 py-0.5 rounded-full bg-green/20 text-green-600 dark:bg-green/10 dark:text-green-400">OK</span>}
-                                      <span className={`
-                                        text-xs px-1.5 py-0.5 rounded-full border font-medium 
-                                        ${enabled[sys] ? 'text-green-600 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950/20' : 'text-muted-foreground border-muted bg-muted/20 dark:bg-muted/10'}
-                                      `}>
-                                        {enabled[sys] ? 'Enabled' : 'Disabled'}
+                                    </h3>
+                                    {hasData && (
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-green-600 dark:bg-green-400" />
+                                        Data Available
                                       </span>
-                                    </div>
+                                    )}
                                   </div>
-                                </CardHeader>
-                                <CardContent className="p-0 pt-1.5">
-                                  {content}
-                                </CardContent>
-                              </Card>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`
+                                      text-xs px-2.5 py-1 rounded-full border font-medium
+                                      ${enabled[sys] 
+                                        ? 'text-blue-700 border-blue-300 bg-blue-50 dark:text-blue-300 dark:border-blue-700 dark:bg-blue-900/30' 
+                                        : 'text-muted-foreground border-border bg-muted/50'
+                                      }
+                                    `}>
+                                      {enabled[sys] ? 'Enabled' : 'Disabled'}
+                                    </span>
+                                    <Button 
+                                      size="sm" 
+                                      variant="ghost" 
+                                      className="h-8 px-2" 
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(JSON.stringify(val, null, 2));
+                                        toast.success(`Copied ${SYSTEM_LABELS[sys]} data to clipboard`);
+                                      }}
+                                      title="Copy system data"
+                                    >
+                                      <Copy className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                {/* System Content */}
+                                {content}
+                              </div>
                             );
                           }).filter(Boolean)}
                         </div>
                       );
                     } else {
                       return searchDialogMode === "html" ? (
-                        <div className="max-h-full overflow-auto p-3">
-                          <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-2 text-xs">
-                            {toPairsGlobal(searchDialogData).slice(0, 80).map(({ k, v }) => (
-                              <div key={k} className="flex flex-col py-1 border-b border-border/20 last:border-b-0">
-                                <dt className="font-medium text-muted-foreground/90 truncate text-[10px] mb-0.5">{k}</dt>
-                                <dd className="break-all text-[11px] leading-tight">{typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' ? String(v) : JSON.stringify(v)}</dd>
-                              </div>
-                            ))}
-                          </dl>
+                        <div className="p-4">
+                          <div className="bg-card border rounded-lg p-5">
+                            <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {toPairsGlobal(searchDialogData).slice(0, 80).map(({ k, v }, idx) => (
+                                <div key={idx} className="space-y-1.5 pb-3 border-b last:border-b-0">
+                                  <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                    {k}
+                                  </dt>
+                                  <dd className="text-sm font-medium break-words leading-relaxed">
+                                    {typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' 
+                                      ? String(v) 
+                                      : JSON.stringify(v)
+                                    }
+                                  </dd>
+                                </div>
+                              ))}
+                            </dl>
+                          </div>
                         </div>
                       ) : (
-                        <div className="max-h-full overflow-auto p-3">
-                          <pre className="text-xs bg-muted/30 p-2 rounded overflow-auto font-mono leading-tight m-0">{JSON.stringify(searchDialogData, null, 2)}</pre>
+                        <div className="p-4">
+                          <div className="bg-card border rounded-lg p-4">
+                            <pre className="text-xs bg-muted/30 p-3 rounded overflow-auto font-mono leading-relaxed">
+                              {JSON.stringify(searchDialogData, null, 2)}
+                            </pre>
+                          </div>
                         </div>
                       );
                     }
