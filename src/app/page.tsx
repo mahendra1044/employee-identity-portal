@@ -96,7 +96,8 @@ function useAuth() {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch(`${API_BASE}/auth/login`, {
+    // FIXED: Use Next.js API route instead of backend directly
+    const res = await fetch(`/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -1095,7 +1096,8 @@ export default function HomePage() {
     setHasSearched(false);
     console.log('🧹 [SEARCH] Cleared previous search state');
     try {
-      const res = await fetch(`${API_BASE}/api/search-employee/${encodeURIComponent(search)}`, {
+      // FIXED: Use Next.js API route instead of backend directly
+      const res = await fetch(`/api/search-employee/${encodeURIComponent(search)}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const body = await res.json();
