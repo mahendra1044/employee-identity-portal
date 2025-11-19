@@ -292,14 +292,25 @@ function SystemCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ system, payload, userEmail: email, description: ticketDesc }),
       });
-      const result = await res.json();
+      
+      let result: any;
+      try {
+        result = await res.json();
+      } catch {
+        // If JSON parsing fails, it's likely HTML (404, 500 error page)
+        const text = await res.text();
+        console.error('SNOW API returned non-JSON response:', { status: res.status, responseText: text.substring(0, 200) });
+        toast.error(`Server error: ${res.status}. Please check server logs.`);
+        return;
+      }
+      
       if (res.ok) {
         const { ticketNumber } = result;
         toast.success(`SNOW ticket submitted: ${ticketNumber}`);
         console.info('SNOW Ticket Success:', { ticketNumber, system, userEmail: email, description: ticketDesc, payload });
       } else {
         toast.error(result.error || "Failed to submit SNOW ticket");
-        console.warn('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: result.error || await res.text(), description: ticketDesc, payload });
+        console.warn('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: result.error, description: ticketDesc, payload });
       }
     } catch (error) {
       toast.error("Failed to submit SNOW ticket");

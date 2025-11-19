@@ -47,9 +47,22 @@ export function useSnow(
     setSnowLoading(true);
     setSnowError(null);
     try {
-      const url = `/api/snow-incidents?email=${encodeURIComponent(targetEmail)}`;
+      const url = `/api/snow/incidents?email=${encodeURIComponent(targetEmail)}`;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-      const json = await res.json();
+      
+      let json: any;
+      try {
+        json = await res.json();
+      } catch {
+        // If JSON parsing fails, it's likely HTML (404, 500 error page)
+        const text = await res.text();
+        console.error('SNOW API returned non-JSON response:', { status: res.status, responseText: text.substring(0, 200) });
+        setSnowError(`Server error: ${res.status}`);
+        setSnowItems([]);
+        setSnowCount(0);
+        setSnowLoading(false);
+        return;
+      }
 
       if (!res.ok) {
         setSnowError(json.error || 'Failed to load incidents');
@@ -58,7 +71,7 @@ export function useSnow(
         return;
       }
 
-      const items = Array.isArray(json?.incidents) ? json.incidents : [];
+      const items = Array.isArray(json?.items) ? json.items : [];
       
       // Generate demo incidents if empty
       const mkDemo = () => {
