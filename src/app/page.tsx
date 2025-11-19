@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
+import { Header, LoginForm } from "@/components/layout-index";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // Backend API base for auth/search/own/config calls
 
@@ -681,81 +682,7 @@ function SystemCard({
   );
 }
 
-function LoginCard({ onLogin }: { onLogin: (email: string, password: string) => Promise<void> }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      await onLogin(email, password);
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      {/* Login Header with Branding */}
-      <header className="border-b bg-background/80 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
-          <img 
-            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" 
-            alt="Company Logo" 
-            className="w-10 h-10 rounded"
-          />
-          <div className="font-semibold text-xl">Identity Sphere</div>
-        </div>
-      </header>
-
-      {/* Login Form */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-[400px]">
-          <CardHeader>
-            <CardTitle>Sign in</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={submit} className="space-y-3">
-              <div>
-                <label className="block text-sm mb-1">Email</label>
-                <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ops@company.com" />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Password</label>
-                <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-              </div>
-              {error && <p className="text-sm text-red-600">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign in"}
-              </Button>
-              <p className="text-xs text-muted-foreground">Mock auth: role inferred by email prefix (ops@, management@, else employee).</p>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Login Footer */}
-      <footer className="border-t bg-background/80 backdrop-blur py-6">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-3">
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-            <button className="hover:text-foreground transition-colors">Privacy Policy</button>
-            <span className="text-border">•</span>
-            <button className="hover:text-foreground transition-colors">Support</button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Identity Sphere. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
-  );
-}
 
 export default function HomePage() {
   const { token, role: originalRole, email, login, logout } = useAuth();
@@ -788,7 +715,7 @@ export default function HomePage() {
   const [pfOpsData, setPfOpsData] = useState<any>(null);
   const [qaActive, setQaActive] = useState<SystemKey>("ping-federate");
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [userToggles, setUserToggles] = useState<Record<SystemKey, boolean>>({});
+  const [userToggles, setUserToggles] = useState<Record<SystemKey, boolean>>({} as Record<SystemKey, boolean>);
 
   // Role toggle state - effective role for UI rendering (resets on refresh)
   const [effectiveRole, setEffectiveRole] = useState<string | null>(null);
@@ -821,7 +748,7 @@ export default function HomePage() {
         } catch {
           // Invalid JSON, reset to empty
           localStorage.removeItem("systemToggles");
-          setUserToggles({});
+          setUserToggles({} as Record<SystemKey, boolean>);
         }
       }
     }
@@ -1213,7 +1140,7 @@ export default function HomePage() {
   // Handle logout: clear toggles
   const handleLogout = () => {
     localStorage.removeItem("systemToggles");
-    setUserToggles({});
+    setUserToggles({} as Record<SystemKey, boolean>);
     logout();
   };
 
@@ -1225,137 +1152,25 @@ export default function HomePage() {
   };
 
   if (!token) {
-    return <LoginCard onLogin={login} />;
+    return <LoginForm onLogin={login} />;
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          {/* Left: Branding Section */}
-          <div className="flex items-center gap-3 min-w-0">
-            <img 
-              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" 
-              alt="Company Logo" 
-              className="w-8 h-8 rounded flex-shrink-0" 
-            />
-            <div className="min-w-0">
-              <div className="font-semibold">Identity Sphere</div>
-              {/* User info badges */}
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-foreground border border-border/50">
-                  <User className="h-3 w-3 flex-shrink-0" /> 
-                  <span className="truncate">{email}</span>
-                </span>
-                <span
-                  className={
-                    `inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border shadow-sm ` +
-                    (role === "ops"
-                      ? "border-purple-300 text-purple-800 bg-purple-100 dark:border-purple-700 dark:text-purple-200 dark:bg-purple-900/30"
-                      : role === "employee"
-                      ? "border-blue-300 text-blue-800 bg-blue-100 dark:border-blue-700 dark:text-blue-200 dark:bg-blue-900/30"
-                      : "border-amber-300 text-amber-800 bg-amber-100 dark:border-amber-700 dark:text-amber-200 dark:bg-amber-900/30")
-                  }
-                >
-                  {getRoleIcon(role)}
-                  {formatRoleName(role)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Action Buttons */}
-          <div className="flex items-center gap-2 flex-wrap justify-end">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setTheme(prev => prev === "light" ? "dark" : prev === "dark" ? "navy" : "light")}>
-                  {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Switch theme</p>
-              </TooltipContent>
-            </Tooltip>
-            {/* Role Toggle for Ops (only visible for original ops users) */}
-            {originalRole === "ops" && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    aria-label="Toggle role mode" 
-                    onClick={toggleRole}
-                  >
-                    <Users className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Switch to {effectiveRole === "ops" ? "Employee" : "Operations"} view</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {/* Settings button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)}>
-                  <SettingsIcon className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Settings</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Manage system visibility</p>
-              </TooltipContent>
-            </Tooltip>
-            {/* Educate Me (employees only) */}
-            {role === "employee" && educateEnabled && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" onClick={() => setEducateOpen(true)}>
-                    <BookOpen className="h-4 w-4 mr-1" />
-                    <span className="hidden sm:inline">Educate me</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>View troubleshooting guides</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {/* Show SNOW tickets button with dynamic count (ops: visible only after search) */}
-            {(
-              role !== 'ops' || (hasSearched && !!resolveSnowEmail())
-            ) && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" onClick={openSnowDialog}>
-                    <FileText className="h-4 w-4 mr-1" />
-                    <span className="hidden sm:inline">SNOW tickets</span>
-                    <span className="sm:hidden">SNOW</span>
-                    {typeof snowCount === 'number' && snowCount > 0 && (
-                      <span className="inline-flex items-center rounded-full bg-destructive px-2 py-0.5 text-[11px] text-destructive-foreground ml-1">
-                        {snowCount}
-                      </span>
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{role === 'ops' ? `View incidents for ${resolveSnowEmail()}` : "View your ServiceNow incidents"}</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="secondary" size="sm" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Sign out</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Sign out of the portal</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-      </header>
+      <Header
+        email={email}
+        role={role}
+        originalRole={originalRole}
+        theme={theme as any}
+        onThemeChange={(t) => setTheme(t)}
+        onRoleToggle={toggleRole}
+        onLogout={handleLogout}
+        onShowSnowTickets={openSnowDialog}
+        snowTicketsCount={snowCount ?? undefined}
+        onShowSettings={() => setSettingsOpen(true)}
+        onShowEducate={() => setEducateOpen(true)}
+        educateEnabled={educateEnabled}
+      />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Settings Dialog */}
