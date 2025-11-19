@@ -4,16 +4,16 @@ const API_BASE = process.env.API_BASE || 'http://localhost:3001';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ query: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { query } = await params;
+  const { id } = await params;
   
-  if (!query) {
+  if (!id) {
     return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 });
   }
 
-  const url = `${API_BASE}/api/search-employee/${encodeURIComponent(query)}`;
-  console.log('🔍 [Next.js API] Search request for:', query);
+  const url = `${API_BASE}/api/search-employee/${encodeURIComponent(id)}`;
+  console.log('🔍 [Next.js API] Search request for:', id);
   console.log('🔍 [Next.js API] Backend URL:', url);
 
   try {
