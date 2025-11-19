@@ -19,69 +19,15 @@ import { useTheme } from "@/hooks/useTheme";
 import { useUserToggles } from "@/hooks/useUserToggles";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 import { Header, LoginForm } from "@/components/layout-index";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"; // Backend API base for auth/search/own/config calls
-
-type Features = {
-  credentialSource: string;
-  useMocks: boolean;
-  useMockAuth: boolean;
-  systems: Record<string, boolean>;
-  // Optional config additions
-  opsShowTilesAfterSearch?: boolean;
-  employeeSearchSystems?: Partial<Record<SystemKey, boolean>>;
-  systemsOrder?: SystemKey[]; // NEW: optional preferred order for system cards
-  // Employee educate guide (optional, can be toggled at deploy time)
-  employeeEducateGuideEnabled?: boolean;
-  // Ops Quick Actions tabs enable/disable per system (deployment-time configurable)
-  quickActionsTabs?: Partial<Record<SystemKey, boolean>>;
-};
-
-type LoginResponse = { token: string; role: string; email: string };
-
-type SystemKey =
-  | "ping-directory"
-  | "ping-federate"
-  | "cyberark"
-  | "saviynt"
-  | "azure-ad"
-  | "ping-mfa";
-
-const SYSTEMS: SystemKey[] = [
-  "ping-directory",
-  "ping-federate",
-  "cyberark",
-  "saviynt",
-  "azure-ad",
-  "ping-mfa",
-];
-
-// Human-readable labels for systems
-const SYSTEM_LABELS: Record<SystemKey, string> = {
-  "ping-directory": "Ping Directory",
-  "ping-federate": "Ping Federate",
-  "cyberark": "CyberArk",
-  "saviynt": "Saviynt",
-  "azure-ad": "Azure AD",
-  "ping-mfa": "Ping MFA",
-};
-
-// Helper function to format role names professionally
-function formatRoleName(role: string): string {
-  const roleMap: Record<string, string> = {
-    "ops": "Operations Team",
-    "employee": "Employee Access",
-    "management": "Management",
-  };
-  return roleMap[role] || role.charAt(0).toUpperCase() + role.slice(1);
-}
-
-// Helper function to get role icon
-function getRoleIcon(role: string) {
-  if (role === "ops") return <Users className="h-3 w-3" />;
-  if (role === "employee") return <User className="h-3 w-3" />;
-  return <User className="h-3 w-3" />;
-}
+// Import from formatters
+import { toPairs, formatRoleName, getRoleIconType } from "@/lib/formatters";
+// Import from constants
+import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
+// Import from services
+import { StorageService } from "@/lib/storage";
+import { ErrorHandler } from "@/lib/error-handler";
+// Import types
+import type { Features, LoginResponse, SystemKey } from "@/lib/types";
 
 function useAuth() {
   const [token, setToken] = useState<string | null>(null);
@@ -89,43 +35,34 @@ function useAuth() {
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const t = localStorage.getItem("token");
-      const r = localStorage.getItem("role");
-      const e = localStorage.getItem("email");
-      if (t && r && e) {
-        setToken(t);
-        setRole(r);
-        setEmail(e);
-      }
+    const auth = StorageService.getAuth();
+    if (auth.token && auth.role && auth.email) {
+      setToken(auth.token);
+      setRole(auth.role);
+      setEmail(auth.email);
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // FIXED: Use Next.js API route instead of backend directly
-    const res = await fetch(`/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) throw new Error("Login failed");
-    const data: LoginResponse = await res.json();
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("email", data.email);
+  const login = async (emailInput: string, password: string) => {
+    try {
+      const res = await fetch(`/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailInput, password }),
+      });
+      if (!res.ok) throw new Error("Login failed");
+      const data: LoginResponse = await res.json();
+      StorageService.saveAuth(data.token, data.role, data.email);
+      setToken(data.token);
+      setRole(data.role);
+      setEmail(data.email);
+    } catch (error) {
+      throw new Error(ErrorHandler.getUserFriendlyMessage(error));
     }
-    setToken(data.token);
-    setRole(data.role);
-    setEmail(data.email);
   };
 
   const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("email");
-    }
+    StorageService.clearAuth();
     setToken(null);
     setRole(null);
     setEmail(null);
@@ -805,36 +742,8 @@ export default function HomePage() {
     return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
   }, [searchDialogData]);
 
-  // helper for HTML view in search dialog (global)
-  const toPairsGlobal = (obj: any): Array<{ k: string; v: any }> => {
-    const out: Array<{ k: string; v: any }> = [];
-    const walk = (val: any, prefix = "") => {
-      if (val === null || val === undefined) {
-        out.push({ k: prefix || "value", v: String(val) });
-        return;
-      }
-      if (Array.isArray(val)) {
-        if (val.length === 0) {
-          out.push({ k: prefix, v: "[]" });
-        } else {
-          val.forEach((item, idx) => walk(item, prefix ? `${prefix}[${idx}]` : `[${idx}]`));
-        }
-        return;
-      }
-      if (typeof val === "object") {
-        const keys = Object.keys(val);
-        if (keys.length === 0) {
-          out.push({ k: prefix, v: "{}" });
-        } else {
-          keys.forEach((key) => walk(val[key], prefix ? `${prefix}.${key}` : key));
-        }
-        return;
-      }
-      out.push({ k: prefix || "value", v: val });
-    };
-    walk(obj);
-    return out;
-  };
+  // Use toPairs from formatters service
+  const toPairsGlobal = toPairs;
 
   // Static, shared mock guide (same for all employees)
   const EDUCATE_GUIDE = useMemo(() => ({
@@ -1045,7 +954,7 @@ export default function HomePage() {
 
   // Handle logout: clear toggles
   const handleLogout = () => {
-    localStorage.removeItem("systemToggles");
+    StorageService.clearSystemToggles();
     logout();
   };
 
