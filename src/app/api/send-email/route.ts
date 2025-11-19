@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'Email sent successfully' });
   } catch (error) {
-    logger.error('Email send error:', { error: (error as Error).message, system: request.body?.system });
+    logger.error('Email send error:', { error: (error as Error).message, url: request.url });
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
   }
 }

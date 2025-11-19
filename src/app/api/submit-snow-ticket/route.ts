@@ -60,14 +60,12 @@ export async function POST(request: NextRequest) {
       fullDescriptionLength: description?.length || 0
     });
 
-    return NextResponse.json({ ticketNumber, timestamp, message: 'Ticket submitted successfully', ...mockTicketData });
+    return NextResponse.json({ ...mockTicketData, timestamp, message: 'Ticket submitted successfully' });
   } catch (error) {
     console.error('SNOW ticket submission error:', {
       error: (error as Error).message,
       stack: (error as Error).stack,
-      system: await request.json().then(body => body.system).catch(() => 'unknown'),
-      userEmail: await request.json().then(body => body.userEmail).catch(() => 'unknown'),
-      description_preview: await request.json().then(body => (body.description || '').substring(0, 100) + '...').catch(() => 'N/A')
+      url: request.url,
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

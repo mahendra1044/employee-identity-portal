@@ -23,6 +23,12 @@ const nextConfig: NextConfig = {
         loaders: [LOADER]
       }
     }
+  },
+  webpack: (config: any) => {
+    config.experiments = config.experiments || {};
+    config.experiments.syncWebAssembly = false;
+    config.experiments.asyncWebAssembly = false;
+    return config;
   }
 };
 

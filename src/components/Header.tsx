@@ -3,7 +3,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { LogOut, Users, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen } from "lucide-react";
+import { LogOut, Users, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen, Briefcase, User, Shield, UserCheck } from "lucide-react";
 
 type HeaderProps = {
   email: string | null;
@@ -38,6 +38,36 @@ export function Header(props: HeaderProps) {
 
   const isEmployee = role === "employee";
 
+  const getRoleIcon = () => {
+    switch (role) {
+      case "ops":
+        return <Briefcase className="h-3 w-3" />;
+      case "employee":
+        return <User className="h-3 w-3" />;
+      case "admin":
+        return <Shield className="h-3 w-3" />;
+      case "manager":
+        return <UserCheck className="h-3 w-3" />;
+      default:
+        return <User className="h-3 w-3" />;
+    }
+  };
+
+  const getRoleDisplay = () => {
+    switch (role) {
+      case "ops":
+        return "Operations Team";
+      case "employee":
+        return "Employee Access";
+      case "admin":
+        return "Admin";
+      case "manager":
+        return "Manager";
+      default:
+        return role || "User";
+    }
+  };
+
   return (
     <header className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
@@ -45,7 +75,13 @@ export function Header(props: HeaderProps) {
           <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" alt="Logo" className="w-8 h-8 rounded" />
           <div className="min-w-0">
             <div className="font-semibold text-sm">Identity Sphere</div>
-            <div className="text-xs text-muted-foreground truncate">{email}</div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="truncate">{email}</span>
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap">
+                {getRoleIcon()}
+                {getRoleDisplay()}
+              </span>
+            </div>
           </div>
         </div>
 

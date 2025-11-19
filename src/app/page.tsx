@@ -12,6 +12,7 @@ import { Sun, Moon, User, Copy, RefreshCw, Eye, Code, BookOpen, FileText, LogOut
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import useSearch from "@/hooks/useSearch";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 import { Header, LoginForm } from "@/components/layout-index";
 
@@ -687,21 +688,33 @@ function SystemCard({
 export default function HomePage() {
   const { token, role: originalRole, email, login, logout } = useAuth();
   const [features, setFeatures] = useState<Features | null>(null);
-  const [search, setSearch] = useState("");
-  const [searchResults, setSearchResults] = useState<any | null>(null);
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
+  const {
+    search,
+    setSearch,
+    searchResults,
+    searchError,
+    hasSearched,
+    doSearch,
+    searchDialogOpen,
+    setSearchDialogOpen,
+    searchDialogTitle,
+    setSearchDialogTitle,
+    searchDialogData,
+    setSearchDialogData,
+    searchDialogLoading,
+    setSearchDialogLoading,
+    searchDialogMode,
+    setSearchDialogMode,
+    openSearchDialog,
+    closeSearchDialog,
+  } = useSearch(token, originalRole);
   const [theme, setTheme] = useState<"light" | "dark" | "navy">();
   const [minutes, setMinutes] = useState<number>(10);
   const [failFed, setFailFed] = useState<any[] | null>(null);
   const [failMfa, setFailMfa] = useState<any[] | null>(null);
   const [opsLoading, setOpsLoading] = useState(false);
   const [opsError, setOpsError] = useState<string | null>(null);
-  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
-  const [searchDialogTitle, setSearchDialogTitle] = useState<string>("");
-  const [searchDialogData, setSearchDialogData] = useState<any | null>(null);
-  const [searchDialogLoading, setSearchDialogLoading] = useState(false);
-  const [searchDialogMode, setSearchDialogMode] = useState<"json" | "html">("json");
+  // search-related state now managed by `useSearch`
   const [snowOpen, setSnowOpen] = useState(false);
   const [snowLoading, setSnowLoading] = useState(false);
   const [snowError, setSnowError] = useState<string | null>(null);
@@ -1013,33 +1026,6 @@ export default function HomePage() {
       setOpsLoading(false);
     }
   };
-
-  const doSearch = async () => {
-    if (!token || !search.trim()) return;
-    console.log('🔍 [SEARCH] Starting search for:', search);
-    console.log('🔍 [SEARCH] Current role:', role);
-    setSearchError(null);
-    setSearchResults(null);
-    setHasSearched(false);
-    console.log('🧹 [SEARCH] Cleared previous search state');
-    try {
-      // FIXED: Use Next.js API route instead of backend directly
-      const res = await fetch(`/api/search-employee/${encodeURIComponent(search)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const body = await res.json();
-      console.log('🔍 [SEARCH] Response received:', body);
-      if (!res.ok) throw new Error(body.error || "Search failed");
-      setSearchResults(body);
-      console.log('💾 [SEARCH] Search results saved to state');
-      setHasSearched(true);
-      console.log('✅ [SEARCH] Search completed successfully, hasSearched set to true');
-    } catch (e: any) {
-      console.error('❌ [SEARCH] Search failed:', e.message);
-      setSearchError(e.message || "Search failed");
-    }
-  };
-
   // Helper: decide which email to use for SNOW incidents based on role/search
   const resolveSnowEmail = (): string | null => {
     const self = String(email || (typeof window !== 'undefined' ? localStorage.getItem("email") : '') || '').toLowerCase();
@@ -1302,10 +1288,7 @@ export default function HomePage() {
                                       onClick={async () => {
                                         const firstUser = finalList[0];
                                         const key = firstUser.userId || firstUser.email;
-                                        setSearchDialogTitle(`Ping Directory — ${key || "Details"}`);
-                                        setSearchDialogData(null);
-                                        setSearchDialogLoading(true);
-                                        setSearchDialogOpen(true);
+                                        openSearchDialog(`Ping Directory — ${key || "Details"}`, null, "json");
                                         try {
                                           const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-directory`;
                                           const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -1317,8 +1300,6 @@ export default function HomePage() {
                                           }
                                         } catch {
                                           setSearchDialogData(firstUser);
-                                        } finally {
-                                          setSearchDialogLoading(false);
                                         }
                                       }}
                                       title="View detailed information for primary result"
@@ -1385,10 +1366,7 @@ export default function HomePage() {
                                       onClick={async () => {
                                         const firstUser = finalList[0];
                                         const key = firstUser.userId || firstUser.email;
-                                        setSearchDialogTitle(`Ping MFA — ${firstUser.userId}`);
-                                        setSearchDialogData(null);
-                                        setSearchDialogLoading(true);
-                                        setSearchDialogOpen(true);
+                                        openSearchDialog(`Ping MFA — ${firstUser.userId}`, null, "json");
                                         try {
                                           const url = `${API_BASE}/api/search-employee/${encodeURIComponent(String(key))}/details?system=ping-mfa`;
                                           const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -1400,8 +1378,6 @@ export default function HomePage() {
                                           }
                                         } catch {
                                           setSearchDialogData(firstUser);
-                                        } finally {
-                                          setSearchDialogLoading(false);
                                         }
                                       }}
                                       title="View detailed information for primary result"
@@ -1475,11 +1451,7 @@ export default function HomePage() {
                         ]));
                         const displayKey = candidateKeys[0] || "";
 
-                        setSearchDialogMode("json");
-                        setSearchDialogTitle(`Consolidated View (JSON) — ${displayKey || "Details"}`);
-                        setSearchDialogData(null);
-                        setSearchDialogLoading(true);
-                        setSearchDialogOpen(true);
+                        openSearchDialog(`Consolidated View (JSON) — ${displayKey || "Details"}`, null, "json");
                         try {
                           const aggregate: Record<string, any> = {};
                           // fetch all-users once as a fallback source for per-system data
@@ -1583,11 +1555,7 @@ export default function HomePage() {
                         ]));
                         const displayKey = candidateKeys[0] || "";
 
-                        setSearchDialogMode("html");
-                        setSearchDialogTitle(`Consolidated View (HTML) — ${displayKey || "Details"}`);
-                        setSearchDialogData(null);
-                        setSearchDialogLoading(true);
-                        setSearchDialogOpen(true);
+                        openSearchDialog(`Consolidated View (HTML) — ${displayKey || "Details"}`, null, "html");
 
                         try {
                           const aggregate: Record<string, any> = {};
