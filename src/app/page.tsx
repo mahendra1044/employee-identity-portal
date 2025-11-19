@@ -13,6 +13,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import useSearch from "@/hooks/useSearch";
+import { useSnow } from "@/hooks/useSnow";
+import { usePfOps } from "@/hooks/usePfOps";
+import { useTheme } from "@/hooks/useTheme";
+import { useUserToggles } from "@/hooks/useUserToggles";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 import { Header, LoginForm } from "@/components/layout-index";
 
@@ -708,27 +712,6 @@ export default function HomePage() {
     openSearchDialog,
     closeSearchDialog,
   } = useSearch(token, originalRole);
-  const [theme, setTheme] = useState<"light" | "dark" | "navy">();
-  const [minutes, setMinutes] = useState<number>(10);
-  const [failFed, setFailFed] = useState<any[] | null>(null);
-  const [failMfa, setFailMfa] = useState<any[] | null>(null);
-  const [opsLoading, setOpsLoading] = useState(false);
-  const [opsError, setOpsError] = useState<string | null>(null);
-  // search-related state now managed by `useSearch`
-  const [snowOpen, setSnowOpen] = useState(false);
-  const [snowLoading, setSnowLoading] = useState(false);
-  const [snowError, setSnowError] = useState<string | null>(null);
-  const [snowCount, setSnowCount] = useState<number | null>(null);
-  const [snowItems, setSnowItems] = useState<any[] | null>(null);
-  const [snowEmail, setSnowEmail] = useState<string | null>(null);
-  const [educateOpen, setEducateOpen] = useState(false);
-  const [pfOpsOpen, setPfOpsOpen] = useState(false);
-  const [pfOpsTitle, setPfOpsTitle] = useState<string>("");
-  const [pfOpsLoading, setPfOpsLoading] = useState(false);
-  const [pfOpsData, setPfOpsData] = useState<any>(null);
-  const [qaActive, setQaActive] = useState<SystemKey>("ping-federate");
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [userToggles, setUserToggles] = useState<Record<SystemKey, boolean>>({} as Record<SystemKey, boolean>);
 
   // Role toggle state - effective role for UI rendering (resets on refresh)
   const [effectiveRole, setEffectiveRole] = useState<string | null>(null);
@@ -741,6 +724,59 @@ export default function HomePage() {
   // Current role for UI rendering (effectiveRole if set, otherwise originalRole)
   const role = effectiveRole || originalRole;
 
+  // Initialize hooks for refactored state management
+  const { theme, changeTheme } = useTheme();
+  const {
+    snowOpen,
+    setSnowOpen,
+    snowLoading,
+    snowError,
+    snowCount,
+    snowItems,
+    snowEmail,
+    openSnowDialog,
+    resolveSnowEmail,
+  } = useSnow(token, role, search, searchResults, hasSearched, email);
+
+  const {
+    pfOpsOpen,
+    setPfOpsOpen,
+    pfOpsTitle,
+    pfOpsLoading,
+    pfOpsData,
+    qaActive,
+    setQaActive,
+    loadPfUserInfo,
+    loadPfOidc,
+    loadPfConnections,
+    loadAadGroups,
+    loadAadSignins,
+    loadAadUser,
+    loadCyberarkAccounts,
+    loadCyberarkActivity,
+    loadCyberarkSafes,
+    loadPdProfile,
+    loadPdGroups,
+    loadPdAudit,
+    loadMfaStatus,
+    loadMfaDevices,
+    loadMfaEvents,
+    loadSaviynt,
+    loadSaviyhtRoles,
+    loadSaviyhtEntitlements,
+  } = usePfOps();
+
+  const { userToggles, handleToggleChange } = useUserToggles();
+
+  // Remaining state
+  const [minutes, setMinutes] = useState<number>(10);
+  const [failFed, setFailFed] = useState<any[] | null>(null);
+  const [failMfa, setFailMfa] = useState<any[] | null>(null);
+  const [opsLoading, setOpsLoading] = useState(false);
+  const [opsError, setOpsError] = useState<string | null>(null);
+  const [educateOpen, setEducateOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   // Toggle between ops and employee mode (only available for original ops users)
   const toggleRole = () => {
     if (originalRole !== "ops") return;
@@ -750,24 +786,7 @@ export default function HomePage() {
     toast.success(`Switched to ${newRole} mode`);
   };
 
-  // Initialize user toggles from localStorage on mount (client-side only)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem("systemToggles");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          setUserToggles(parsed);
-        } catch {
-          // Invalid JSON, reset to empty
-          localStorage.removeItem("systemToggles");
-          setUserToggles({} as Record<SystemKey, boolean>);
-        }
-      }
-    }
-  }, []);
-
-  // Apply theme class to root element and persist to localStorage
+  // Apply theme class to root element
   useEffect(() => {
     if (typeof window !== 'undefined' && theme) {
       let classes = '';
@@ -779,7 +798,6 @@ export default function HomePage() {
         classes = 'dark navy';
       }
       document.documentElement.className = classes;
-      localStorage.setItem("theme", theme);
     }
   }, [theme]);
 
@@ -854,18 +872,20 @@ export default function HomePage() {
   }, [features]);
 
   useEffect(() => {
-    // init theme from localStorage; default to light regardless of system
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem("theme");
-      if (stored === "light" || stored === "dark" || stored === "navy") {
-        setTheme(stored);
-      } else {
-        setTheme("light");
+    // init theme from localStorage (done in useTheme hook now)
+    // Just apply the theme to the DOM
+    if (typeof window !== 'undefined' && theme) {
+      let classes = '';
+      if (theme === 'light') {
+        classes = '';
+      } else if (theme === 'dark') {
+        classes = 'dark';
+      } else if (theme === 'navy') {
+        classes = 'dark navy';
       }
-    } else {
-      setTheme("light");
+      document.documentElement.className = classes;
     }
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     if (!token) return;
@@ -895,20 +915,7 @@ export default function HomePage() {
     run();
   }, [token]);
 
-  // Initialize user toggles to defaults after features load
-  useEffect(() => {
-    if (!features || !token) return;
-    const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!(features.systems[s] ?? false) }), {} as Record<SystemKey, boolean>);
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem("systemToggles");
-      const parsed = stored ? JSON.parse(stored) : {};
-      const updatedToggles = { ...defaults, ...parsed };
-      setUserToggles(updatedToggles);
-      localStorage.setItem("systemToggles", JSON.stringify(updatedToggles));
-    } else {
-      setUserToggles(defaults);
-    }
-  }, [features, token]);
+  // userToggles initialization is now handled by useUserToggles hook
 
   const enabled = useMemo(() => {
     const all = features?.systems || {};
@@ -1026,95 +1033,8 @@ export default function HomePage() {
       setOpsLoading(false);
     }
   };
-  // Helper: decide which email to use for SNOW incidents based on role/search
-  const resolveSnowEmail = (): string | null => {
-    const self = String(email || (typeof window !== 'undefined' ? localStorage.getItem("email") : '') || '').toLowerCase();
-    if (role === 'ops') {
-      // Only after a search should ops see/incidents for a user
-      if (!hasSearched) return null;
-      const q = String(search || '').trim().toLowerCase();
-      // If the query itself looks like an email, prefer it
-      if (q && q.includes('@') && q.includes('.')) return q;
-      // Otherwise try first Ping Directory result's email
-      const pd = Array.isArray((searchResults as any)?.["ping-directory"]) ? (searchResults as any)["ping-directory"] : [];
-      const exact = pd.find((u: any) => String(u?.email || '').toLowerCase() === q || String(u?.userId || '') === String(search || '').trim());
-      if (exact?.email) return String(exact.email).toLowerCase();
-      if (pd[0]?.email) return String(pd[0].email).toLowerCase();
-      return null;
-    }
-    return self || null;
-  };
 
-  // Open SNOW dialog and fetch incidents
-  const openSnowDialog = async () => {
-    if (!token) return;
-    const target = resolveSnowEmail();
-    // Only block when ops has no valid searched target; employees can proceed (backend uses self email)
-    if (role === 'ops' && !target) {
-      toast.error('No target user found for SNOW incidents');
-      return;
-    }
-    setSnowOpen(true);
-    setSnowLoading(true);
-    setSnowError(null);
-    setSnowItems(null);
-    // For employees, prefer server-returned email; prefill with best-known fallback
-    const selfFallback = (typeof window !== 'undefined' ? localStorage.getItem('email') : '') || email || '';
-    setSnowEmail(role === 'ops' ? target : (target || String(selfFallback).toLowerCase()))
-    try {
-      const base = `${API_BASE}/api/snow/incidents`;
-      const url = role === 'ops' ? `${base}?email=${encodeURIComponent(String(target))}` : base;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json?.error || 'Failed to load incidents');
-      // Ensure dialog shows the actual email resolved by the server
-      if (json?.email) {
-        setSnowEmail(String(json.email));
-      }
-      const items = Array.isArray(json?.items) ? json.items : [];
-      // Fallback demo incidents on empty payloads (helps employee role in mock mode)
-      const mkDemo = () => {
-        const now = Date.now();
-        const iso = (ms: number) => new Date(ms).toISOString();
-        const assigned = String(json?.email || target || selfFallback).toLowerCase();
-        return [
-          { number: `INC-DEMO-${Math.floor(Math.random()*1_000_000).toString().padStart(6,'0')}`, short_description: 'Demo: Access issue with corporate app', state: 'open', priority: '3 - Moderate', updatedAt: iso(now), assigned_to: assigned },
-          { number: `INC-DEMO-${Math.floor(Math.random()*1_000_000).toString().padStart(6,'0')}`, short_description: 'Demo: MFA verification pending', state: 'in_progress', priority: '2 - High', updatedAt: iso(now - 60*60*1000), assigned_to: assigned },
-          { number: `INC-DEMO-${Math.floor(Math.random()*1_000_000).toString().padStart(6,'0')}`, short_description: 'Demo: Password reset completed', state: 'closed', priority: '4 - Low', updatedAt: iso(now - 24*60*60*1000), assigned_to: assigned },
-        ];
-      };
-      const finalItems = items.length > 0 ? items : mkDemo();
-      setSnowItems(finalItems);
-      const computedCount = finalItems.reduce((acc: number, it: any) => {
-        const st = String(it.state || '').toLowerCase();
-        if (st === 'open' || st.includes('progress')) return acc + 1;
-        return acc;
-      }, 0);
-      setSnowCount(
-        typeof json?.open === 'number' && typeof json?.in_progress === 'number'
-          ? Number(json.open) + Number(json.in_progress)
-          : computedCount
-      );
-    } catch (e: any) {
-      setSnowError(e.message || 'Failed to load incidents');
-      setSnowItems([]);
-      setSnowCount(0);
-    } finally {
-      setSnowLoading(false);
-    }
-  };
-
-  // Reset SNOW context on ops search changes to avoid stale counts/targets
-  useEffect(() => {
-    if (role === 'ops') {
-      setSnowCount(null);
-      setSnowEmail(null);
-      setSnowItems(null);
-    }
-  }, [role, hasSearched, search]);
-
-  // removed loadAllUsers (feature deprecated)
-
+  // Load recent failures on ops login
   useEffect(() => {
     if (token && role === "ops") {
       // do not auto-load all users; show recent failures panel instead
@@ -1126,15 +1046,7 @@ export default function HomePage() {
   // Handle logout: clear toggles
   const handleLogout = () => {
     localStorage.removeItem("systemToggles");
-    setUserToggles({} as Record<SystemKey, boolean>);
     logout();
-  };
-
-  // Handle toggle change
-  const handleToggleChange = (system: SystemKey, checked: boolean) => {
-    const updated = { ...userToggles, [system]: checked };
-    setUserToggles(updated);
-    localStorage.setItem("systemToggles", JSON.stringify(updated));
   };
 
   if (!token) {
@@ -1148,7 +1060,7 @@ export default function HomePage() {
         role={role}
         originalRole={originalRole}
         theme={theme as any}
-        onThemeChange={(t) => setTheme(t)}
+        onThemeChange={changeTheme}
         onRoleToggle={toggleRole}
         onLogout={handleLogout}
         onShowSnowTickets={openSnowDialog}
@@ -1185,9 +1097,11 @@ export default function HomePage() {
                 ))}
               </div>
               <Button variant="outline" onClick={() => {
-                const defaults = SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: enabled[s] }), {} as Record<SystemKey, boolean>);
-                setUserToggles(defaults);
-                localStorage.setItem("systemToggles", JSON.stringify(defaults));
+                SYSTEMS.forEach(s => {
+                  if (enabled[s]) {
+                    handleToggleChange(s, true);
+                  }
+                });
                 toast.success("Reset to defaults");
               }} className="w-full">
                 Reset to Defaults
@@ -1834,24 +1748,15 @@ export default function HomePage() {
                 <div className="rounded-lg border bg-gradient-to-r from-muted/60 to-background p-3 sm:p-4">
                   {qaActive === "ping-federate" && qaEnabledTabs["ping-federate"] && (
                     <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping Federate — User Info"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/pf/userinfo"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load User Info" }); } finally { setPfOpsLoading(false); }
-                      }} title="User information">
+                      <Button size="sm" variant="secondary" onClick={loadPfUserInfo} title="User information">
                         <User className="h-4 w-4 mr-1" />
                         User Info
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping Federate — OIDC Connections"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/pf/oidc"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load OIDC connections" }); } finally { setPfOpsLoading(false); }
-                      }} title="OIDC connections">
+                      <Button size="sm" variant="secondary" onClick={loadPfOidc} title="OIDC connections">
                         <Globe className="h-4 w-4 mr-1" />
                         OIDC
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping Federate — SAML Connections"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/pf/saml"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j); } catch { setPfOpsData({ error: "Failed to load SAML connections" }); } finally { setPfOpsLoading(false); }
-                      }} title="SAML connections">
+                      <Button size="sm" variant="secondary" onClick={loadPfConnections} title="SAML connections">
                         <Shield className="h-4 w-4 mr-1" />
                         SAML
                       </Button>
@@ -1860,24 +1765,15 @@ export default function HomePage() {
 
                   {qaActive === "ping-directory" && qaEnabledTabs["ping-directory"] && (
                     <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping Directory — Profile"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/pd/profile"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load profile" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Profile">
+                      <Button size="sm" variant="secondary" onClick={loadPdProfile} title="Profile">
                         <Database className="h-4 w-4 mr-1" />
                         Profile
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping Directory — Groups"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/pd/groups"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load groups" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Groups">
+                      <Button size="sm" variant="secondary" onClick={loadPdGroups} title="Groups">
                         <Users className="h-4 w-4 mr-1" />
                         Groups
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping Directory — Audit"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/pd/audit"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load audit" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Audit">
+                      <Button size="sm" variant="secondary" onClick={loadPdAudit} title="Audit">
                         <History className="h-4 w-4 mr-1" />
                         Audit
                       </Button>
@@ -1886,24 +1782,15 @@ export default function HomePage() {
 
                   {qaActive === "ping-mfa" && qaEnabledTabs["ping-mfa"] && (
                     <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping MFA — Status"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/mfa/status"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load status" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Status">
+                      <Button size="sm" variant="secondary" onClick={loadMfaStatus} title="Status">
                         <Status className="h-4 w-4 mr-1" />
                         Status
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping MFA — Devices"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/mfa/devices"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load devices" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Devices">
+                      <Button size="sm" variant="secondary" onClick={loadMfaDevices} title="Devices">
                         <Device className="h-4 w-4 mr-1" />
                         Devices
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Ping MFA — Events"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/mfa/events"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load events" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Events">
+                      <Button size="sm" variant="secondary" onClick={loadMfaEvents} title="Events">
                         <Event className="h-4 w-4 mr-1" />
                         Events
                       </Button>
@@ -1912,24 +1799,15 @@ export default function HomePage() {
 
                   {qaActive === "azure-ad" && qaEnabledTabs["azure-ad"] && (
                     <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Azure AD — User"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/aad/user"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load user" }); } finally { setPfOpsLoading(false);} 
-                      }} title="User">
+                      <Button size="sm" variant="secondary" onClick={loadAadUser} title="User">
                         <User className="h-4 w-4 mr-1" />
                         User
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Azure AD — Groups"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/aad/groups"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load groups" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Groups">
+                      <Button size="sm" variant="secondary" onClick={loadAadGroups} title="Groups">
                         <Users className="h-4 w-4 mr-1" />
                         Groups
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Azure AD — Sign-ins"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/aad/signins"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load sign-ins" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Sign-ins">
+                      <Button size="sm" variant="secondary" onClick={loadAadSignins} title="Sign-ins">
                         <Signin className="h-4 w-4 mr-1" />
                         Sign-ins
                       </Button>
@@ -1938,24 +1816,15 @@ export default function HomePage() {
 
                   {qaActive === "cyberark" && qaEnabledTabs["cyberark"] && (
                     <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("CyberArk — Safes"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/cyberark/safes"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load safes" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Safes">
+                      <Button size="sm" variant="secondary" onClick={loadCyberarkSafes} title="Safes">
                         <Vault className="h-4 w-4 mr-1" />
                         Safes
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("CyberArk — Accounts"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/cyberark/accounts"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load accounts" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Accounts">
+                      <Button size="sm" variant="secondary" onClick={loadCyberarkAccounts} title="Accounts">
                         <Users className="h-4 w-4 mr-1" />
                         Accounts
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("CyberArk — Activity"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/cyberark/activity"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load activity" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Activity">
+                      <Button size="sm" variant="secondary" onClick={loadCyberarkActivity} title="Activity">
                         <Activity className="h-4 w-4 mr-1" />
                         Activity
                       </Button>
@@ -1964,24 +1833,15 @@ export default function HomePage() {
 
                   {qaActive === "saviynt" && qaEnabledTabs["saviynt"] && (
                     <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Saviynt — Roles"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/saviynt/roles"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load roles" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Roles">
+                      <Button size="sm" variant="secondary" onClick={loadSaviyhtRoles} title="Roles">
                         <Role className="h-4 w-4 mr-1" />
                         Roles
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Saviynt — Entitlements"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/saviynt/entitlements"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load entitlements" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Entitlements">
+                      <Button size="sm" variant="secondary" onClick={loadSaviyhtEntitlements} title="Entitlements">
                         <Entitlement className="h-4 w-4 mr-1" />
                         Entitlements
                       </Button>
-                      <Button size="sm" variant="secondary" onClick={async () => {
-                        setPfOpsTitle("Saviynt — Requests"); setPfOpsOpen(true); setPfOpsLoading(true);
-                        try { const r = await fetch("/api/saviynt/requests"); const j = await r.json().catch(() => ({})); setPfOpsData(j?.data ?? j);} catch { setPfOpsData({ error: "Failed to load requests" }); } finally { setPfOpsLoading(false);} 
-                      }} title="Requests">
+                      <Button size="sm" variant="secondary" onClick={loadSaviynt} title="Requests">
                         <Request className="h-4 w-4 mr-1" />
                         Requests
                       </Button>
