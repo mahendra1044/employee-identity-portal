@@ -8,6 +8,9 @@
     "cyberark": true,
     "saviynt": true,
     "azure-ad": true,
-    "ping-mfa": true
+    "ping-mfa": true,
+    "ping-access": true,
+    "ping-authorize": true,
+    "ping-intelligence": true
   }
 }
