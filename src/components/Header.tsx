@@ -7,6 +7,7 @@ import { LogOut, Users, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen,
 import { useAppAuth } from "@/hooks/useAppAuth";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppUI } from "@/hooks/useAppUI";
+import { getOpsModeDescription } from "@/lib/role-utils";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
 export function Header(props: {
@@ -25,6 +26,10 @@ export function Header(props: {
   const getRoleIcon = () => {
     switch (currentRole) {
       case "ops":
+      case "sso_ops":
+      case "pam_ops":
+      case "iga_ops":
+      case "tpag_ops":
         return <Briefcase className="h-3 w-3" />;
       case "employee":
         return <User className="h-3 w-3" />;
@@ -41,6 +46,14 @@ export function Header(props: {
     switch (currentRole) {
       case "ops":
         return "Operations Team";
+      case "sso_ops":
+        return "SSO Operations";
+      case "pam_ops":
+        return "PAM Operations";
+      case "iga_ops":
+        return "IGA Operations";
+      case "tpag_ops":
+        return "TPAG Operations";
       case "employee":
         return "Employee Access";
       case "admin":
@@ -52,6 +65,14 @@ export function Header(props: {
     }
   };
 
+  const getOpsModeTooltip = () => {
+    const description = getOpsModeDescription(currentRole);
+    if (description) {
+      return description;
+    }
+    return getRoleDisplay();
+  };
+
   return (
     <header className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
@@ -61,10 +82,17 @@ export function Header(props: {
             <div className="font-semibold text-sm">Identity Sphere</div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="truncate">{email}</span>
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap">
-                {getRoleIcon()}
-                {getRoleDisplay()}
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-muted-foreground font-medium whitespace-nowrap cursor-help">
+                    {getRoleIcon()}
+                    {getRoleDisplay()}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{getOpsModeTooltip()}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </div>

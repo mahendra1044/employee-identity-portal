@@ -23,6 +23,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { API_BASE } from "@/lib/constants";
 import { OPS_CONFIG } from "@/lib/ui-config";
+import { isOpsRole } from "@/lib/role-utils";
 import type { SystemKey } from "@/lib/types";
 
 interface FailureData {
@@ -60,7 +61,7 @@ export function useOpsFeatures(
   features: any,
   enabled: Record<SystemKey, boolean>
 ): UseOpsFeuresResult {
-  const isOps = role === "ops";
+  const isOps = isOpsRole(role);
   const [minutes, setMinutes] = useState<number>(OPS_CONFIG.DEFAULT_TIME_RANGE);
   const [failFed, setFailFed] = useState<FailureData[]>([]);
   const [failMfa, setFailMfa] = useState<FailureData[]>([]);

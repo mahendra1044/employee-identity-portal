@@ -1,0 +1,93 @@
+/**
+ * Role utility functions for determining ops modes and system access
+ */
+
+import type { SystemKey } from "./types";
+import { PING_SYSTEMS, PAM_SYSTEMS, IGA_SYSTEMS, TPAG_SYSTEMS } from "./constants";
+
+/**
+ * Determines if a role is an ops-like role (has ops privileges)
+ */
+export function isOpsRole(role: string | null | undefined): boolean {
+  if (!role) return false;
+  return role === "ops" || 
+         role === "sso_ops" || 
+         role === "pam_ops" || 
+         role === "iga_ops" || 
+         role === "tpag_ops";
+}
+
+/**
+ * Gets the allowed systems for a specific ops role
+ * Returns all systems for general ops, or filtered systems for specialized ops
+ */
+export function getAllowedSystemsForRole(role: string | null | undefined): SystemKey[] | null {
+  if (!role) return null;
+  
+  switch (role) {
+    case "ops":
+      return null; // null means all systems allowed
+    case "sso_ops":
+      return PING_SYSTEMS;
+    case "pam_ops":
+      return PAM_SYSTEMS;
+    case "iga_ops":
+      return IGA_SYSTEMS;
+    case "tpag_ops":
+      return TPAG_SYSTEMS;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Checks if a system is allowed for a specific role
+ */
+export function isSystemAllowedForRole(system: SystemKey, role: string | null | undefined): boolean {
+  if (!role) return true; // No role restrictions
+  
+  const allowedSystems = getAllowedSystemsForRole(role);
+  
+  // null means all systems are allowed (general ops)
+  if (allowedSystems === null) return true;
+  
+  // Check if system is in the allowed list
+  return allowedSystems.includes(system);
+}
+
+/**
+ * Filters systems based on role permissions
+ */
+export function filterSystemsByRole(systems: SystemKey[], role: string | null | undefined): SystemKey[] {
+  if (!role || !isOpsRole(role)) return systems;
+  
+  const allowedSystems = getAllowedSystemsForRole(role);
+  
+  // null means all systems allowed
+  if (allowedSystems === null) return systems;
+  
+  // Filter to only allowed systems
+  return systems.filter(sys => allowedSystems.includes(sys));
+}
+
+/**
+ * Gets a human-readable description of the ops mode
+ */
+export function getOpsModeDescription(role: string | null | undefined): string {
+  if (!role) return "";
+  
+  switch (role) {
+    case "ops":
+      return "All Systems";
+    case "sso_ops":
+      return "SSO Operations (Ping Systems)";
+    case "pam_ops":
+      return "PAM Operations (CyberArk)";
+    case "iga_ops":
+      return "IGA Operations (Saviynt)";
+    case "tpag_ops":
+      return "TPAG Operations";
+    default:
+      return "";
+  }
+}

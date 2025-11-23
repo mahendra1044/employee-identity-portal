@@ -42,6 +42,8 @@ import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
 // Import from services
 import { StorageService } from "@/lib/storage";
 import { ErrorHandler } from "@/lib/error-handler";
+// Import role utilities
+import { isOpsRole, filterSystemsByRole } from "@/lib/role-utils";
 // Import types
 import type { Features, LoginResponse, SystemKey } from "@/lib/types";
 
@@ -174,20 +176,39 @@ export default function HomePage() {
   const anyEnabled = useMemo(() => Object.values(enabled).some(Boolean), [enabled]);
 
   const visibleSystems = useMemo(() => {
-    const result = orderedSystems.filter((sys: SystemKey) => 
+    let result = orderedSystems.filter((sys: SystemKey) => 
       enabled[sys] && 
       userToggles[sys] && 
       (role !== "ops" || hasSearched)
     );
+    
+    // Filter systems based on specialized ops role
+    if (isOpsRole(role)) {
+      result = filterSystemsByRole(result, role);
+    }
+    
     console.log('👁️ [VISIBLE SYSTEMS] Calculated visible systems:', result);
     console.log('👁️ [VISIBLE SYSTEMS] Filters - role:', role, 'hasSearched:', hasSearched);
     return result;
   }, [orderedSystems, enabled, userToggles, role, hasSearched]);
 
-  const qaEnabledTabs = useMemo(() => ({
-    ...enabled,
-    ...(features?.quickActionsTabs || {})
-  }), [enabled, features]);
+  const qaEnabledTabs = useMemo(() => {
+    const baseTabs = {
+      ...enabled,
+      ...(features?.quickActionsTabs || {})
+    };
+    
+    // Filter tabs based on specialized ops role
+    if (isOpsRole(role)) {
+      const allowedSystems = filterSystemsByRole(SYSTEMS, role);
+      return SYSTEMS.reduce((acc, sys) => ({
+        ...acc,
+        [sys]: baseTabs[sys] && allowedSystems.includes(sys)
+      }), {} as Record<SystemKey, boolean>);
+    }
+    
+    return baseTabs;
+  }, [enabled, features, role]);
 
   const splunkUrl = "https://splunk.company.com";
   const cloudwatchUrl = "https://console.aws.amazon.com/cloudwatch/home";
@@ -290,7 +311,7 @@ export default function HomePage() {
         />
 
         {/* Ops Quick Actions (tabs) - independent card below Search, visible after successful search */}
-        {role === "ops" && hasSearched && (
+        {isOpsRole(role) && hasSearched && (
           <QuickActionsCard
             qaActive={qaActive as SystemKey}
             onSetQaActive={(system) => setQaActive(system)}
@@ -321,7 +342,7 @@ export default function HomePage() {
         )}
 
         {/* Ops Recent Failures Panel */}
-        {role === "ops" && (
+        {isOpsRole(role) && (
           <RecentFailuresPanel
             minutes={minutes}
             onMinutesChange={setMinutes}

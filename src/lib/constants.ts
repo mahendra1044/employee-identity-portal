@@ -24,11 +24,34 @@ export const SYSTEM_LABELS: Record<SystemKey, string> = {
 
 export const ROLE_MAP: Record<string, string> = {
   "ops": "Operations Team",
+  "sso_ops": "SSO Operations",
+  "pam_ops": "PAM Operations",
+  "iga_ops": "IGA Operations",
+  "tpag_ops": "TPAG Operations",
   "employee": "Employee Access",
   "management": "Management",
   "admin": "Administrator",
   "manager": "Manager",
 };
+
+// System groups for specialized ops modes
+export const PING_SYSTEMS: SystemKey[] = [
+  "ping-directory",
+  "ping-federate",
+  "ping-mfa",
+];
+
+export const PAM_SYSTEMS: SystemKey[] = [
+  "cyberark",
+];
+
+export const IGA_SYSTEMS: SystemKey[] = [
+  "saviynt",
+];
+
+export const TPAG_SYSTEMS: SystemKey[] = [
+  // To be defined based on requirements
+];
 
 export const API_BASE = 
   typeof window !== 'undefined' 

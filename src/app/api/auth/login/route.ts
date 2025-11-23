@@ -20,7 +20,16 @@ export async function POST(request: NextRequest) {
     let role = 'employee'; // default
     const emailLower = email.toLowerCase();
     
-    if (emailLower.includes('ops@') || emailLower.startsWith('ops')) {
+    // Check for specialized ops modes first
+    if (emailLower.includes('sso_ops@') || emailLower === 'sso_ops@company.com') {
+      role = 'sso_ops';
+    } else if (emailLower.includes('pam_ops@') || emailLower === 'pam_ops@company.com') {
+      role = 'pam_ops';
+    } else if (emailLower.includes('iga_ops@') || emailLower === 'iga_ops@company.com') {
+      role = 'iga_ops';
+    } else if (emailLower.includes('tpag_ops@') || emailLower === 'tpag_ops@company.com') {
+      role = 'tpag_ops';
+    } else if (emailLower.includes('ops@') || emailLower.startsWith('ops')) {
       role = 'ops';
     } else if (emailLower.includes('management@') || emailLower.startsWith('management')) {
       role = 'management';
