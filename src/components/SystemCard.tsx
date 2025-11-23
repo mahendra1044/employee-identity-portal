@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { User, Globe, Shield } from "lucide-react";
 import { API_BASE } from "@/lib/constants";
-import type { SystemKey } from "@/lib/types";
+import type { SystemKey, SystemData } from "@/lib/types";
 
 interface SystemCardProps {
   name: string;
@@ -37,8 +37,8 @@ export function SystemCard({
   email,
   userKey,
 }: SystemCardProps) {
-  const [data, setData] = useState<any | null>(null);
-  const [details, setDetails] = useState<any | null>(null);
+  const [data, setData] = useState<SystemData | null>(null);
+  const [details, setDetails] = useState<SystemData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -46,7 +46,7 @@ export function SystemCard({
   const [pfOpen, setPfOpen] = useState(false);
   const [pfTitle, setPfTitle] = useState<string>("");
   const [pfLoading, setPfLoading] = useState(false);
-  const [pfData, setPfData] = useState<any>(null);
+  const [pfData, setPfData] = useState<SystemData | null>(null);
   const [description, setDescription] = useState("");
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
 

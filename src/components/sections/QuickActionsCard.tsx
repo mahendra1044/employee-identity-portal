@@ -60,8 +60,8 @@ interface QuickActionsCardProps {
   onLoadCyberarkAccounts: () => void;
   onLoadCyberarkActivity: () => void;
   onLoadSaviynt: () => void;
-  onLoadSaviyhtRoles: () => void;
-  onLoadSaviyhtEntitlements: () => void;
+  onLoadSaviynt_Roles: () => void;
+  onLoadSaviynt_Entitlements: () => void;
   splunkUrl: string;
   cloudwatchUrl: string;
 }
@@ -88,8 +88,8 @@ export function QuickActionsCard({
   onLoadCyberarkAccounts,
   onLoadCyberarkActivity,
   onLoadSaviynt,
-  onLoadSaviyhtRoles,
-  onLoadSaviyhtEntitlements,
+  onLoadSaviynt_Roles,
+  onLoadSaviynt_Entitlements,
   splunkUrl,
   cloudwatchUrl,
 }: QuickActionsCardProps) {
@@ -226,11 +226,11 @@ export function QuickActionsCard({
 
             {qaActive === "saviynt" && qaEnabledTabs["saviynt"] && (
               <div className="flex flex-wrap gap-2 justify-start">
-                <Button size="sm" variant="secondary" onClick={onLoadSaviyhtRoles} title="Roles">
+                <Button size="sm" variant="secondary" onClick={onLoadSaviynt_Roles} title="Roles">
                   <Badge className="h-4 w-4 mr-1" />
                   Roles
                 </Button>
-                <Button size="sm" variant="secondary" onClick={onLoadSaviyhtEntitlements} title="Entitlements">
+                <Button size="sm" variant="secondary" onClick={onLoadSaviynt_Entitlements} title="Entitlements">
                   <Key className="h-4 w-4 mr-1" />
                   Entitlements
                 </Button>

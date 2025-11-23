@@ -28,17 +28,24 @@ export async function GET(
 
     console.log('🔍 [Next.js API] Backend response status:', response.status);
 
+    // CRITICAL: Check status BEFORE parsing JSON to avoid <!DOCTYPE error
+    // When backend fails, it returns HTML error page instead of JSON
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error');
+      console.error('🔍 [Next.js API] Backend error:', response.status, errorText.substring(0, 100));
+      return NextResponse.json(
+        { error: `Backend error: HTTP ${response.status}` },
+        { status: response.status }
+      );
+    }
+
     const data = await response.json();
     console.log('🔍 [Next.js API] Backend response data:', data);
 
-    if (!response.ok) {
-      console.error('🔍 [Next.js API] Backend error:', data.error || 'Unknown error');
-      return NextResponse.json({ error: data.error || 'Failed to search employee' }, { status: response.status });
-    }
-
     return NextResponse.json(data);
   } catch (error) {
-    console.error('🔍 [Next.js API] Fetch error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('🔍 [Next.js API] Fetch error:', message);
     return NextResponse.json({ 
       error: 'Failed to connect to backend server. Please ensure the backend is running on port 3001.' 
     }, { status: 500 });

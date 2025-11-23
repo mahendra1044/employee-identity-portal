@@ -20,7 +20,7 @@ import { Eye, Code, FileText, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
 import { toPairs } from "@/lib/formatters";
-import type { SystemKey, Features } from "@/lib/types";
+import type { SystemKey, Features, SearchResults } from "@/lib/types";
 
 interface SearchSectionProps {
   token: string;
@@ -30,12 +30,24 @@ interface SearchSectionProps {
   search: string;
   onSearchChange: (value: string) => void;
   onDoSearch: () => void;
-  searchResults: Record<string, any> | null;
+  searchResults: SearchResults | null;
   searchError: string | null;
   hasSearched: boolean;
   enabled: Record<string, boolean>;
   features?: Features;
 }
+
+// Helper function to safely get system results
+const getSystemResults = (results: SearchResults | null, system: string): unknown[] | null => {
+  if (!results || !(system in results)) return null;
+  const data = results[system];
+  return Array.isArray(data) ? data : null;
+};
+
+// Helper function to validate system key
+const isValidSystemKey = (value: unknown): value is SystemKey => {
+  return typeof value === 'string' && (SYSTEMS as readonly string[]).includes(value);
+};
 
 export function SearchSection({
   token,
@@ -52,15 +64,15 @@ export function SearchSection({
 }: SearchSectionProps) {
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [searchDialogTitle, setSearchDialogTitle] = useState("");
-  const [searchDialogData, setSearchDialogData] = useState<any>(null);
+  const [searchDialogData, setSearchDialogData] = useState<Record<string, unknown> | null>(null);
   const [searchDialogLoading, setSearchDialogLoading] = useState(false);
   const [searchDialogMode, setSearchDialogMode] = useState<"json" | "html">("html");
 
   const orderedSystems = useMemo<SystemKey[]>(() => {
     const order = features?.systemsOrder || [];
-    const valid = order.filter((s): s is SystemKey => SYSTEMS.includes(s as any));
-    const remaining = SYSTEMS.filter((s) => !valid.includes(s as any));
-    return [...valid, ...remaining];
+    const valid = order.filter(isValidSystemKey);
+    const remaining = SYSTEMS.filter((s) => !valid.includes(s as SystemKey));
+    return [...valid, ...remaining] as SystemKey[];
   }, [features]);
 
   const isAggregate = useMemo(() => {
@@ -68,7 +80,7 @@ export function SearchSection({
       !!searchDialogData &&
       typeof searchDialogData === "object" &&
       Object.keys(searchDialogData).some((k) =>
-        SYSTEMS.includes(k as SystemKey)
+        isValidSystemKey(k)
       )
     );
   }, [searchDialogData]);
@@ -395,8 +407,8 @@ export function SearchSection({
                         "json"
                       );
                       try {
-                        const aggregate: Record<string, any> = {};
-                        let allUsers: any[] | null = null;
+                        const aggregate: Record<string, unknown> = {};
+                        let allUsers: unknown[] | null = null;
                         try {
                           const auRes = await fetch(
                             `${API_BASE}/api/all-users`,
@@ -433,7 +445,7 @@ export function SearchSection({
                             aggregate[sys] = null;
                             continue;
                           }
-                          let found: any = undefined;
+                          let found: unknown = undefined;
                           for (const key of candidateKeys) {
                             try {
                               const url = `${API_BASE}/api/search-employee/${encodeURIComponent(
@@ -454,19 +466,16 @@ export function SearchSection({
                             } catch {}
                           }
                           if (!found) {
-                            const arr = Array.isArray(
-                              (searchResults as any)?.[sys]
-                            )
-                              ? (searchResults as any)[sys]
-                              : [];
-                            const matched = arr.filter((it: any) =>
-                              candidateKeys.some(
+                            const systemResults = getSystemResults(searchResults, sys);
+                            const arr = systemResults || [];
+                            const matched = arr.filter((it: unknown) => {
+                              const item = it as Record<string, unknown>;
+                              return candidateKeys.some(
                                 (k) =>
-                                  it.userId === k ||
-                                  it.email?.toLowerCase?.() ===
-                                    String(k).toLowerCase()
-                              )
-                            );
+                                  item.userId === k ||
+                                  (typeof item.email === 'string' && item.email.toLowerCase() === String(k).toLowerCase())
+                              );
+                            });
                             if (matched.length > 0)
                               found =
                                 matched.length === 1
@@ -474,20 +483,24 @@ export function SearchSection({
                                   : matched;
                           }
                           if (!found && allUsers) {
-                            const matchedUser = allUsers.find((u: any) =>
-                              candidateKeys.some(
+                            const matchedUser = allUsers.find((u: unknown) => {
+                              const user = u as Record<string, unknown>;
+                              return candidateKeys.some(
                                 (k) =>
-                                  u?.userId === k ||
-                                  u?.email?.toLowerCase?.() ===
-                                    String(k).toLowerCase()
-                              )
-                            );
+                                  user?.userId === k ||
+                                  (typeof user?.email === 'string' && user.email.toLowerCase() === String(k).toLowerCase())
+                              );
+                            });
                             if (
                               matchedUser &&
-                              matchedUser.systems &&
+                              typeof matchedUser === 'object' &&
+                              'systems' in matchedUser &&
+                              typeof matchedUser.systems === 'object' &&
+                              matchedUser.systems !== null &&
                               sys in matchedUser.systems
                             ) {
-                              found = matchedUser.systems[sys];
+                              const systems = matchedUser.systems as Record<string, unknown>;
+                              found = systems[sys];
                             }
                           }
                           aggregate[sys] = found ?? null;
@@ -562,8 +575,8 @@ export function SearchSection({
                       );
 
                       try {
-                        const aggregate: Record<string, any> = {};
-                        let allUsers: any[] | null = null;
+                        const aggregate: Record<string, unknown> = {};
+                        let allUsers: unknown[] | null = null;
                         try {
                           const auRes = await fetch(
                             `${API_BASE}/api/all-users`,
@@ -584,7 +597,7 @@ export function SearchSection({
                         } catch {}
 
                         for (const sys of orderedSystems) {
-                          let found: any = undefined;
+                          let found: unknown = undefined;
                           for (const key of candidateKeys) {
                             try {
                               const url = `${API_BASE}/api/search-employee/${encodeURIComponent(
@@ -605,19 +618,16 @@ export function SearchSection({
                             } catch {}
                           }
                           if (!found) {
-                            const arr = Array.isArray(
-                              (searchResults as any)?.[sys]
-                            )
-                              ? (searchResults as any)[sys]
-                              : [];
-                            const matched = arr.filter((it: any) =>
-                              candidateKeys.some(
+                            const systemResults = getSystemResults(searchResults, sys);
+                            const arr = systemResults || [];
+                            const matched = arr.filter((it: unknown) => {
+                              const item = it as Record<string, unknown>;
+                              return candidateKeys.some(
                                 (k) =>
-                                  it.userId === k ||
-                                  it.email?.toLowerCase?.() ===
-                                    String(k).toLowerCase()
-                              )
-                            );
+                                  item.userId === k ||
+                                  (typeof item.email === 'string' && item.email.toLowerCase() === String(k).toLowerCase())
+                              );
+                            });
                             if (matched.length > 0)
                               found =
                                 matched.length === 1
@@ -625,20 +635,24 @@ export function SearchSection({
                                   : matched;
                           }
                           if (!found && allUsers) {
-                            const matchedUser = allUsers.find((u: any) =>
-                              candidateKeys.some(
+                            const matchedUser = allUsers.find((u: unknown) => {
+                              const user = u as Record<string, unknown>;
+                              return candidateKeys.some(
                                 (k) =>
-                                  u?.userId === k ||
-                                  u?.email?.toLowerCase?.() ===
-                                    String(k).toLowerCase()
-                              )
-                            );
+                                  user?.userId === k ||
+                                  (typeof user?.email === 'string' && user.email.toLowerCase() === String(k).toLowerCase())
+                              );
+                            });
                             if (
                               matchedUser &&
-                              matchedUser.systems &&
+                              typeof matchedUser === 'object' &&
+                              'systems' in matchedUser &&
+                              typeof matchedUser.systems === 'object' &&
+                              matchedUser.systems !== null &&
                               sys in matchedUser.systems
                             ) {
-                              found = matchedUser.systems[sys];
+                              const systems = matchedUser.systems as Record<string, unknown>;
+                              found = systems[sys];
                             }
                           }
                           aggregate[sys] = found ?? null;
@@ -717,9 +731,12 @@ export function SearchSection({
                     return (
                       <div className="space-y-6 p-4">
                         {orderedSystems.map((sys) => {
-                          const val = (searchDialogData as any)?.[sys] ?? null;
+                          const rawVal = (typeof searchDialogData === 'object' && searchDialogData !== null && sys in searchDialogData) 
+                            ? (searchDialogData as Record<string, unknown>)[sys] 
+                            : null;
+                          const val = (rawVal && typeof rawVal === 'object') ? rawVal : null;
                           const hasData =
-                            val && Object.keys(val).length > 0;
+                            val && typeof val === 'object' && Object.keys(val).length > 0;
                           if (!enabled[sys] && !hasData) return null;
 
                           const content =
@@ -728,7 +745,7 @@ export function SearchSection({
                                 {val ? (
                                   <div className="bg-card border rounded-lg p-4">
                                     <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      {toPairs(val)
+                                      {toPairs(val as Record<string, unknown>)
                                         .slice(0, 50)
                                         .map(({ k, v }, idx) => (
                                           <div
@@ -767,7 +784,7 @@ export function SearchSection({
                             ) : (
                               <div className="bg-card border rounded-lg p-4">
                                 <pre className="text-xs bg-muted/30 p-3 rounded overflow-auto font-mono leading-relaxed">
-                                  {JSON.stringify(val, null, 2)}
+                                  {String(JSON.stringify(val, null, 2))}
                                 </pre>
                               </div>
                             );

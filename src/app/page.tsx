@@ -111,8 +111,8 @@ export default function HomePage() {
     loadMfaDevices,
     loadMfaEvents,
     loadSaviynt,
-    loadSaviyhtRoles,
-    loadSaviyhtEntitlements,
+    loadSaviynt_Roles,
+    loadSaviynt_Entitlements,
   } = usePfOps();
 
   // Apply theme class to root element
@@ -312,8 +312,8 @@ export default function HomePage() {
             onLoadCyberarkAccounts={loadCyberarkAccounts}
             onLoadCyberarkActivity={loadCyberarkActivity}
             onLoadSaviynt={loadSaviynt}
-            onLoadSaviyhtRoles={loadSaviyhtRoles}
-            onLoadSaviyhtEntitlements={loadSaviyhtEntitlements}
+            onLoadSaviynt_Roles={loadSaviynt_Roles}
+            onLoadSaviynt_Entitlements={loadSaviynt_Entitlements}
             splunkUrl={splunkUrl}
             cloudwatchUrl={cloudwatchUrl}
           />

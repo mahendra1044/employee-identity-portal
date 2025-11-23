@@ -29,14 +29,24 @@ export type LoginResponse = {
   email: string;
 };
 
-export type SystemData = Record<string, any>;
+export type SystemData = Record<string, unknown>;
 
 export type SearchResult = {
   userId: string;
   email: string;
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 };
+
+// Search results by system - each system returns array of results
+export type SearchResults = Record<SystemKey | string, SearchResult[] | Record<string, unknown>>;
+
+// PF Ops dialog data structure
+export type PfOpsResponse = {
+  data?: Record<string, unknown>;
+  error?: string;
+  status?: number;
+} | null;
 
 export type SnowIncident = {
   number: string;

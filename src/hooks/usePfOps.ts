@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import type { PfOpsResponse } from "@/lib/types";
 
 export function usePfOps() {
   const [pfOpsOpen, setPfOpsOpen] = useState(false);
   const [pfOpsTitle, setPfOpsTitle] = useState<string>("");
   const [pfOpsLoading, setPfOpsLoading] = useState(false);
-  const [pfOpsData, setPfOpsData] = useState<any>(null);
+  const [pfOpsData, setPfOpsData] = useState<PfOpsResponse>(null);
   const [qaActive, setQaActive] = useState<string>("ping-federate");
 
   // Generic loader wrapper
@@ -16,10 +17,22 @@ export function usePfOps() {
     setPfOpsLoading(true);
     try {
       const res = await fetch(url);
-      const j = await res.json().catch(() => ({}));
+      
+      // Check status BEFORE parsing JSON to avoid HTML error responses
+      if (!res.ok) {
+        const errorMsg = await res.text().catch(() => `HTTP ${res.status}`);
+        console.error(`❌ Failed to load ${title}: ${res.status} ${res.statusText}`);
+        setPfOpsData({ error: `Failed to load ${title}: ${res.status} ${res.statusText}` });
+        return;
+      }
+      
+      const j = await res.json();
       setPfOpsData(j?.data ?? j);
-    } catch (e: any) {
-      setPfOpsData({ error: `Failed to load ${title}` });
+      console.log(`✅ Loaded ${title}:`, j);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ Failed to load ${title}:`, message);
+      setPfOpsData({ error: `Failed to load ${title}: ${message}` });
     } finally {
       setPfOpsLoading(false);
     }
@@ -96,11 +109,11 @@ export function usePfOps() {
     await loadEndpoint("/api/saviynt/requests", "Saviynt — Requests");
   }, [loadEndpoint]);
 
-  const loadSaviyhtRoles = useCallback(async () => {
+  const loadSaviynt_Roles = useCallback(async () => {
     await loadEndpoint("/api/saviynt/roles", "Saviynt — Roles");
   }, [loadEndpoint]);
 
-  const loadSaviyhtEntitlements = useCallback(async () => {
+  const loadSaviynt_Entitlements = useCallback(async () => {
     await loadEndpoint("/api/saviynt/entitlements", "Saviynt — Entitlements");
   }, [loadEndpoint]);
 
@@ -128,8 +141,8 @@ export function usePfOps() {
     loadMfaDevices,
     loadMfaEvents,
     loadSaviynt,
-    loadSaviyhtRoles,
-    loadSaviyhtEntitlements,
+    loadSaviynt_Roles,
+    loadSaviynt_Entitlements,
   };
 }
 
