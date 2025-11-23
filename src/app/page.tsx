@@ -15,8 +15,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import useSearch from "@/hooks/useSearch";
 import { useSnow } from "@/hooks/useSnow";
 import { usePfOps } from "@/hooks/usePfOps";
-import { useTheme } from "@/hooks/useTheme";
-import { useUserToggles } from "@/hooks/useUserToggles";
+import { useAppAuth } from "@/hooks/useAppAuth";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppToggles } from "@/hooks/useAppToggles";
+import { useAppUI } from "@/hooks/useAppUI";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 import { Header, LoginForm } from "@/components/layout-index";
 // Import from formatters
@@ -638,7 +640,11 @@ function SystemCard({
 
 
 export default function HomePage() {
-  const { token, role: originalRole, email, login, logout } = useAuth();
+  const { token, role: originalRole, email, login, logout } = useAppAuth();
+  const { theme, setTheme } = useAppTheme();
+  const { toggles: userToggles, toggleSystem, resetToggles } = useAppToggles();
+  const { ui, setUIState, toggleRole } = useAppUI();
+
   const [features, setFeatures] = useState<Features | null>(null);
   const {
     search,
@@ -661,19 +667,10 @@ export default function HomePage() {
     closeSearchDialog,
   } = useSearch(token, originalRole);
 
-  // Role toggle state - effective role for UI rendering (resets on refresh)
-  const [effectiveRole, setEffectiveRole] = useState<string | null>(null);
+  // Use effective role from context (ops can toggle between ops/employee)
+  const role = ui.currentRole || originalRole;
 
-  // Initialize effective role when originalRole changes (on login or refresh)
-  useEffect(() => {
-    setEffectiveRole(originalRole);
-  }, [originalRole]);
-
-  // Current role for UI rendering (effectiveRole if set, otherwise originalRole)
-  const role = effectiveRole || originalRole;
-
-  // Initialize hooks for refactored state management
-  const { theme, changeTheme } = useTheme();
+  // SNOW state
   const {
     snowOpen,
     setSnowOpen,
@@ -714,25 +711,12 @@ export default function HomePage() {
     loadSaviyhtEntitlements,
   } = usePfOps();
 
-  const { userToggles, handleToggleChange } = useUserToggles();
-
-  // Remaining state
+  // Remaining local state
   const [minutes, setMinutes] = useState<number>(10);
   const [failFed, setFailFed] = useState<any[] | null>(null);
   const [failMfa, setFailMfa] = useState<any[] | null>(null);
   const [opsLoading, setOpsLoading] = useState(false);
   const [opsError, setOpsError] = useState<string | null>(null);
-  const [educateOpen, setEducateOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-
-  // Toggle between ops and employee mode (only available for original ops users)
-  const toggleRole = () => {
-    if (originalRole !== "ops") return;
-    
-    const newRole = effectiveRole === "ops" ? "employee" : "ops";
-    setEffectiveRole(newRole);
-    toast.success(`Switched to ${newRole} mode`);
-  };
 
   // Apply theme class to root element
   useEffect(() => {
@@ -963,36 +947,21 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, role]);
 
-  // Handle logout: clear toggles
-  const handleLogout = () => {
-    StorageService.clearSystemToggles();
-    logout();
-  };
-
   if (!token) {
-    return <LoginForm onLogin={login} />;
+    return <LoginForm />;
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header
-        email={email}
-        role={role}
-        originalRole={originalRole}
-        theme={theme as any}
-        onThemeChange={changeTheme}
-        onRoleToggle={toggleRole}
-        onLogout={handleLogout}
         onShowSnowTickets={openSnowDialog}
         snowTicketsCount={snowCount ?? undefined}
-        onShowSettings={() => setSettingsOpen(true)}
-        onShowEducate={() => setEducateOpen(true)}
         educateEnabled={educateEnabled}
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Settings Dialog */}
-        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <Dialog open={ui.settingsOpen} onOpenChange={(open) => setUIState('settingsOpen', open)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>System Card Visibility</DialogTitle>
@@ -1010,18 +979,14 @@ export default function HomePage() {
                     </div>
                     <Checkbox
                       checked={userToggles[sys] ?? false}
-                      onCheckedChange={(checked) => handleToggleChange(sys, !!checked)}
+                      onCheckedChange={(checked) => toggleSystem(sys, !!checked)}
                       disabled={!enabled[sys]}
                     />
                   </div>
                 ))}
               </div>
               <Button variant="outline" onClick={() => {
-                SYSTEMS.forEach(s => {
-                  if (enabled[s]) {
-                    handleToggleChange(s, true);
-                  }
-                });
+                resetToggles();
                 toast.success("Reset to defaults");
               }} className="w-full">
                 Reset to Defaults
@@ -1031,7 +996,7 @@ export default function HomePage() {
         </Dialog>
 
         {/* Educate Guide Dialog */}
-        <Dialog open={educateOpen} onOpenChange={setEducateOpen}>
+        <Dialog open={ui.educateOpen} onOpenChange={(open) => setUIState('educateOpen', open)}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Educational Guides — By System</DialogTitle>

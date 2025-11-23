@@ -1,45 +1,29 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { LogOut, Users, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen, Briefcase, User, Shield, UserCheck } from "lucide-react";
+import { useAppAuth } from "@/hooks/useAppAuth";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAppUI } from "@/hooks/useAppUI";
+import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
-type HeaderProps = {
-  email: string | null;
-  role: string | null;
-  originalRole: string | null;
-  theme?: "light" | "dark" | "navy";
-  onThemeChange: (t: "light" | "dark" | "navy") => void;
-  onRoleToggle: () => void;
-  onLogout: () => void;
+export function Header(props: {
   onShowSnowTickets?: () => void;
   snowTicketsCount?: number;
-  onShowSettings?: () => void;
-  onShowEducate?: () => void;
   educateEnabled?: boolean;
-};
+}) {
+  const { email, logout } = useAppAuth();
+  const { theme, setTheme } = useAppTheme();
+  const { ui, setUIState, toggleRole } = useAppUI();
 
-export function Header(props: HeaderProps) {
-  const {
-    email,
-    role,
-    originalRole,
-    theme,
-    onThemeChange,
-    onRoleToggle,
-    onLogout,
-    onShowSnowTickets,
-    snowTicketsCount,
-    onShowSettings,
-    onShowEducate,
-    educateEnabled,
-  } = props;
-
-  const isEmployee = role === "employee";
+  const originalRole = ui.originalRole;
+  const currentRole = ui.currentRole || 'employee';
+  const isEmployee = currentRole === "employee";
 
   const getRoleIcon = () => {
-    switch (role) {
+    switch (currentRole) {
       case "ops":
         return <Briefcase className="h-3 w-3" />;
       case "employee":
@@ -54,7 +38,7 @@ export function Header(props: HeaderProps) {
   };
 
   const getRoleDisplay = () => {
-    switch (role) {
+    switch (currentRole) {
       case "ops":
         return "Operations Team";
       case "employee":
@@ -64,7 +48,7 @@ export function Header(props: HeaderProps) {
       case "manager":
         return "Manager";
       default:
-        return role || "User";
+        return currentRole || "User";
     }
   };
 
@@ -86,50 +70,48 @@ export function Header(props: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={() => onThemeChange(theme === "light" ? "dark" : theme === "dark" ? "navy" : "light")} aria-label="Toggle theme">
-                {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Switch theme</p>
-            </TooltipContent>
-          </Tooltip>
-
-          {originalRole === "ops" && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={onRoleToggle} aria-label="Toggle role">
-                  <Users className="h-4 w-4" />
+                <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "light" ? "dark" : theme === "dark" ? "navy" : "light")} aria-label="Toggle theme">
+                  {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Switch to {role === "ops" ? "Employee" : "Operations"} view</p>
+                <p>Switch theme</p>
               </TooltipContent>
             </Tooltip>
-          )}
 
-          {onShowSnowTickets && (
+            {originalRole === "ops" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={toggleRole} aria-label="Toggle role">
+                    <Users className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Switch to {currentRole === "ops" ? "Employee" : "Operations"} view</p>
+                </TooltipContent>
+              </Tooltip>
+            )}          {props.onShowSnowTickets && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={onShowSnowTickets}>
+                <Button size="sm" variant="outline" onClick={props.onShowSnowTickets}>
                   <FileText className="h-4 w-4 mr-1" />
                   <span className="hidden sm:inline">SNOW tickets</span>
                   <span className="sm:hidden">SNOW</span>
-                  {snowTicketsCount ? <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-red-500 text-white">{snowTicketsCount}</span> : null}
+                  {props.snowTicketsCount ? <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-red-500 text-white">{props.snowTicketsCount}</span> : null}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{role === 'ops' ? `View incidents for ${email}` : "View your ServiceNow incidents"}</p>
+                <p>{currentRole === 'ops' ? `View incidents for ${email}` : "View your ServiceNow incidents"}</p>
               </TooltipContent>
             </Tooltip>
           )}
 
-          {educateEnabled && isEmployee && onShowEducate && (
+          {props.educateEnabled && isEmployee && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={onShowEducate}>
+                <Button size="sm" variant="outline" onClick={() => setUIState('educateOpen', true)}>
                   <BookOpen className="h-4 w-4 mr-1" />
                   <span className="hidden sm:inline">Educate Me</span>
                   <span className="sm:hidden">Educate</span>
@@ -141,23 +123,21 @@ export function Header(props: HeaderProps) {
             </Tooltip>
           )}
 
-          {onShowSettings && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={onShowSettings} aria-label="Settings">
-                  <SettingsIcon className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Settings</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Manage system visibility</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" onClick={() => setUIState('settingsOpen', true)} aria-label="Settings">
+                <SettingsIcon className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Settings</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Manage system visibility</p>
+            </TooltipContent>
+          </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="secondary" size="sm" onClick={onLogout} aria-label="Sign out">
+              <Button variant="secondary" size="sm" onClick={logout} aria-label="Sign out">
                 <LogOut className="h-4 w-4 mr-1" />
                 <span className="hidden sm:inline">Sign out</span>
               </Button>

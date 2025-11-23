@@ -4,6 +4,7 @@ import VisualEditsMessenger from "../visual-edits/VisualEditsMessenger";
 import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
+import { AppProvider } from "@/context/AppContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +19,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <ErrorReporter />
+        <AppProvider>
+          <ErrorReporter />
         <Script
           src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts//route-messenger.js"
           strategy="afterInteractive"
@@ -40,8 +42,9 @@ export default function RootLayout({
             },
           }}
         />
-        {children}
-        <VisualEditsMessenger />
+          {children}
+          <VisualEditsMessenger />
+        </AppProvider>
       </body>
     </html>
   );
