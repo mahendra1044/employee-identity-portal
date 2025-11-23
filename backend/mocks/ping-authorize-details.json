@@ -1,0 +1,63 @@
+{
+  "userId": "u12345",
+  "status": "active",
+  "policyEvaluations": 8934,
+  "allowedDecisions": 8721,
+  "deniedDecisions": 213,
+  "lastEvaluationTime": "2025-09-20T16:45:00Z",
+  "activePolicies": 24,
+  "riskScore": "low",
+  "contextualFactors": ["device_trusted", "known_location", "working_hours"],
+  "decisionAccuracy": "99.2%",
+  "policyDetails": [
+    {
+      "id": "pol_auth_001",
+      "name": "Resource Access Control",
+      "type": "attribute_based",
+      "rules": [
+        "role == 'employee'",
+        "department == 'Engineering'"
+      ],
+      "status": "active",
+      "lastModified": "2025-08-15T10:00:00Z"
+    },
+    {
+      "id": "pol_auth_002",
+      "name": "Time-based Access",
+      "type": "temporal",
+      "rules": [
+        "time >= 08:00",
+        "time <= 18:00"
+      ],
+      "status": "active",
+      "lastModified": "2025-07-20T14:30:00Z"
+    }
+  ],
+  "recentDecisions": [
+    {
+      "timestamp": "2025-09-20T16:45:00Z",
+      "resource": "/data/customer-records",
+      "action": "read",
+      "decision": "allow",
+      "reason": "Policy match: Resource Access Control"
+    },
+    {
+      "timestamp": "2025-09-20T16:30:00Z",
+      "resource": "/admin/settings",
+      "action": "write",
+      "decision": "deny",
+      "reason": "Insufficient privileges"
+    }
+  ],
+  "attributeProfile": {
+    "role": "employee",
+    "department": "Engineering",
+    "clearanceLevel": "standard",
+    "location": "US-East"
+  },
+  "complianceStatus": {
+    "gdpr": "compliant",
+    "hipaa": "not_applicable",
+    "sox": "compliant"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "userId": "u12345",
+  "threatLevel": "low",
+  "anomaliesDetected": 2,
+  "behaviorScore": 87,
+  "lastAnalysisTime": "2025-09-20T17:00:00Z",
+  "suspiciousActivities": 0,
+  "blockedAttempts": 5,
+  "deviceFingerprints": 3,
+  "geolocationChanges": 1,
+  "riskFactors": ["new_device"]
+}

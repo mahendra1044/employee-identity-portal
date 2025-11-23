@@ -9,7 +9,10 @@ export type SystemKey =
   | "cyberark"
   | "saviynt"
   | "azure-ad"
-  | "ping-mfa";
+  | "ping-mfa"
+  | "ping-access"
+  | "ping-authorize"
+  | "ping-intelligence";
 
 export type Features = {
   credentialSource: string;

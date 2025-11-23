@@ -11,6 +11,9 @@ export const SYSTEMS: SystemKey[] = [
   "saviynt",
   "azure-ad",
   "ping-mfa",
+  "ping-access",
+  "ping-authorize",
+  "ping-intelligence",
 ];
 
 export const SYSTEM_LABELS: Record<SystemKey, string> = {
@@ -20,6 +23,9 @@ export const SYSTEM_LABELS: Record<SystemKey, string> = {
   "saviynt": "Saviynt",
   "azure-ad": "Azure AD",
   "ping-mfa": "Ping MFA",
+  "ping-access": "Ping Access",
+  "ping-authorize": "Ping Authorize",
+  "ping-intelligence": "Ping Intelligence",
 };
 
 export const ROLE_MAP: Record<string, string> = {
@@ -39,6 +45,9 @@ export const PING_SYSTEMS: SystemKey[] = [
   "ping-directory",
   "ping-federate",
   "ping-mfa",
+  "ping-access",
+  "ping-authorize",
+  "ping-intelligence",
 ];
 
 export const PAM_SYSTEMS: SystemKey[] = [

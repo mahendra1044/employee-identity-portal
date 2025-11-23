@@ -27,6 +27,7 @@ interface DialogsSectionProps {
   userToggles: Record<SystemKey, boolean>;
   onToggleSystem: (system: string, enabled: boolean) => void;
   onResetToggles: () => void;
+  role?: string | null;
 
   // Educate Dialog
   educateOpen: boolean;
@@ -58,6 +59,7 @@ export function DialogsSection({
   userToggles,
   onToggleSystem,
   onResetToggles,
+  role,
   educateOpen,
   onEducateOpenChange,
   email,
@@ -85,6 +87,7 @@ export function DialogsSection({
         userToggles={userToggles}
         onToggleSystem={onToggleSystem}
         onResetToggles={onResetToggles}
+        role={role}
       />
 
       {/* Educate Guide Dialog */}

@@ -1,0 +1,12 @@
+{
+  "userId": "u12345",
+  "status": "active",
+  "policyEvaluations": 8934,
+  "allowedDecisions": 8721,
+  "deniedDecisions": 213,
+  "lastEvaluationTime": "2025-09-20T16:45:00Z",
+  "activePolicies": 24,
+  "riskScore": "low",
+  "contextualFactors": ["device_trusted", "known_location"],
+  "decisionAccuracy": "99.2%"
+}

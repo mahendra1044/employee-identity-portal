@@ -1,0 +1,67 @@
+{
+  "userId": "u12345",
+  "threatLevel": "low",
+  "anomaliesDetected": 2,
+  "behaviorScore": 87,
+  "lastAnalysisTime": "2025-09-20T17:00:00Z",
+  "suspiciousActivities": 0,
+  "blockedAttempts": 5,
+  "deviceFingerprints": 3,
+  "geolocationChanges": 1,
+  "riskFactors": ["new_device"],
+  "detectedAnomalies": [
+    {
+      "id": "anom_001",
+      "type": "unusual_login_time",
+      "severity": "low",
+      "timestamp": "2025-09-19T03:00:00Z",
+      "description": "Login attempt outside normal hours",
+      "resolved": true
+    },
+    {
+      "id": "anom_002",
+      "type": "new_location",
+      "severity": "medium",
+      "timestamp": "2025-09-18T14:00:00Z",
+      "description": "Login from new geographic location",
+      "resolved": false
+    }
+  ],
+  "behaviorProfile": {
+    "normalLoginHours": "08:00-18:00",
+    "typicalLocations": ["New York, US", "Boston, US"],
+    "averageSessionDuration": "4.5 hours",
+    "commonDevices": ["iPhone 14", "MacBook Pro"]
+  },
+  "threatSignals": [
+    {
+      "signal": "impossible_travel",
+      "detected": false,
+      "lastCheck": "2025-09-20T17:00:00Z"
+    },
+    {
+      "signal": "credential_stuffing",
+      "detected": false,
+      "lastCheck": "2025-09-20T17:00:00Z"
+    }
+  ],
+  "blockedAttacks": [
+    {
+      "timestamp": "2025-09-15T10:30:00Z",
+      "type": "brute_force",
+      "source": "185.220.101.45",
+      "attempts": 15
+    }
+  ],
+  "riskAssessment": {
+    "overallRisk": "low",
+    "accountCompromiseRisk": "low",
+    "dataExfiltrationRisk": "low",
+    "privilegeEscalationRisk": "low"
+  },
+  "mlModelsApplied": [
+    "behavioral_biometrics_v2",
+    "anomaly_detection_v3",
+    "threat_prediction_v1"
+  ]
+}

@@ -276,6 +276,7 @@ export default function HomePage() {
           userToggles={userToggles}
           onToggleSystem={(system, enabled) => toggleSystem(system as SystemKey, enabled)}
           onResetToggles={resetToggles}
+          role={role}
           educateOpen={ui.educateOpen}
           onEducateOpenChange={(open) => setUIState('educateOpen', open)}
           email={email}

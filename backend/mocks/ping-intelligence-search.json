@@ -1,0 +1,29 @@
+{
+  "u1007": {
+    "userId": "u1007",
+    "name": "George Smith",
+    "email": "george.smith@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 85,
+    "anomaliesDetected": 1,
+    "lastAnalysisTime": "2025-09-19T14:00:00Z"
+  },
+  "alice": {
+    "userId": "u2001",
+    "name": "Alice Johnson",
+    "email": "alice.johnson@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 92,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T11:30:00Z"
+  },
+  "bob": {
+    "userId": "u2002",
+    "name": "Bob Williams",
+    "email": "bob.williams@company.com",
+    "threatLevel": "medium",
+    "behaviorScore": 78,
+    "anomaliesDetected": 3,
+    "lastAnalysisTime": "2025-09-18T16:00:00Z"
+  }
+}

@@ -13,6 +13,9 @@ const SYSTEM_DETAILS_FILES: Record<string, string> = {
   'azure-ad': 'azure-ad-details.json',
   'cyberark': 'cyberark-details.json',
   'saviynt': 'saviynt-details.json',
+  'ping-access': 'ping-access-search.json',
+  'ping-authorize': 'ping-authorize-search.json',
+  'ping-intelligence': 'ping-intelligence-search.json',
 };
 
 // Load system details data

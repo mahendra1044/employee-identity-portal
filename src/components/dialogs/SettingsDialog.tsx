@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
+import { filterSystemsByRole, isOpsRole } from "@/lib/role-utils";
 import type { SystemKey } from "@/lib/types";
 
 interface SettingsDialogProps {
@@ -20,6 +21,7 @@ interface SettingsDialogProps {
   userToggles: Record<string, boolean>;
   onToggleSystem: (system: string, enabled: boolean) => void;
   onResetToggles: () => void;
+  role?: string | null;
 }
 
 export function SettingsDialog({
@@ -29,11 +31,22 @@ export function SettingsDialog({
   userToggles,
   onToggleSystem,
   onResetToggles,
+  role,
 }: SettingsDialogProps) {
   const handleReset = () => {
     onResetToggles();
     toast.success("Reset to defaults");
   };
+
+  // Filter systems based on user role
+  const visibleSystems = useMemo(() => {
+    // If ops role, filter by role permissions
+    if (isOpsRole(role)) {
+      return filterSystemsByRole(SYSTEMS, role);
+    }
+    // For non-ops users, show all systems
+    return SYSTEMS;
+  }, [role]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,7 +59,7 @@ export function SettingsDialog({
             Toggle which system cards to display. Defaults reset on logout/login.
           </p>
           <div className="space-y-3 max-h-60 overflow-y-auto">
-            {SYSTEMS.map((sys) => (
+            {visibleSystems.map((sys) => (
               <div key={sys} className="flex items-center justify-between">
                 <div className="space-y-1">
                   <label className="text-sm font-medium">

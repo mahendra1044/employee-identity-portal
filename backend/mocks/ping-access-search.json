@@ -1,0 +1,29 @@
+{
+  "u1007": {
+    "userId": "u1007",
+    "name": "George Smith",
+    "email": "george.smith@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway"],
+    "accessPolicies": 8,
+    "lastAccessTime": "2025-09-19T12:00:00Z"
+  },
+  "alice": {
+    "userId": "u2001",
+    "name": "Alice Johnson",
+    "email": "alice.johnson@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway", "Dev Gateway"],
+    "accessPolicies": 15,
+    "lastAccessTime": "2025-09-20T10:30:00Z"
+  },
+  "bob": {
+    "userId": "u2002",
+    "name": "Bob Williams",
+    "email": "bob.williams@company.com",
+    "status": "active",
+    "apiGateways": ["Staging Gateway"],
+    "accessPolicies": 6,
+    "lastAccessTime": "2025-09-18T14:15:00Z"
+  }
+}
