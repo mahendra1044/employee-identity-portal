@@ -13,30 +13,30 @@ export function useSnow(
 ) {
   const [snowOpen, setSnowOpen] = useState(false);
   const [snowLoading, setSnowLoading] = useState(false);
-  const [snowError, setSnowError] = useState<string | null>(null);
-  const [snowCount, setSnowCount] = useState<number | null>(null);
-  const [snowItems, setSnowItems] = useState<any[] | null>(null);
-  const [snowEmail, setSnowEmail] = useState<string | null>(null);
+  const [snowError, setSnowError] = useState<string | undefined>(undefined);
+  const [snowCount, setSnowCount] = useState<number | undefined>(undefined);
+  const [snowItems, setSnowItems] = useState<any[] | undefined>(undefined);
+  const [snowEmail, setSnowEmail] = useState<string | undefined>(undefined);
 
   // Helper: decide which email to use for SNOW incidents based on role/search
-  const resolveSnowEmail = useCallback((): string | null => {
+  const resolveSnowEmail = useCallback((): string | undefined => {
     const self = String(email || (typeof window !== 'undefined' ? localStorage.getItem("email") : '') || '').toLowerCase();
     if (role === 'ops') {
       // Only after a search should ops see incidents for a user
-      if (!hasSearched) return null;
+      if (!hasSearched) return undefined;
       const q = String(search || '').trim().toLowerCase();
       // If the query itself looks like an email, prefer it
       if (q && q.includes('@') && q.includes('.')) return q;
       // Otherwise try first Ping Directory result's email
       const pd = Array.isArray((searchResults as any)?.["ping-directory"]) ? (searchResults as any)["ping-directory"] : [];
       if (pd[0]?.email) return String(pd[0].email).toLowerCase();
-      return null;
+      return undefined;
     }
-    return self || null;
+    return self || undefined;
   }, [role, hasSearched, search, searchResults, email]);
 
   // Load SNOW incidents
-  const loadSnowIncidents = useCallback(async (targetEmail: string | null) => {
+  const loadSnowIncidents = useCallback(async (targetEmail: string | undefined) => {
     if (!token || !targetEmail) {
       setSnowError('No target email available');
       setSnowItems([]);
@@ -45,7 +45,7 @@ export function useSnow(
     }
 
     setSnowLoading(true);
-    setSnowError(null);
+    setSnowError(undefined);
     try {
       const url = `/api/snow/incidents?email=${encodeURIComponent(targetEmail)}`;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -125,9 +125,9 @@ export function useSnow(
   // Reset SNOW context on ops search changes to avoid stale counts/targets
   useEffect(() => {
     if (role === 'ops') {
-      setSnowCount(null);
-      setSnowEmail(null);
-      setSnowItems(null);
+      setSnowCount(undefined);
+      setSnowEmail(undefined);
+      setSnowItems(undefined);
     }
   }, [role, hasSearched, search]);
 

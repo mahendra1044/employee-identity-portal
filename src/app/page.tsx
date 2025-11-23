@@ -19,6 +19,10 @@ import { useAppAuth } from "@/hooks/useAppAuth";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppToggles } from "@/hooks/useAppToggles";
 import { useAppUI } from "@/hooks/useAppUI";
+import { useFeatures } from "@/hooks/useFeatures";
+import { useThemeDOM } from "@/hooks/useThemeDOM";
+import { useOpsFeatures } from "@/hooks/useOpsFeatures";
+import { usePageState } from "@/hooks/usePageState";
 import { Header, LoginForm } from "@/components/layout-index";
 import { EducateGuideDialog } from "@/components/dialogs/EducateGuideDialog";
 import { SettingsDialog } from "@/components/dialogs/SettingsDialog";
@@ -28,6 +32,8 @@ import { SnowIncidentsDialog } from "@/components/dialogs/SnowIncidentsDialog";
 import { PfOpsDialog } from "@/components/dialogs/PfOpsDialog";
 import { RecentFailuresPanel } from "@/components/RecentFailuresPanel";
 import { SystemCardsGrid } from "@/components/SystemCardsGrid";
+import { DialogsSection } from "@/components/sections/DialogsSection";
+import { QuickActionsCard } from "@/components/sections/QuickActionsCard";
 // Import from formatters
 import { toPairs, formatRoleName, getRoleIconType } from "@/lib/formatters";
 // Import from constants
@@ -38,55 +44,12 @@ import { ErrorHandler } from "@/lib/error-handler";
 // Import types
 import type { Features, LoginResponse, SystemKey } from "@/lib/types";
 
-function useAuth() {
-  const [token, setToken] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    const auth = StorageService.getAuth();
-    if (auth.token && auth.role && auth.email) {
-      setToken(auth.token);
-      setRole(auth.role);
-      setEmail(auth.email);
-    }
-  }, []);
-
-  const login = async (emailInput: string, password: string) => {
-    try {
-      const res = await fetch(`/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailInput, password }),
-      });
-      if (!res.ok) throw new Error("Login failed");
-      const data: LoginResponse = await res.json();
-      StorageService.saveAuth(data.token, data.role, data.email);
-      setToken(data.token);
-      setRole(data.role);
-      setEmail(data.email);
-    } catch (error) {
-      throw new Error(ErrorHandler.getUserFriendlyMessage(error));
-    }
-  };
-
-  const logout = () => {
-    StorageService.clearAuth();
-    setToken(null);
-    setRole(null);
-    setEmail(null);
-  };
-
-  return { token, role, email, login, logout };
-}
-
 export default function HomePage() {
   const { token, role: originalRole, email, login, logout } = useAppAuth();
   const { theme, setTheme } = useAppTheme();
   const { toggles: userToggles, toggleSystem, resetToggles } = useAppToggles();
   const { ui, setUIState, toggleRole } = useAppUI();
 
-  const [features, setFeatures] = useState<Features | null>(null);
   const {
     search,
     setSearch,
@@ -152,13 +115,6 @@ export default function HomePage() {
     loadSaviyhtEntitlements,
   } = usePfOps();
 
-  // Remaining local state
-  const [minutes, setMinutes] = useState<number>(10);
-  const [failFed, setFailFed] = useState<any[] | null>(null);
-  const [failMfa, setFailMfa] = useState<any[] | null>(null);
-  const [opsLoading, setOpsLoading] = useState(false);
-  const [opsError, setOpsError] = useState<string | null>(null);
-
   // Apply theme class to root element
   useEffect(() => {
     if (typeof window !== 'undefined' && theme) {
@@ -181,57 +137,12 @@ export default function HomePage() {
   // Use toPairs from formatters service
   const toPairsGlobal = toPairs;
 
-  // Static, shared mock guide (same for all employees)
-  // Deployment-time toggle: env overrides features when provided
-  const educateEnabled = useMemo(() => {
-    const envVal = (process.env.NEXT_PUBLIC_EDUCATE_GUIDE || "").toString().trim().toLowerCase();
-    if (envVal) return ["1", "true", "on", "yes", "enabled"].includes(envVal);
-    return features?.employeeEducateGuideEnabled ?? true; // default ON if not specified
-  }, [features]);
+  // Load features and theme using custom hooks
+  const { features, educateEnabled } = useFeatures(token);
+  useThemeDOM(theme);
 
-  useEffect(() => {
-    // init theme from localStorage (done in useTheme hook now)
-    // Just apply the theme to the DOM
-    if (typeof window !== 'undefined' && theme) {
-      let classes = '';
-      if (theme === 'light') {
-        classes = '';
-      } else if (theme === 'dark') {
-        classes = 'dark';
-      } else if (theme === 'navy') {
-        classes = 'dark navy';
-      }
-      document.documentElement.className = classes;
-    }
-  }, [theme]);
-
-  useEffect(() => {
-    if (!token) return;
-    const run = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/config/features`);
-        if (res.ok) {
-          const f = await res.json();
-          setFeatures(f);
-        } else {
-          setFeatures({
-            credentialSource: "env",
-            useMocks: true,
-            useMockAuth: true,
-            systems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
-          });
-        }
-      } catch {
-        setFeatures({
-          credentialSource: "env",
-          useMocks: true,
-          useMockAuth: true,
-          systems: SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: true }), {} as Record<string, boolean>),
-        });
-      }
-    };
-    run();
-  }, [token]);
+  // Create page-level state for all dialogs and UI toggles
+  const pageState = usePageState();
 
   // userToggles initialization is now handled by useUserToggles hook
 
@@ -239,6 +150,17 @@ export default function HomePage() {
     const all = features?.systems || {};
     return SYSTEMS.reduce((acc, s) => ({ ...acc, [s]: !!all[s] }), {} as Record<SystemKey, boolean>);
   }, [features]);
+
+  // Ops-specific state and logic
+  const {
+    minutes,
+    setMinutes,
+    failFed,
+    failMfa,
+    loading: opsLoading,
+    error: opsError,
+    loadFailures,
+  } = useOpsFeatures(role, token, features, enabled);
 
   // Determine the order of system cards based on features.systemsOrder (if provided)
   const orderedSystems = useMemo<SystemKey[]>(() => {
@@ -311,56 +233,6 @@ export default function HomePage() {
   // Clear currentUserKey when search empties (ops only)
   // Remove old searchKey useEffects - no longer needed
 
-  const loadRecentFailures = async () => {
-    if (!token || role !== "ops") return;
-    setOpsLoading(true);
-    setOpsError(null);
-    try {
-      const [fedRes, mfaRes] = await Promise.all([
-        fetch(`${API_BASE}/api/ops-failures?system=ping-federate&minutes=${minutes}`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/api/ops-failures?system=ping-mfa&minutes=${minutes}`, { headers: { Authorization: `Bearer ${token}` } }),
-      ]);
-      const fedJson = await fedRes.json().catch(() => ({ data: [] }));
-      const mfaJson = await mfaRes.json().catch(() => ({ data: [] }));
-      let fed = Array.isArray(fedJson?.data) ? fedJson.data : [];
-      let mfa = Array.isArray(mfaJson?.data) ? mfaJson.data : [];
-      // Provide test data if backend has none
-      if ((!fed || fed.length === 0) && (!mfa || mfa.length === 0)) {
-        const now = Date.now();
-        const mkTs = (minsAgo: number) => new Date(now - minsAgo * 60_000).toISOString();
-        fed = [
-          { userId: "u12345", reason: "Invalid credentials", timestamp: mkTs(2) },
-          { email: "jane.doe@company.com", reason: "Account locked", timestamp: mkTs(5) },
-          { userId: "u67890", reason: "MFA required not satisfied", timestamp: mkTs(9) },
-        ];
-        mfa = [
-          { userId: "u12345", error: "Push timeout", timestamp: mkTs(3) },
-          { email: "john.smith@company.com", error: "Device not enrolled", timestamp: mkTs(7) },
-        ];
-      }
-      setFailFed(fed);
-      setFailMfa(mfa);
-      if (!fedRes.ok || !mfaRes.ok) {
-        setOpsError("Failure feeds not available (mock backend may not implement /api/ops-failures)");
-      }
-    } catch (e: any) {
-      setOpsError(e?.message || "Failed to load failures");
-      setFailFed([]);
-      setFailMfa([]);
-    } finally {
-      setOpsLoading(false);
-    }
-  };
-
-  // Load recent failures on ops login
-  useEffect(() => {
-    if (token && role === "ops") {
-      // do not auto-load all users; show recent failures panel instead
-      loadRecentFailures();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, role]);
-
   if (!token) {
     return <LoginForm />;
   }
@@ -374,29 +246,38 @@ export default function HomePage() {
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 py-6 space-y-8">
-        {/* Settings Dialog */}
-        <SettingsDialog
-          open={ui.settingsOpen}
-          onOpenChange={(open) => setUIState('settingsOpen', open)}
+        {/* All dialogs - rendered as section */}
+        <DialogsSection
+          settingsOpen={ui.settingsOpen}
+          onSettingsOpenChange={(open) => setUIState('settingsOpen', open)}
           enabled={enabled}
           userToggles={userToggles}
-          onToggleSystem={toggleSystem}
+          onToggleSystem={(system, enabled) => toggleSystem(system as SystemKey, enabled)}
           onResetToggles={resetToggles}
-        />
-
-        {/* Educate Guide Dialog */}
-        <EducateGuideDialog
-          open={ui.educateOpen}
-          onOpenChange={(open) => setUIState('educateOpen', open)}
+          educateOpen={ui.educateOpen}
+          onEducateOpenChange={(open) => setUIState('educateOpen', open)}
           email={email}
+          snowOpen={snowOpen}
+          onSnowOpenChange={setSnowOpen}
+          snowEmail={snowEmail}
+          snowCount={snowCount}
+          snowItems={snowItems}
+          snowLoading={snowLoading}
+          snowError={snowError}
+          onSnowRefresh={openSnowDialog}
+          pfOpsOpen={pfOpsOpen}
+          onPfOpsOpenChange={setPfOpsOpen}
+          pfOpsTitle={pfOpsTitle}
+          pfOpsData={pfOpsData}
+          pfOpsLoading={pfOpsLoading}
         />
 
-                {/* Search Section */}
+        {/* Search Section */}
         <SearchSection
           token={token!}
-          role={role}
-          originalRole={originalRole}
-          email={email}
+          role={role!}
+          originalRole={originalRole!}
+          email={email!}
           search={search}
           onSearchChange={setSearch}
           onDoSearch={doSearch}
@@ -409,185 +290,41 @@ export default function HomePage() {
 
         {/* Ops Quick Actions (tabs) - independent card below Search, visible after successful search */}
         {role === "ops" && hasSearched && (
-          <section>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between p-6 space-y-0">
-                <CardTitle>Quick Actions</CardTitle>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
-                  >
-                    Take Me to Splunk
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
-                  >
-                    Take Me to Cloud Watch
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex flex-wrap gap-1">
-                    <div className="flex flex-wrap gap-1 items-center">
-                      {SYSTEMS.filter((s) => qaEnabledTabs[s]).map((s) => (
-                        <Button
-                          key={s}
-                          size="sm"
-                          variant={qaActive === s ? "default" : "outline"}
-                          onClick={() => setQaActive(s)}
-                          className="whitespace-nowrap"
-                        >
-                          {SYSTEM_LABELS[s]}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  <span className="text-xs text-muted-foreground truncate max-w-[60%]">
-                    Target: {resolveSnowEmail() || search || "(unknown)"}
-                  </span>
-                </div>
-
-                {/* Buttons per active tab (3 each) */}
-                <div className="rounded-lg border bg-gradient-to-r from-muted/60 to-background p-3 sm:p-4">
-                  {qaActive === "ping-federate" && qaEnabledTabs["ping-federate"] && (
-                    <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={loadPfUserInfo} title="User information">
-                        <User className="h-4 w-4 mr-1" />
-                        User Info
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadPfOidc} title="OIDC connections">
-                        <Globe className="h-4 w-4 mr-1" />
-                        OIDC
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadPfConnections} title="SAML connections">
-                        <Shield className="h-4 w-4 mr-1" />
-                        SAML
-                      </Button>
-                    </div>
-                  )}
-
-                  {qaActive === "ping-directory" && qaEnabledTabs["ping-directory"] && (
-                    <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={loadPdProfile} title="Profile">
-                        <Database className="h-4 w-4 mr-1" />
-                        Profile
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadPdGroups} title="Groups">
-                        <Users className="h-4 w-4 mr-1" />
-                        Groups
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadPdAudit} title="Audit">
-                        <History className="h-4 w-4 mr-1" />
-                        Audit
-                      </Button>
-                    </div>
-                  )}
-
-                  {qaActive === "ping-mfa" && qaEnabledTabs["ping-mfa"] && (
-                    <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={loadMfaStatus} title="Status">
-                        <Status className="h-4 w-4 mr-1" />
-                        Status
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadMfaDevices} title="Devices">
-                        <Device className="h-4 w-4 mr-1" />
-                        Devices
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadMfaEvents} title="Events">
-                        <Event className="h-4 w-4 mr-1" />
-                        Events
-                      </Button>
-                    </div>
-                  )}
-
-                  {qaActive === "azure-ad" && qaEnabledTabs["azure-ad"] && (
-                    <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={loadAadUser} title="User">
-                        <User className="h-4 w-4 mr-1" />
-                        User
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadAadGroups} title="Groups">
-                        <Users className="h-4 w-4 mr-1" />
-                        Groups
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadAadSignins} title="Sign-ins">
-                        <Signin className="h-4 w-4 mr-1" />
-                        Sign-ins
-                      </Button>
-                    </div>
-                  )}
-
-                  {qaActive === "cyberark" && qaEnabledTabs["cyberark"] && (
-                    <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={loadCyberarkSafes} title="Safes">
-                        <Vault className="h-4 w-4 mr-1" />
-                        Safes
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadCyberarkAccounts} title="Accounts">
-                        <Users className="h-4 w-4 mr-1" />
-                        Accounts
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadCyberarkActivity} title="Activity">
-                        <Activity className="h-4 w-4 mr-1" />
-                        Activity
-                      </Button>
-                    </div>
-                  )}
-
-                  {qaActive === "saviynt" && qaEnabledTabs["saviynt"] && (
-                    <div className="flex flex-wrap gap-2 justify-start">
-                      <Button size="sm" variant="secondary" onClick={loadSaviyhtRoles} title="Roles">
-                        <Role className="h-4 w-4 mr-1" />
-                        Roles
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadSaviyhtEntitlements} title="Entitlements">
-                        <Entitlement className="h-4 w-4 mr-1" />
-                        Entitlements
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={loadSaviynt} title="Requests">
-                        <Request className="h-4 w-4 mr-1" />
-                        Requests
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+          <QuickActionsCard
+            qaActive={qaActive as SystemKey}
+            onSetQaActive={(system) => setQaActive(system)}
+            qaEnabledTabs={qaEnabledTabs}
+            resolveSnowEmail={resolveSnowEmail}
+            search={search}
+            onLoadPfUserInfo={loadPfUserInfo}
+            onLoadPfOidc={loadPfOidc}
+            onLoadPfConnections={loadPfConnections}
+            onLoadPdProfile={loadPdProfile}
+            onLoadPdGroups={loadPdGroups}
+            onLoadPdAudit={loadPdAudit}
+            onLoadMfaStatus={loadMfaStatus}
+            onLoadMfaDevices={loadMfaDevices}
+            onLoadMfaEvents={loadMfaEvents}
+            onLoadAadUser={loadAadUser}
+            onLoadAadGroups={loadAadGroups}
+            onLoadAadSignins={loadAadSignins}
+            onLoadCyberarkSafes={loadCyberarkSafes}
+            onLoadCyberarkAccounts={loadCyberarkAccounts}
+            onLoadCyberarkActivity={loadCyberarkActivity}
+            onLoadSaviynt={loadSaviynt}
+            onLoadSaviyhtRoles={loadSaviyhtRoles}
+            onLoadSaviyhtEntitlements={loadSaviyhtEntitlements}
+            splunkUrl={splunkUrl}
+            cloudwatchUrl={cloudwatchUrl}
+          />
         )}
-
-        {/* SNOW incidents dialog */}
-        <SnowIncidentsDialog
-          open={snowOpen}
-          onOpenChange={setSnowOpen}
-          snowEmail={snowEmail}
-          snowCount={snowCount}
-          snowItems={snowItems}
-          snowLoading={snowLoading}
-          snowError={snowError}
-          onRefresh={openSnowDialog}
-        />
-
-        {/* OPS: Ping Federate quick actions dialog */}
-        <PfOpsDialog
-          open={pfOpsOpen}
-          onOpenChange={setPfOpsOpen}
-          title={pfOpsTitle || 'Ping Federate'}
-          data={pfOpsData}
-          loading={pfOpsLoading}
-        />
 
         {/* Ops Recent Failures Panel */}
         {role === "ops" && (
           <RecentFailuresPanel
             minutes={minutes}
             onMinutesChange={setMinutes}
-            onRefresh={loadRecentFailures}
+            onRefresh={loadFailures}
             loading={opsLoading}
             error={opsError}
             failFed={failFed}

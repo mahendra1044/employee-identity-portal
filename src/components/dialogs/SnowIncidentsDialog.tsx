@@ -12,7 +12,7 @@ interface SnowIncidentsDialogProps {
   snowCount?: number;
   snowItems?: any[];
   snowLoading: boolean;
-  snowError: string | null;
+  snowError: string | null | undefined;
   onRefresh: () => void;
 }
 
