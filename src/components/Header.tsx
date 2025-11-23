@@ -7,7 +7,7 @@ import { LogOut, Users, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen,
 import { useAppAuth } from "@/hooks/useAppAuth";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppUI } from "@/hooks/useAppUI";
-import { getOpsModeDescription } from "@/lib/role-utils";
+import { getOpsModeDescription, isOpsRole } from "@/lib/role-utils";
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
 export function Header(props: {
@@ -22,6 +22,32 @@ export function Header(props: {
   const originalRole = ui.originalRole;
   const currentRole = ui.currentRole || 'employee';
   const isEmployee = currentRole === "employee";
+
+  // Determine if toggle button should show
+  const canToggleRole = isOpsRole(originalRole);
+  
+  // Get toggle tooltip text based on current and original role
+  const getToggleTooltip = () => {
+    if (!originalRole) return "";
+    
+    // For specialized ops modes (sso_ops, pam_ops, etc.)
+    if (originalRole !== 'ops' && isOpsRole(originalRole)) {
+      if (currentRole === 'ops') {
+        // Currently in general ops, can switch back to specialized
+        return `Switch to ${getOpsModeDescription(originalRole)}`;
+      } else {
+        // Currently in specialized mode, can switch to general ops
+        return "Switch to General Operations (All Systems)";
+      }
+    }
+    
+    // For regular ops users
+    if (originalRole === 'ops') {
+      return `Switch to ${currentRole === "ops" ? "Employee" : "Operations"} view`;
+    }
+    
+    return "";
+  };
 
   const getRoleIcon = () => {
     switch (currentRole) {
@@ -109,7 +135,7 @@ export function Header(props: {
               </TooltipContent>
             </Tooltip>
 
-            {originalRole === "ops" && (
+            {canToggleRole && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="ghost" size="icon" onClick={toggleRole} aria-label="Toggle role">
@@ -117,10 +143,12 @@ export function Header(props: {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Switch to {currentRole === "ops" ? "Employee" : "Operations"} view</p>
+                  <p>{getToggleTooltip()}</p>
                 </TooltipContent>
               </Tooltip>
-            )}          {props.onShowSnowTickets && (
+            )}
+
+          {props.onShowSnowTickets && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button size="sm" variant="outline" onClick={props.onShowSnowTickets}>

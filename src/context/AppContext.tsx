@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode, Dispatch } from 'react';
 import { StorageService } from '@/lib/storage';
+import { isOpsRole } from '@/lib/role-utils';
 import type { SystemKey } from '@/lib/types';
 
 /**
@@ -132,7 +133,28 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     case 'TOGGLE_ROLE': {
-      const newRole = state.ui.currentRole === 'ops' ? 'employee' : 'ops';
+      const { currentRole, originalRole } = state.ui;
+      
+      // If no current role, do nothing
+      if (!currentRole) return state;
+      
+      let newRole: string;
+      
+      // For specialized ops modes (sso_ops, pam_ops, iga_ops, tpag_ops)
+      // Toggle between specialized mode ↔ general ops
+      if (originalRole && originalRole !== 'ops' && isOpsRole(originalRole)) {
+        // If currently in general ops, switch back to specialized mode
+        if (currentRole === 'ops') {
+          newRole = originalRole;
+        } else {
+          // If in specialized mode, switch to general ops
+          newRole = 'ops';
+        }
+      } else {
+        // For regular ops users: toggle between ops ↔ employee
+        newRole = currentRole === 'ops' ? 'employee' : 'ops';
+      }
+      
       return {
         ...state,
         ui: {
