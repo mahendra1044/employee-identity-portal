@@ -182,10 +182,8 @@ export default function HomePage() {
       (role !== "ops" || hasSearched)
     );
     
-    // Filter systems based on specialized ops role
-    if (isOpsRole(role)) {
-      result = filterSystemsByRole(result, role);
-    }
+    // Filter systems based on role (applies to ALL roles, not just ops)
+    result = filterSystemsByRole(result, role);
     
     console.log('👁️ [VISIBLE SYSTEMS] Calculated visible systems:', result);
     console.log('👁️ [VISIBLE SYSTEMS] Filters - role:', role, 'hasSearched:', hasSearched);

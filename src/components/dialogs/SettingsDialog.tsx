@@ -38,14 +38,9 @@ export function SettingsDialog({
     toast.success("Reset to defaults");
   };
 
-  // Filter systems based on user role
+  // Filter systems based on user role (applies to ALL roles, not just ops)
   const visibleSystems = useMemo(() => {
-    // If ops role, filter by role permissions
-    if (isOpsRole(role)) {
-      return filterSystemsByRole(SYSTEMS, role);
-    }
-    // For non-ops users, show all systems
-    return SYSTEMS;
+    return filterSystemsByRole(SYSTEMS, role);
   }, [role]);
 
   return (
