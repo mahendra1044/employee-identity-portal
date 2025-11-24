@@ -35,6 +35,8 @@ export function getAllowedSystemsForRole(role: string | null | undefined): Syste
       return IGA_SYSTEMS;
     case "tpag_ops":
       return TPAG_SYSTEMS;
+    case "employee":
+      return ORIGINAL_SYSTEMS; // Employees see only the original 6 systems
     default:
       return null;
   }
@@ -59,7 +61,7 @@ export function isSystemAllowedForRole(system: SystemKey, role: string | null | 
  * Filters systems based on role permissions
  */
 export function filterSystemsByRole(systems: SystemKey[], role: string | null | undefined): SystemKey[] {
-  if (!role || !isOpsRole(role)) return systems;
+  if (!role) return systems;
   
   const allowedSystems = getAllowedSystemsForRole(role);
   
