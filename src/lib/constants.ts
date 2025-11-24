@@ -50,6 +50,16 @@ export const PING_SYSTEMS: SystemKey[] = [
   "ping-intelligence",
 ];
 
+// Original 6 systems (before the 3 new Ping systems were added)
+export const ORIGINAL_SYSTEMS: SystemKey[] = [
+  "ping-directory",
+  "ping-federate",
+  "ping-mfa",
+  "azure-ad",
+  "cyberark",
+  "saviynt",
+];
+
 export const PAM_SYSTEMS: SystemKey[] = [
   "cyberark",
 ];

@@ -3,7 +3,7 @@
  */
 
 import type { SystemKey } from "./types";
-import { PING_SYSTEMS, PAM_SYSTEMS, IGA_SYSTEMS, TPAG_SYSTEMS } from "./constants";
+import { PING_SYSTEMS, PAM_SYSTEMS, IGA_SYSTEMS, TPAG_SYSTEMS, ORIGINAL_SYSTEMS } from "./constants";
 
 /**
  * Determines if a role is an ops-like role (has ops privileges)
@@ -19,14 +19,14 @@ export function isOpsRole(role: string | null | undefined): boolean {
 
 /**
  * Gets the allowed systems for a specific ops role
- * Returns all systems for general ops, or filtered systems for specialized ops
+ * Returns original 6 systems for general ops, or filtered systems for specialized ops
  */
 export function getAllowedSystemsForRole(role: string | null | undefined): SystemKey[] | null {
   if (!role) return null;
   
   switch (role) {
     case "ops":
-      return null; // null means all systems allowed
+      return ORIGINAL_SYSTEMS; // General ops sees only the original 6 systems
     case "sso_ops":
       return PING_SYSTEMS;
     case "pam_ops":
@@ -78,7 +78,7 @@ export function getOpsModeDescription(role: string | null | undefined): string {
   
   switch (role) {
     case "ops":
-      return "All Systems";
+      return "Operations Team (Core Systems)";
     case "sso_ops":
       return "SSO Operations (Ping Systems)";
     case "pam_ops":
