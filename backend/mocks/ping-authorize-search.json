@@ -1,4 +1,58 @@
 {
+  "u1001": {
+    "userId": "u1001",
+    "name": "Alice Johnson",
+    "email": "alice.johnson@company.com",
+    "status": "active",
+    "policyEvaluations": 12340,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T11:00:00Z"
+  },
+  "u1002": {
+    "userId": "u1002",
+    "name": "Bob Martin",
+    "email": "bob.martin@company.com",
+    "status": "active",
+    "policyEvaluations": 8901,
+    "riskScore": "medium",
+    "lastEvaluationTime": "2025-09-18T15:45:00Z"
+  },
+  "u1003": {
+    "userId": "u1003",
+    "name": "Charlie Kim",
+    "email": "charlie.kim@company.com",
+    "status": "active",
+    "policyEvaluations": 6754,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-19T09:50:00Z"
+  },
+  "u1004": {
+    "userId": "u1004",
+    "name": "Dana Lee",
+    "email": "dana.lee@company.com",
+    "status": "active",
+    "policyEvaluations": 4521,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T09:15:00Z"
+  },
+  "u1005": {
+    "userId": "u1005",
+    "name": "Evan Torres",
+    "email": "evan.torres@company.com",
+    "status": "inactive",
+    "policyEvaluations": 3210,
+    "riskScore": "medium",
+    "lastEvaluationTime": "2025-09-15T17:00:00Z"
+  },
+  "u1006": {
+    "userId": "u1006",
+    "name": "Fatima Khan",
+    "email": "fatima.khan@company.com",
+    "status": "active",
+    "policyEvaluations": 15670,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T12:30:00Z"
+  },
   "u1007": {
     "userId": "u1007",
     "name": "George Smith",
@@ -8,8 +62,125 @@
     "riskScore": "low",
     "lastEvaluationTime": "2025-09-19T13:30:00Z"
   },
+  "u1008": {
+    "userId": "u1008",
+    "name": "Hannah Park",
+    "email": "hannah.park@company.com",
+    "status": "active",
+    "policyEvaluations": 2890,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T07:45:00Z"
+  },
+  "u1009": {
+    "userId": "u1009",
+    "name": "Ian Chen",
+    "email": "ian.chen@company.com",
+    "status": "active",
+    "policyEvaluations": 18900,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T14:15:00Z"
+  },
+  "u1010": {
+    "userId": "u1010",
+    "name": "Julia Nguyen",
+    "email": "julia.nguyen@company.com",
+    "status": "active",
+    "policyEvaluations": 4123,
+    "riskScore": "medium",
+    "lastEvaluationTime": "2025-09-19T11:50:00Z"
+  },
+  "u1011": {
+    "userId": "u1011",
+    "name": "Kevin Patel",
+    "email": "kevin.patel@company.com",
+    "status": "suspended",
+    "policyEvaluations": 0,
+    "riskScore": "high",
+    "lastEvaluationTime": "2025-09-10T10:30:00Z"
+  },
+  "u1012": {
+    "userId": "u1012",
+    "name": "Laura Garcia",
+    "email": "laura.garcia@company.com",
+    "status": "active",
+    "policyEvaluations": 9876,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T10:00:00Z"
+  },
+  "u1013": {
+    "userId": "u1013",
+    "name": "Mohammed Ali",
+    "email": "mohammed.ali@company.com",
+    "status": "active",
+    "policyEvaluations": 7234,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-19T15:40:00Z"
+  },
+  "u1014": {
+    "userId": "u1014",
+    "name": "Nina Brown",
+    "email": "nina.brown@company.com",
+    "status": "active",
+    "policyEvaluations": 11450,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T11:30:00Z"
+  },
+  "u1015": {
+    "userId": "u1015",
+    "name": "Oscar Diaz",
+    "email": "oscar.diaz@company.com",
+    "status": "active",
+    "policyEvaluations": 1987,
+    "riskScore": "medium",
+    "lastEvaluationTime": "2025-09-19T14:55:00Z"
+  },
+  "u1016": {
+    "userId": "u1016",
+    "name": "Priya Singh",
+    "email": "priya.singh@company.com",
+    "status": "active",
+    "policyEvaluations": 16780,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T10:45:00Z"
+  },
+  "u1017": {
+    "userId": "u1017",
+    "name": "Quentin Roux",
+    "email": "quentin.roux@company.com",
+    "status": "inactive",
+    "policyEvaluations": 5612,
+    "riskScore": "medium",
+    "lastEvaluationTime": "2025-09-12T14:10:00Z"
+  },
+  "u1018": {
+    "userId": "u1018",
+    "name": "Rita Souza",
+    "email": "rita.souza@company.com",
+    "status": "active",
+    "policyEvaluations": 8543,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T08:30:00Z"
+  },
+  "u1019": {
+    "userId": "u1019",
+    "name": "Sam Wilson",
+    "email": "sam.wilson@company.com",
+    "status": "active",
+    "policyEvaluations": 6321,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-19T17:20:00Z"
+  },
+  "u1020": {
+    "userId": "u1020",
+    "name": "Tina Zhang",
+    "email": "tina.zhang@company.com",
+    "status": "active",
+    "policyEvaluations": 13210,
+    "riskScore": "low",
+    "lastEvaluationTime": "2025-09-20T13:00:00Z"
+  },
   "alice": {
-    "userId": "u2001",
+    "userId": "u1001",
     "name": "Alice Johnson",
     "email": "alice.johnson@company.com",
     "status": "active",
@@ -18,9 +189,9 @@
     "lastEvaluationTime": "2025-09-20T11:00:00Z"
   },
   "bob": {
-    "userId": "u2002",
-    "name": "Bob Williams",
-    "email": "bob.williams@company.com",
+    "userId": "u1002",
+    "name": "Bob Martin",
+    "email": "bob.martin@company.com",
     "status": "active",
     "policyEvaluations": 8901,
     "riskScore": "medium",

@@ -1,4 +1,58 @@
 {
+  "u1001": {
+    "userId": "u1001",
+    "name": "Alice Johnson",
+    "email": "alice.johnson@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 92,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T11:30:00Z"
+  },
+  "u1002": {
+    "userId": "u1002",
+    "name": "Bob Martin",
+    "email": "bob.martin@company.com",
+    "threatLevel": "medium",
+    "behaviorScore": 78,
+    "anomaliesDetected": 3,
+    "lastAnalysisTime": "2025-09-18T16:00:00Z"
+  },
+  "u1003": {
+    "userId": "u1003",
+    "name": "Charlie Kim",
+    "email": "charlie.kim@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 88,
+    "anomaliesDetected": 1,
+    "lastAnalysisTime": "2025-09-19T10:00:00Z"
+  },
+  "u1004": {
+    "userId": "u1004",
+    "name": "Dana Lee",
+    "email": "dana.lee@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 90,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T09:30:00Z"
+  },
+  "u1005": {
+    "userId": "u1005",
+    "name": "Evan Torres",
+    "email": "evan.torres@company.com",
+    "threatLevel": "medium",
+    "behaviorScore": 72,
+    "anomaliesDetected": 4,
+    "lastAnalysisTime": "2025-09-15T17:15:00Z"
+  },
+  "u1006": {
+    "userId": "u1006",
+    "name": "Fatima Khan",
+    "email": "fatima.khan@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 95,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T12:45:00Z"
+  },
   "u1007": {
     "userId": "u1007",
     "name": "George Smith",
@@ -8,8 +62,125 @@
     "anomaliesDetected": 1,
     "lastAnalysisTime": "2025-09-19T14:00:00Z"
   },
+  "u1008": {
+    "userId": "u1008",
+    "name": "Hannah Park",
+    "email": "hannah.park@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 91,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T08:00:00Z"
+  },
+  "u1009": {
+    "userId": "u1009",
+    "name": "Ian Chen",
+    "email": "ian.chen@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 93,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T14:30:00Z"
+  },
+  "u1010": {
+    "userId": "u1010",
+    "name": "Julia Nguyen",
+    "email": "julia.nguyen@company.com",
+    "threatLevel": "medium",
+    "behaviorScore": 76,
+    "anomaliesDetected": 2,
+    "lastAnalysisTime": "2025-09-19T12:05:00Z"
+  },
+  "u1011": {
+    "userId": "u1011",
+    "name": "Kevin Patel",
+    "email": "kevin.patel@company.com",
+    "threatLevel": "high",
+    "behaviorScore": 45,
+    "anomaliesDetected": 8,
+    "lastAnalysisTime": "2025-09-10T10:45:00Z"
+  },
+  "u1012": {
+    "userId": "u1012",
+    "name": "Laura Garcia",
+    "email": "laura.garcia@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 89,
+    "anomaliesDetected": 1,
+    "lastAnalysisTime": "2025-09-20T10:15:00Z"
+  },
+  "u1013": {
+    "userId": "u1013",
+    "name": "Mohammed Ali",
+    "email": "mohammed.ali@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 87,
+    "anomaliesDetected": 1,
+    "lastAnalysisTime": "2025-09-19T15:55:00Z"
+  },
+  "u1014": {
+    "userId": "u1014",
+    "name": "Nina Brown",
+    "email": "nina.brown@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 94,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T11:45:00Z"
+  },
+  "u1015": {
+    "userId": "u1015",
+    "name": "Oscar Diaz",
+    "email": "oscar.diaz@company.com",
+    "threatLevel": "medium",
+    "behaviorScore": 74,
+    "anomaliesDetected": 3,
+    "lastAnalysisTime": "2025-09-19T15:10:00Z"
+  },
+  "u1016": {
+    "userId": "u1016",
+    "name": "Priya Singh",
+    "email": "priya.singh@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 96,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T11:00:00Z"
+  },
+  "u1017": {
+    "userId": "u1017",
+    "name": "Quentin Roux",
+    "email": "quentin.roux@company.com",
+    "threatLevel": "medium",
+    "behaviorScore": 70,
+    "anomaliesDetected": 5,
+    "lastAnalysisTime": "2025-09-12T14:25:00Z"
+  },
+  "u1018": {
+    "userId": "u1018",
+    "name": "Rita Souza",
+    "email": "rita.souza@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 86,
+    "anomaliesDetected": 1,
+    "lastAnalysisTime": "2025-09-20T08:45:00Z"
+  },
+  "u1019": {
+    "userId": "u1019",
+    "name": "Sam Wilson",
+    "email": "sam.wilson@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 84,
+    "anomaliesDetected": 1,
+    "lastAnalysisTime": "2025-09-19T17:35:00Z"
+  },
+  "u1020": {
+    "userId": "u1020",
+    "name": "Tina Zhang",
+    "email": "tina.zhang@company.com",
+    "threatLevel": "low",
+    "behaviorScore": 91,
+    "anomaliesDetected": 0,
+    "lastAnalysisTime": "2025-09-20T13:15:00Z"
+  },
   "alice": {
-    "userId": "u2001",
+    "userId": "u1001",
     "name": "Alice Johnson",
     "email": "alice.johnson@company.com",
     "threatLevel": "low",
@@ -18,9 +189,9 @@
     "lastAnalysisTime": "2025-09-20T11:30:00Z"
   },
   "bob": {
-    "userId": "u2002",
-    "name": "Bob Williams",
-    "email": "bob.williams@company.com",
+    "userId": "u1002",
+    "name": "Bob Martin",
+    "email": "bob.martin@company.com",
     "threatLevel": "medium",
     "behaviorScore": 78,
     "anomaliesDetected": 3,
