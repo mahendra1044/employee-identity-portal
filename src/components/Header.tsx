@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { LogOut, Users, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen, Briefcase, User, Shield, UserCheck } from "lucide-react";
+import { LogOut, Users, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen, Briefcase, User, Shield, UserCheck, ArrowLeftRight, UserCircle, ShieldCheck, RefreshCw } from "lucide-react";
 import { useAppAuth } from "@/hooks/useAppAuth";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppUI } from "@/hooks/useAppUI";
@@ -153,7 +153,7 @@ export function Header(props: {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button variant="ghost" size="icon" onClick={toggleRole} aria-label="Toggle ops mode">
-                        <Users className="h-4 w-4" />
+                        <ArrowLeftRight className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -167,7 +167,7 @@ export function Header(props: {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button variant="ghost" size="icon" onClick={() => setRole('employee')} aria-label="Switch to employee view">
-                        <User className="h-4 w-4" />
+                        <UserCircle className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -181,7 +181,7 @@ export function Header(props: {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button variant="ghost" size="icon" onClick={() => setRole(originalRole)} aria-label="Switch back to ops mode">
-                        <Briefcase className="h-4 w-4" />
+                        <ShieldCheck className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -197,7 +197,7 @@ export function Header(props: {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="ghost" size="icon" onClick={toggleRole} aria-label="Toggle role">
-                    <Users className="h-4 w-4" />
+                    <RefreshCw className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
