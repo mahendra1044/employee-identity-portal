@@ -17,7 +17,7 @@ export function Header(props: {
 }) {
   const { email, logout } = useAppAuth();
   const { theme, setTheme } = useAppTheme();
-  const { ui, setUIState, toggleRole } = useAppUI();
+  const { ui, setUIState, toggleRole, setRole } = useAppUI();
 
   const originalRole = ui.originalRole;
   const currentRole = ui.currentRole || 'employee';
@@ -26,14 +26,20 @@ export function Header(props: {
   // Determine if toggle button should show
   const canToggleRole = isOpsRole(originalRole);
   
+  // Check if user is specialized ops (sso_ops, pam_ops, etc.) - they get TWO buttons
+  const isSpecializedOps = originalRole && originalRole !== 'ops' && isOpsRole(originalRole);
+  
   // Get toggle tooltip text based on current and original role
   const getToggleTooltip = () => {
     if (!originalRole) return "";
     
     // For specialized ops modes (sso_ops, pam_ops, etc.)
-    if (originalRole !== 'ops' && isOpsRole(originalRole)) {
+    if (isSpecializedOps) {
       if (currentRole === 'ops') {
         // Currently in general ops, can switch back to specialized
+        return `Switch to ${getOpsModeDescription(originalRole)}`;
+      } else if (currentRole === 'employee') {
+        // Currently in employee mode, switch back to specialized
         return `Switch to ${getOpsModeDescription(originalRole)}`;
       } else {
         // Currently in specialized mode, can switch to general ops
@@ -47,6 +53,10 @@ export function Header(props: {
     }
     
     return "";
+  };
+
+  const getEmployeeToggleTooltip = () => {
+    return "Switch to Employee view";
   };
 
   const getRoleIcon = () => {
@@ -135,7 +145,55 @@ export function Header(props: {
               </TooltipContent>
             </Tooltip>
 
-            {canToggleRole && (
+            {/* For specialized ops (sso_ops, pam_ops, etc.): Show TWO buttons */}
+            {isSpecializedOps && (
+              <>
+                {/* Button 1: Toggle between specialized ops ↔ general ops */}
+                {currentRole !== 'employee' && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" onClick={toggleRole} aria-label="Toggle ops mode">
+                        <Users className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{getToggleTooltip()}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                
+                {/* Button 2: Switch to employee mode */}
+                {currentRole !== 'employee' && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" onClick={() => setRole('employee')} aria-label="Switch to employee view">
+                        <User className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{getEmployeeToggleTooltip()}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                
+                {/* If in employee mode, show button to go back to specialized ops */}
+                {currentRole === 'employee' && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" onClick={() => setRole(originalRole)} aria-label="Switch back to ops mode">
+                        <Briefcase className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Switch back to {getOpsModeDescription(originalRole)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </>
+            )}
+            
+            {/* For regular ops: Show single toggle button (existing behavior) */}
+            {!isSpecializedOps && canToggleRole && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="ghost" size="icon" onClick={toggleRole} aria-label="Toggle role">

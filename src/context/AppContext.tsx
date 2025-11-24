@@ -41,6 +41,7 @@ export type AppAction =
   | { type: 'RESET_TOGGLES' }
   | { type: 'SET_UI_STATE'; payload: { key: keyof AppState['ui']; value: boolean | string | null } }
   | { type: 'TOGGLE_ROLE' }
+  | { type: 'SET_ROLE'; payload: string }
   | { type: 'INIT_STATE'; payload: Partial<AppState> };
 
 /**
@@ -166,6 +167,15 @@ function appReducer(state: AppState, action: AppAction): AppState {
         },
       };
     }
+
+    case 'SET_ROLE':
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          currentRole: action.payload,
+        },
+      };
 
     case 'SET_UI_STATE':
       return {
