@@ -5,7 +5,7 @@
  * Only shown when ops user has performed a successful search.
  * 
  * Features:
- * - Tab-based interface for each system (ping-federate, ping-directory, ping-mfa, azure-ad, cyberark, saviynt)
+ * - Tab-based interface for each system (all identity systems including 6 CyberArk systems)
  * - System-specific action buttons (3 per system)
  * - Links to external tools (Splunk, CloudWatch)
  * - Target user display showing who the actions are for
@@ -34,6 +34,12 @@ import {
   Badge,
   Key,
   Send,
+  Lock,
+  MonitorPlay,
+  RotateCw,
+  AlertTriangle,
+  Server,
+  FileKey,
 } from "lucide-react";
 import type { SystemKey } from "@/lib/types";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
@@ -59,6 +65,21 @@ interface QuickActionsCardProps {
   onLoadCyberarkSafes: () => void;
   onLoadCyberarkAccounts: () => void;
   onLoadCyberarkActivity: () => void;
+  onLoadCyberarkEpmPolicies: () => void;
+  onLoadCyberarkEpmApplications: () => void;
+  onLoadCyberarkEpmElevations: () => void;
+  onLoadCyberarkAleroSessions: () => void;
+  onLoadCyberarkAleroTargets: () => void;
+  onLoadCyberarkAleroRecordings: () => void;
+  onLoadCyberarkConjurSecrets: () => void;
+  onLoadCyberarkConjurVaults: () => void;
+  onLoadCyberarkConjurRotation: () => void;
+  onLoadCyberarkDpaAuthorizations: () => void;
+  onLoadCyberarkDpaRiskAssessment: () => void;
+  onLoadCyberarkDpaPolicies: () => void;
+  onLoadCyberarkIdentityDevices: () => void;
+  onLoadCyberarkIdentitySsoApps: () => void;
+  onLoadCyberarkIdentityLoginHistory: () => void;
   onLoadSaviynt: () => void;
   onLoadSaviynt_Roles: () => void;
   onLoadSaviynt_Entitlements: () => void;
@@ -87,6 +108,21 @@ export function QuickActionsCard({
   onLoadCyberarkSafes,
   onLoadCyberarkAccounts,
   onLoadCyberarkActivity,
+  onLoadCyberarkEpmPolicies,
+  onLoadCyberarkEpmApplications,
+  onLoadCyberarkEpmElevations,
+  onLoadCyberarkAleroSessions,
+  onLoadCyberarkAleroTargets,
+  onLoadCyberarkAleroRecordings,
+  onLoadCyberarkConjurSecrets,
+  onLoadCyberarkConjurVaults,
+  onLoadCyberarkConjurRotation,
+  onLoadCyberarkDpaAuthorizations,
+  onLoadCyberarkDpaRiskAssessment,
+  onLoadCyberarkDpaPolicies,
+  onLoadCyberarkIdentityDevices,
+  onLoadCyberarkIdentitySsoApps,
+  onLoadCyberarkIdentityLoginHistory,
   onLoadSaviynt,
   onLoadSaviynt_Roles,
   onLoadSaviynt_Entitlements,
@@ -220,6 +256,91 @@ export function QuickActionsCard({
                 <Button size="sm" variant="secondary" onClick={onLoadCyberarkActivity} title="Activity">
                   <Activity className="h-4 w-4 mr-1" />
                   Activity
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "cyberark-epm" && qaEnabledTabs["cyberark-epm"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkEpmPolicies} title="Policies">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Policies
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkEpmApplications} title="Applications">
+                  <Server className="h-4 w-4 mr-1" />
+                  Applications
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkEpmElevations} title="Elevation History">
+                  <History className="h-4 w-4 mr-1" />
+                  Elevations
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "cyberark-alero" && qaEnabledTabs["cyberark-alero"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkAleroSessions} title="Sessions">
+                  <Activity className="h-4 w-4 mr-1" />
+                  Sessions
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkAleroTargets} title="Targets">
+                  <Database className="h-4 w-4 mr-1" />
+                  Targets
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkAleroRecordings} title="Recordings">
+                  <MonitorPlay className="h-4 w-4 mr-1" />
+                  Recordings
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "cyberark-conjur" && qaEnabledTabs["cyberark-conjur"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkConjurSecrets} title="Secrets">
+                  <FileKey className="h-4 w-4 mr-1" />
+                  Secrets
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkConjurVaults} title="Vaults">
+                  <Vault className="h-4 w-4 mr-1" />
+                  Vaults
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkConjurRotation} title="Rotation">
+                  <RotateCw className="h-4 w-4 mr-1" />
+                  Rotation
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "cyberark-dpa" && qaEnabledTabs["cyberark-dpa"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkDpaAuthorizations} title="Authorizations">
+                  <Key className="h-4 w-4 mr-1" />
+                  Authorizations
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkDpaRiskAssessment} title="Risk Assessment">
+                  <AlertTriangle className="h-4 w-4 mr-1" />
+                  Risk
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkDpaPolicies} title="Policies">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Policies
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "cyberark-identity" && qaEnabledTabs["cyberark-identity"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkIdentityDevices} title="Devices">
+                  <Smartphone className="h-4 w-4 mr-1" />
+                  Devices
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkIdentitySsoApps} title="SSO Applications">
+                  <Globe className="h-4 w-4 mr-1" />
+                  SSO Apps
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadCyberarkIdentityLoginHistory} title="Login History">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Login History
                 </Button>
               </div>
             )}

@@ -60,17 +60,82 @@ export function usePfOps() {
     await loadEndpoint("/api/aad/signins", "Azure AD — Sign-ins");
   }, [loadEndpoint]);
 
-  // CyberArk endpoints
+  // CyberArk PAM endpoints
   const loadCyberarkAccounts = useCallback(async () => {
-    await loadEndpoint("/api/cyberark/accounts", "CyberArk — Accounts");
+    await loadEndpoint("/api/cyberark/accounts", "CyberArk PAM — Accounts");
   }, [loadEndpoint]);
 
   const loadCyberarkActivity = useCallback(async () => {
-    await loadEndpoint("/api/cyberark/activity", "CyberArk — Activity");
+    await loadEndpoint("/api/cyberark/activity", "CyberArk PAM — Activity");
   }, [loadEndpoint]);
 
   const loadCyberarkSafes = useCallback(async () => {
-    await loadEndpoint("/api/cyberark/safes", "CyberArk — Safes");
+    await loadEndpoint("/api/cyberark/safes", "CyberArk PAM — Safes");
+  }, [loadEndpoint]);
+
+  // CyberArk EPM endpoints
+  const loadCyberarkEpmPolicies = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-epm/policies", "CyberArk EPM — Policies");
+  }, [loadEndpoint]);
+
+  const loadCyberarkEpmApplications = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-epm/applications", "CyberArk EPM — Applications");
+  }, [loadEndpoint]);
+
+  const loadCyberarkEpmElevations = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-epm/elevation-history", "CyberArk EPM — Elevation History");
+  }, [loadEndpoint]);
+
+  // CyberArk Alero endpoints
+  const loadCyberarkAleroSessions = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-alero/sessions", "CyberArk Alero — Sessions");
+  }, [loadEndpoint]);
+
+  const loadCyberarkAleroTargets = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-alero/targets", "CyberArk Alero — Targets");
+  }, [loadEndpoint]);
+
+  const loadCyberarkAleroRecordings = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-alero/recordings", "CyberArk Alero — Recordings");
+  }, [loadEndpoint]);
+
+  // CyberArk Conjur endpoints
+  const loadCyberarkConjurSecrets = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-conjur/secrets", "CyberArk Conjur — Secrets");
+  }, [loadEndpoint]);
+
+  const loadCyberarkConjurVaults = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-conjur/vaults", "CyberArk Conjur — Vaults");
+  }, [loadEndpoint]);
+
+  const loadCyberarkConjurRotation = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-conjur/rotation", "CyberArk Conjur — Rotation Schedule");
+  }, [loadEndpoint]);
+
+  // CyberArk DPA endpoints
+  const loadCyberarkDpaAuthorizations = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-dpa/authorizations", "CyberArk DPA — Authorizations");
+  }, [loadEndpoint]);
+
+  const loadCyberarkDpaRiskAssessment = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-dpa/risk-assessment", "CyberArk DPA — Risk Assessment");
+  }, [loadEndpoint]);
+
+  const loadCyberarkDpaPolicies = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-dpa/policies", "CyberArk DPA — Policies");
+  }, [loadEndpoint]);
+
+  // CyberArk Identity endpoints
+  const loadCyberarkIdentityDevices = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-identity/devices", "CyberArk Identity — Devices");
+  }, [loadEndpoint]);
+
+  const loadCyberarkIdentitySsoApps = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-identity/sso-apps", "CyberArk Identity — SSO Applications");
+  }, [loadEndpoint]);
+
+  const loadCyberarkIdentityLoginHistory = useCallback(async () => {
+    await loadEndpoint("/api/cyberark-identity/login-history", "CyberArk Identity — Login History");
   }, [loadEndpoint]);
 
   // Ping Directory endpoints
@@ -134,6 +199,21 @@ export function usePfOps() {
     loadCyberarkAccounts,
     loadCyberarkActivity,
     loadCyberarkSafes,
+    loadCyberarkEpmPolicies,
+    loadCyberarkEpmApplications,
+    loadCyberarkEpmElevations,
+    loadCyberarkAleroSessions,
+    loadCyberarkAleroTargets,
+    loadCyberarkAleroRecordings,
+    loadCyberarkConjurSecrets,
+    loadCyberarkConjurVaults,
+    loadCyberarkConjurRotation,
+    loadCyberarkDpaAuthorizations,
+    loadCyberarkDpaRiskAssessment,
+    loadCyberarkDpaPolicies,
+    loadCyberarkIdentityDevices,
+    loadCyberarkIdentitySsoApps,
+    loadCyberarkIdentityLoginHistory,
     loadPdProfile,
     loadPdGroups,
     loadPdAudit,

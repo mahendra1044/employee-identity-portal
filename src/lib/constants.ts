@@ -8,6 +8,11 @@ export const SYSTEMS: SystemKey[] = [
   "ping-directory",
   "ping-federate",
   "cyberark",
+  "cyberark-epm",
+  "cyberark-alero",
+  "cyberark-conjur",
+  "cyberark-dpa",
+  "cyberark-identity",
   "saviynt",
   "azure-ad",
   "ping-mfa",
@@ -19,7 +24,12 @@ export const SYSTEMS: SystemKey[] = [
 export const SYSTEM_LABELS: Record<SystemKey, string> = {
   "ping-directory": "Ping Directory",
   "ping-federate": "Ping Federate",
-  "cyberark": "CyberArk",
+  "cyberark": "CyberArk PAM",
+  "cyberark-epm": "CyberArk EPM",
+  "cyberark-alero": "CyberArk Alero",
+  "cyberark-conjur": "CyberArk Conjur",
+  "cyberark-dpa": "CyberArk DPA",
+  "cyberark-identity": "CyberArk Identity",
   "saviynt": "Saviynt",
   "azure-ad": "Azure AD",
   "ping-mfa": "Ping MFA",
@@ -62,6 +72,11 @@ export const ORIGINAL_SYSTEMS: SystemKey[] = [
 
 export const PAM_SYSTEMS: SystemKey[] = [
   "cyberark",
+  "cyberark-epm",
+  "cyberark-alero",
+  "cyberark-conjur",
+  "cyberark-dpa",
+  "cyberark-identity",
 ];
 
 export const IGA_SYSTEMS: SystemKey[] = [
