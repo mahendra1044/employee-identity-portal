@@ -32,6 +32,9 @@ const DEFAULT_FEATURES: Features = {
     "saviynt": true,
     "azure-ad": true,
     "ping-mfa": true,
+    "ping-access": true,
+    "ping-authorize": true,
+    "ping-intelligence": true,
   },
 };
 
@@ -57,7 +60,7 @@ export function useFeatures(token: string | null): UseFeatureResult {
 
     const loadFeatures = async () => {
       try {
-        const res = await fetch(`${API_BASE}/config/features`);
+        const res = await fetch('/api/config/features');
         if (res.ok) {
           const data = await res.json();
           setFeatures(data);
