@@ -1,3 +1,19 @@
+/**
+ * DataDialog Component
+ * 
+ * A reusable dialog component for displaying data in multiple formats:
+ * - JSON: Pretty-printed JSON view
+ * - HTML: Key-value pairs in a readable format
+ * - Table: Structured table view
+ * 
+ * Features:
+ * - Copy to clipboard functionality
+ * - Configurable max width
+ * - Loading state support
+ * - Custom content via children prop
+ * 
+ * @module DataDialog
+ */
 "use client";
 
 import { Button } from "@/components/ui/button";
