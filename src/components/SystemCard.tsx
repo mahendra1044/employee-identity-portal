@@ -13,9 +13,9 @@ import { Copy, RefreshCw, Eye, Code, FileText } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { User, Globe, Shield } from "lucide-react";
 import { API_BASE } from "@/lib/constants";
+import { DataDialog } from "@/components/dialogs/DataDialog";
 import type { SystemKey, SystemData } from "@/lib/types";
 
 interface SystemCardProps {
@@ -177,35 +177,7 @@ export function SystemCard({
     loadInitial(false);
   }, [token, enabled, userKey]);
 
-  const toPairs = (obj: any): Array<{ k: string; v: any }> => {
-    const out: Array<{ k: string; v: any }> = [];
-    const walk = (val: any, prefix = "") => {
-      if (val === null || val === undefined) {
-        out.push({ k: prefix || "value", v: String(val) });
-        return;
-      }
-      if (Array.isArray(val)) {
-        if (val.length === 0) {
-          out.push({ k: prefix, v: "[]" });
-        } else {
-          val.forEach((item, idx) => walk(item, prefix ? `${prefix}[${idx}]` : `[${idx}]`));
-        }
-        return;
-      }
-      if (typeof val === "object") {
-        const keys = Object.keys(val);
-        if (keys.length === 0) {
-          out.push({ k: prefix, v: "{}" });
-        } else {
-          keys.forEach((key) => walk(val[key], prefix ? `${prefix}.${key}` : key));
-        }
-        return;
-      }
-      out.push({ k: prefix || "value", v: val });
-    };
-    walk(obj);
-    return out;
-  };
+  // toPairs moved to DataDialog component - no longer needed here
 
   const openHtmlView = async () => {
     if (!details && !data && enabled && !loading) {
@@ -438,64 +410,29 @@ export function SystemCard({
         </CardContent>
       </Card>
 
-      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between w-full pr-12">
-              <span>{name} — Details</span>
-              {details && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigator.clipboard.writeText(JSON.stringify(details, null, 2))}
-                  title="Copy JSON to clipboard"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          {loading ? (
-            <p className="text-sm animate-pulse">Loading details...</p>
-          ) : details ? (
-            <pre className="flex-1 text-xs bg-muted p-2 rounded overflow-auto m-0">
-              {JSON.stringify(details, null, 2)}
-            </pre>
-          ) : (
-            <p className="text-sm text-muted-foreground">No details available</p>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Details Dialog - uses DataDialog with JSON mode */}
+      <DataDialog
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        title={`${name} — Details`}
+        data={details}
+        loading={loading}
+        mode="json"
+        maxWidth="4xl"
+      />
 
-      <Dialog open={htmlOpen} onOpenChange={setHtmlOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="pr-12">{name} — HTML View</DialogTitle>
-          </DialogHeader>
-          {(() => {
-            const payload = details || data;
-            if (!payload) return <p className="text-sm text-muted-foreground">No data available to display</p>;
-            const pairs = toPairs(payload).slice(0, 1000);
-            return (
-              <div className="flex-1 overflow-auto pr-1">
-                <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
-                  {pairs.map(({ k, v }) => (
-                    <div key={k} className="flex flex-col py-1 border-b last:border-b-0 border-border/60">
-                      <dt className="text-xs font-medium text-muted-foreground truncate">{k}</dt>
-                      <dd className="text-sm break-words">
-                        {typeof v === "string" || typeof v === "number" || typeof v === "boolean"
-                          ? String(v)
-                          : JSON.stringify(v)}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
+      {/* HTML View Dialog - uses DataDialog with html mode */}
+      <DataDialog
+        open={htmlOpen}
+        onOpenChange={setHtmlOpen}
+        title={`${name} — HTML View`}
+        data={details || data}
+        mode="html"
+        maxWidth="5xl"
+        showCopy={false}
+      />
 
+      {/* SNOW Ticket Dialog - custom content, can't use DataDialog */}
       <Dialog open={ticketDialogOpen} onOpenChange={setTicketDialogOpen}>
         <DialogContent className="max-h-[80vh] flex flex-col">
           <DialogHeader className="flex-shrink-0">
@@ -523,50 +460,16 @@ export function SystemCard({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={pfOpen} onOpenChange={setPfOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between w-full pr-12">
-              <span>{pfTitle || "Ping Federate"}</span>
-              {pfData && (
-                <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(pfData, null, 2))} title="Copy JSON to clipboard">
-                  <Copy className="h-4 w-4" />
-                </Button>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          {pfLoading ? (
-            <p className="text-sm animate-pulse">Loading...</p>
-          ) : Array.isArray(pfData) ? (
-            <div className="flex-1 overflow-auto pr-1">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {Object.keys(pfData[0] || {}).map((k) => (
-                      <TableHead key={k} className="capitalize">{k.replace(/([A-Z])/g, ' $1')}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pfData.map((row: any, idx: number) => (
-                    <TableRow key={idx}>
-                      {Object.keys(pfData[0] || {}).map((k) => (
-                        <TableCell key={k} className="text-sm break-words">{String(row[k])}</TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : pfData ? (
-            <pre className="flex-1 text-xs bg-muted p-2 rounded overflow-auto m-0">
-              {JSON.stringify(pfData, null, 2)}
-            </pre>
-          ) : (
-            <p className="text-sm text-muted-foreground">No data available</p>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Ping Federate Dialog - uses DataDialog with auto table/json mode */}
+      <DataDialog
+        open={pfOpen}
+        onOpenChange={setPfOpen}
+        title={pfTitle || "Ping Federate"}
+        data={pfData}
+        loading={pfLoading}
+        mode={Array.isArray(pfData) ? "table" : "json"}
+        maxWidth="5xl"
+      />
     </>
   );
 }
