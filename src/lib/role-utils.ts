@@ -93,7 +93,7 @@ export function getOpsModeDescription(role: string | null | undefined): string {
     case "entraid_ops":
       return "Entra ID Operations (Azure AD)";
     case "tpag_ops":
-      return "TPAG Operations";
+      return "TPAG Operations (Third-Party Access Governance)";
     default:
       return "";
   }

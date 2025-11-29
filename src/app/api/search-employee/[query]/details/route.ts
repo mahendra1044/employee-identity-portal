@@ -24,6 +24,9 @@ const SAVIYNT_SUB_SYSTEMS = ['saviynt', 'saviynt-certifications', 'saviynt-analy
 // EntraAD sub-systems that use azure-ad-details.json with computed data
 const ENTRAID_SUB_SYSTEMS = ['azure-ad', 'azure-ad-users', 'azure-ad-groups', 'azure-ad-apps', 'azure-ad-conditional', 'azure-ad-signin'];
 
+// TPAG sub-systems that use saviynt-tpag-details.json with computed data
+const TPAG_SUB_SYSTEMS = ['saviynt-tpag', 'saviynt-tpag-vendors', 'saviynt-tpag-contracts', 'saviynt-tpag-access', 'saviynt-tpag-risk', 'saviynt-tpag-lifecycle'];
+
 // Generate detailed CyberArk mock data for all 6 systems
 function generateCyberArkDetailsData(system: string, userId: string, email: string) {
   const failureUsers = ['u1003', 'u1007', 'u1012', 'u1018'];
@@ -447,6 +450,113 @@ function generateEntraADSubSystemData(system: string, userId: string, baseData: 
   return dataGenerators[system] || null;
 }
 
+// Generate TPAG sub-system mock data
+function generateTPAGSubSystemData(system: string, userId: string, baseData: any) {
+  const failureUsers = ['u1003', 'u1007', 'u1012', 'u1018'];
+  const hasFailure = failureUsers.includes(userId);
+
+  // For base saviynt-tpag system, return as-is
+  if (system === 'saviynt-tpag') {
+    return baseData;
+  }
+
+  // Extract relevant data based on sub-system
+  const dataGenerators: Record<string, any> = {
+    'saviynt-tpag-vendors': hasFailure ? {
+      userId,
+      error: 'Vendor data access denied',
+      status: 'failed',
+      message: 'Unable to retrieve vendor management data',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.vendorName,
+      totalVendors: baseData.vendorStats?.total || Math.floor(Math.random() * 50) + 20,
+      activeVendors: baseData.vendorStats?.active || Math.floor(Math.random() * 40) + 15,
+      pendingOnboarding: baseData.vendorStats?.pending || Math.floor(Math.random() * 5),
+      recentVendors: baseData.vendors || [
+        { name: 'Acme Corp', status: 'Active', riskScore: 'Low', onboardDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString() },
+        { name: 'TechPartners Inc', status: 'Active', riskScore: 'Medium', onboardDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString() },
+        { name: 'Global Services', status: 'Pending', riskScore: 'Low', onboardDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      vendorCategories: ['IT Services', 'Consulting', 'Manufacturing', 'Logistics'],
+    },
+    'saviynt-tpag-contracts': hasFailure ? {
+      userId,
+      error: 'Contract data unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve contract information',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.vendorName,
+      totalContracts: baseData.contractStats?.total || Math.floor(Math.random() * 30) + 10,
+      activeContracts: baseData.contractStats?.active || Math.floor(Math.random() * 25) + 8,
+      expiringContracts: baseData.contractStats?.expiring || Math.floor(Math.random() * 3),
+      pendingRenewal: baseData.contractStats?.renewal || Math.floor(Math.random() * 2),
+      recentContracts: baseData.contracts || [
+        { vendor: 'Acme Corp', type: 'MSA', startDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(), endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), status: 'Active' },
+        { vendor: 'TechPartners Inc', type: 'SOW', startDate: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(), endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), status: 'Expiring' },
+      ],
+      contractTypes: ['MSA', 'SOW', 'NDA', 'DPA'],
+    },
+    'saviynt-tpag-access': hasFailure ? {
+      userId,
+      error: 'Third-party access unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve third-party access data',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.vendorName,
+      activeAccessGrants: baseData.accessStats?.active || Math.floor(Math.random() * 20) + 5,
+      pendingRequests: baseData.accessStats?.pending || Math.floor(Math.random() * 3),
+      revokedAccess: baseData.accessStats?.revoked || Math.floor(Math.random() * 5),
+      accessRequests: baseData.accessRequests || [
+        { vendor: 'Acme Corp', user: 'john.vendor@acme.com', resource: 'SharePoint Site', status: 'Active', grantDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() },
+        { vendor: 'TechPartners Inc', user: 'jane.contractor@techpartners.com', resource: 'Azure DevOps', status: 'Pending', requestDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      accessTypes: ['Read-Only', 'Read-Write', 'Admin', 'Limited'],
+    },
+    'saviynt-tpag-risk': hasFailure ? {
+      userId,
+      error: 'Risk assessment unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve risk assessment data',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.vendorName,
+      overallRiskScore: baseData.riskStats?.overall || ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
+      highRiskVendors: baseData.riskStats?.highRisk || Math.floor(Math.random() * 3),
+      pendingAssessments: baseData.riskStats?.pending || Math.floor(Math.random() * 5),
+      complianceScore: baseData.riskStats?.compliance || Math.floor(Math.random() * 20) + 80,
+      riskAssessments: baseData.riskAssessments || [
+        { vendor: 'Acme Corp', riskLevel: 'Low', lastAssessment: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), nextReview: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString() },
+        { vendor: 'TechPartners Inc', riskLevel: 'Medium', lastAssessment: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), nextReview: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      riskCategories: ['Data Security', 'Compliance', 'Operational', 'Financial'],
+    },
+    'saviynt-tpag-lifecycle': hasFailure ? {
+      userId,
+      error: 'Lifecycle data unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve lifecycle management data',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.vendorName,
+      pendingOnboarding: baseData.lifecycleStats?.onboarding || Math.floor(Math.random() * 5),
+      pendingOffboarding: baseData.lifecycleStats?.offboarding || Math.floor(Math.random() * 2),
+      pendingReviews: baseData.lifecycleStats?.reviews || Math.floor(Math.random() * 8),
+      completedReviews: baseData.lifecycleStats?.completed || Math.floor(Math.random() * 20) + 10,
+      lifecycleEvents: baseData.lifecycleEvents || [
+        { type: 'Onboarding', vendor: 'NewVendor LLC', status: 'In Progress', startDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+        { type: 'Access Review', vendor: 'Acme Corp', status: 'Pending', dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() },
+        { type: 'Offboarding', vendor: 'OldVendor Inc', status: 'Completed', completedDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      reviewTypes: ['Quarterly', 'Annual', 'Ad-hoc', 'Contract Renewal'],
+    },
+  };
+
+  return dataGenerators[system] || null;
+}
+
 // Load system details data
 function loadSystemDetails(system: string) {
   try {
@@ -588,6 +698,41 @@ export async function GET(
     }
 
     console.log(`✅ Generated ${system} details for ${query}`);
+    return NextResponse.json({ data: detailsData });
+  }
+
+  // Check if it's a TPAG sub-system - generate data dynamically
+  if (TPAG_SUB_SYSTEMS.includes(system)) {
+    // Load base Saviynt TPAG data (uses saviynt-details.json as base)
+    const saviyntPath = join(process.cwd(), 'backend/mocks/saviynt-details.json');
+    let saviyntData;
+    try {
+      saviyntData = JSON.parse(readFileSync(saviyntPath, 'utf-8'));
+    } catch (error) {
+      console.error('❌ Error loading saviynt-details.json for TPAG:', error);
+      return NextResponse.json({ error: 'TPAG data not available' }, { status: 500 });
+    }
+
+    const userData = saviyntData[query];
+    if (!userData) {
+      console.log(`⚠️ User ${query} not found in saviynt details for TPAG`);
+      return NextResponse.json({ error: `User ${query} not found in TPAG` }, { status: 404 });
+    }
+
+    // For base saviynt-tpag system, return the data directly
+    if (system === 'saviynt-tpag') {
+      console.log(`✅ Found TPAG details for ${query}`);
+      return NextResponse.json({ data: userData });
+    }
+
+    // For sub-systems, generate specific data
+    const detailsData = generateTPAGSubSystemData(system, query, userData);
+    
+    if (!detailsData) {
+      return NextResponse.json({ error: `System ${system} not found` }, { status: 404 });
+    }
+
+    console.log(`✅ Generated ${system} TPAG details for ${query}`);
     return NextResponse.json({ data: detailsData });
   }
 

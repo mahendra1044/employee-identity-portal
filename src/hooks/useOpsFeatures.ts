@@ -65,6 +65,9 @@ interface UseOpsFeuresResult {
   // EntraAD failures (for entraid_ops)
   failEntraAuth: FailureData[];
   failEntraAccess: FailureData[];
+  // TPAG failures (for tpag_ops)
+  failTpagVendor: FailureData[];
+  failTpagAccess: FailureData[];
   loading: boolean;
   error: string | undefined;
   qaEnabledTabs: Record<SystemKey, boolean>;
@@ -100,6 +103,9 @@ export function useOpsFeatures(
   // EntraAD failure states
   const [failEntraAuth, setFailEntraAuth] = useState<FailureData[]>([]);
   const [failEntraAccess, setFailEntraAccess] = useState<FailureData[]>([]);
+  // TPAG failure states
+  const [failTpagVendor, setFailTpagVendor] = useState<FailureData[]>([]);
+  const [failTpagAccess, setFailTpagAccess] = useState<FailureData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -118,6 +124,7 @@ export function useOpsFeatures(
   const shouldLoadPamFailures = role === 'pam_ops';
   const shouldLoadIgaFailures = role === 'iga_ops';
   const shouldLoadEntraFailures = role === 'entraid_ops';
+  const shouldLoadTpagFailures = role === 'tpag_ops';
 
   // Load recent failures for ops role (role-aware)
   const loadFailures = useCallback(async () => {
@@ -185,6 +192,19 @@ export function useOpsFeatures(
           })
         );
         fetchLabels.push('entra-auth', 'entra-access');
+      }
+
+      // TPAG failures (for tpag_ops)
+      if (shouldLoadTpagFailures) {
+        fetchPromises.push(
+          fetch(`${API_BASE}/api/ops-failures?system=saviynt-tpag-vendor&minutes=${minutes}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${API_BASE}/api/ops-failures?system=saviynt-tpag-access&minutes=${minutes}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        );
+        fetchLabels.push('tpag-vendor', 'tpag-access');
       }
 
       const responses = await Promise.all(fetchPromises);
@@ -291,9 +311,35 @@ export function useOpsFeatures(
         }
         setFailEntraAuth(entraAuth);
         setFailEntraAccess(entraAccess);
+        currentIndex += 2;
       } else {
         setFailEntraAuth([]);
         setFailEntraAccess([]);
+      }
+
+      // Process TPAG failures
+      if (shouldLoadTpagFailures) {
+        let tpagVendor = Array.isArray(allData[currentIndex]?.data) ? allData[currentIndex].data : [];
+        let tpagAccess = Array.isArray(allData[currentIndex + 1]?.data) ? allData[currentIndex + 1].data : [];
+
+        // Provide test data if backend has none (TPAG)
+        if ((!tpagVendor || tpagVendor.length === 0) && (!tpagAccess || tpagAccess.length === 0)) {
+          tpagVendor = [
+            { userId: "v12345", reason: "Vendor contract expired", application: "Vendor Portal", timestamp: mkTs(1) },
+            { email: "vendor@partner.com", reason: "Third-party access suspended", application: "B2B Gateway", timestamp: mkTs(3) },
+            { userId: "v67890", reason: "Vendor onboarding incomplete", application: "Supplier Hub", timestamp: mkTs(5) },
+          ];
+          tpagAccess = [
+            { userId: "v12345", error: "Access request denied - risk score too high", system: "saviynt-tpag-risk", timestamp: mkTs(2) },
+            { email: "contractor@external.com", error: "Lifecycle policy violation", system: "saviynt-tpag-lifecycle", timestamp: mkTs(4) },
+            { userId: "v99999", error: "Contract renewal required", system: "saviynt-tpag-contracts", timestamp: mkTs(7) },
+          ];
+        }
+        setFailTpagVendor(tpagVendor);
+        setFailTpagAccess(tpagAccess);
+      } else {
+        setFailTpagVendor([]);
+        setFailTpagAccess([]);
       }
 
       // Check if any responses failed
@@ -311,10 +357,12 @@ export function useOpsFeatures(
       setFailIgaProvisioning([]);
       setFailEntraAuth([]);
       setFailEntraAccess([]);
+      setFailTpagVendor([]);
+      setFailTpagAccess([]);
     } finally {
       setLoading(false);
     }
-  }, [isOps, token, minutes, shouldLoadSsoFailures, shouldLoadPamFailures, shouldLoadIgaFailures, shouldLoadEntraFailures]);
+  }, [isOps, token, minutes, shouldLoadSsoFailures, shouldLoadPamFailures, shouldLoadIgaFailures, shouldLoadEntraFailures, shouldLoadTpagFailures]);
 
   // Auto-load failures when ops role logs in
   useEffect(() => {
@@ -334,6 +382,8 @@ export function useOpsFeatures(
     setFailIgaProvisioning([]);
     setFailEntraAuth([]);
     setFailEntraAccess([]);
+    setFailTpagVendor([]);
+    setFailTpagAccess([]);
     setError(undefined);
   }, [role]);
 
@@ -349,6 +399,8 @@ export function useOpsFeatures(
     failIgaProvisioning,
     failEntraAuth,
     failEntraAccess,
+    failTpagVendor,
+    failTpagAccess,
     loading,
     error,
     qaEnabledTabs,

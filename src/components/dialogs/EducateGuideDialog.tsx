@@ -126,6 +126,30 @@ export function EducateGuideDialog({
         title: "Entra ID Sign-in Logs",
         summary: "",
       },
+      "saviynt-tpag": {
+        title: "TPAG Overview",
+        summary: "",
+      },
+      "saviynt-tpag-vendors": {
+        title: "TPAG Vendors",
+        summary: "",
+      },
+      "saviynt-tpag-contracts": {
+        title: "TPAG Contracts",
+        summary: "",
+      },
+      "saviynt-tpag-access": {
+        title: "TPAG Access",
+        summary: "",
+      },
+      "saviynt-tpag-risk": {
+        title: "TPAG Risk",
+        summary: "",
+      },
+      "saviynt-tpag-lifecycle": {
+        title: "TPAG Lifecycle",
+        summary: "",
+      },
     }),
     [email]
   );

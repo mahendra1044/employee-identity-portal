@@ -314,6 +314,84 @@ export function usePfOps() {
     await loadEndpoint("/api/aad/signin/failures", "Sign-in Logs — Failed Sign-ins");
   }, [loadEndpoint]);
 
+  // TPAG Overview endpoints
+  const loadTpagOverviewDashboard = useCallback(async () => {
+    await loadEndpoint("/api/tpag/overview/dashboard", "TPAG — Dashboard Overview");
+  }, [loadEndpoint]);
+
+  const loadTpagOverviewStats = useCallback(async () => {
+    await loadEndpoint("/api/tpag/overview/stats", "TPAG — Statistics");
+  }, [loadEndpoint]);
+
+  const loadTpagOverviewAlerts = useCallback(async () => {
+    await loadEndpoint("/api/tpag/overview/alerts", "TPAG — Active Alerts");
+  }, [loadEndpoint]);
+
+  // TPAG Vendors endpoints
+  const loadTpagVendorsAll = useCallback(async () => {
+    await loadEndpoint("/api/tpag/vendors/all", "TPAG Vendors — All Vendors");
+  }, [loadEndpoint]);
+
+  const loadTpagVendorsActive = useCallback(async () => {
+    await loadEndpoint("/api/tpag/vendors/active", "TPAG Vendors — Active Vendors");
+  }, [loadEndpoint]);
+
+  const loadTpagVendorsPending = useCallback(async () => {
+    await loadEndpoint("/api/tpag/vendors/pending", "TPAG Vendors — Pending Onboarding");
+  }, [loadEndpoint]);
+
+  // TPAG Contracts endpoints
+  const loadTpagContractsAll = useCallback(async () => {
+    await loadEndpoint("/api/tpag/contracts/all", "TPAG Contracts — All Contracts");
+  }, [loadEndpoint]);
+
+  const loadTpagContractsExpiring = useCallback(async () => {
+    await loadEndpoint("/api/tpag/contracts/expiring", "TPAG Contracts — Expiring Soon");
+  }, [loadEndpoint]);
+
+  const loadTpagContractsRenewal = useCallback(async () => {
+    await loadEndpoint("/api/tpag/contracts/renewal", "TPAG Contracts — Pending Renewal");
+  }, [loadEndpoint]);
+
+  // TPAG Access endpoints
+  const loadTpagAccessRequests = useCallback(async () => {
+    await loadEndpoint("/api/tpag/access/requests", "TPAG Access — Access Requests");
+  }, [loadEndpoint]);
+
+  const loadTpagAccessActive = useCallback(async () => {
+    await loadEndpoint("/api/tpag/access/active", "TPAG Access — Active Access");
+  }, [loadEndpoint]);
+
+  const loadTpagAccessRevoked = useCallback(async () => {
+    await loadEndpoint("/api/tpag/access/revoked", "TPAG Access — Revoked Access");
+  }, [loadEndpoint]);
+
+  // TPAG Risk endpoints
+  const loadTpagRiskAssessments = useCallback(async () => {
+    await loadEndpoint("/api/tpag/risk/assessments", "TPAG Risk — Risk Assessments");
+  }, [loadEndpoint]);
+
+  const loadTpagRiskHighRisk = useCallback(async () => {
+    await loadEndpoint("/api/tpag/risk/high-risk", "TPAG Risk — High Risk Vendors");
+  }, [loadEndpoint]);
+
+  const loadTpagRiskCompliance = useCallback(async () => {
+    await loadEndpoint("/api/tpag/risk/compliance", "TPAG Risk — Compliance Status");
+  }, [loadEndpoint]);
+
+  // TPAG Lifecycle endpoints
+  const loadTpagLifecycleOnboarding = useCallback(async () => {
+    await loadEndpoint("/api/tpag/lifecycle/onboarding", "TPAG Lifecycle — Onboarding");
+  }, [loadEndpoint]);
+
+  const loadTpagLifecycleOffboarding = useCallback(async () => {
+    await loadEndpoint("/api/tpag/lifecycle/offboarding", "TPAG Lifecycle — Offboarding");
+  }, [loadEndpoint]);
+
+  const loadTpagLifecycleReviews = useCallback(async () => {
+    await loadEndpoint("/api/tpag/lifecycle/reviews", "TPAG Lifecycle — Access Reviews");
+  }, [loadEndpoint]);
+
   return {
     pfOpsOpen,
     setPfOpsOpen,
@@ -395,6 +473,30 @@ export function usePfOps() {
     loadEntraSigninLogs,
     loadEntraSigninRisky,
     loadEntraSigninFailures,
+    // TPAG Overview
+    loadTpagOverviewDashboard,
+    loadTpagOverviewStats,
+    loadTpagOverviewAlerts,
+    // TPAG Vendors
+    loadTpagVendorsAll,
+    loadTpagVendorsActive,
+    loadTpagVendorsPending,
+    // TPAG Contracts
+    loadTpagContractsAll,
+    loadTpagContractsExpiring,
+    loadTpagContractsRenewal,
+    // TPAG Access
+    loadTpagAccessRequests,
+    loadTpagAccessActive,
+    loadTpagAccessRevoked,
+    // TPAG Risk
+    loadTpagRiskAssessments,
+    loadTpagRiskHighRisk,
+    loadTpagRiskCompliance,
+    // TPAG Lifecycle
+    loadTpagLifecycleOnboarding,
+    loadTpagLifecycleOffboarding,
+    loadTpagLifecycleReviews,
   };
 }
 

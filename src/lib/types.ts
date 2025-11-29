@@ -27,7 +27,13 @@ export type SystemKey =
   | "ping-mfa"
   | "ping-access"
   | "ping-authorize"
-  | "ping-intelligence";
+  | "ping-intelligence"
+  | "saviynt-tpag"
+  | "saviynt-tpag-vendors"
+  | "saviynt-tpag-contracts"
+  | "saviynt-tpag-access"
+  | "saviynt-tpag-risk"
+  | "saviynt-tpag-lifecycle";
 
 export type Features = {
   credentialSource: string;

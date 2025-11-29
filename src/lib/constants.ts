@@ -29,6 +29,12 @@ export const SYSTEMS: SystemKey[] = [
   "ping-access",
   "ping-authorize",
   "ping-intelligence",
+  "saviynt-tpag",
+  "saviynt-tpag-vendors",
+  "saviynt-tpag-contracts",
+  "saviynt-tpag-access",
+  "saviynt-tpag-risk",
+  "saviynt-tpag-lifecycle",
 ];
 
 export const SYSTEM_LABELS: Record<SystemKey, string> = {
@@ -56,6 +62,12 @@ export const SYSTEM_LABELS: Record<SystemKey, string> = {
   "ping-access": "Ping Access",
   "ping-authorize": "Ping Authorize",
   "ping-intelligence": "Ping Intelligence",
+  "saviynt-tpag": "TPAG Overview",
+  "saviynt-tpag-vendors": "TPAG Vendors",
+  "saviynt-tpag-contracts": "TPAG Contracts",
+  "saviynt-tpag-access": "TPAG Access",
+  "saviynt-tpag-risk": "TPAG Risk",
+  "saviynt-tpag-lifecycle": "TPAG Lifecycle",
 };
 
 export const ROLE_MAP: Record<string, string> = {
@@ -119,7 +131,12 @@ export const ENTRAID_SYSTEMS: SystemKey[] = [
 ];
 
 export const TPAG_SYSTEMS: SystemKey[] = [
-  // To be defined based on requirements
+  "saviynt-tpag",
+  "saviynt-tpag-vendors",
+  "saviynt-tpag-contracts",
+  "saviynt-tpag-access",
+  "saviynt-tpag-risk",
+  "saviynt-tpag-lifecycle",
 ];
 
 export const API_BASE = 

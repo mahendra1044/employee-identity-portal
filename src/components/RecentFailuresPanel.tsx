@@ -39,10 +39,13 @@ interface RecentFailuresPanelProps {
   // EntraAD failures (for entraid_ops)
   failEntraAuth?: FailureItem[];
   failEntraAccess?: FailureItem[];
+  // TPAG failures (for tpag_ops)
+  failTpagVendor?: FailureItem[];
+  failTpagAccess?: FailureItem[];
 }
 
 // Helper to render a failure item based on its type
-function renderFailureItem(it: FailureItem, type: 'sso' | 'pam' | 'iga' | 'entra') {
+function renderFailureItem(it: FailureItem, type: 'sso' | 'pam' | 'iga' | 'entra' | 'tpag') {
   const user = it.userId || it.email || "unknown";
   const reason = it.reason || it.error || "failure";
   const time = it.time || it.timestamp || "";
@@ -61,6 +64,11 @@ function renderFailureItem(it: FailureItem, type: 'sso' | 'pam' | 'iga' | 'entra
     const context = it.application ? ` [App: ${it.application}]` : it.system ? ` [${it.system}]` : '';
     return `${user} — ${reason}${context} — ${time}`;
   }
+
+  if (type === 'tpag') {
+    const context = it.application ? ` [Vendor: ${it.application}]` : it.system ? ` [${it.system}]` : '';
+    return `${user} — ${reason}${context} — ${time}`;
+  }
   
   return `${user} — ${reason} — ${time}`;
 }
@@ -76,6 +84,8 @@ function getPanelTitle(role: string | null | undefined, minutes: number): string
       return `IGA Recent Failures (last ${minutes} min)`;
     case 'entraid_ops':
       return `Entra ID Recent Failures (last ${minutes} min)`;
+    case 'tpag_ops':
+      return `TPAG Recent Failures (last ${minutes} min)`;
     default:
       return `Recent Failures (last ${minutes} min)`;
   }
@@ -96,16 +106,20 @@ export function RecentFailuresPanel({
   failIgaProvisioning = [],
   failEntraAuth = [],
   failEntraAccess = [],
+  failTpagVendor = [],
+  failTpagAccess = [],
 }: RecentFailuresPanelProps) {
   // Determine which failure panels to show based on role
   // SSO failures: shown for sso_ops and base ops roles
   // PAM failures: shown only for pam_ops role
   // IGA failures: shown only for iga_ops role
   // EntraAD failures: shown only for entraid_ops role
+  // TPAG failures: shown only for tpag_ops role
   const showSsoFailures = role === 'sso_ops' || role === 'ops';
   const showPamFailures = role === 'pam_ops';
   const showIgaFailures = role === 'iga_ops';
   const showEntraFailures = role === 'entraid_ops';
+  const showTpagFailures = role === 'tpag_ops';
 
   return (
     <section>
@@ -308,6 +322,53 @@ export function RecentFailuresPanel({
                       {failEntraAccess!.slice(0, 25).map((it: FailureItem, idx: number) => (
                         <li key={`entra-access-${idx}`}>
                           {renderFailureItem(it, 'entra')}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No failures in window</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* TPAG Failures Section (for tpag_ops) */}
+          {showTpagFailures && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">TPAG – Vendor Failures</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p className="text-sm animate-pulse">Loading...</p>
+                  ) : (failTpagVendor?.length || 0) > 0 ? (
+                    <ul className="text-sm list-disc pl-4 space-y-1">
+                      {failTpagVendor!.slice(0, 25).map((it: FailureItem, idx: number) => (
+                        <li key={`tpag-vendor-${idx}`}>
+                          {renderFailureItem(it, 'tpag')}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No failures in window</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">TPAG – Access Failures</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p className="text-sm animate-pulse">Loading...</p>
+                  ) : (failTpagAccess?.length || 0) > 0 ? (
+                    <ul className="text-sm list-disc pl-4 space-y-1">
+                      {failTpagAccess!.slice(0, 25).map((it: FailureItem, idx: number) => (
+                        <li key={`tpag-access-${idx}`}>
+                          {renderFailureItem(it, 'tpag')}
                         </li>
                       ))}
                     </ul>

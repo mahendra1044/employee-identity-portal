@@ -171,6 +171,30 @@ export default function HomePage() {
     loadEntraSigninLogs,
     loadEntraSigninRisky,
     loadEntraSigninFailures,
+    // TPAG Overview
+    loadTpagOverviewDashboard,
+    loadTpagOverviewStats,
+    loadTpagOverviewAlerts,
+    // TPAG Vendors
+    loadTpagVendorsAll,
+    loadTpagVendorsActive,
+    loadTpagVendorsPending,
+    // TPAG Contracts
+    loadTpagContractsAll,
+    loadTpagContractsExpiring,
+    loadTpagContractsRenewal,
+    // TPAG Access
+    loadTpagAccessRequests,
+    loadTpagAccessActive,
+    loadTpagAccessRevoked,
+    // TPAG Risk
+    loadTpagRiskAssessments,
+    loadTpagRiskHighRisk,
+    loadTpagRiskCompliance,
+    // TPAG Lifecycle
+    loadTpagLifecycleOnboarding,
+    loadTpagLifecycleOffboarding,
+    loadTpagLifecycleReviews,
   } = usePfOps();
 
   // Apply theme class to root element
@@ -221,6 +245,8 @@ export default function HomePage() {
     failIgaProvisioning,
     failEntraAuth,
     failEntraAccess,
+    failTpagVendor,
+    failTpagAccess,
     loading: opsLoading,
     error: opsError,
     loadFailures,
@@ -451,6 +477,30 @@ export default function HomePage() {
             onLoadEntraSigninLogs={loadEntraSigninLogs}
             onLoadEntraSigninRisky={loadEntraSigninRisky}
             onLoadEntraSigninFailures={loadEntraSigninFailures}
+            // TPAG Overview
+            onLoadTpagOverviewDashboard={loadTpagOverviewDashboard}
+            onLoadTpagOverviewStats={loadTpagOverviewStats}
+            onLoadTpagOverviewAlerts={loadTpagOverviewAlerts}
+            // TPAG Vendors
+            onLoadTpagVendorsAll={loadTpagVendorsAll}
+            onLoadTpagVendorsActive={loadTpagVendorsActive}
+            onLoadTpagVendorsPending={loadTpagVendorsPending}
+            // TPAG Contracts
+            onLoadTpagContractsAll={loadTpagContractsAll}
+            onLoadTpagContractsExpiring={loadTpagContractsExpiring}
+            onLoadTpagContractsRenewal={loadTpagContractsRenewal}
+            // TPAG Access
+            onLoadTpagAccessRequests={loadTpagAccessRequests}
+            onLoadTpagAccessActive={loadTpagAccessActive}
+            onLoadTpagAccessRevoked={loadTpagAccessRevoked}
+            // TPAG Risk
+            onLoadTpagRiskAssessments={loadTpagRiskAssessments}
+            onLoadTpagRiskHighRisk={loadTpagRiskHighRisk}
+            onLoadTpagRiskCompliance={loadTpagRiskCompliance}
+            // TPAG Lifecycle
+            onLoadTpagLifecycleOnboarding={loadTpagLifecycleOnboarding}
+            onLoadTpagLifecycleOffboarding={loadTpagLifecycleOffboarding}
+            onLoadTpagLifecycleReviews={loadTpagLifecycleReviews}
             splunkUrl={splunkUrl}
             cloudwatchUrl={cloudwatchUrl}
           />
@@ -473,6 +523,8 @@ export default function HomePage() {
             failIgaProvisioning={failIgaProvisioning}
             failEntraAuth={failEntraAuth}
             failEntraAccess={failEntraAccess}
+            failTpagVendor={failTpagVendor}
+            failTpagAccess={failTpagAccess}
           />
         )}
 

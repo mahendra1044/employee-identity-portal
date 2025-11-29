@@ -110,5 +110,47 @@
     "Review recent events; timeouts or denials suggest device sync problems.",
     "Check policy compliance; bypassed MFA may violate security requirements.",
     "Verify backup methods; without alternatives, lost devices block access entirely."
+  ],
+  "saviynt-tpag": [
+    "Review TPAG dashboard for overall third-party access governance health.",
+    "Monitor active alerts for vendor compliance and access violations.",
+    "Track statistics for vendor onboarding, offboarding, and access trends.",
+    "Use overview to identify high-risk vendors requiring immediate attention.",
+    "Check system status for integration health with external vendor systems."
+  ],
+  "saviynt-tpag-vendors": [
+    "Manage vendor relationships through centralized vendor management portal.",
+    "Review active vendors for current contract and compliance status.",
+    "Track pending onboarding requests for new vendor partnerships.",
+    "Monitor vendor risk scores and compliance certifications.",
+    "Verify vendor contact information and escalation paths are current."
+  ],
+  "saviynt-tpag-contracts": [
+    "Review all contracts for terms, conditions, and data handling requirements.",
+    "Monitor expiring contracts to ensure timely renewal or offboarding.",
+    "Track pending renewals to prevent service interruptions.",
+    "Verify contract compliance with security and privacy requirements.",
+    "Document contract amendments and track version history."
+  ],
+  "saviynt-tpag-access": [
+    "Review third-party access requests for appropriate entitlements.",
+    "Monitor active access grants for vendor users.",
+    "Track revoked access to ensure complete offboarding.",
+    "Verify just-in-time access grants are properly time-limited.",
+    "Audit access patterns for anomalies or policy violations."
+  ],
+  "saviynt-tpag-risk": [
+    "Conduct risk assessments for new and existing vendor relationships.",
+    "Monitor high-risk vendors for enhanced oversight requirements.",
+    "Track compliance status against security frameworks and regulations.",
+    "Review risk mitigation plans and remediation progress.",
+    "Document risk acceptance decisions with proper approvals."
+  ],
+  "saviynt-tpag-lifecycle": [
+    "Manage vendor onboarding workflows from initial request to access grant.",
+    "Track offboarding progress to ensure complete access termination.",
+    "Conduct periodic access reviews for all active vendor users.",
+    "Monitor lifecycle events for compliance and audit trail.",
+    "Verify attestation and certification requirements are met."
   ]
 }

@@ -134,6 +134,30 @@ interface QuickActionsCardProps {
   onLoadEntraSigninLogs: () => void;
   onLoadEntraSigninRisky: () => void;
   onLoadEntraSigninFailures: () => void;
+  // TPAG Overview
+  onLoadTpagOverviewDashboard: () => void;
+  onLoadTpagOverviewStats: () => void;
+  onLoadTpagOverviewAlerts: () => void;
+  // TPAG Vendors
+  onLoadTpagVendorsAll: () => void;
+  onLoadTpagVendorsActive: () => void;
+  onLoadTpagVendorsPending: () => void;
+  // TPAG Contracts
+  onLoadTpagContractsAll: () => void;
+  onLoadTpagContractsExpiring: () => void;
+  onLoadTpagContractsRenewal: () => void;
+  // TPAG Access
+  onLoadTpagAccessRequests: () => void;
+  onLoadTpagAccessActive: () => void;
+  onLoadTpagAccessRevoked: () => void;
+  // TPAG Risk
+  onLoadTpagRiskAssessments: () => void;
+  onLoadTpagRiskHighRisk: () => void;
+  onLoadTpagRiskCompliance: () => void;
+  // TPAG Lifecycle
+  onLoadTpagLifecycleOnboarding: () => void;
+  onLoadTpagLifecycleOffboarding: () => void;
+  onLoadTpagLifecycleReviews: () => void;
   splunkUrl: string;
   cloudwatchUrl: string;
 }
@@ -217,6 +241,30 @@ export function QuickActionsCard({
   onLoadEntraSigninLogs,
   onLoadEntraSigninRisky,
   onLoadEntraSigninFailures,
+  // TPAG Overview
+  onLoadTpagOverviewDashboard,
+  onLoadTpagOverviewStats,
+  onLoadTpagOverviewAlerts,
+  // TPAG Vendors
+  onLoadTpagVendorsAll,
+  onLoadTpagVendorsActive,
+  onLoadTpagVendorsPending,
+  // TPAG Contracts
+  onLoadTpagContractsAll,
+  onLoadTpagContractsExpiring,
+  onLoadTpagContractsRenewal,
+  // TPAG Access
+  onLoadTpagAccessRequests,
+  onLoadTpagAccessActive,
+  onLoadTpagAccessRevoked,
+  // TPAG Risk
+  onLoadTpagRiskAssessments,
+  onLoadTpagRiskHighRisk,
+  onLoadTpagRiskCompliance,
+  // TPAG Lifecycle
+  onLoadTpagLifecycleOnboarding,
+  onLoadTpagLifecycleOffboarding,
+  onLoadTpagLifecycleReviews,
   splunkUrl,
   cloudwatchUrl,
 }: QuickActionsCardProps) {
@@ -637,6 +685,114 @@ export function QuickActionsCard({
                 <Button size="sm" variant="secondary" onClick={onLoadEntraSigninFailures} title="Failures">
                   <XCircle className="h-4 w-4 mr-1" />
                   Failures
+                </Button>
+              </div>
+            )}
+
+            {/* TPAG Overview Tab */}
+            {qaActive === "saviynt-tpag" && qaEnabledTabs["saviynt-tpag"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadTpagOverviewDashboard} title="TPAG Dashboard">
+                  <BarChart2 className="h-4 w-4 mr-1" />
+                  Dashboard
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagOverviewStats} title="Statistics">
+                  <Activity className="h-4 w-4 mr-1" />
+                  Statistics
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagOverviewAlerts} title="Active Alerts">
+                  <AlertTriangle className="h-4 w-4 mr-1" />
+                  Alerts
+                </Button>
+              </div>
+            )}
+
+            {/* TPAG Vendors Tab */}
+            {qaActive === "saviynt-tpag-vendors" && qaEnabledTabs["saviynt-tpag-vendors"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadTpagVendorsAll} title="All Vendors">
+                  <Users className="h-4 w-4 mr-1" />
+                  All Vendors
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagVendorsActive} title="Active Vendors">
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Active
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagVendorsPending} title="Pending Onboarding">
+                  <Clock className="h-4 w-4 mr-1" />
+                  Pending
+                </Button>
+              </div>
+            )}
+
+            {/* TPAG Contracts Tab */}
+            {qaActive === "saviynt-tpag-contracts" && qaEnabledTabs["saviynt-tpag-contracts"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadTpagContractsAll} title="All Contracts">
+                  <ClipboardList className="h-4 w-4 mr-1" />
+                  All Contracts
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagContractsExpiring} title="Expiring Contracts">
+                  <AlertTriangle className="h-4 w-4 mr-1" />
+                  Expiring
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagContractsRenewal} title="Pending Renewal">
+                  <RotateCw className="h-4 w-4 mr-1" />
+                  Renewal
+                </Button>
+              </div>
+            )}
+
+            {/* TPAG Access Tab */}
+            {qaActive === "saviynt-tpag-access" && qaEnabledTabs["saviynt-tpag-access"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadTpagAccessRequests} title="Access Requests">
+                  <Send className="h-4 w-4 mr-1" />
+                  Requests
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagAccessActive} title="Active Access">
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Active
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagAccessRevoked} title="Revoked Access">
+                  <XCircle className="h-4 w-4 mr-1" />
+                  Revoked
+                </Button>
+              </div>
+            )}
+
+            {/* TPAG Risk Tab */}
+            {qaActive === "saviynt-tpag-risk" && qaEnabledTabs["saviynt-tpag-risk"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadTpagRiskAssessments} title="Risk Assessments">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Assessments
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagRiskHighRisk} title="High Risk Vendors">
+                  <AlertTriangle className="h-4 w-4 mr-1" />
+                  High Risk
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagRiskCompliance} title="Compliance Status">
+                  <Eye className="h-4 w-4 mr-1" />
+                  Compliance
+                </Button>
+              </div>
+            )}
+
+            {/* TPAG Lifecycle Tab */}
+            {qaActive === "saviynt-tpag-lifecycle" && qaEnabledTabs["saviynt-tpag-lifecycle"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadTpagLifecycleOnboarding} title="Onboarding">
+                  <User className="h-4 w-4 mr-1" />
+                  Onboarding
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagLifecycleOffboarding} title="Offboarding">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Offboarding
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadTpagLifecycleReviews} title="Access Reviews">
+                  <ListChecks className="h-4 w-4 mr-1" />
+                  Reviews
                 </Button>
               </div>
             )}

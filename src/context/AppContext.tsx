@@ -80,6 +80,12 @@ const initialState: AppState = {
     'saviynt-controls': true,
     'saviynt-requests': true,
     'saviynt-provisioning': true,
+    'saviynt-tpag': true,
+    'saviynt-tpag-vendors': true,
+    'saviynt-tpag-contracts': true,
+    'saviynt-tpag-access': true,
+    'saviynt-tpag-risk': true,
+    'saviynt-tpag-lifecycle': true,
   },
   ui: {
     currentRole: null,

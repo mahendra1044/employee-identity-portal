@@ -55,5 +55,13 @@
     "azure-ad-apps": { "own": true, "all": true, "search": true },
     "azure-ad-conditional": { "own": true, "all": true, "search": true },
     "azure-ad-signin": { "own": true, "all": true, "search": true }
+  },
+  "tpag_ops": {
+    "saviynt-tpag": { "own": true, "all": true, "search": true },
+    "saviynt-tpag-vendors": { "own": true, "all": true, "search": true },
+    "saviynt-tpag-contracts": { "own": true, "all": true, "search": true },
+    "saviynt-tpag-access": { "own": true, "all": true, "search": true },
+    "saviynt-tpag-risk": { "own": true, "all": true, "search": true },
+    "saviynt-tpag-lifecycle": { "own": true, "all": true, "search": true }
   }
 }
