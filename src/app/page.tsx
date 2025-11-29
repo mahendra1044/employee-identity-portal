@@ -131,6 +131,26 @@ export default function HomePage() {
     loadSaviynt,
     loadSaviynt_Roles,
     loadSaviynt_Entitlements,
+    // Saviynt Certifications
+    loadSaviyntCertificationsCampaigns,
+    loadSaviyntCertificationsPending,
+    loadSaviyntCertificationsHistory,
+    // Saviynt Analytics
+    loadSaviyntAnalyticsDashboard,
+    loadSaviyntAnalyticsRiskScores,
+    loadSaviyntAnalyticsAnomalies,
+    // Saviynt Controls
+    loadSaviyntControlsSod,
+    loadSaviyntControlsPolicies,
+    loadSaviyntControlsExceptions,
+    // Saviynt Requests
+    loadSaviyntRequestsPending,
+    loadSaviyntRequestsApproved,
+    loadSaviyntRequestsRejected,
+    // Saviynt Provisioning
+    loadSaviyntProvisioningTasks,
+    loadSaviyntProvisioningFailed,
+    loadSaviyntProvisioningQueue,
   } = usePfOps();
 
   // Apply theme class to root element
@@ -177,6 +197,8 @@ export default function HomePage() {
     failMfa,
     failPam,
     failVault,
+    failIgaAccess,
+    failIgaProvisioning,
     loading: opsLoading,
     error: opsError,
     loadFailures,
@@ -367,6 +389,26 @@ export default function HomePage() {
             onLoadSaviynt={loadSaviynt}
             onLoadSaviynt_Roles={loadSaviynt_Roles}
             onLoadSaviynt_Entitlements={loadSaviynt_Entitlements}
+            // Saviynt Certifications
+            onLoadSaviyntCertificationsCampaigns={loadSaviyntCertificationsCampaigns}
+            onLoadSaviyntCertificationsPending={loadSaviyntCertificationsPending}
+            onLoadSaviyntCertificationsHistory={loadSaviyntCertificationsHistory}
+            // Saviynt Analytics
+            onLoadSaviyntAnalyticsDashboard={loadSaviyntAnalyticsDashboard}
+            onLoadSaviyntAnalyticsRiskScores={loadSaviyntAnalyticsRiskScores}
+            onLoadSaviyntAnalyticsAnomalies={loadSaviyntAnalyticsAnomalies}
+            // Saviynt Controls
+            onLoadSaviyntControlsSod={loadSaviyntControlsSod}
+            onLoadSaviyntControlsPolicies={loadSaviyntControlsPolicies}
+            onLoadSaviyntControlsExceptions={loadSaviyntControlsExceptions}
+            // Saviynt Requests
+            onLoadSaviyntRequestsPending={loadSaviyntRequestsPending}
+            onLoadSaviyntRequestsApproved={loadSaviyntRequestsApproved}
+            onLoadSaviyntRequestsRejected={loadSaviyntRequestsRejected}
+            // Saviynt Provisioning
+            onLoadSaviyntProvisioningTasks={loadSaviyntProvisioningTasks}
+            onLoadSaviyntProvisioningFailed={loadSaviyntProvisioningFailed}
+            onLoadSaviyntProvisioningQueue={loadSaviyntProvisioningQueue}
             splunkUrl={splunkUrl}
             cloudwatchUrl={cloudwatchUrl}
           />
@@ -385,6 +427,8 @@ export default function HomePage() {
             failMfa={failMfa}
             failPam={failPam}
             failVault={failVault}
+            failIgaAccess={failIgaAccess}
+            failIgaProvisioning={failIgaProvisioning}
           />
         )}
 

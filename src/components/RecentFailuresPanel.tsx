@@ -15,6 +15,9 @@ interface FailureItem {
   safe?: string;
   account?: string;
   system?: string;
+  application?: string;
+  entitlement?: string;
+  certificationId?: string;
 }
 
 interface RecentFailuresPanelProps {
@@ -30,16 +33,24 @@ interface RecentFailuresPanelProps {
   // PAM failures (for pam_ops and general ops)
   failPam?: FailureItem[];
   failVault?: FailureItem[];
+  // IGA failures (for iga_ops and general ops)
+  failIgaAccess?: FailureItem[];
+  failIgaProvisioning?: FailureItem[];
 }
 
 // Helper to render a failure item based on its type
-function renderFailureItem(it: FailureItem, type: 'sso' | 'pam') {
+function renderFailureItem(it: FailureItem, type: 'sso' | 'pam' | 'iga') {
   const user = it.userId || it.email || "unknown";
   const reason = it.reason || it.error || "failure";
   const time = it.time || it.timestamp || "";
   
   if (type === 'pam') {
     const context = it.safe ? ` [Safe: ${it.safe}]` : it.account ? ` [Account: ${it.account}]` : it.system ? ` [${it.system}]` : '';
+    return `${user} — ${reason}${context} — ${time}`;
+  }
+  
+  if (type === 'iga') {
+    const context = it.application ? ` [App: ${it.application}]` : it.entitlement ? ` [Entitlement: ${it.entitlement}]` : it.system ? ` [${it.system}]` : '';
     return `${user} — ${reason}${context} — ${time}`;
   }
   
@@ -53,6 +64,8 @@ function getPanelTitle(role: string | null | undefined, minutes: number): string
       return `SSO Recent Failures (last ${minutes} min)`;
     case 'pam_ops':
       return `PAM Recent Failures (last ${minutes} min)`;
+    case 'iga_ops':
+      return `IGA Recent Failures (last ${minutes} min)`;
     default:
       return `Recent Failures (last ${minutes} min)`;
   }
@@ -69,10 +82,16 @@ export function RecentFailuresPanel({
   failMfa = [],
   failPam = [],
   failVault = [],
+  failIgaAccess = [],
+  failIgaProvisioning = [],
 }: RecentFailuresPanelProps) {
   // Determine which failure panels to show based on role
+  // SSO failures: shown for sso_ops and base ops roles
+  // PAM failures: shown only for pam_ops role
+  // IGA failures: shown only for iga_ops role
   const showSsoFailures = role === 'sso_ops' || role === 'ops';
-  const showPamFailures = role === 'pam_ops' || role === 'ops';
+  const showPamFailures = role === 'pam_ops';
+  const showIgaFailures = role === 'iga_ops';
 
   return (
     <section>
@@ -147,7 +166,7 @@ export function RecentFailuresPanel({
 
           {/* PAM Failures Section (for pam_ops and general ops) */}
           {showPamFailures && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">CyberArk PAM – Access Failures</CardTitle>
@@ -181,6 +200,53 @@ export function RecentFailuresPanel({
                       {failVault!.slice(0, 25).map((it: FailureItem, idx: number) => (
                         <li key={`vault-${idx}`}>
                           {renderFailureItem(it, 'pam')}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No failures in window</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* IGA Failures Section (for iga_ops and general ops) */}
+          {showIgaFailures && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Saviynt – Access Request Failures</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p className="text-sm animate-pulse">Loading...</p>
+                  ) : (failIgaAccess?.length || 0) > 0 ? (
+                    <ul className="text-sm list-disc pl-4 space-y-1">
+                      {failIgaAccess!.slice(0, 25).map((it: FailureItem, idx: number) => (
+                        <li key={`iga-access-${idx}`}>
+                          {renderFailureItem(it, 'iga')}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No failures in window</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Saviynt – Provisioning Failures</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p className="text-sm animate-pulse">Loading...</p>
+                  ) : (failIgaProvisioning?.length || 0) > 0 ? (
+                    <ul className="text-sm list-disc pl-4 space-y-1">
+                      {failIgaProvisioning!.slice(0, 25).map((it: FailureItem, idx: number) => (
+                        <li key={`iga-prov-${idx}`}>
+                          {renderFailureItem(it, 'iga')}
                         </li>
                       ))}
                     </ul>

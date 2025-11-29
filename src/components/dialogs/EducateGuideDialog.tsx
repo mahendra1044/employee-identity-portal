@@ -82,6 +82,26 @@ export function EducateGuideDialog({
         title: "Saviynt",
         summary: "",
       },
+      "saviynt-certifications": {
+        title: "Saviynt Certifications",
+        summary: "",
+      },
+      "saviynt-analytics": {
+        title: "Saviynt Analytics",
+        summary: "",
+      },
+      "saviynt-controls": {
+        title: "Saviynt Controls",
+        summary: "",
+      },
+      "saviynt-requests": {
+        title: "Saviynt Requests",
+        summary: "",
+      },
+      "saviynt-provisioning": {
+        title: "Saviynt Provisioning",
+        summary: "",
+      },
       "azure-ad": {
         title: "Azure AD",
         summary: "",

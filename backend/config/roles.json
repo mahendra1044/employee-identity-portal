@@ -22,5 +22,30 @@
     "saviynt": { "own": true, "all": true, "search": false },
     "azure-ad": { "own": true, "all": true, "search": false },
     "ping-mfa": { "own": true, "all": true, "search": true }
+  },
+  "sso_ops": {
+    "ping-directory": { "own": true, "all": true, "search": true },
+    "ping-federate": { "own": true, "all": true, "search": false },
+    "ping-mfa": { "own": true, "all": true, "search": true },
+    "ping-access": { "own": true, "all": true, "search": false },
+    "ping-authorize": { "own": true, "all": true, "search": false },
+    "ping-intelligence": { "own": true, "all": true, "search": false },
+    "azure-ad": { "own": true, "all": true, "search": false }
+  },
+  "pam_ops": {
+    "cyberark": { "own": true, "all": true, "search": false },
+    "cyberark-epm": { "own": true, "all": true, "search": false },
+    "cyberark-alero": { "own": true, "all": true, "search": false },
+    "cyberark-conjur": { "own": true, "all": true, "search": false },
+    "cyberark-dpa": { "own": true, "all": true, "search": false },
+    "cyberark-identity": { "own": true, "all": true, "search": false }
+  },
+  "iga_ops": {
+    "saviynt": { "own": true, "all": true, "search": false },
+    "saviynt-certifications": { "own": true, "all": true, "search": false },
+    "saviynt-analytics": { "own": true, "all": true, "search": false },
+    "saviynt-controls": { "own": true, "all": true, "search": false },
+    "saviynt-requests": { "own": true, "all": true, "search": false },
+    "saviynt-provisioning": { "own": true, "all": true, "search": false }
   }
 }

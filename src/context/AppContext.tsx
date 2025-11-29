@@ -70,6 +70,11 @@ const initialState: AppState = {
     'cyberark-dpa': true,
     'cyberark-identity': true,
     saviynt: true,
+    'saviynt-certifications': true,
+    'saviynt-analytics': true,
+    'saviynt-controls': true,
+    'saviynt-requests': true,
+    'saviynt-provisioning': true,
   },
   ui: {
     currentRole: null,

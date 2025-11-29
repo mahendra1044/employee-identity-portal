@@ -27,6 +27,41 @@
     "Check certification campaigns; failed certs may suspend entitlements.",
     "Review SOD (segregation of duties) violations; they flag risky role combinations."
   ],
+  "saviynt-certifications": [
+    "Review active certification campaigns; open campaigns require action by reviewers.",
+    "Check pending reviews; unaddressed items may auto-revoke access after deadline.",
+    "Verify campaign scope; incorrect filters exclude users or entitlements from review.",
+    "Monitor certification history; past failures indicate recurring access issues.",
+    "Validate escalation paths; misconfigured escalations delay certification completion."
+  ],
+  "saviynt-analytics": [
+    "Review risk scores; elevated scores indicate potential over-privileged users.",
+    "Check anomaly detection results; unusual patterns may indicate compromised accounts.",
+    "Monitor dashboard metrics; trending violations require immediate attention.",
+    "Verify analytics data freshness; stale data leads to inaccurate risk assessments.",
+    "Review usage patterns; deviations from baseline suggest policy violations."
+  ],
+  "saviynt-controls": [
+    "Review SoD violation reports; toxic combinations require mitigating controls.",
+    "Check policy configurations; overly permissive rules allow risky access patterns.",
+    "Validate exception approvals; expired exceptions may suddenly block access.",
+    "Monitor control effectiveness; low detection rates indicate policy gaps.",
+    "Review compensating controls; missing mitigations leave violations unaddressed."
+  ],
+  "saviynt-requests": [
+    "Track pending request status; stuck requests delay user access.",
+    "Review approval workflows; missing approvers cause request bottlenecks.",
+    "Check rejected requests; patterns indicate policy or eligibility issues.",
+    "Validate request forms; incomplete information causes processing delays.",
+    "Monitor request SLAs; breaches indicate workflow inefficiencies."
+  ],
+  "saviynt-provisioning": [
+    "Check task queue status; backed-up queues delay access provisioning.",
+    "Review failed tasks; connector errors prevent access from being granted.",
+    "Verify connector health; offline connectors block all provisioning operations.",
+    "Monitor retry attempts; repeated failures indicate systemic issues.",
+    "Check reconciliation status; sync issues create access discrepancies."
+  ],
   "azure-ad": [
     "Inspect group memberships; removal from groups blocks resource access.",
     "Review sign-in history; repeated failures indicate conditional access blocks.",

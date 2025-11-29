@@ -14,6 +14,11 @@ export const SYSTEMS: SystemKey[] = [
   "cyberark-dpa",
   "cyberark-identity",
   "saviynt",
+  "saviynt-certifications",
+  "saviynt-analytics",
+  "saviynt-controls",
+  "saviynt-requests",
+  "saviynt-provisioning",
   "azure-ad",
   "ping-mfa",
   "ping-access",
@@ -30,7 +35,12 @@ export const SYSTEM_LABELS: Record<SystemKey, string> = {
   "cyberark-conjur": "CyberArk Conjur",
   "cyberark-dpa": "CyberArk DPA",
   "cyberark-identity": "CyberArk Identity",
-  "saviynt": "Saviynt",
+  "saviynt": "Saviynt IGA",
+  "saviynt-certifications": "Saviynt Certifications",
+  "saviynt-analytics": "Saviynt Analytics",
+  "saviynt-controls": "Saviynt Controls",
+  "saviynt-requests": "Saviynt Requests",
+  "saviynt-provisioning": "Saviynt Provisioning",
   "azure-ad": "Azure AD",
   "ping-mfa": "Ping MFA",
   "ping-access": "Ping Access",
@@ -81,6 +91,11 @@ export const PAM_SYSTEMS: SystemKey[] = [
 
 export const IGA_SYSTEMS: SystemKey[] = [
   "saviynt",
+  "saviynt-certifications",
+  "saviynt-analytics",
+  "saviynt-controls",
+  "saviynt-requests",
+  "saviynt-provisioning",
 ];
 
 export const TPAG_SYSTEMS: SystemKey[] = [

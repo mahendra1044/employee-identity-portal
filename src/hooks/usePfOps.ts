@@ -171,15 +171,80 @@ export function usePfOps() {
 
   // Saviynt endpoints
   const loadSaviynt = useCallback(async () => {
-    await loadEndpoint("/api/saviynt/requests", "Saviynt — Requests");
+    await loadEndpoint("/api/saviynt/requests", "Saviynt IGA — Requests");
   }, [loadEndpoint]);
 
   const loadSaviynt_Roles = useCallback(async () => {
-    await loadEndpoint("/api/saviynt/roles", "Saviynt — Roles");
+    await loadEndpoint("/api/saviynt/roles", "Saviynt IGA — Roles");
   }, [loadEndpoint]);
 
   const loadSaviynt_Entitlements = useCallback(async () => {
-    await loadEndpoint("/api/saviynt/entitlements", "Saviynt — Entitlements");
+    await loadEndpoint("/api/saviynt/entitlements", "Saviynt IGA — Entitlements");
+  }, [loadEndpoint]);
+
+  // Saviynt Certifications endpoints
+  const loadSaviyntCertificationsCampaigns = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-certifications/campaigns", "Saviynt Certifications — Campaigns");
+  }, [loadEndpoint]);
+
+  const loadSaviyntCertificationsPending = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-certifications/pending", "Saviynt Certifications — Pending Reviews");
+  }, [loadEndpoint]);
+
+  const loadSaviyntCertificationsHistory = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-certifications/history", "Saviynt Certifications — History");
+  }, [loadEndpoint]);
+
+  // Saviynt Analytics endpoints
+  const loadSaviyntAnalyticsDashboard = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-analytics/dashboard", "Saviynt Analytics — Dashboard");
+  }, [loadEndpoint]);
+
+  const loadSaviyntAnalyticsRiskScores = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-analytics/risk-scores", "Saviynt Analytics — Risk Scores");
+  }, [loadEndpoint]);
+
+  const loadSaviyntAnalyticsAnomalies = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-analytics/anomalies", "Saviynt Analytics — Anomalies");
+  }, [loadEndpoint]);
+
+  // Saviynt Controls endpoints
+  const loadSaviyntControlsSod = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-controls/sod", "Saviynt Controls — SoD Violations");
+  }, [loadEndpoint]);
+
+  const loadSaviyntControlsPolicies = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-controls/policies", "Saviynt Controls — Policies");
+  }, [loadEndpoint]);
+
+  const loadSaviyntControlsExceptions = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-controls/exceptions", "Saviynt Controls — Exceptions");
+  }, [loadEndpoint]);
+
+  // Saviynt Requests endpoints
+  const loadSaviyntRequestsPending = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-requests/pending", "Saviynt Requests — Pending");
+  }, [loadEndpoint]);
+
+  const loadSaviyntRequestsApproved = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-requests/approved", "Saviynt Requests — Approved");
+  }, [loadEndpoint]);
+
+  const loadSaviyntRequestsRejected = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-requests/rejected", "Saviynt Requests — Rejected");
+  }, [loadEndpoint]);
+
+  // Saviynt Provisioning endpoints
+  const loadSaviyntProvisioningTasks = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-provisioning/tasks", "Saviynt Provisioning — Tasks");
+  }, [loadEndpoint]);
+
+  const loadSaviyntProvisioningFailed = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-provisioning/failed", "Saviynt Provisioning — Failed");
+  }, [loadEndpoint]);
+
+  const loadSaviyntProvisioningQueue = useCallback(async () => {
+    await loadEndpoint("/api/saviynt-provisioning/queue", "Saviynt Provisioning — Queue");
   }, [loadEndpoint]);
 
   return {
@@ -223,6 +288,26 @@ export function usePfOps() {
     loadSaviynt,
     loadSaviynt_Roles,
     loadSaviynt_Entitlements,
+    // Saviynt Certifications
+    loadSaviyntCertificationsCampaigns,
+    loadSaviyntCertificationsPending,
+    loadSaviyntCertificationsHistory,
+    // Saviynt Analytics
+    loadSaviyntAnalyticsDashboard,
+    loadSaviyntAnalyticsRiskScores,
+    loadSaviyntAnalyticsAnomalies,
+    // Saviynt Controls
+    loadSaviyntControlsSod,
+    loadSaviyntControlsPolicies,
+    loadSaviyntControlsExceptions,
+    // Saviynt Requests
+    loadSaviyntRequestsPending,
+    loadSaviyntRequestsApproved,
+    loadSaviyntRequestsRejected,
+    // Saviynt Provisioning
+    loadSaviyntProvisioningTasks,
+    loadSaviyntProvisioningFailed,
+    loadSaviyntProvisioningQueue,
   };
 }
 

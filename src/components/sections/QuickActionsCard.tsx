@@ -40,6 +40,17 @@ import {
   AlertTriangle,
   Server,
   FileKey,
+  ClipboardList,
+  Clock,
+  BarChart2,
+  Eye,
+  Layers,
+  XCircle,
+  ThumbsUp,
+  ThumbsDown,
+  ListChecks,
+  ListX,
+  ListOrdered,
 } from "lucide-react";
 import type { SystemKey } from "@/lib/types";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
@@ -83,6 +94,26 @@ interface QuickActionsCardProps {
   onLoadSaviynt: () => void;
   onLoadSaviynt_Roles: () => void;
   onLoadSaviynt_Entitlements: () => void;
+  // Saviynt Certifications
+  onLoadSaviyntCertificationsCampaigns: () => void;
+  onLoadSaviyntCertificationsPending: () => void;
+  onLoadSaviyntCertificationsHistory: () => void;
+  // Saviynt Analytics
+  onLoadSaviyntAnalyticsDashboard: () => void;
+  onLoadSaviyntAnalyticsRiskScores: () => void;
+  onLoadSaviyntAnalyticsAnomalies: () => void;
+  // Saviynt Controls
+  onLoadSaviyntControlsSod: () => void;
+  onLoadSaviyntControlsPolicies: () => void;
+  onLoadSaviyntControlsExceptions: () => void;
+  // Saviynt Requests
+  onLoadSaviyntRequestsPending: () => void;
+  onLoadSaviyntRequestsApproved: () => void;
+  onLoadSaviyntRequestsRejected: () => void;
+  // Saviynt Provisioning
+  onLoadSaviyntProvisioningTasks: () => void;
+  onLoadSaviyntProvisioningFailed: () => void;
+  onLoadSaviyntProvisioningQueue: () => void;
   splunkUrl: string;
   cloudwatchUrl: string;
 }
@@ -126,6 +157,26 @@ export function QuickActionsCard({
   onLoadSaviynt,
   onLoadSaviynt_Roles,
   onLoadSaviynt_Entitlements,
+  // Saviynt Certifications
+  onLoadSaviyntCertificationsCampaigns,
+  onLoadSaviyntCertificationsPending,
+  onLoadSaviyntCertificationsHistory,
+  // Saviynt Analytics
+  onLoadSaviyntAnalyticsDashboard,
+  onLoadSaviyntAnalyticsRiskScores,
+  onLoadSaviyntAnalyticsAnomalies,
+  // Saviynt Controls
+  onLoadSaviyntControlsSod,
+  onLoadSaviyntControlsPolicies,
+  onLoadSaviyntControlsExceptions,
+  // Saviynt Requests
+  onLoadSaviyntRequestsPending,
+  onLoadSaviyntRequestsApproved,
+  onLoadSaviyntRequestsRejected,
+  // Saviynt Provisioning
+  onLoadSaviyntProvisioningTasks,
+  onLoadSaviyntProvisioningFailed,
+  onLoadSaviyntProvisioningQueue,
   splunkUrl,
   cloudwatchUrl,
 }: QuickActionsCardProps) {
@@ -358,6 +409,91 @@ export function QuickActionsCard({
                 <Button size="sm" variant="secondary" onClick={onLoadSaviynt} title="Requests">
                   <Send className="h-4 w-4 mr-1" />
                   Requests
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "saviynt-certifications" && qaEnabledTabs["saviynt-certifications"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntCertificationsCampaigns} title="Campaigns">
+                  <ClipboardList className="h-4 w-4 mr-1" />
+                  Campaigns
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntCertificationsPending} title="Pending Reviews">
+                  <Clock className="h-4 w-4 mr-1" />
+                  Pending
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntCertificationsHistory} title="History">
+                  <History className="h-4 w-4 mr-1" />
+                  History
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "saviynt-analytics" && qaEnabledTabs["saviynt-analytics"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntAnalyticsDashboard} title="Dashboard">
+                  <BarChart2 className="h-4 w-4 mr-1" />
+                  Dashboard
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntAnalyticsRiskScores} title="Risk Scores">
+                  <AlertTriangle className="h-4 w-4 mr-1" />
+                  Risk Scores
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntAnalyticsAnomalies} title="Anomalies">
+                  <Eye className="h-4 w-4 mr-1" />
+                  Anomalies
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "saviynt-controls" && qaEnabledTabs["saviynt-controls"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntControlsSod} title="SoD Violations">
+                  <Layers className="h-4 w-4 mr-1" />
+                  SoD Violations
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntControlsPolicies} title="Policies">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Policies
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntControlsExceptions} title="Exceptions">
+                  <XCircle className="h-4 w-4 mr-1" />
+                  Exceptions
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "saviynt-requests" && qaEnabledTabs["saviynt-requests"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntRequestsPending} title="Pending Requests">
+                  <Clock className="h-4 w-4 mr-1" />
+                  Pending
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntRequestsApproved} title="Approved Requests">
+                  <ThumbsUp className="h-4 w-4 mr-1" />
+                  Approved
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntRequestsRejected} title="Rejected Requests">
+                  <ThumbsDown className="h-4 w-4 mr-1" />
+                  Rejected
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "saviynt-provisioning" && qaEnabledTabs["saviynt-provisioning"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntProvisioningTasks} title="Tasks">
+                  <ListChecks className="h-4 w-4 mr-1" />
+                  Tasks
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntProvisioningFailed} title="Failed">
+                  <ListX className="h-4 w-4 mr-1" />
+                  Failed
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadSaviyntProvisioningQueue} title="Queue">
+                  <ListOrdered className="h-4 w-4 mr-1" />
+                  Queue
                 </Button>
               </div>
             )}

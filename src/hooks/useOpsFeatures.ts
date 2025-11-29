@@ -5,6 +5,7 @@
  * - Recent failures loading from systems based on role:
  *   - SSO Ops (sso_ops): ping-federate and ping-mfa failures
  *   - PAM Ops (pam_ops): cyberark-pam and cyberark-vault failures
+ *   - IGA Ops (iga_ops): saviynt access and provisioning failures
  *   - General Ops (ops): All failures
  * - Time range filtering for failure analysis (default: 10 minutes)
  * - Quick action tabs configuration and state
@@ -22,6 +23,8 @@
  * const { failFed, failMfa, ... } = useOpsFeatures(role, token, features, enabled);
  * // For PAM Ops
  * const { failPam, failVault, ... } = useOpsFeatures(role, token, features, enabled);
+ * // For IGA Ops
+ * const { failIgaAccess, failIgaProvisioning, ... } = useOpsFeatures(role, token, features, enabled);
  */
 
 "use client";
@@ -41,6 +44,9 @@ interface FailureData {
   system?: string;
   safe?: string;
   account?: string;
+  application?: string;
+  entitlement?: string;
+  certificationId?: string;
 }
 
 interface UseOpsFeuresResult {
@@ -53,6 +59,9 @@ interface UseOpsFeuresResult {
   // PAM failures (for pam_ops and general ops)
   failPam: FailureData[];
   failVault: FailureData[];
+  // IGA failures (for iga_ops and general ops)
+  failIgaAccess: FailureData[];
+  failIgaProvisioning: FailureData[];
   loading: boolean;
   error: string | undefined;
   qaEnabledTabs: Record<SystemKey, boolean>;
@@ -82,6 +91,9 @@ export function useOpsFeatures(
   // PAM failure states
   const [failPam, setFailPam] = useState<FailureData[]>([]);
   const [failVault, setFailVault] = useState<FailureData[]>([]);
+  // IGA failure states
+  const [failIgaAccess, setFailIgaAccess] = useState<FailureData[]>([]);
+  const [failIgaProvisioning, setFailIgaProvisioning] = useState<FailureData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -92,8 +104,12 @@ export function useOpsFeatures(
   }), [enabled, features]);
 
   // Determine which failure types to load based on role
+  // SSO failures: shown for sso_ops and base ops roles
+  // PAM failures: shown only for pam_ops role
+  // IGA failures: shown only for iga_ops role
   const shouldLoadSsoFailures = role === 'sso_ops' || role === 'ops';
-  const shouldLoadPamFailures = role === 'pam_ops' || role === 'ops';
+  const shouldLoadPamFailures = role === 'pam_ops';
+  const shouldLoadIgaFailures = role === 'iga_ops';
 
   // Load recent failures for ops role (role-aware)
   const loadFailures = useCallback(async () => {
@@ -137,14 +153,30 @@ export function useOpsFeatures(
         fetchLabels.push('pam', 'vault');
       }
 
+      // IGA failures (for iga_ops or general ops)
+      if (shouldLoadIgaFailures) {
+        fetchPromises.push(
+          fetch(`${API_BASE}/api/ops-failures?system=saviynt-access&minutes=${minutes}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${API_BASE}/api/ops-failures?system=saviynt-provisioning&minutes=${minutes}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        );
+        fetchLabels.push('iga-access', 'iga-provisioning');
+      }
+
       const responses = await Promise.all(fetchPromises);
       const dataPromises = responses.map(r => r.json().catch(() => ({ data: [] })));
       const allData = await Promise.all(dataPromises);
 
+      // Calculate indices based on which failures are being loaded
+      let currentIndex = 0;
+
       // Process SSO failures
       if (shouldLoadSsoFailures) {
-        let fed = Array.isArray(allData[0]?.data) ? allData[0].data : [];
-        let mfa = Array.isArray(allData[1]?.data) ? allData[1].data : [];
+        let fed = Array.isArray(allData[currentIndex]?.data) ? allData[currentIndex].data : [];
+        let mfa = Array.isArray(allData[currentIndex + 1]?.data) ? allData[currentIndex + 1].data : [];
 
         // Provide test data if backend has none (SSO)
         if ((!fed || fed.length === 0) && (!mfa || mfa.length === 0)) {
@@ -160,6 +192,7 @@ export function useOpsFeatures(
         }
         setFailFed(fed);
         setFailMfa(mfa);
+        currentIndex += 2;
       } else {
         setFailFed([]);
         setFailMfa([]);
@@ -167,11 +200,8 @@ export function useOpsFeatures(
 
       // Process PAM failures
       if (shouldLoadPamFailures) {
-        const pamIndex = shouldLoadSsoFailures ? 2 : 0;
-        const vaultIndex = shouldLoadSsoFailures ? 3 : 1;
-        
-        let pam = Array.isArray(allData[pamIndex]?.data) ? allData[pamIndex].data : [];
-        let vault = Array.isArray(allData[vaultIndex]?.data) ? allData[vaultIndex].data : [];
+        let pam = Array.isArray(allData[currentIndex]?.data) ? allData[currentIndex].data : [];
+        let vault = Array.isArray(allData[currentIndex + 1]?.data) ? allData[currentIndex + 1].data : [];
 
         // Provide test data if backend has none (PAM)
         if ((!pam || pam.length === 0) && (!vault || vault.length === 0)) {
@@ -188,9 +218,35 @@ export function useOpsFeatures(
         }
         setFailPam(pam);
         setFailVault(vault);
+        currentIndex += 2;
       } else {
         setFailPam([]);
         setFailVault([]);
+      }
+
+      // Process IGA failures
+      if (shouldLoadIgaFailures) {
+        let igaAccess = Array.isArray(allData[currentIndex]?.data) ? allData[currentIndex].data : [];
+        let igaProvisioning = Array.isArray(allData[currentIndex + 1]?.data) ? allData[currentIndex + 1].data : [];
+
+        // Provide test data if backend has none (IGA)
+        if ((!igaAccess || igaAccess.length === 0) && (!igaProvisioning || igaProvisioning.length === 0)) {
+          igaAccess = [
+            { userId: "u12345", reason: "Access certification expired", application: "SAP-PROD", timestamp: mkTs(1) },
+            { email: "manager@company.com", reason: "Entitlement request denied", entitlement: "ADMIN_ROLE", timestamp: mkTs(3) },
+            { userId: "u67890", reason: "Role assignment failed", application: "Salesforce", timestamp: mkTs(5) },
+          ];
+          igaProvisioning = [
+            { userId: "u12345", error: "Provisioning timeout", application: "ServiceNow", timestamp: mkTs(2) },
+            { email: "newuser@company.com", error: "Account creation failed", system: "saviynt-provisioning", timestamp: mkTs(4) },
+            { userId: "u99999", error: "Deprovisioning incomplete", application: "Workday", timestamp: mkTs(7) },
+          ];
+        }
+        setFailIgaAccess(igaAccess);
+        setFailIgaProvisioning(igaProvisioning);
+      } else {
+        setFailIgaAccess([]);
+        setFailIgaProvisioning([]);
       }
 
       // Check if any responses failed
@@ -204,10 +260,12 @@ export function useOpsFeatures(
       setFailMfa([]);
       setFailPam([]);
       setFailVault([]);
+      setFailIgaAccess([]);
+      setFailIgaProvisioning([]);
     } finally {
       setLoading(false);
     }
-  }, [isOps, token, minutes, shouldLoadSsoFailures, shouldLoadPamFailures]);
+  }, [isOps, token, minutes, shouldLoadSsoFailures, shouldLoadPamFailures, shouldLoadIgaFailures]);
 
   // Auto-load failures when ops role logs in
   useEffect(() => {
@@ -215,6 +273,18 @@ export function useOpsFeatures(
       loadFailures();
     }
   }, [isOps, loadFailures]);
+
+  // Clear failure states when role changes to prevent stale data
+  useEffect(() => {
+    // Reset all failure states when role changes
+    setFailFed([]);
+    setFailMfa([]);
+    setFailPam([]);
+    setFailVault([]);
+    setFailIgaAccess([]);
+    setFailIgaProvisioning([]);
+    setError(undefined);
+  }, [role]);
 
   return {
     isOps,
@@ -224,6 +294,8 @@ export function useOpsFeatures(
     failMfa,
     failPam,
     failVault,
+    failIgaAccess,
+    failIgaProvisioning,
     loading,
     error,
     qaEnabledTabs,

@@ -8,7 +8,6 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.config({
     extends: ['next'],
-    plugins: ['import'],
   }),
   {
     ignores: ['src/visual-edits/**'],
@@ -20,16 +19,6 @@ const eslintConfig = [
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       'react-hooks/exhaustive-deps': 'off',
-      'import/no-unresolved': 'off',
-      'import/named': 'off',
-      'import/default': 'off',
-      'import/namespace': 'off',
-      'import/no-absolute-path': 'error',
-      'import/no-dynamic-require': 'error',
-      'import/no-self-import': 'error',
-      'import/no-cycle': 'off',
-      'import/no-useless-path-segments': 'error',
-      'import/no-anonymous-default-export': 'off',
     },
   },
 ]

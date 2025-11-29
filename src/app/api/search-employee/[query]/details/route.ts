@@ -18,6 +18,9 @@ const SYSTEM_DETAILS_FILES: Record<string, string> = {
   'ping-intelligence': 'ping-intelligence-search.json',
 };
 
+// Saviynt sub-systems that use saviynt-details.json with computed data
+const SAVIYNT_SUB_SYSTEMS = ['saviynt', 'saviynt-certifications', 'saviynt-analytics', 'saviynt-controls', 'saviynt-requests', 'saviynt-provisioning'];
+
 // Generate detailed CyberArk mock data for all 6 systems
 function generateCyberArkDetailsData(system: string, userId: string, email: string) {
   const failureUsers = ['u1003', 'u1007', 'u1012', 'u1018'];
@@ -208,6 +211,129 @@ function generateCyberArkDetailsData(system: string, userId: string, email: stri
   return dataGenerators[system] || null;
 }
 
+// Generate Saviynt sub-system mock data
+function generateSaviyntSubSystemData(system: string, userId: string, baseData: any) {
+  const failureUsers = ['u1003', 'u1007', 'u1012', 'u1018'];
+  const hasFailure = failureUsers.includes(userId);
+
+  // For base saviynt system, return as-is
+  if (system === 'saviynt') {
+    return baseData;
+  }
+
+  // Extract relevant data based on sub-system
+  const dataGenerators: Record<string, any> = {
+    'saviynt-certifications': hasFailure ? {
+      userId,
+      error: 'Certification access denied',
+      status: 'failed',
+      message: 'User does not have access to certification campaigns',
+    } : {
+      userId,
+      displayName: baseData.displayName,
+      certifications: baseData.certifications || [],
+      activeCampaigns: Math.floor(Math.random() * 3) + 1,
+      completedCertifications: Math.floor(Math.random() * 10) + 5,
+      pendingReviews: Math.floor(Math.random() * 5),
+      complianceStatus: 'compliant',
+      lastCertificationDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      upcomingDeadlines: [
+        { campaign: 'Q2 Access Review', dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), itemsToReview: Math.floor(Math.random() * 10) + 5 },
+        { campaign: 'Privileged Access Certification', dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), itemsToReview: Math.floor(Math.random() * 5) + 2 },
+      ],
+    },
+    'saviynt-analytics': hasFailure ? {
+      userId,
+      error: 'Analytics unavailable',
+      status: 'failed',
+      message: 'User analytics data not found',
+    } : {
+      userId,
+      displayName: baseData.displayName,
+      analytics: baseData.analytics || {},
+      risk: baseData.risk || {},
+      riskTrend: ['stable', 'increasing', 'decreasing'][Math.floor(Math.random() * 3)],
+      peerGroupComparison: {
+        avgRiskScore: 35,
+        userRiskScore: baseData.risk?.score || 30,
+        percentile: Math.floor(Math.random() * 40) + 30,
+      },
+      anomalyDetection: {
+        recentAnomalies: Math.floor(Math.random() * 3),
+        lastAnomaly: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+        anomalyTypes: ['Unusual access time', 'New application access', 'Geographic anomaly'].slice(0, Math.floor(Math.random() * 3) + 1),
+      },
+      accessPatterns: {
+        mostAccessedApps: ['SAP', 'ServiceNow', 'Workday', 'Salesforce'].slice(0, Math.floor(Math.random() * 3) + 2),
+        peakAccessHours: '9 AM - 11 AM',
+        averageSessionDuration: '45 minutes',
+      },
+    },
+    'saviynt-controls': hasFailure ? {
+      userId,
+      error: 'Controls data unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve SOD and policy data',
+    } : {
+      userId,
+      displayName: baseData.displayName,
+      controls: baseData.controls || {},
+      sodViolations: baseData.controls?.sodViolations || [],
+      policyExceptions: baseData.controls?.policyExceptions || [],
+      mitigatingControls: baseData.controls?.mitigatingControls || [],
+      riskRating: ['low', 'medium', 'high'][Math.floor(Math.random() * 2)],
+      lastReviewDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      controlEffectiveness: Math.floor(Math.random() * 20) + 80,
+      complianceFrameworks: ['SOX', 'GDPR', 'HIPAA'].slice(0, Math.floor(Math.random() * 2) + 1),
+    },
+    'saviynt-requests': hasFailure ? {
+      userId,
+      error: 'Request history unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve access request history',
+    } : {
+      userId,
+      displayName: baseData.displayName,
+      pendingRequests: Math.floor(Math.random() * 3),
+      approvedRequests: Math.floor(Math.random() * 20) + 10,
+      deniedRequests: Math.floor(Math.random() * 5),
+      recentRequests: [
+        { requestId: `REQ-${Math.floor(Math.random() * 10000)}`, type: 'Application Access', application: 'SAP HR', status: 'approved', requestDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+        { requestId: `REQ-${Math.floor(Math.random() * 10000)}`, type: 'Role Assignment', role: 'Finance Analyst', status: 'pending', requestDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
+        { requestId: `REQ-${Math.floor(Math.random() * 10000)}`, type: 'Entitlement', entitlement: 'DB Admin', status: 'denied', requestDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      averageApprovalTime: '4 hours',
+      selfServiceEnabled: true,
+    },
+    'saviynt-provisioning': hasFailure ? {
+      userId,
+      error: 'Provisioning data unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve provisioning status',
+    } : {
+      userId,
+      displayName: baseData.displayName,
+      provisioning: baseData.provisioning || {},
+      provisionedApplications: Math.floor(Math.random() * 15) + 10,
+      pendingProvisioningTasks: baseData.provisioning?.pendingTasks || Math.floor(Math.random() * 3),
+      lastProvisioningAction: baseData.provisioning?.lastProvisioned || new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+      provisioningStatus: baseData.provisioning?.status || 'complete',
+      recentProvisioningActions: [
+        { action: 'Account Created', target: 'ServiceNow', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), status: 'success' },
+        { action: 'Role Assigned', target: 'SAP', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), status: 'success' },
+        { action: 'Access Revoked', target: 'Legacy HR System', timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), status: 'success' },
+      ],
+      connectorHealth: {
+        activeConnectors: Math.floor(Math.random() * 10) + 15,
+        failedConnectors: 0,
+        lastHealthCheck: new Date().toISOString(),
+      },
+    },
+  };
+
+  return dataGenerators[system] || null;
+}
+
 // Load system details data
 function loadSystemDetails(system: string) {
   try {
@@ -279,6 +405,41 @@ export async function GET(
       return NextResponse.json({ error: `System ${system} not found` }, { status: 404 });
     }
 
+    return NextResponse.json({ data: detailsData });
+  }
+
+  // Check if it's a Saviynt sub-system - generate data dynamically
+  if (SAVIYNT_SUB_SYSTEMS.includes(system)) {
+    // Load base Saviynt data
+    const saviyntPath = join(process.cwd(), 'backend/mocks/saviynt-details.json');
+    let saviyntData;
+    try {
+      saviyntData = JSON.parse(readFileSync(saviyntPath, 'utf-8'));
+    } catch (error) {
+      console.error('❌ Error loading saviynt-details.json:', error);
+      return NextResponse.json({ error: 'Saviynt data not available' }, { status: 500 });
+    }
+
+    const userData = saviyntData[query];
+    if (!userData) {
+      console.log(`⚠️ User ${query} not found in saviynt details`);
+      return NextResponse.json({ error: `User ${query} not found in Saviynt` }, { status: 404 });
+    }
+
+    // For base saviynt system, return the data directly
+    if (system === 'saviynt') {
+      console.log(`✅ Found Saviynt details for ${query}`);
+      return NextResponse.json({ data: userData });
+    }
+
+    // For sub-systems, generate specific data
+    const detailsData = generateSaviyntSubSystemData(system, query, userData);
+    
+    if (!detailsData) {
+      return NextResponse.json({ error: `System ${system} not found` }, { status: 404 });
+    }
+
+    console.log(`✅ Generated ${system} details for ${query}`);
     return NextResponse.json({ data: detailsData });
   }
 

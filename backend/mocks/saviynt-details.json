@@ -26,7 +26,22 @@
     "history": [
       { "ts": "2025-07-14T09:20:00Z", "action": "RoleGranted", "detail": "Engineer" },
       { "ts": "2025-06-01T10:12:00Z", "action": "EntitlementGranted", "detail": "Github-Read" }
-    ]
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2024-01-12T10:00:00Z",
+      "status": "Active"
+    }
   },
   "u1002": {
     "accountId": "svy-acc-1002",
@@ -55,7 +70,108 @@
     "accessRequestsOpen": 0,
     "history": [
       { "ts": "2025-07-20T11:00:00Z", "action": "EntitlementGranted", "detail": "SF-Manager" }
-    ]
+    ],
+    "analytics": {
+      "riskTrend": "decreasing",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 1,
+      "mitigatingControls": ["Manager approval required for privileged access"]
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2022-05-10T09:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1003": {
+    "accountId": "svy-acc-1003",
+    "user": "charlie.kim",
+    "displayName": "Charlie Kim",
+    "department": "IT",
+    "manager": "IT Director",
+    "roles": [
+      { "name": "Support Engineer", "grantedOn": "2024-02-15", "owner": "it-director", "certified": true },
+      { "name": "VPN User", "grantedOn": "2024-02-15", "owner": "net-ops", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "ServiceNow", "name": "ServiceNow-Agent", "grantedOn": "2024-02-15" },
+      { "application": "Jira", "name": "Jira-User", "grantedOn": "2024-02-20" }
+    ],
+    "risk": {
+      "score": 6,
+      "factors": ["Helpdesk access"],
+      "lastCalculated": "2025-08-28T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-28",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-02" }
+    ],
+    "accessRequestsOpen": 1,
+    "history": [
+      { "ts": "2025-08-01T14:00:00Z", "action": "AccessRequested", "detail": "ServiceNow-Admin" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 1,
+      "lastProvisioned": "2024-02-15T11:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1004": {
+    "accountId": "svy-acc-1004",
+    "user": "dana.lee",
+    "displayName": "Dana Lee",
+    "department": "Finance",
+    "manager": "CFO",
+    "roles": [
+      { "name": "Financial Analyst", "grantedOn": "2023-06-01", "owner": "cfo", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "SAP", "name": "SAP-Finance", "grantedOn": "2023-06-01" },
+      { "application": "Workday", "name": "Workday-Finance", "grantedOn": "2023-06-05" },
+      { "application": "Tableau", "name": "Tableau-User", "grantedOn": "2023-07-10" }
+    ],
+    "risk": {
+      "score": 9,
+      "factors": ["Financial system access", "Sensitive data access"],
+      "lastCalculated": "2025-08-30T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-30",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-03" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-07-10T10:30:00Z", "action": "EntitlementGranted", "detail": "Tableau-User" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "elevated"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2023-06-01T08:00:00Z",
+      "status": "Active"
+    }
   },
   "u1005": {
     "accountId": "svy-acc-1005",
@@ -82,7 +198,109 @@
     "accessRequestsOpen": 0,
     "history": [
       { "ts": "2025-06-10T14:30:00Z", "action": "RoleGranted", "detail": "HR Specialist" }
-    ]
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2023-10-01T09:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1006": {
+    "accountId": "svy-acc-1006",
+    "user": "fatima.khan",
+    "displayName": "Fatima Khan",
+    "department": "Security",
+    "manager": "CISO",
+    "roles": [
+      { "name": "Security Analyst", "grantedOn": "2022-09-15", "owner": "ciso", "certified": true },
+      { "name": "VPN User", "grantedOn": "2022-09-15", "owner": "net-ops", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "Splunk", "name": "Splunk-Analyst", "grantedOn": "2022-09-15" },
+      { "application": "CrowdStrike", "name": "CrowdStrike-User", "grantedOn": "2022-09-20" },
+      { "application": "Tenable", "name": "Tenable-User", "grantedOn": "2023-01-10" }
+    ],
+    "risk": {
+      "score": 11,
+      "factors": ["Security tools access", "Privileged investigation access"],
+      "lastCalculated": "2025-09-01T00:00:00Z"
+    },
+    "lastReviewed": "2025-09-01",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-05" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-08-15T11:00:00Z", "action": "CertificationCompleted", "detail": "Q3-2025 Access Review" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "elevated"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2022-09-15T10:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1007": {
+    "accountId": "svy-acc-1007",
+    "user": "george.smith",
+    "displayName": "George Smith",
+    "department": "Marketing",
+    "manager": "CMO",
+    "roles": [
+      { "name": "Marketing Manager", "grantedOn": "2023-03-01", "owner": "cmo", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "HubSpot", "name": "HubSpot-Admin", "grantedOn": "2023-03-01" },
+      { "application": "Marketo", "name": "Marketo-User", "grantedOn": "2023-03-05" },
+      { "application": "Salesforce", "name": "SF-Marketing", "grantedOn": "2023-03-10" }
+    ],
+    "risk": {
+      "score": 5,
+      "factors": ["Marketing platform admin"],
+      "lastCalculated": "2025-08-28T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-28",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-02" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-06-20T09:00:00Z", "action": "EntitlementGranted", "detail": "SF-Marketing" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2023-03-01T08:30:00Z",
+      "status": "Active"
+    }
   },
   "u1008": {
     "accountId": "svy-acc-1008",
@@ -109,7 +327,66 @@
     "accessRequestsOpen": 0,
     "history": [
       { "ts": "2025-05-22T10:00:00Z", "action": "RoleGranted", "detail": "Designer" }
-    ]
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2024-03-15T09:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1009": {
+    "accountId": "svy-acc-1009",
+    "user": "ian.chen",
+    "displayName": "Ian Chen",
+    "department": "Engineering",
+    "manager": "Bob Martin",
+    "roles": [
+      { "name": "Software Engineer", "grantedOn": "2024-05-01", "owner": "eng-manager", "certified": true },
+      { "name": "VPN User", "grantedOn": "2024-05-01", "owner": "net-ops", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "Github", "name": "Github-Developer", "grantedOn": "2024-05-01" },
+      { "application": "Jira", "name": "Jira-User", "grantedOn": "2024-05-01" },
+      { "application": "AWS", "name": "AWS-Developer", "grantedOn": "2024-06-15" }
+    ],
+    "risk": {
+      "score": 8,
+      "factors": ["Cloud infrastructure access", "Code repository access"],
+      "lastCalculated": "2025-08-29T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-29",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-04" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-06-15T14:00:00Z", "action": "EntitlementGranted", "detail": "AWS-Developer" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2024-05-01T10:00:00Z",
+      "status": "Active"
+    }
   },
   "u1010": {
     "accountId": "svy-acc-1010",
@@ -137,7 +414,195 @@
     "accessRequestsOpen": 0,
     "history": [
       { "ts": "2025-07-05T09:45:00Z", "action": "EntitlementGranted", "detail": "Confluence-Admin" }
-    ]
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2022-08-10T11:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1011": {
+    "accountId": "svy-acc-1011",
+    "user": "kevin.patel",
+    "displayName": "Kevin Patel",
+    "department": "Sales",
+    "manager": "Sales Director",
+    "roles": [
+      { "name": "Account Executive", "grantedOn": "2024-01-15", "owner": "sales-director", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "Salesforce", "name": "SF-Sales", "grantedOn": "2024-01-15" },
+      { "application": "LinkedIn Sales Navigator", "name": "LinkedIn-Pro", "grantedOn": "2024-01-20" },
+      { "application": "Gong", "name": "Gong-User", "grantedOn": "2024-02-01" }
+    ],
+    "risk": {
+      "score": 5,
+      "factors": ["Customer data access"],
+      "lastCalculated": "2025-08-27T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-27",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-01" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-05-10T11:00:00Z", "action": "EntitlementGranted", "detail": "Gong-User" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2024-01-15T09:30:00Z",
+      "status": "Active"
+    }
+  },
+  "u1012": {
+    "accountId": "svy-acc-1012",
+    "user": "laura.garcia",
+    "displayName": "Laura Garcia",
+    "department": "Legal",
+    "manager": "General Counsel",
+    "roles": [
+      { "name": "Counsel", "grantedOn": "2023-02-01", "owner": "general-counsel", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "DocuSign", "name": "DocuSign-Admin", "grantedOn": "2023-02-01" },
+      { "application": "Ironclad", "name": "Ironclad-User", "grantedOn": "2023-02-05" },
+      { "application": "Workday", "name": "Workday-Legal", "grantedOn": "2023-02-10" }
+    ],
+    "risk": {
+      "score": 8,
+      "factors": ["Legal document access", "Contract admin privileges"],
+      "lastCalculated": "2025-08-29T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-29",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-03" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-07-01T10:00:00Z", "action": "CertificationCompleted", "detail": "Q2-2025 Access Review" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "elevated"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2023-02-01T08:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1013": {
+    "accountId": "svy-acc-1013",
+    "user": "mohammed.ali",
+    "displayName": "Mohammed Ali",
+    "department": "IT",
+    "manager": "IT Director",
+    "roles": [
+      { "name": "SysAdmin", "grantedOn": "2021-06-15", "owner": "it-director", "certified": true },
+      { "name": "VPN Admin", "grantedOn": "2021-06-15", "owner": "net-ops", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "Active Directory", "name": "AD-Admin", "grantedOn": "2021-06-15" },
+      { "application": "Azure", "name": "Azure-Admin", "grantedOn": "2021-06-20" },
+      { "application": "ServiceNow", "name": "ServiceNow-Admin", "grantedOn": "2021-07-01" }
+    ],
+    "risk": {
+      "score": 15,
+      "factors": ["Domain admin privileges", "Cloud admin access", "Infrastructure access"],
+      "lastCalculated": "2025-09-01T00:00:00Z"
+    },
+    "lastReviewed": "2025-09-01",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-05" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-08-20T15:00:00Z", "action": "CertificationCompleted", "detail": "Privileged Access Review" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "elevated"
+    },
+    "controls": {
+      "sodViolations": 1,
+      "policyExceptions": 1,
+      "mitigatingControls": ["Quarterly privileged access review", "Session recording enabled"]
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2021-06-15T10:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1014": {
+    "accountId": "svy-acc-1014",
+    "user": "nina.brown",
+    "displayName": "Nina Brown",
+    "department": "Customer Support",
+    "manager": "Support Manager",
+    "roles": [
+      { "name": "CSM", "grantedOn": "2024-04-01", "owner": "support-manager", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "Zendesk", "name": "Zendesk-Agent", "grantedOn": "2024-04-01" },
+      { "application": "Intercom", "name": "Intercom-User", "grantedOn": "2024-04-05" },
+      { "application": "Salesforce", "name": "SF-Support", "grantedOn": "2024-04-10" }
+    ],
+    "risk": {
+      "score": 4,
+      "factors": ["Customer data access"],
+      "lastCalculated": "2025-08-26T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-26",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-01" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-06-05T09:30:00Z", "action": "EntitlementGranted", "detail": "SF-Support" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2024-04-01T08:00:00Z",
+      "status": "Active"
+    }
   },
   "u1015": {
     "accountId": "svy-acc-1015",
@@ -164,7 +629,108 @@
     "accessRequestsOpen": 0,
     "history": [
       { "ts": "2025-06-18T11:20:00Z", "action": "RoleGranted", "detail": "QA" }
-    ]
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2023-04-20T10:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1016": {
+    "accountId": "svy-acc-1016",
+    "user": "priya.singh",
+    "displayName": "Priya Singh",
+    "department": "Data",
+    "manager": "Data Lead",
+    "roles": [
+      { "name": "Data Scientist", "grantedOn": "2023-08-01", "owner": "data-lead", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "Databricks", "name": "Databricks-User", "grantedOn": "2023-08-01" },
+      { "application": "Snowflake", "name": "Snowflake-Analyst", "grantedOn": "2023-08-05" },
+      { "application": "Tableau", "name": "Tableau-Creator", "grantedOn": "2023-08-10" }
+    ],
+    "risk": {
+      "score": 10,
+      "factors": ["Data warehouse access", "PII analytics access"],
+      "lastCalculated": "2025-08-30T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-30",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-04" }
+    ],
+    "accessRequestsOpen": 1,
+    "history": [
+      { "ts": "2025-08-25T14:00:00Z", "action": "AccessRequested", "detail": "Snowflake-Admin" }
+    ],
+    "analytics": {
+      "riskTrend": "increasing",
+      "unusualBehavior": false,
+      "peerGroupComparison": "elevated"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 1,
+      "lastProvisioned": "2023-08-01T09:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1017": {
+    "accountId": "svy-acc-1017",
+    "user": "quentin.roux",
+    "displayName": "Quentin Roux",
+    "department": "Finance",
+    "manager": "CFO",
+    "roles": [
+      { "name": "Controller", "grantedOn": "2022-01-15", "owner": "cfo", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "SAP", "name": "SAP-Admin", "grantedOn": "2022-01-15" },
+      { "application": "NetSuite", "name": "NetSuite-Admin", "grantedOn": "2022-01-20" },
+      { "application": "Workday", "name": "Workday-Finance-Admin", "grantedOn": "2022-02-01" }
+    ],
+    "risk": {
+      "score": 14,
+      "factors": ["Financial admin privileges", "Payroll access", "Audit trail access"],
+      "lastCalculated": "2025-09-01T00:00:00Z"
+    },
+    "lastReviewed": "2025-09-01",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-05" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-07-15T10:00:00Z", "action": "CertificationCompleted", "detail": "SOX Compliance Review" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "elevated"
+    },
+    "controls": {
+      "sodViolations": 1,
+      "policyExceptions": 1,
+      "mitigatingControls": ["Dual approval for transactions over $50k", "Monthly reconciliation review"]
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2022-01-15T08:00:00Z",
+      "status": "Active"
+    }
   },
   "u1018": {
     "accountId": "svy-acc-1018",
@@ -191,6 +757,109 @@
     "accessRequestsOpen": 0,
     "history": [
       { "ts": "2025-07-12T13:00:00Z", "action": "EntitlementGranted", "detail": "Workday-Admin" }
-    ]
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "elevated"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2021-12-15T09:00:00Z",
+      "status": "Active"
+    }
+  },
+  "u1019": {
+    "accountId": "svy-acc-1019",
+    "user": "sam.wilson",
+    "displayName": "Sam Wilson",
+    "department": "Security",
+    "manager": "CISO",
+    "roles": [
+      { "name": "GRC Analyst", "grantedOn": "2023-09-01", "owner": "ciso", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "OneTrust", "name": "OneTrust-User", "grantedOn": "2023-09-01" },
+      { "application": "ServiceNow GRC", "name": "ServiceNow-GRC", "grantedOn": "2023-09-05" },
+      { "application": "Saviynt", "name": "Saviynt-Auditor", "grantedOn": "2023-09-10" }
+    ],
+    "risk": {
+      "score": 7,
+      "factors": ["Audit access", "Compliance system access"],
+      "lastCalculated": "2025-08-28T00:00:00Z"
+    },
+    "lastReviewed": "2025-08-28",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-02" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-06-01T10:00:00Z", "action": "EntitlementGranted", "detail": "Saviynt-Auditor" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "normal"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 0,
+      "mitigatingControls": []
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2023-09-01T08:30:00Z",
+      "status": "Active"
+    }
+  },
+  "u1020": {
+    "accountId": "svy-acc-1020",
+    "user": "tina.zhang",
+    "displayName": "Tina Zhang",
+    "department": "Engineering",
+    "manager": "Bob Martin",
+    "roles": [
+      { "name": "DevOps Engineer", "grantedOn": "2023-05-15", "owner": "eng-manager", "certified": true },
+      { "name": "VPN User", "grantedOn": "2023-05-15", "owner": "net-ops", "certified": true }
+    ],
+    "entitlements": [
+      { "application": "AWS", "name": "AWS-Admin", "grantedOn": "2023-05-15" },
+      { "application": "GitHub", "name": "GitHub-Admin", "grantedOn": "2023-05-15" },
+      { "application": "Kubernetes", "name": "K8s-Admin", "grantedOn": "2023-06-01" },
+      { "application": "Terraform Cloud", "name": "Terraform-User", "grantedOn": "2023-06-10" }
+    ],
+    "risk": {
+      "score": 16,
+      "factors": ["Cloud admin privileges", "Infrastructure as code access", "Production environment access"],
+      "lastCalculated": "2025-09-01T00:00:00Z"
+    },
+    "lastReviewed": "2025-09-01",
+    "certifications": [
+      { "campaign": "Q3-2025 Access Review", "status": "Approved", "completedAt": "2025-09-05" }
+    ],
+    "accessRequestsOpen": 0,
+    "history": [
+      { "ts": "2025-08-01T11:00:00Z", "action": "CertificationCompleted", "detail": "Privileged Access Review" }
+    ],
+    "analytics": {
+      "riskTrend": "stable",
+      "unusualBehavior": false,
+      "peerGroupComparison": "elevated"
+    },
+    "controls": {
+      "sodViolations": 0,
+      "policyExceptions": 1,
+      "mitigatingControls": ["Break-glass procedure for production access", "All changes logged and monitored"]
+    },
+    "provisioning": {
+      "pendingTasks": 0,
+      "lastProvisioned": "2023-05-15T10:00:00Z",
+      "status": "Active"
+    }
   }
 }
