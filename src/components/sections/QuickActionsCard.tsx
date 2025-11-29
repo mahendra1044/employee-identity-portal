@@ -15,6 +15,7 @@
 
 "use client";
 
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { SystemKey } from "@/lib/types";
@@ -98,6 +99,16 @@ export function QuickActionsCard({
   // Filter systems that have enabled tabs
   const enabledSystems = SYSTEMS.filter((s) => qaEnabledTabs[s]);
 
+  // Auto-select first enabled tab if current active tab is not enabled
+  useEffect(() => {
+    if (enabledSystems.length > 0 && !qaEnabledTabs[qaActive]) {
+      onSetQaActive(enabledSystems[0]);
+    }
+  }, [enabledSystems, qaActive, qaEnabledTabs, onSetQaActive]);
+
+  // Determine the effective active tab (fallback to first enabled if current is disabled)
+  const effectiveActive = qaEnabledTabs[qaActive] ? qaActive : enabledSystems[0];
+
   return (
     <section>
       <Card>
@@ -129,7 +140,7 @@ export function QuickActionsCard({
                   <Button
                     key={system}
                     size="sm"
-                    variant={qaActive === system ? "default" : "outline"}
+                    variant={effectiveActive === system ? "default" : "outline"}
                     onClick={() => onSetQaActive(system)}
                     className="whitespace-nowrap"
                   >
@@ -145,9 +156,9 @@ export function QuickActionsCard({
 
           {/* Action buttons for active tab - data-driven rendering */}
           <div className="rounded-lg border bg-gradient-to-r from-muted/60 to-background p-3 sm:p-4">
-            {qaEnabledTabs[qaActive] && (
+            {effectiveActive && qaEnabledTabs[effectiveActive] && (
               <ActionButtons 
-                system={qaActive} 
+                system={effectiveActive} 
                 actionHandlers={actionHandlers}
               />
             )}

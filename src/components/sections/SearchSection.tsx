@@ -82,13 +82,18 @@ export function SearchSection({
   // Hooks
   const { fetchConsolidatedData } = useConsolidatedView();
 
-  // Compute ordered systems
+  // Compute ordered systems (all systems for general use)
   const orderedSystems = useMemo<SystemKey[]>(() => {
     const order = features?.systemsOrder || [];
     const valid = order.filter(isValidSystemKey);
     const remaining = SYSTEMS.filter((s) => !valid.includes(s as SystemKey));
     return [...valid, ...remaining] as SystemKey[];
   }, [features]);
+
+  // Search systems - only the systems shown in search cards
+  const searchSystemKeys = useMemo<SystemKey[]>(() => {
+    return SEARCH_SYSTEMS.map((config) => config.system);
+  }, []);
 
   // isAggregate is now controlled by explicit state, not data detection
   const isAggregate = isAggregateView;
@@ -131,7 +136,7 @@ export function SearchSection({
         email,
         search,
         searchResults,
-        orderedSystems,
+        orderedSystems: searchSystemKeys, // Only fetch for search card systems
         features,
       });
       setDialogData(result.aggregate);
@@ -148,7 +153,7 @@ export function SearchSection({
     
     return (
       <div className="space-y-6 p-4">
-        {orderedSystems.map((sys) => {
+        {searchSystemKeys.map((sys) => {
           const rawVal = sys in dialogData ? dialogData[sys] : null;
           const val = rawVal && typeof rawVal === "object" ? rawVal as Record<string, unknown> : null;
           const hasData = val && Object.keys(val).length > 0;
