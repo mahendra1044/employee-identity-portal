@@ -1,9 +1,130 @@
+/**
+ * usePfOps Hook (Refactored)
+ * 
+ * Manages PingFederate and other system operations for Quick Actions.
+ * Now uses configuration-driven approach instead of 70+ individual functions.
+ * 
+ * @hook
+ * @returns {UsePfOpsReturn} Object with dialog state, active tab, and action handlers
+ */
+
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { PfOpsResponse } from "@/lib/types";
+import type { SystemKey } from "@/lib/types";
+import { OPS_ENDPOINTS, ENDPOINT_MAP, type EndpointAction } from "@/lib/ops-endpoints";
 
-export function usePfOps() {
+// Type for the action handlers map
+export type ActionHandlers = Record<string, () => Promise<void>>;
+
+export interface UsePfOpsReturn {
+  // Dialog state
+  pfOpsOpen: boolean;
+  setPfOpsOpen: (open: boolean) => void;
+  pfOpsTitle: string;
+  pfOpsLoading: boolean;
+  pfOpsData: PfOpsResponse;
+  
+  // Quick Actions tab state
+  qaActive: string;
+  setQaActive: (system: string) => void;
+  
+  // Generic loader function
+  loadEndpoint: (url: string, title: string) => Promise<void>;
+  
+  // Action handlers map (all endpoints by key)
+  actionHandlers: ActionHandlers;
+  
+  // Helper to get actions for a system
+  getActionsForSystem: (system: SystemKey) => EndpointAction[];
+  
+  // ===== Legacy individual loaders (for backward compatibility) =====
+  // These will be removed in a future refactor
+  loadPfUserInfo: () => Promise<void>;
+  loadPfOidc: () => Promise<void>;
+  loadPfConnections: () => Promise<void>;
+  loadAadGroups: () => Promise<void>;
+  loadAadSignins: () => Promise<void>;
+  loadAadUser: () => Promise<void>;
+  loadCyberarkAccounts: () => Promise<void>;
+  loadCyberarkActivity: () => Promise<void>;
+  loadCyberarkSafes: () => Promise<void>;
+  loadCyberarkEpmPolicies: () => Promise<void>;
+  loadCyberarkEpmApplications: () => Promise<void>;
+  loadCyberarkEpmElevations: () => Promise<void>;
+  loadCyberarkAleroSessions: () => Promise<void>;
+  loadCyberarkAleroTargets: () => Promise<void>;
+  loadCyberarkAleroRecordings: () => Promise<void>;
+  loadCyberarkConjurSecrets: () => Promise<void>;
+  loadCyberarkConjurVaults: () => Promise<void>;
+  loadCyberarkConjurRotation: () => Promise<void>;
+  loadCyberarkDpaAuthorizations: () => Promise<void>;
+  loadCyberarkDpaRiskAssessment: () => Promise<void>;
+  loadCyberarkDpaPolicies: () => Promise<void>;
+  loadCyberarkIdentityDevices: () => Promise<void>;
+  loadCyberarkIdentitySsoApps: () => Promise<void>;
+  loadCyberarkIdentityLoginHistory: () => Promise<void>;
+  loadPdProfile: () => Promise<void>;
+  loadPdGroups: () => Promise<void>;
+  loadPdAudit: () => Promise<void>;
+  loadMfaStatus: () => Promise<void>;
+  loadMfaDevices: () => Promise<void>;
+  loadMfaEvents: () => Promise<void>;
+  loadSaviynt: () => Promise<void>;
+  loadSaviynt_Roles: () => Promise<void>;
+  loadSaviynt_Entitlements: () => Promise<void>;
+  loadSaviyntCertificationsCampaigns: () => Promise<void>;
+  loadSaviyntCertificationsPending: () => Promise<void>;
+  loadSaviyntCertificationsHistory: () => Promise<void>;
+  loadSaviyntAnalyticsDashboard: () => Promise<void>;
+  loadSaviyntAnalyticsRiskScores: () => Promise<void>;
+  loadSaviyntAnalyticsAnomalies: () => Promise<void>;
+  loadSaviyntControlsSod: () => Promise<void>;
+  loadSaviyntControlsPolicies: () => Promise<void>;
+  loadSaviyntControlsExceptions: () => Promise<void>;
+  loadSaviyntRequestsPending: () => Promise<void>;
+  loadSaviyntRequestsApproved: () => Promise<void>;
+  loadSaviyntRequestsRejected: () => Promise<void>;
+  loadSaviyntProvisioningTasks: () => Promise<void>;
+  loadSaviyntProvisioningFailed: () => Promise<void>;
+  loadSaviyntProvisioningQueue: () => Promise<void>;
+  loadEntraUsersAll: () => Promise<void>;
+  loadEntraUsersGuests: () => Promise<void>;
+  loadEntraUsersLicenses: () => Promise<void>;
+  loadEntraGroupsAll: () => Promise<void>;
+  loadEntraGroupsDynamic: () => Promise<void>;
+  loadEntraGroupsMembership: () => Promise<void>;
+  loadEntraAppsEnterprise: () => Promise<void>;
+  loadEntraAppsRegistrations: () => Promise<void>;
+  loadEntraAppsConsent: () => Promise<void>;
+  loadEntraConditionalPolicies: () => Promise<void>;
+  loadEntraConditionalNamedLocations: () => Promise<void>;
+  loadEntraConditionalReports: () => Promise<void>;
+  loadEntraSigninLogs: () => Promise<void>;
+  loadEntraSigninRisky: () => Promise<void>;
+  loadEntraSigninFailures: () => Promise<void>;
+  loadTpagOverviewDashboard: () => Promise<void>;
+  loadTpagOverviewStats: () => Promise<void>;
+  loadTpagOverviewAlerts: () => Promise<void>;
+  loadTpagVendorsAll: () => Promise<void>;
+  loadTpagVendorsActive: () => Promise<void>;
+  loadTpagVendorsPending: () => Promise<void>;
+  loadTpagContractsAll: () => Promise<void>;
+  loadTpagContractsExpiring: () => Promise<void>;
+  loadTpagContractsRenewal: () => Promise<void>;
+  loadTpagAccessRequests: () => Promise<void>;
+  loadTpagAccessActive: () => Promise<void>;
+  loadTpagAccessRevoked: () => Promise<void>;
+  loadTpagRiskAssessments: () => Promise<void>;
+  loadTpagRiskHighRisk: () => Promise<void>;
+  loadTpagRiskCompliance: () => Promise<void>;
+  loadTpagLifecycleOnboarding: () => Promise<void>;
+  loadTpagLifecycleOffboarding: () => Promise<void>;
+  loadTpagLifecycleReviews: () => Promise<void>;
+}
+
+export function usePfOps(): UsePfOpsReturn {
   const [pfOpsOpen, setPfOpsOpen] = useState(false);
   const [pfOpsTitle, setPfOpsTitle] = useState<string>("");
   const [pfOpsLoading, setPfOpsLoading] = useState(false);
@@ -38,465 +159,185 @@ export function usePfOps() {
     }
   }, []);
 
-  // Ping Federate endpoints
-  const loadPfUserInfo = useCallback(async () => {
-    await loadEndpoint("/api/pf/userinfo", "Ping Federate — User Info");
-  }, [loadEndpoint]);
-
-  const loadPfOidc = useCallback(async () => {
-    await loadEndpoint("/api/pf/oidc", "Ping Federate — OIDC Connections");
-  }, [loadEndpoint]);
-
-  const loadPfConnections = useCallback(async () => {
-    await loadEndpoint("/api/pf/connections", "Ping Federate — Connections");
-  }, [loadEndpoint]);
-
-  // Azure AD endpoints
-  const loadAadGroups = useCallback(async () => {
-    await loadEndpoint("/api/aad/groups", "Azure AD — Groups");
-  }, [loadEndpoint]);
-
-  const loadAadSignins = useCallback(async () => {
-    await loadEndpoint("/api/aad/signins", "Azure AD — Sign-ins");
-  }, [loadEndpoint]);
-
-  // CyberArk PAM endpoints
-  const loadCyberarkAccounts = useCallback(async () => {
-    await loadEndpoint("/api/cyberark/accounts", "CyberArk PAM — Accounts");
-  }, [loadEndpoint]);
-
-  const loadCyberarkActivity = useCallback(async () => {
-    await loadEndpoint("/api/cyberark/activity", "CyberArk PAM — Activity");
-  }, [loadEndpoint]);
-
-  const loadCyberarkSafes = useCallback(async () => {
-    await loadEndpoint("/api/cyberark/safes", "CyberArk PAM — Safes");
-  }, [loadEndpoint]);
-
-  // CyberArk EPM endpoints
-  const loadCyberarkEpmPolicies = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-epm/policies", "CyberArk EPM — Policies");
-  }, [loadEndpoint]);
-
-  const loadCyberarkEpmApplications = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-epm/applications", "CyberArk EPM — Applications");
-  }, [loadEndpoint]);
-
-  const loadCyberarkEpmElevations = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-epm/elevation-history", "CyberArk EPM — Elevation History");
-  }, [loadEndpoint]);
-
-  // CyberArk Alero endpoints
-  const loadCyberarkAleroSessions = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-alero/sessions", "CyberArk Alero — Sessions");
-  }, [loadEndpoint]);
-
-  const loadCyberarkAleroTargets = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-alero/targets", "CyberArk Alero — Targets");
-  }, [loadEndpoint]);
-
-  const loadCyberarkAleroRecordings = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-alero/recordings", "CyberArk Alero — Recordings");
-  }, [loadEndpoint]);
-
-  // CyberArk Conjur endpoints
-  const loadCyberarkConjurSecrets = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-conjur/secrets", "CyberArk Conjur — Secrets");
-  }, [loadEndpoint]);
-
-  const loadCyberarkConjurVaults = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-conjur/vaults", "CyberArk Conjur — Vaults");
-  }, [loadEndpoint]);
-
-  const loadCyberarkConjurRotation = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-conjur/rotation", "CyberArk Conjur — Rotation Schedule");
-  }, [loadEndpoint]);
-
-  // CyberArk DPA endpoints
-  const loadCyberarkDpaAuthorizations = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-dpa/authorizations", "CyberArk DPA — Authorizations");
-  }, [loadEndpoint]);
-
-  const loadCyberarkDpaRiskAssessment = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-dpa/risk-assessment", "CyberArk DPA — Risk Assessment");
-  }, [loadEndpoint]);
-
-  const loadCyberarkDpaPolicies = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-dpa/policies", "CyberArk DPA — Policies");
-  }, [loadEndpoint]);
-
-  // CyberArk Identity endpoints
-  const loadCyberarkIdentityDevices = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-identity/devices", "CyberArk Identity — Devices");
-  }, [loadEndpoint]);
-
-  const loadCyberarkIdentitySsoApps = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-identity/sso-apps", "CyberArk Identity — SSO Applications");
-  }, [loadEndpoint]);
-
-  const loadCyberarkIdentityLoginHistory = useCallback(async () => {
-    await loadEndpoint("/api/cyberark-identity/login-history", "CyberArk Identity — Login History");
-  }, [loadEndpoint]);
-
-  // Ping Directory endpoints
-  const loadPdProfile = useCallback(async () => {
-    await loadEndpoint("/api/pd/profile", "Ping Directory — Profile");
-  }, [loadEndpoint]);
-
-  const loadPdGroups = useCallback(async () => {
-    await loadEndpoint("/api/pd/groups", "Ping Directory — Groups");
-  }, [loadEndpoint]);
-
-  const loadPdAudit = useCallback(async () => {
-    await loadEndpoint("/api/pd/audit", "Ping Directory — Audit");
-  }, [loadEndpoint]);
-
-  // Ping MFA endpoints
-  const loadMfaStatus = useCallback(async () => {
-    await loadEndpoint("/api/mfa/status", "Ping MFA — Status");
-  }, [loadEndpoint]);
-
-  const loadMfaDevices = useCallback(async () => {
-    await loadEndpoint("/api/mfa/devices", "Ping MFA — Devices");
-  }, [loadEndpoint]);
-
-  const loadMfaEvents = useCallback(async () => {
-    await loadEndpoint("/api/mfa/events", "Ping MFA — Events");
-  }, [loadEndpoint]);
-
-  // Azure AD User endpoint
-  const loadAadUser = useCallback(async () => {
-    await loadEndpoint("/api/aad/user", "Azure AD — User");
-  }, [loadEndpoint]);
-
-  // Saviynt endpoints
-  const loadSaviynt = useCallback(async () => {
-    await loadEndpoint("/api/saviynt/requests", "Saviynt IGA — Requests");
-  }, [loadEndpoint]);
-
-  const loadSaviynt_Roles = useCallback(async () => {
-    await loadEndpoint("/api/saviynt/roles", "Saviynt IGA — Roles");
-  }, [loadEndpoint]);
-
-  const loadSaviynt_Entitlements = useCallback(async () => {
-    await loadEndpoint("/api/saviynt/entitlements", "Saviynt IGA — Entitlements");
-  }, [loadEndpoint]);
-
-  // Saviynt Certifications endpoints
-  const loadSaviyntCertificationsCampaigns = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-certifications/campaigns", "Saviynt Certifications — Campaigns");
-  }, [loadEndpoint]);
-
-  const loadSaviyntCertificationsPending = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-certifications/pending", "Saviynt Certifications — Pending Reviews");
-  }, [loadEndpoint]);
-
-  const loadSaviyntCertificationsHistory = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-certifications/history", "Saviynt Certifications — History");
-  }, [loadEndpoint]);
-
-  // Saviynt Analytics endpoints
-  const loadSaviyntAnalyticsDashboard = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-analytics/dashboard", "Saviynt Analytics — Dashboard");
-  }, [loadEndpoint]);
-
-  const loadSaviyntAnalyticsRiskScores = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-analytics/risk-scores", "Saviynt Analytics — Risk Scores");
-  }, [loadEndpoint]);
-
-  const loadSaviyntAnalyticsAnomalies = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-analytics/anomalies", "Saviynt Analytics — Anomalies");
-  }, [loadEndpoint]);
-
-  // Saviynt Controls endpoints
-  const loadSaviyntControlsSod = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-controls/sod", "Saviynt Controls — SoD Violations");
-  }, [loadEndpoint]);
-
-  const loadSaviyntControlsPolicies = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-controls/policies", "Saviynt Controls — Policies");
-  }, [loadEndpoint]);
-
-  const loadSaviyntControlsExceptions = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-controls/exceptions", "Saviynt Controls — Exceptions");
-  }, [loadEndpoint]);
-
-  // Saviynt Requests endpoints
-  const loadSaviyntRequestsPending = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-requests/pending", "Saviynt Requests — Pending");
-  }, [loadEndpoint]);
-
-  const loadSaviyntRequestsApproved = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-requests/approved", "Saviynt Requests — Approved");
-  }, [loadEndpoint]);
-
-  const loadSaviyntRequestsRejected = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-requests/rejected", "Saviynt Requests — Rejected");
-  }, [loadEndpoint]);
-
-  // Saviynt Provisioning endpoints
-  const loadSaviyntProvisioningTasks = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-provisioning/tasks", "Saviynt Provisioning — Tasks");
-  }, [loadEndpoint]);
-
-  const loadSaviyntProvisioningFailed = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-provisioning/failed", "Saviynt Provisioning — Failed");
-  }, [loadEndpoint]);
-
-  const loadSaviyntProvisioningQueue = useCallback(async () => {
-    await loadEndpoint("/api/saviynt-provisioning/queue", "Saviynt Provisioning — Queue");
-  }, [loadEndpoint]);
-
-  // ===== EntraAD (Azure AD) Endpoints =====
-
-  // EntraAD Users endpoints
-  const loadEntraUsersAll = useCallback(async () => {
-    await loadEndpoint("/api/aad/users/all", "Entra ID Users — All Users");
-  }, [loadEndpoint]);
-
-  const loadEntraUsersGuests = useCallback(async () => {
-    await loadEndpoint("/api/aad/users/guests", "Entra ID Users — Guest Users");
-  }, [loadEndpoint]);
-
-  const loadEntraUsersLicenses = useCallback(async () => {
-    await loadEndpoint("/api/aad/users/licenses", "Entra ID Users — License Assignments");
-  }, [loadEndpoint]);
-
-  // EntraAD Groups endpoints
-  const loadEntraGroupsAll = useCallback(async () => {
-    await loadEndpoint("/api/aad/groups/all", "Entra ID Groups — All Groups");
-  }, [loadEndpoint]);
-
-  const loadEntraGroupsDynamic = useCallback(async () => {
-    await loadEndpoint("/api/aad/groups/dynamic", "Entra ID Groups — Dynamic Groups");
-  }, [loadEndpoint]);
-
-  const loadEntraGroupsMembership = useCallback(async () => {
-    await loadEndpoint("/api/aad/groups/membership", "Entra ID Groups — Group Membership");
-  }, [loadEndpoint]);
-
-  // EntraAD Apps endpoints
-  const loadEntraAppsEnterprise = useCallback(async () => {
-    await loadEndpoint("/api/aad/apps/enterprise", "Entra ID Apps — Enterprise Applications");
-  }, [loadEndpoint]);
-
-  const loadEntraAppsRegistrations = useCallback(async () => {
-    await loadEndpoint("/api/aad/apps/registrations", "Entra ID Apps — App Registrations");
-  }, [loadEndpoint]);
-
-  const loadEntraAppsConsent = useCallback(async () => {
-    await loadEndpoint("/api/aad/apps/consent", "Entra ID Apps — Admin Consent");
-  }, [loadEndpoint]);
-
-  // EntraAD Conditional Access endpoints
-  const loadEntraConditionalPolicies = useCallback(async () => {
-    await loadEndpoint("/api/aad/conditional/policies", "Conditional Access — Policies");
-  }, [loadEndpoint]);
-
-  const loadEntraConditionalNamedLocations = useCallback(async () => {
-    await loadEndpoint("/api/aad/conditional/named-locations", "Conditional Access — Named Locations");
-  }, [loadEndpoint]);
-
-  const loadEntraConditionalReports = useCallback(async () => {
-    await loadEndpoint("/api/aad/conditional/reports", "Conditional Access — Sign-in Reports");
-  }, [loadEndpoint]);
-
-  // EntraAD Sign-in endpoints
-  const loadEntraSigninLogs = useCallback(async () => {
-    await loadEndpoint("/api/aad/signin/logs", "Sign-in Logs — Recent Sign-ins");
-  }, [loadEndpoint]);
-
-  const loadEntraSigninRisky = useCallback(async () => {
-    await loadEndpoint("/api/aad/signin/risky", "Sign-in Logs — Risky Sign-ins");
-  }, [loadEndpoint]);
-
-  const loadEntraSigninFailures = useCallback(async () => {
-    await loadEndpoint("/api/aad/signin/failures", "Sign-in Logs — Failed Sign-ins");
-  }, [loadEndpoint]);
-
-  // TPAG Overview endpoints
-  const loadTpagOverviewDashboard = useCallback(async () => {
-    await loadEndpoint("/api/tpag/overview/dashboard", "TPAG — Dashboard Overview");
-  }, [loadEndpoint]);
-
-  const loadTpagOverviewStats = useCallback(async () => {
-    await loadEndpoint("/api/tpag/overview/stats", "TPAG — Statistics");
-  }, [loadEndpoint]);
-
-  const loadTpagOverviewAlerts = useCallback(async () => {
-    await loadEndpoint("/api/tpag/overview/alerts", "TPAG — Active Alerts");
-  }, [loadEndpoint]);
-
-  // TPAG Vendors endpoints
-  const loadTpagVendorsAll = useCallback(async () => {
-    await loadEndpoint("/api/tpag/vendors/all", "TPAG Vendors — All Vendors");
-  }, [loadEndpoint]);
-
-  const loadTpagVendorsActive = useCallback(async () => {
-    await loadEndpoint("/api/tpag/vendors/active", "TPAG Vendors — Active Vendors");
-  }, [loadEndpoint]);
-
-  const loadTpagVendorsPending = useCallback(async () => {
-    await loadEndpoint("/api/tpag/vendors/pending", "TPAG Vendors — Pending Onboarding");
-  }, [loadEndpoint]);
-
-  // TPAG Contracts endpoints
-  const loadTpagContractsAll = useCallback(async () => {
-    await loadEndpoint("/api/tpag/contracts/all", "TPAG Contracts — All Contracts");
-  }, [loadEndpoint]);
-
-  const loadTpagContractsExpiring = useCallback(async () => {
-    await loadEndpoint("/api/tpag/contracts/expiring", "TPAG Contracts — Expiring Soon");
-  }, [loadEndpoint]);
-
-  const loadTpagContractsRenewal = useCallback(async () => {
-    await loadEndpoint("/api/tpag/contracts/renewal", "TPAG Contracts — Pending Renewal");
-  }, [loadEndpoint]);
-
-  // TPAG Access endpoints
-  const loadTpagAccessRequests = useCallback(async () => {
-    await loadEndpoint("/api/tpag/access/requests", "TPAG Access — Access Requests");
-  }, [loadEndpoint]);
-
-  const loadTpagAccessActive = useCallback(async () => {
-    await loadEndpoint("/api/tpag/access/active", "TPAG Access — Active Access");
-  }, [loadEndpoint]);
-
-  const loadTpagAccessRevoked = useCallback(async () => {
-    await loadEndpoint("/api/tpag/access/revoked", "TPAG Access — Revoked Access");
-  }, [loadEndpoint]);
-
-  // TPAG Risk endpoints
-  const loadTpagRiskAssessments = useCallback(async () => {
-    await loadEndpoint("/api/tpag/risk/assessments", "TPAG Risk — Risk Assessments");
-  }, [loadEndpoint]);
-
-  const loadTpagRiskHighRisk = useCallback(async () => {
-    await loadEndpoint("/api/tpag/risk/high-risk", "TPAG Risk — High Risk Vendors");
-  }, [loadEndpoint]);
-
-  const loadTpagRiskCompliance = useCallback(async () => {
-    await loadEndpoint("/api/tpag/risk/compliance", "TPAG Risk — Compliance Status");
-  }, [loadEndpoint]);
-
-  // TPAG Lifecycle endpoints
-  const loadTpagLifecycleOnboarding = useCallback(async () => {
-    await loadEndpoint("/api/tpag/lifecycle/onboarding", "TPAG Lifecycle — Onboarding");
-  }, [loadEndpoint]);
-
-  const loadTpagLifecycleOffboarding = useCallback(async () => {
-    await loadEndpoint("/api/tpag/lifecycle/offboarding", "TPAG Lifecycle — Offboarding");
-  }, [loadEndpoint]);
-
-  const loadTpagLifecycleReviews = useCallback(async () => {
-    await loadEndpoint("/api/tpag/lifecycle/reviews", "TPAG Lifecycle — Access Reviews");
-  }, [loadEndpoint]);
-
+  // Generate all action handlers from config
+  const actionHandlers = useMemo<ActionHandlers>(() => {
+    const handlers: ActionHandlers = {};
+    
+    OPS_ENDPOINTS.forEach(systemConfig => {
+      systemConfig.actions.forEach(action => {
+        handlers[action.key] = async () => {
+          await loadEndpoint(action.url, action.title);
+        };
+      });
+    });
+    
+    return handlers;
+  }, [loadEndpoint]);
+
+  // Helper to get actions for a system
+  const getActionsForSystem = useCallback((system: SystemKey): EndpointAction[] => {
+    const config = OPS_ENDPOINTS.find(e => e.system === system);
+    return config?.actions || [];
+  }, []);
+
+  // ===== Legacy loaders for backward compatibility =====
+  // Map old function names to new action handlers
+  // This allows existing code to continue working
+  
   return {
+    // Dialog state
     pfOpsOpen,
     setPfOpsOpen,
     pfOpsTitle,
     pfOpsLoading,
     pfOpsData,
+    
+    // Quick Actions tab state
     qaActive,
     setQaActive,
-    loadPfUserInfo,
-    loadPfOidc,
-    loadPfConnections,
-    loadAadGroups,
-    loadAadSignins,
-    loadAadUser,
-    loadCyberarkAccounts,
-    loadCyberarkActivity,
-    loadCyberarkSafes,
-    loadCyberarkEpmPolicies,
-    loadCyberarkEpmApplications,
-    loadCyberarkEpmElevations,
-    loadCyberarkAleroSessions,
-    loadCyberarkAleroTargets,
-    loadCyberarkAleroRecordings,
-    loadCyberarkConjurSecrets,
-    loadCyberarkConjurVaults,
-    loadCyberarkConjurRotation,
-    loadCyberarkDpaAuthorizations,
-    loadCyberarkDpaRiskAssessment,
-    loadCyberarkDpaPolicies,
-    loadCyberarkIdentityDevices,
-    loadCyberarkIdentitySsoApps,
-    loadCyberarkIdentityLoginHistory,
-    loadPdProfile,
-    loadPdGroups,
-    loadPdAudit,
-    loadMfaStatus,
-    loadMfaDevices,
-    loadMfaEvents,
-    loadSaviynt,
-    loadSaviynt_Roles,
-    loadSaviynt_Entitlements,
+    
+    // Generic loader
+    loadEndpoint,
+    
+    // New config-driven handlers
+    actionHandlers,
+    getActionsForSystem,
+    
+    // ===== Legacy loaders (backward compatibility) =====
+    // Ping Federate
+    loadPfUserInfo: actionHandlers.pfUserInfo || (async () => {}),
+    loadPfOidc: actionHandlers.pfOidc || (async () => {}),
+    loadPfConnections: actionHandlers.pfConnections || (async () => {}),
+    
+    // Ping Directory
+    loadPdProfile: actionHandlers.pdProfile || (async () => {}),
+    loadPdGroups: actionHandlers.pdGroups || (async () => {}),
+    loadPdAudit: actionHandlers.pdAudit || (async () => {}),
+    
+    // Ping MFA
+    loadMfaStatus: actionHandlers.mfaStatus || (async () => {}),
+    loadMfaDevices: actionHandlers.mfaDevices || (async () => {}),
+    loadMfaEvents: actionHandlers.mfaEvents || (async () => {}),
+    
+    // Azure AD
+    loadAadUser: actionHandlers.aadUser || (async () => {}),
+    loadAadGroups: actionHandlers.aadGroups || (async () => {}),
+    loadAadSignins: actionHandlers.aadSignins || (async () => {}),
+    
+    // CyberArk PAM
+    loadCyberarkSafes: actionHandlers.cyberarkSafes || (async () => {}),
+    loadCyberarkAccounts: actionHandlers.cyberarkAccounts || (async () => {}),
+    loadCyberarkActivity: actionHandlers.cyberarkActivity || (async () => {}),
+    
+    // CyberArk EPM
+    loadCyberarkEpmPolicies: actionHandlers.cyberarkEpmPolicies || (async () => {}),
+    loadCyberarkEpmApplications: actionHandlers.cyberarkEpmApplications || (async () => {}),
+    loadCyberarkEpmElevations: actionHandlers.cyberarkEpmElevations || (async () => {}),
+    
+    // CyberArk Alero
+    loadCyberarkAleroSessions: actionHandlers.cyberarkAleroSessions || (async () => {}),
+    loadCyberarkAleroTargets: actionHandlers.cyberarkAleroTargets || (async () => {}),
+    loadCyberarkAleroRecordings: actionHandlers.cyberarkAleroRecordings || (async () => {}),
+    
+    // CyberArk Conjur
+    loadCyberarkConjurSecrets: actionHandlers.cyberarkConjurSecrets || (async () => {}),
+    loadCyberarkConjurVaults: actionHandlers.cyberarkConjurVaults || (async () => {}),
+    loadCyberarkConjurRotation: actionHandlers.cyberarkConjurRotation || (async () => {}),
+    
+    // CyberArk DPA
+    loadCyberarkDpaAuthorizations: actionHandlers.cyberarkDpaAuthorizations || (async () => {}),
+    loadCyberarkDpaRiskAssessment: actionHandlers.cyberarkDpaRiskAssessment || (async () => {}),
+    loadCyberarkDpaPolicies: actionHandlers.cyberarkDpaPolicies || (async () => {}),
+    
+    // CyberArk Identity
+    loadCyberarkIdentityDevices: actionHandlers.cyberarkIdentityDevices || (async () => {}),
+    loadCyberarkIdentitySsoApps: actionHandlers.cyberarkIdentitySsoApps || (async () => {}),
+    loadCyberarkIdentityLoginHistory: actionHandlers.cyberarkIdentityLoginHistory || (async () => {}),
+    
+    // Saviynt IGA
+    loadSaviynt: actionHandlers.saviyntRequests || (async () => {}),
+    loadSaviynt_Roles: actionHandlers.saviyntRoles || (async () => {}),
+    loadSaviynt_Entitlements: actionHandlers.saviyntEntitlements || (async () => {}),
+    
     // Saviynt Certifications
-    loadSaviyntCertificationsCampaigns,
-    loadSaviyntCertificationsPending,
-    loadSaviyntCertificationsHistory,
+    loadSaviyntCertificationsCampaigns: actionHandlers.saviyntCertificationsCampaigns || (async () => {}),
+    loadSaviyntCertificationsPending: actionHandlers.saviyntCertificationsPending || (async () => {}),
+    loadSaviyntCertificationsHistory: actionHandlers.saviyntCertificationsHistory || (async () => {}),
+    
     // Saviynt Analytics
-    loadSaviyntAnalyticsDashboard,
-    loadSaviyntAnalyticsRiskScores,
-    loadSaviyntAnalyticsAnomalies,
+    loadSaviyntAnalyticsDashboard: actionHandlers.saviyntAnalyticsDashboard || (async () => {}),
+    loadSaviyntAnalyticsRiskScores: actionHandlers.saviyntAnalyticsRiskScores || (async () => {}),
+    loadSaviyntAnalyticsAnomalies: actionHandlers.saviyntAnalyticsAnomalies || (async () => {}),
+    
     // Saviynt Controls
-    loadSaviyntControlsSod,
-    loadSaviyntControlsPolicies,
-    loadSaviyntControlsExceptions,
+    loadSaviyntControlsSod: actionHandlers.saviyntControlsSod || (async () => {}),
+    loadSaviyntControlsPolicies: actionHandlers.saviyntControlsPolicies || (async () => {}),
+    loadSaviyntControlsExceptions: actionHandlers.saviyntControlsExceptions || (async () => {}),
+    
     // Saviynt Requests
-    loadSaviyntRequestsPending,
-    loadSaviyntRequestsApproved,
-    loadSaviyntRequestsRejected,
+    loadSaviyntRequestsPending: actionHandlers.saviyntRequestsPending || (async () => {}),
+    loadSaviyntRequestsApproved: actionHandlers.saviyntRequestsApproved || (async () => {}),
+    loadSaviyntRequestsRejected: actionHandlers.saviyntRequestsRejected || (async () => {}),
+    
     // Saviynt Provisioning
-    loadSaviyntProvisioningTasks,
-    loadSaviyntProvisioningFailed,
-    loadSaviyntProvisioningQueue,
+    loadSaviyntProvisioningTasks: actionHandlers.saviyntProvisioningTasks || (async () => {}),
+    loadSaviyntProvisioningFailed: actionHandlers.saviyntProvisioningFailed || (async () => {}),
+    loadSaviyntProvisioningQueue: actionHandlers.saviyntProvisioningQueue || (async () => {}),
+    
     // EntraAD Users
-    loadEntraUsersAll,
-    loadEntraUsersGuests,
-    loadEntraUsersLicenses,
+    loadEntraUsersAll: actionHandlers.entraUsersAll || (async () => {}),
+    loadEntraUsersGuests: actionHandlers.entraUsersGuests || (async () => {}),
+    loadEntraUsersLicenses: actionHandlers.entraUsersLicenses || (async () => {}),
+    
     // EntraAD Groups
-    loadEntraGroupsAll,
-    loadEntraGroupsDynamic,
-    loadEntraGroupsMembership,
+    loadEntraGroupsAll: actionHandlers.entraGroupsAll || (async () => {}),
+    loadEntraGroupsDynamic: actionHandlers.entraGroupsDynamic || (async () => {}),
+    loadEntraGroupsMembership: actionHandlers.entraGroupsMembership || (async () => {}),
+    
     // EntraAD Apps
-    loadEntraAppsEnterprise,
-    loadEntraAppsRegistrations,
-    loadEntraAppsConsent,
+    loadEntraAppsEnterprise: actionHandlers.entraAppsEnterprise || (async () => {}),
+    loadEntraAppsRegistrations: actionHandlers.entraAppsRegistrations || (async () => {}),
+    loadEntraAppsConsent: actionHandlers.entraAppsConsent || (async () => {}),
+    
     // EntraAD Conditional Access
-    loadEntraConditionalPolicies,
-    loadEntraConditionalNamedLocations,
-    loadEntraConditionalReports,
+    loadEntraConditionalPolicies: actionHandlers.entraConditionalPolicies || (async () => {}),
+    loadEntraConditionalNamedLocations: actionHandlers.entraConditionalNamedLocations || (async () => {}),
+    loadEntraConditionalReports: actionHandlers.entraConditionalReports || (async () => {}),
+    
     // EntraAD Sign-in Logs
-    loadEntraSigninLogs,
-    loadEntraSigninRisky,
-    loadEntraSigninFailures,
+    loadEntraSigninLogs: actionHandlers.entraSigninLogs || (async () => {}),
+    loadEntraSigninRisky: actionHandlers.entraSigninRisky || (async () => {}),
+    loadEntraSigninFailures: actionHandlers.entraSigninFailures || (async () => {}),
+    
     // TPAG Overview
-    loadTpagOverviewDashboard,
-    loadTpagOverviewStats,
-    loadTpagOverviewAlerts,
+    loadTpagOverviewDashboard: actionHandlers.tpagOverviewDashboard || (async () => {}),
+    loadTpagOverviewStats: actionHandlers.tpagOverviewStats || (async () => {}),
+    loadTpagOverviewAlerts: actionHandlers.tpagOverviewAlerts || (async () => {}),
+    
     // TPAG Vendors
-    loadTpagVendorsAll,
-    loadTpagVendorsActive,
-    loadTpagVendorsPending,
+    loadTpagVendorsAll: actionHandlers.tpagVendorsAll || (async () => {}),
+    loadTpagVendorsActive: actionHandlers.tpagVendorsActive || (async () => {}),
+    loadTpagVendorsPending: actionHandlers.tpagVendorsPending || (async () => {}),
+    
     // TPAG Contracts
-    loadTpagContractsAll,
-    loadTpagContractsExpiring,
-    loadTpagContractsRenewal,
+    loadTpagContractsAll: actionHandlers.tpagContractsAll || (async () => {}),
+    loadTpagContractsExpiring: actionHandlers.tpagContractsExpiring || (async () => {}),
+    loadTpagContractsRenewal: actionHandlers.tpagContractsRenewal || (async () => {}),
+    
     // TPAG Access
-    loadTpagAccessRequests,
-    loadTpagAccessActive,
-    loadTpagAccessRevoked,
+    loadTpagAccessRequests: actionHandlers.tpagAccessRequests || (async () => {}),
+    loadTpagAccessActive: actionHandlers.tpagAccessActive || (async () => {}),
+    loadTpagAccessRevoked: actionHandlers.tpagAccessRevoked || (async () => {}),
+    
     // TPAG Risk
-    loadTpagRiskAssessments,
-    loadTpagRiskHighRisk,
-    loadTpagRiskCompliance,
+    loadTpagRiskAssessments: actionHandlers.tpagRiskAssessments || (async () => {}),
+    loadTpagRiskHighRisk: actionHandlers.tpagRiskHighRisk || (async () => {}),
+    loadTpagRiskCompliance: actionHandlers.tpagRiskCompliance || (async () => {}),
+    
     // TPAG Lifecycle
-    loadTpagLifecycleOnboarding,
-    loadTpagLifecycleOffboarding,
-    loadTpagLifecycleReviews,
+    loadTpagLifecycleOnboarding: actionHandlers.tpagLifecycleOnboarding || (async () => {}),
+    loadTpagLifecycleOffboarding: actionHandlers.tpagLifecycleOffboarding || (async () => {}),
+    loadTpagLifecycleReviews: actionHandlers.tpagLifecycleReviews || (async () => {}),
   };
 }
 

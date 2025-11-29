@@ -90,6 +90,7 @@ export default function HomePage() {
     resolveSnowEmail,
   } = useSnow(token, role, search, searchResults, hasSearched, email);
 
+  // Simplified usePfOps - now uses actionHandlers map instead of 70+ individual functions
   const {
     pfOpsOpen,
     setPfOpsOpen,
@@ -98,103 +99,7 @@ export default function HomePage() {
     pfOpsData,
     qaActive,
     setQaActive,
-    loadPfUserInfo,
-    loadPfOidc,
-    loadPfConnections,
-    loadAadGroups,
-    loadAadSignins,
-    loadAadUser,
-    loadCyberarkAccounts,
-    loadCyberarkActivity,
-    loadCyberarkSafes,
-    loadCyberarkEpmPolicies,
-    loadCyberarkEpmApplications,
-    loadCyberarkEpmElevations,
-    loadCyberarkAleroSessions,
-    loadCyberarkAleroTargets,
-    loadCyberarkAleroRecordings,
-    loadCyberarkConjurSecrets,
-    loadCyberarkConjurVaults,
-    loadCyberarkConjurRotation,
-    loadCyberarkDpaAuthorizations,
-    loadCyberarkDpaRiskAssessment,
-    loadCyberarkDpaPolicies,
-    loadCyberarkIdentityDevices,
-    loadCyberarkIdentitySsoApps,
-    loadCyberarkIdentityLoginHistory,
-    loadPdProfile,
-    loadPdGroups,
-    loadPdAudit,
-    loadMfaStatus,
-    loadMfaDevices,
-    loadMfaEvents,
-    loadSaviynt,
-    loadSaviynt_Roles,
-    loadSaviynt_Entitlements,
-    // Saviynt Certifications
-    loadSaviyntCertificationsCampaigns,
-    loadSaviyntCertificationsPending,
-    loadSaviyntCertificationsHistory,
-    // Saviynt Analytics
-    loadSaviyntAnalyticsDashboard,
-    loadSaviyntAnalyticsRiskScores,
-    loadSaviyntAnalyticsAnomalies,
-    // Saviynt Controls
-    loadSaviyntControlsSod,
-    loadSaviyntControlsPolicies,
-    loadSaviyntControlsExceptions,
-    // Saviynt Requests
-    loadSaviyntRequestsPending,
-    loadSaviyntRequestsApproved,
-    loadSaviyntRequestsRejected,
-    // Saviynt Provisioning
-    loadSaviyntProvisioningTasks,
-    loadSaviyntProvisioningFailed,
-    loadSaviyntProvisioningQueue,
-    // EntraAD Users
-    loadEntraUsersAll,
-    loadEntraUsersGuests,
-    loadEntraUsersLicenses,
-    // EntraAD Groups
-    loadEntraGroupsAll,
-    loadEntraGroupsDynamic,
-    loadEntraGroupsMembership,
-    // EntraAD Apps
-    loadEntraAppsEnterprise,
-    loadEntraAppsRegistrations,
-    loadEntraAppsConsent,
-    // EntraAD Conditional Access
-    loadEntraConditionalPolicies,
-    loadEntraConditionalNamedLocations,
-    loadEntraConditionalReports,
-    // EntraAD Sign-in Logs
-    loadEntraSigninLogs,
-    loadEntraSigninRisky,
-    loadEntraSigninFailures,
-    // TPAG Overview
-    loadTpagOverviewDashboard,
-    loadTpagOverviewStats,
-    loadTpagOverviewAlerts,
-    // TPAG Vendors
-    loadTpagVendorsAll,
-    loadTpagVendorsActive,
-    loadTpagVendorsPending,
-    // TPAG Contracts
-    loadTpagContractsAll,
-    loadTpagContractsExpiring,
-    loadTpagContractsRenewal,
-    // TPAG Access
-    loadTpagAccessRequests,
-    loadTpagAccessActive,
-    loadTpagAccessRevoked,
-    // TPAG Risk
-    loadTpagRiskAssessments,
-    loadTpagRiskHighRisk,
-    loadTpagRiskCompliance,
-    // TPAG Lifecycle
-    loadTpagLifecycleOnboarding,
-    loadTpagLifecycleOffboarding,
-    loadTpagLifecycleReviews,
+    actionHandlers,
   } = usePfOps();
 
   // Apply theme class to root element
@@ -396,7 +301,7 @@ export default function HomePage() {
           features={features}
         />
 
-        {/* Ops Quick Actions (tabs) - independent card below Search, visible after successful search */}
+        {/* Ops Quick Actions (tabs) - Refactored to use config-driven actionHandlers */}
         {isOpsRole(role) && hasSearched && (
           <QuickActionsCard
             qaActive={qaActive as SystemKey}
@@ -404,103 +309,7 @@ export default function HomePage() {
             qaEnabledTabs={qaEnabledTabs}
             resolveSnowEmail={resolveSnowEmail}
             search={search}
-            onLoadPfUserInfo={loadPfUserInfo}
-            onLoadPfOidc={loadPfOidc}
-            onLoadPfConnections={loadPfConnections}
-            onLoadPdProfile={loadPdProfile}
-            onLoadPdGroups={loadPdGroups}
-            onLoadPdAudit={loadPdAudit}
-            onLoadMfaStatus={loadMfaStatus}
-            onLoadMfaDevices={loadMfaDevices}
-            onLoadMfaEvents={loadMfaEvents}
-            onLoadAadUser={loadAadUser}
-            onLoadAadGroups={loadAadGroups}
-            onLoadAadSignins={loadAadSignins}
-            onLoadCyberarkSafes={loadCyberarkSafes}
-            onLoadCyberarkAccounts={loadCyberarkAccounts}
-            onLoadCyberarkActivity={loadCyberarkActivity}
-            onLoadCyberarkEpmPolicies={loadCyberarkEpmPolicies}
-            onLoadCyberarkEpmApplications={loadCyberarkEpmApplications}
-            onLoadCyberarkEpmElevations={loadCyberarkEpmElevations}
-            onLoadCyberarkAleroSessions={loadCyberarkAleroSessions}
-            onLoadCyberarkAleroTargets={loadCyberarkAleroTargets}
-            onLoadCyberarkAleroRecordings={loadCyberarkAleroRecordings}
-            onLoadCyberarkConjurSecrets={loadCyberarkConjurSecrets}
-            onLoadCyberarkConjurVaults={loadCyberarkConjurVaults}
-            onLoadCyberarkConjurRotation={loadCyberarkConjurRotation}
-            onLoadCyberarkDpaAuthorizations={loadCyberarkDpaAuthorizations}
-            onLoadCyberarkDpaRiskAssessment={loadCyberarkDpaRiskAssessment}
-            onLoadCyberarkDpaPolicies={loadCyberarkDpaPolicies}
-            onLoadCyberarkIdentityDevices={loadCyberarkIdentityDevices}
-            onLoadCyberarkIdentitySsoApps={loadCyberarkIdentitySsoApps}
-            onLoadCyberarkIdentityLoginHistory={loadCyberarkIdentityLoginHistory}
-            onLoadSaviynt={loadSaviynt}
-            onLoadSaviynt_Roles={loadSaviynt_Roles}
-            onLoadSaviynt_Entitlements={loadSaviynt_Entitlements}
-            // Saviynt Certifications
-            onLoadSaviyntCertificationsCampaigns={loadSaviyntCertificationsCampaigns}
-            onLoadSaviyntCertificationsPending={loadSaviyntCertificationsPending}
-            onLoadSaviyntCertificationsHistory={loadSaviyntCertificationsHistory}
-            // Saviynt Analytics
-            onLoadSaviyntAnalyticsDashboard={loadSaviyntAnalyticsDashboard}
-            onLoadSaviyntAnalyticsRiskScores={loadSaviyntAnalyticsRiskScores}
-            onLoadSaviyntAnalyticsAnomalies={loadSaviyntAnalyticsAnomalies}
-            // Saviynt Controls
-            onLoadSaviyntControlsSod={loadSaviyntControlsSod}
-            onLoadSaviyntControlsPolicies={loadSaviyntControlsPolicies}
-            onLoadSaviyntControlsExceptions={loadSaviyntControlsExceptions}
-            // Saviynt Requests
-            onLoadSaviyntRequestsPending={loadSaviyntRequestsPending}
-            onLoadSaviyntRequestsApproved={loadSaviyntRequestsApproved}
-            onLoadSaviyntRequestsRejected={loadSaviyntRequestsRejected}
-            // Saviynt Provisioning
-            onLoadSaviyntProvisioningTasks={loadSaviyntProvisioningTasks}
-            onLoadSaviyntProvisioningFailed={loadSaviyntProvisioningFailed}
-            onLoadSaviyntProvisioningQueue={loadSaviyntProvisioningQueue}
-            // EntraAD Users
-            onLoadEntraUsersAll={loadEntraUsersAll}
-            onLoadEntraUsersGuests={loadEntraUsersGuests}
-            onLoadEntraUsersLicenses={loadEntraUsersLicenses}
-            // EntraAD Groups
-            onLoadEntraGroupsAll={loadEntraGroupsAll}
-            onLoadEntraGroupsDynamic={loadEntraGroupsDynamic}
-            onLoadEntraGroupsMembership={loadEntraGroupsMembership}
-            // EntraAD Apps
-            onLoadEntraAppsEnterprise={loadEntraAppsEnterprise}
-            onLoadEntraAppsRegistrations={loadEntraAppsRegistrations}
-            onLoadEntraAppsConsent={loadEntraAppsConsent}
-            // EntraAD Conditional Access
-            onLoadEntraConditionalPolicies={loadEntraConditionalPolicies}
-            onLoadEntraConditionalNamedLocations={loadEntraConditionalNamedLocations}
-            onLoadEntraConditionalReports={loadEntraConditionalReports}
-            // EntraAD Sign-in Logs
-            onLoadEntraSigninLogs={loadEntraSigninLogs}
-            onLoadEntraSigninRisky={loadEntraSigninRisky}
-            onLoadEntraSigninFailures={loadEntraSigninFailures}
-            // TPAG Overview
-            onLoadTpagOverviewDashboard={loadTpagOverviewDashboard}
-            onLoadTpagOverviewStats={loadTpagOverviewStats}
-            onLoadTpagOverviewAlerts={loadTpagOverviewAlerts}
-            // TPAG Vendors
-            onLoadTpagVendorsAll={loadTpagVendorsAll}
-            onLoadTpagVendorsActive={loadTpagVendorsActive}
-            onLoadTpagVendorsPending={loadTpagVendorsPending}
-            // TPAG Contracts
-            onLoadTpagContractsAll={loadTpagContractsAll}
-            onLoadTpagContractsExpiring={loadTpagContractsExpiring}
-            onLoadTpagContractsRenewal={loadTpagContractsRenewal}
-            // TPAG Access
-            onLoadTpagAccessRequests={loadTpagAccessRequests}
-            onLoadTpagAccessActive={loadTpagAccessActive}
-            onLoadTpagAccessRevoked={loadTpagAccessRevoked}
-            // TPAG Risk
-            onLoadTpagRiskAssessments={loadTpagRiskAssessments}
-            onLoadTpagRiskHighRisk={loadTpagRiskHighRisk}
-            onLoadTpagRiskCompliance={loadTpagRiskCompliance}
-            // TPAG Lifecycle
-            onLoadTpagLifecycleOnboarding={loadTpagLifecycleOnboarding}
-            onLoadTpagLifecycleOffboarding={loadTpagLifecycleOffboarding}
-            onLoadTpagLifecycleReviews={loadTpagLifecycleReviews}
+            actionHandlers={actionHandlers}
             splunkUrl={splunkUrl}
             cloudwatchUrl={cloudwatchUrl}
           />
