@@ -64,6 +64,11 @@ const initialState: AppState = {
     'ping-intelligence': true,
     'azure-ad': true,
     cyberark: true,
+    'cyberark-epm': true,
+    'cyberark-alero': true,
+    'cyberark-conjur': true,
+    'cyberark-dpa': true,
+    'cyberark-identity': true,
     saviynt: true,
   },
   ui: {

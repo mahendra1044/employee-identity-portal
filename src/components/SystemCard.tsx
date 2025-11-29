@@ -175,7 +175,6 @@ export function SystemCard({
     }
     
     loadInitial(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, enabled, userKey]);
 
   const toPairs = (obj: any): Array<{ k: string; v: any }> => {

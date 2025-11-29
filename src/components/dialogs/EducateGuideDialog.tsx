@@ -28,7 +28,7 @@ export function EducateGuideDialog({
   onOpenChange,
   email,
 }: EducateGuideDialogProps) {
-  const EDUCATE_GUIDE = useMemo(
+  const EDUCATE_GUIDE: Record<SystemKey, { title: string; summary: string }> = useMemo(
     () => ({
       "ping-directory": {
         title: "Ping Directory",
@@ -38,8 +38,44 @@ export function EducateGuideDialog({
         title: "Ping Federate",
         summary: "",
       },
+      "ping-mfa": {
+        title: "Ping MFA",
+        summary: "",
+      },
+      "ping-access": {
+        title: "Ping Access",
+        summary: "",
+      },
+      "ping-authorize": {
+        title: "Ping Authorize",
+        summary: "",
+      },
+      "ping-intelligence": {
+        title: "Ping Intelligence",
+        summary: "",
+      },
       cyberark: {
-        title: "CyberArk",
+        title: "CyberArk PAM",
+        summary: "",
+      },
+      "cyberark-epm": {
+        title: "CyberArk EPM",
+        summary: "",
+      },
+      "cyberark-alero": {
+        title: "CyberArk Alero",
+        summary: "",
+      },
+      "cyberark-conjur": {
+        title: "CyberArk Conjur",
+        summary: "",
+      },
+      "cyberark-dpa": {
+        title: "CyberArk DPA",
+        summary: "",
+      },
+      "cyberark-identity": {
+        title: "CyberArk Identity",
         summary: "",
       },
       saviynt: {
@@ -48,10 +84,6 @@ export function EducateGuideDialog({
       },
       "azure-ad": {
         title: "Azure AD",
-        summary: "",
-      },
-      "ping-mfa": {
-        title: "Ping MFA",
         summary: "",
       },
     }),
@@ -68,8 +100,8 @@ export function EducateGuideDialog({
           <Accordion type="single" collapsible className="w-full">
             {SYSTEMS.map((sys) => {
               const points =
-                EDUCATE_CONFIG[sys as keyof typeof EDUCATE_CONFIG] || [];
-              const guide = EDUCATE_GUIDE[sys as SystemKey];
+                (EDUCATE_CONFIG as Record<string, string[]>)[sys] || [];
+              const guide = EDUCATE_GUIDE[sys];
               return (
                 <AccordionItem key={sys} value={sys}>
                   <AccordionTrigger className="text-left hover:no-underline">

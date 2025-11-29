@@ -175,6 +175,8 @@ export default function HomePage() {
     setMinutes,
     failFed,
     failMfa,
+    failPam,
+    failVault,
     loading: opsLoading,
     error: opsError,
     loadFailures,
@@ -347,6 +349,21 @@ export default function HomePage() {
             onLoadCyberarkSafes={loadCyberarkSafes}
             onLoadCyberarkAccounts={loadCyberarkAccounts}
             onLoadCyberarkActivity={loadCyberarkActivity}
+            onLoadCyberarkEpmPolicies={loadCyberarkEpmPolicies}
+            onLoadCyberarkEpmApplications={loadCyberarkEpmApplications}
+            onLoadCyberarkEpmElevations={loadCyberarkEpmElevations}
+            onLoadCyberarkAleroSessions={loadCyberarkAleroSessions}
+            onLoadCyberarkAleroTargets={loadCyberarkAleroTargets}
+            onLoadCyberarkAleroRecordings={loadCyberarkAleroRecordings}
+            onLoadCyberarkConjurSecrets={loadCyberarkConjurSecrets}
+            onLoadCyberarkConjurVaults={loadCyberarkConjurVaults}
+            onLoadCyberarkConjurRotation={loadCyberarkConjurRotation}
+            onLoadCyberarkDpaAuthorizations={loadCyberarkDpaAuthorizations}
+            onLoadCyberarkDpaRiskAssessment={loadCyberarkDpaRiskAssessment}
+            onLoadCyberarkDpaPolicies={loadCyberarkDpaPolicies}
+            onLoadCyberarkIdentityDevices={loadCyberarkIdentityDevices}
+            onLoadCyberarkIdentitySsoApps={loadCyberarkIdentitySsoApps}
+            onLoadCyberarkIdentityLoginHistory={loadCyberarkIdentityLoginHistory}
             onLoadSaviynt={loadSaviynt}
             onLoadSaviynt_Roles={loadSaviynt_Roles}
             onLoadSaviynt_Entitlements={loadSaviynt_Entitlements}
@@ -363,8 +380,11 @@ export default function HomePage() {
             onRefresh={loadFailures}
             loading={opsLoading}
             error={opsError}
+            role={role}
             failFed={failFed}
             failMfa={failMfa}
+            failPam={failPam}
+            failVault={failVault}
           />
         )}
 
