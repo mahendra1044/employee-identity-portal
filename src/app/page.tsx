@@ -142,16 +142,7 @@ export default function HomePage() {
   const {
     minutes,
     setMinutes,
-    failFed,
-    failMfa,
-    failPam,
-    failVault,
-    failIgaAccess,
-    failIgaProvisioning,
-    failEntraAuth,
-    failEntraAccess,
-    failTpagVendor,
-    failTpagAccess,
+    failures,
     loading: opsLoading,
     error: opsError,
     loadFailures,
@@ -324,16 +315,7 @@ export default function HomePage() {
             loading={opsLoading}
             error={opsError}
             role={role}
-            failFed={failFed}
-            failMfa={failMfa}
-            failPam={failPam}
-            failVault={failVault}
-            failIgaAccess={failIgaAccess}
-            failIgaProvisioning={failIgaProvisioning}
-            failEntraAuth={failEntraAuth}
-            failEntraAccess={failEntraAccess}
-            failTpagVendor={failTpagVendor}
-            failTpagAccess={failTpagAccess}
+            failures={failures}
           />
         )}
 

@@ -4,21 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { RefreshCw } from "lucide-react";
-
-interface FailureItem {
-  userId?: string;
-  email?: string;
-  reason?: string;
-  error?: string;
-  timestamp?: string;
-  time?: string;
-  safe?: string;
-  account?: string;
-  system?: string;
-  application?: string;
-  entitlement?: string;
-  certificationId?: string;
-}
+import {
+  type FailureKey,
+  type FailureData,
+  type FailureCategory,
+  FAILURE_CATEGORIES,
+  formatFailureItem,
+  getPanelTitle,
+  shouldShowCategory,
+} from "@/lib/failures-config";
 
 interface RecentFailuresPanelProps {
   minutes: number;
@@ -27,68 +21,91 @@ interface RecentFailuresPanelProps {
   loading: boolean;
   error?: string;
   role?: string | null;
-  // SSO failures (for sso_ops and general ops)
-  failFed?: FailureItem[];
-  failMfa?: FailureItem[];
-  // PAM failures (for pam_ops)
-  failPam?: FailureItem[];
-  failVault?: FailureItem[];
-  // IGA failures (for iga_ops)
-  failIgaAccess?: FailureItem[];
-  failIgaProvisioning?: FailureItem[];
-  // EntraAD failures (for entraid_ops)
-  failEntraAuth?: FailureItem[];
-  failEntraAccess?: FailureItem[];
-  // TPAG failures (for tpag_ops)
-  failTpagVendor?: FailureItem[];
-  failTpagAccess?: FailureItem[];
+  /** Consolidated failures object from useOpsFeatures */
+  failures: Record<FailureKey, FailureData[]>;
 }
 
-// Helper to render a failure item based on its type
-function renderFailureItem(it: FailureItem, type: 'sso' | 'pam' | 'iga' | 'entra' | 'tpag') {
-  const user = it.userId || it.email || "unknown";
-  const reason = it.reason || it.error || "failure";
-  const time = it.time || it.timestamp || "";
-  
-  if (type === 'pam') {
-    const context = it.safe ? ` [Safe: ${it.safe}]` : it.account ? ` [Account: ${it.account}]` : it.system ? ` [${it.system}]` : '';
-    return `${user} — ${reason}${context} — ${time}`;
-  }
-  
-  if (type === 'iga') {
-    const context = it.application ? ` [App: ${it.application}]` : it.entitlement ? ` [Entitlement: ${it.entitlement}]` : it.system ? ` [${it.system}]` : '';
-    return `${user} — ${reason}${context} — ${time}`;
-  }
-
-  if (type === 'entra') {
-    const context = it.application ? ` [App: ${it.application}]` : it.system ? ` [${it.system}]` : '';
-    return `${user} — ${reason}${context} — ${time}`;
-  }
-
-  if (type === 'tpag') {
-    const context = it.application ? ` [Vendor: ${it.application}]` : it.system ? ` [${it.system}]` : '';
-    return `${user} — ${reason}${context} — ${time}`;
-  }
-  
-  return `${user} — ${reason} — ${time}`;
+/** 
+ * Single failure card component - renders one failure type 
+ * Eliminates the repetitive Card sections from the original implementation
+ */
+function FailureCard({
+  title,
+  failures,
+  keyPrefix,
+  renderType,
+  loading,
+}: {
+  title: string;
+  failures: FailureData[];
+  keyPrefix: string;
+  renderType: 'sso' | 'pam' | 'iga' | 'entra' | 'tpag';
+  loading: boolean;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p className="text-sm animate-pulse">Loading...</p>
+        ) : (failures?.length || 0) > 0 ? (
+          <ul className="text-sm list-disc pl-4 space-y-1">
+            {failures.slice(0, 25).map((it: FailureData, idx: number) => (
+              <li key={`${keyPrefix}-${idx}`}>
+                {formatFailureItem(it, renderType)}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">No failures in window</p>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
-// Determine panel title based on role
-function getPanelTitle(role: string | null | undefined, minutes: number): string {
-  switch (role) {
-    case 'sso_ops':
-      return `SSO Recent Failures (last ${minutes} min)`;
-    case 'pam_ops':
-      return `PAM Recent Failures (last ${minutes} min)`;
-    case 'iga_ops':
-      return `IGA Recent Failures (last ${minutes} min)`;
-    case 'entraid_ops':
-      return `Entra ID Recent Failures (last ${minutes} min)`;
-    case 'tpag_ops':
-      return `TPAG Recent Failures (last ${minutes} min)`;
-    default:
-      return `Recent Failures (last ${minutes} min)`;
+/**
+ * Failure category section - renders a grid of failure cards for a category
+ * Replaces the repetitive showXxxFailures && (...) blocks
+ */
+function FailureCategorySection({
+  category,
+  role,
+  failures,
+  loading,
+  isLast,
+}: {
+  category: FailureCategory;
+  role: string | null | undefined;
+  failures: Record<FailureKey, FailureData[]>;
+  loading: boolean;
+  isLast: boolean;
+}) {
+  // Check if this category should be shown for the current role
+  if (!shouldShowCategory(category, role ?? null)) {
+    return null;
   }
+
+  // Get the category config
+  const categoryConfig = FAILURE_CATEGORIES.find(c => c.category === category);
+  if (!categoryConfig) return null;
+
+  return (
+    <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!isLast ? 'mb-4' : ''}`}>
+      {categoryConfig.failures.map((failureType) => (
+        <FailureCard
+          key={failureType.key}
+          title={failureType.title}
+          failures={failures[failureType.key] || []}
+          keyPrefix={failureType.key}
+          renderType={failureType.renderType}
+          loading={loading}
+        />
+      ))}
+    </div>
+  );
 }
 
 export function RecentFailuresPanel({
@@ -98,28 +115,12 @@ export function RecentFailuresPanel({
   loading,
   error,
   role,
-  failFed = [],
-  failMfa = [],
-  failPam = [],
-  failVault = [],
-  failIgaAccess = [],
-  failIgaProvisioning = [],
-  failEntraAuth = [],
-  failEntraAccess = [],
-  failTpagVendor = [],
-  failTpagAccess = [],
+  failures,
 }: RecentFailuresPanelProps) {
-  // Determine which failure panels to show based on role
-  // SSO failures: shown for sso_ops and base ops roles
-  // PAM failures: shown only for pam_ops role
-  // IGA failures: shown only for iga_ops role
-  // EntraAD failures: shown only for entraid_ops role
-  // TPAG failures: shown only for tpag_ops role
-  const showSsoFailures = role === 'sso_ops' || role === 'ops';
-  const showPamFailures = role === 'pam_ops';
-  const showIgaFailures = role === 'iga_ops';
-  const showEntraFailures = role === 'entraid_ops';
-  const showTpagFailures = role === 'tpag_ops';
+  // Get visible categories for this role
+  const visibleCategories = FAILURE_CATEGORIES
+    .filter(cat => shouldShowCategory(cat.category, role ?? null))
+    .map(cat => cat.category);
 
   return (
     <section>
@@ -145,240 +146,17 @@ export function RecentFailuresPanel({
             {error && <span className="text-xs text-red-600">{error}</span>}
           </div>
 
-          {/* SSO Failures Section (for sso_ops and general ops) */}
-          {showSsoFailures && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Ping Federate – Login Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failFed?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failFed!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`fed-${idx}`}>
-                          {renderFailureItem(it, 'sso')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Ping MFA – Verification Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failMfa?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failMfa!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`mfa-${idx}`}>
-                          {renderFailureItem(it, 'sso')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* PAM Failures Section (for pam_ops and general ops) */}
-          {showPamFailures && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">CyberArk PAM – Access Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failPam?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failPam!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`pam-${idx}`}>
-                          {renderFailureItem(it, 'pam')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">CyberArk Vault – Operation Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failVault?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failVault!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`vault-${idx}`}>
-                          {renderFailureItem(it, 'pam')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* IGA Failures Section (for iga_ops) */}
-          {showIgaFailures && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Saviynt – Access Request Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failIgaAccess?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failIgaAccess!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`iga-access-${idx}`}>
-                          {renderFailureItem(it, 'iga')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Saviynt – Provisioning Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failIgaProvisioning?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failIgaProvisioning!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`iga-prov-${idx}`}>
-                          {renderFailureItem(it, 'iga')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* EntraAD Failures Section (for entraid_ops) */}
-          {showEntraFailures && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Entra ID – Authentication Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failEntraAuth?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failEntraAuth!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`entra-auth-${idx}`}>
-                          {renderFailureItem(it, 'entra')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Entra ID – Access Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failEntraAccess?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failEntraAccess!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`entra-access-${idx}`}>
-                          {renderFailureItem(it, 'entra')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* TPAG Failures Section (for tpag_ops) */}
-          {showTpagFailures && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">TPAG – Vendor Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failTpagVendor?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failTpagVendor!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`tpag-vendor-${idx}`}>
-                          {renderFailureItem(it, 'tpag')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">TPAG – Access Failures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <p className="text-sm animate-pulse">Loading...</p>
-                  ) : (failTpagAccess?.length || 0) > 0 ? (
-                    <ul className="text-sm list-disc pl-4 space-y-1">
-                      {failTpagAccess!.slice(0, 25).map((it: FailureItem, idx: number) => (
-                        <li key={`tpag-access-${idx}`}>
-                          {renderFailureItem(it, 'tpag')}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No failures in window</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          {/* Render all visible failure categories - data-driven approach */}
+          {visibleCategories.map((category, index) => (
+            <FailureCategorySection
+              key={category}
+              category={category}
+              role={role}
+              failures={failures}
+              loading={loading}
+              isLast={index === visibleCategories.length - 1}
+            />
+          ))}
         </CardContent>
       </Card>
     </section>
