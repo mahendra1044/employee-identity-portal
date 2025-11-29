@@ -69,6 +69,41 @@
     "Check MFA enrollment; unenrolled users face sign-in challenges.",
     "Examine app registrations; consent issues prevent SSO to SaaS apps."
   ],
+  "azure-ad-users": [
+    "Review user properties and profile information; incomplete data causes app failures.",
+    "Check account status (enabled/disabled); disabled accounts block all M365 access.",
+    "Verify license assignments; missing licenses disable productivity features.",
+    "Monitor guest user access; expired guests create security and compliance risks.",
+    "Review user risk level; high-risk users may need password reset or MFA re-enrollment."
+  ],
+  "azure-ad-groups": [
+    "Validate group membership; missing groups deny access to SharePoint, Teams, and apps.",
+    "Review dynamic group rules; incorrect queries exclude valid users from access.",
+    "Check group-based licensing; unlicensed groups cause feature unavailability.",
+    "Monitor security groups; stale memberships create unnecessary access permissions.",
+    "Verify Microsoft 365 group settings; misconfigured groups affect Teams and Outlook."
+  ],
+  "azure-ad-apps": [
+    "Review enterprise app assignments; unassigned users cannot access applications.",
+    "Check app consent status; missing admin consent blocks user sign-ins.",
+    "Verify app registration credentials; expired secrets cause authentication failures.",
+    "Monitor SAML/OIDC configurations; mismatches cause federation sign-in errors.",
+    "Review API permissions; insufficient scopes cause app functionality failures."
+  ],
+  "azure-ad-conditional": [
+    "Examine CA policy assignments; overly broad policies block legitimate access.",
+    "Review device compliance requirements; non-compliant devices get blocked.",
+    "Check named location configurations; VPN users may be incorrectly restricted.",
+    "Verify MFA requirements in policies; misconfigured MFA causes sign-in loops.",
+    "Monitor sign-in frequency settings; aggressive timeouts frustrate users."
+  ],
+  "azure-ad-signin": [
+    "Review sign-in logs for patterns; repeated failures indicate configuration issues.",
+    "Check error codes in failures; specific codes point to exact remediation steps.",
+    "Monitor risky sign-ins; unaddressed risks may indicate compromised accounts.",
+    "Verify location-based blocks; travel triggers false positives for mobile users.",
+    "Review interrupted sign-ins; CA policy conflicts cause incomplete authentications."
+  ],
   "ping-mfa": [
     "Confirm enrollment status; unenrolled users can't complete MFA challenges.",
     "List enrolled devices; unregistered phones lead to push notification failures.",

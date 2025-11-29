@@ -56,12 +56,15 @@ interface UseOpsFeuresResult {
   // SSO failures (for sso_ops and general ops)
   failFed: FailureData[];
   failMfa: FailureData[];
-  // PAM failures (for pam_ops and general ops)
+  // PAM failures (for pam_ops)
   failPam: FailureData[];
   failVault: FailureData[];
-  // IGA failures (for iga_ops and general ops)
+  // IGA failures (for iga_ops)
   failIgaAccess: FailureData[];
   failIgaProvisioning: FailureData[];
+  // EntraAD failures (for entraid_ops)
+  failEntraAuth: FailureData[];
+  failEntraAccess: FailureData[];
   loading: boolean;
   error: string | undefined;
   qaEnabledTabs: Record<SystemKey, boolean>;
@@ -94,6 +97,9 @@ export function useOpsFeatures(
   // IGA failure states
   const [failIgaAccess, setFailIgaAccess] = useState<FailureData[]>([]);
   const [failIgaProvisioning, setFailIgaProvisioning] = useState<FailureData[]>([]);
+  // EntraAD failure states
+  const [failEntraAuth, setFailEntraAuth] = useState<FailureData[]>([]);
+  const [failEntraAccess, setFailEntraAccess] = useState<FailureData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -107,9 +113,11 @@ export function useOpsFeatures(
   // SSO failures: shown for sso_ops and base ops roles
   // PAM failures: shown only for pam_ops role
   // IGA failures: shown only for iga_ops role
+  // EntraAD failures: shown only for entraid_ops role
   const shouldLoadSsoFailures = role === 'sso_ops' || role === 'ops';
   const shouldLoadPamFailures = role === 'pam_ops';
   const shouldLoadIgaFailures = role === 'iga_ops';
+  const shouldLoadEntraFailures = role === 'entraid_ops';
 
   // Load recent failures for ops role (role-aware)
   const loadFailures = useCallback(async () => {
@@ -164,6 +172,19 @@ export function useOpsFeatures(
           })
         );
         fetchLabels.push('iga-access', 'iga-provisioning');
+      }
+
+      // EntraAD failures (for entraid_ops)
+      if (shouldLoadEntraFailures) {
+        fetchPromises.push(
+          fetch(`${API_BASE}/api/ops-failures?system=azure-ad-auth&minutes=${minutes}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${API_BASE}/api/ops-failures?system=azure-ad-access&minutes=${minutes}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        );
+        fetchLabels.push('entra-auth', 'entra-access');
       }
 
       const responses = await Promise.all(fetchPromises);
@@ -244,9 +265,35 @@ export function useOpsFeatures(
         }
         setFailIgaAccess(igaAccess);
         setFailIgaProvisioning(igaProvisioning);
+        currentIndex += 2;
       } else {
         setFailIgaAccess([]);
         setFailIgaProvisioning([]);
+      }
+
+      // Process EntraAD failures
+      if (shouldLoadEntraFailures) {
+        let entraAuth = Array.isArray(allData[currentIndex]?.data) ? allData[currentIndex].data : [];
+        let entraAccess = Array.isArray(allData[currentIndex + 1]?.data) ? allData[currentIndex + 1].data : [];
+
+        // Provide test data if backend has none (EntraAD)
+        if ((!entraAuth || entraAuth.length === 0) && (!entraAccess || entraAccess.length === 0)) {
+          entraAuth = [
+            { userId: "u12345", reason: "Sign-in blocked by Conditional Access", application: "Microsoft 365", timestamp: mkTs(1) },
+            { email: "user@company.com", reason: "MFA challenge failed", application: "Azure Portal", timestamp: mkTs(3) },
+            { userId: "u67890", reason: "Password expired", application: "SharePoint Online", timestamp: mkTs(5) },
+          ];
+          entraAccess = [
+            { userId: "u12345", error: "Group membership sync failed", system: "azure-ad-groups", timestamp: mkTs(2) },
+            { email: "admin@company.com", error: "App consent required", application: "Power BI", timestamp: mkTs(4) },
+            { userId: "u99999", error: "License assignment failed", system: "azure-ad-users", timestamp: mkTs(7) },
+          ];
+        }
+        setFailEntraAuth(entraAuth);
+        setFailEntraAccess(entraAccess);
+      } else {
+        setFailEntraAuth([]);
+        setFailEntraAccess([]);
       }
 
       // Check if any responses failed
@@ -262,10 +309,12 @@ export function useOpsFeatures(
       setFailVault([]);
       setFailIgaAccess([]);
       setFailIgaProvisioning([]);
+      setFailEntraAuth([]);
+      setFailEntraAccess([]);
     } finally {
       setLoading(false);
     }
-  }, [isOps, token, minutes, shouldLoadSsoFailures, shouldLoadPamFailures, shouldLoadIgaFailures]);
+  }, [isOps, token, minutes, shouldLoadSsoFailures, shouldLoadPamFailures, shouldLoadIgaFailures, shouldLoadEntraFailures]);
 
   // Auto-load failures when ops role logs in
   useEffect(() => {
@@ -283,6 +332,8 @@ export function useOpsFeatures(
     setFailVault([]);
     setFailIgaAccess([]);
     setFailIgaProvisioning([]);
+    setFailEntraAuth([]);
+    setFailEntraAccess([]);
     setError(undefined);
   }, [role]);
 
@@ -296,6 +347,8 @@ export function useOpsFeatures(
     failVault,
     failIgaAccess,
     failIgaProvisioning,
+    failEntraAuth,
+    failEntraAccess,
     loading,
     error,
     qaEnabledTabs,

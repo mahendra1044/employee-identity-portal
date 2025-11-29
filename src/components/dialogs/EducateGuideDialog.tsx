@@ -106,6 +106,26 @@ export function EducateGuideDialog({
         title: "Azure AD",
         summary: "",
       },
+      "azure-ad-users": {
+        title: "Entra ID Users",
+        summary: "",
+      },
+      "azure-ad-groups": {
+        title: "Entra ID Groups",
+        summary: "",
+      },
+      "azure-ad-apps": {
+        title: "Entra ID Apps",
+        summary: "",
+      },
+      "azure-ad-conditional": {
+        title: "Entra ID Conditional Access",
+        summary: "",
+      },
+      "azure-ad-signin": {
+        title: "Entra ID Sign-in Logs",
+        summary: "",
+      },
     }),
     [email]
   );

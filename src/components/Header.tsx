@@ -65,6 +65,7 @@ export function Header(props: {
       case "sso_ops":
       case "pam_ops":
       case "iga_ops":
+      case "entraid_ops":
       case "tpag_ops":
         return <Briefcase className="h-3 w-3" />;
       case "employee":
@@ -88,6 +89,8 @@ export function Header(props: {
         return "PAM Operations";
       case "iga_ops":
         return "IGA Operations";
+      case "entraid_ops":
+        return "Entra ID Operations";
       case "tpag_ops":
         return "TPAG Operations";
       case "employee":

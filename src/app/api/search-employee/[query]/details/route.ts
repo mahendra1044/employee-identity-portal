@@ -21,6 +21,9 @@ const SYSTEM_DETAILS_FILES: Record<string, string> = {
 // Saviynt sub-systems that use saviynt-details.json with computed data
 const SAVIYNT_SUB_SYSTEMS = ['saviynt', 'saviynt-certifications', 'saviynt-analytics', 'saviynt-controls', 'saviynt-requests', 'saviynt-provisioning'];
 
+// EntraAD sub-systems that use azure-ad-details.json with computed data
+const ENTRAID_SUB_SYSTEMS = ['azure-ad', 'azure-ad-users', 'azure-ad-groups', 'azure-ad-apps', 'azure-ad-conditional', 'azure-ad-signin'];
+
 // Generate detailed CyberArk mock data for all 6 systems
 function generateCyberArkDetailsData(system: string, userId: string, email: string) {
   const failureUsers = ['u1003', 'u1007', 'u1012', 'u1018'];
@@ -334,6 +337,116 @@ function generateSaviyntSubSystemData(system: string, userId: string, baseData: 
   return dataGenerators[system] || null;
 }
 
+// Generate EntraAD sub-system mock data
+function generateEntraADSubSystemData(system: string, userId: string, baseData: any) {
+  const failureUsers = ['u1003', 'u1007', 'u1012', 'u1018'];
+  const hasFailure = failureUsers.includes(userId);
+
+  // For base azure-ad system, return as-is
+  if (system === 'azure-ad') {
+    return baseData;
+  }
+
+  // Extract relevant data based on sub-system
+  const dataGenerators: Record<string, any> = {
+    'azure-ad-users': hasFailure ? {
+      userId,
+      error: 'User management access denied',
+      status: 'failed',
+      message: 'Unable to retrieve user management data',
+    } : {
+      userId,
+      upn: baseData.upn,
+      displayName: baseData.displayName || baseData.jobTitle,
+      department: baseData.department,
+      manager: baseData.manager,
+      accountEnabled: true,
+      userType: 'Member',
+      createdDateTime: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      lastPasswordChangeDateTime: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      licenses: baseData.licenses || [],
+      assignedPlans: Math.floor(Math.random() * 20) + 10,
+      riskLevel: baseData.signInRisk || 'low',
+      onPremisesSyncEnabled: Math.random() > 0.3,
+    },
+    'azure-ad-groups': hasFailure ? {
+      userId,
+      error: 'Group access denied',
+      status: 'failed',
+      message: 'Unable to retrieve group membership data',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.jobTitle,
+      memberOf: baseData.groups || [],
+      ownedGroups: Math.floor(Math.random() * 3),
+      securityGroups: Math.floor(Math.random() * 5) + 2,
+      m365Groups: Math.floor(Math.random() * 4) + 1,
+      dynamicGroups: Math.floor(Math.random() * 2),
+      groupTypes: ['Security', 'Microsoft 365', 'Distribution'].slice(0, Math.floor(Math.random() * 2) + 1),
+      lastGroupChange: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    'azure-ad-apps': hasFailure ? {
+      userId,
+      error: 'App access unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve application assignments',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.jobTitle,
+      assignedApps: Math.floor(Math.random() * 15) + 8,
+      consentedApps: Math.floor(Math.random() * 10) + 5,
+      enterpriseApps: [
+        { name: 'Microsoft 365', type: 'Enterprise', lastUsed: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000).toISOString() },
+        { name: 'Salesforce', type: 'Enterprise', lastUsed: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
+        { name: 'ServiceNow', type: 'Enterprise', lastUsed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+      ],
+      pendingConsent: Math.floor(Math.random() * 2),
+      appRoleAssignments: Math.floor(Math.random() * 8) + 3,
+    },
+    'azure-ad-conditional': hasFailure ? {
+      userId,
+      error: 'Conditional Access data unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve Conditional Access policy data',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.jobTitle,
+      conditionalAccess: baseData.conditionalAccess || {},
+      appliedPolicies: baseData.conditionalAccess?.policies || ['Require MFA', 'Block legacy auth'],
+      policyEvaluations: Math.floor(Math.random() * 50) + 20,
+      blockedSignIns: Math.floor(Math.random() * 5),
+      mfaRequired: true,
+      compliantDevice: Math.random() > 0.2,
+      trustedLocation: Math.random() > 0.3,
+      riskBasedPolicies: ['Sign-in Risk', 'User Risk'].slice(0, Math.floor(Math.random() * 2) + 1),
+      lastPolicyHit: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    'azure-ad-signin': hasFailure ? {
+      userId,
+      error: 'Sign-in logs unavailable',
+      status: 'failed',
+      message: 'Unable to retrieve sign-in history',
+    } : {
+      userId,
+      displayName: baseData.displayName || baseData.jobTitle,
+      lastSignIn: baseData.lastSync || new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+      signInRisk: baseData.signInRisk || 'low',
+      totalSignIns: Math.floor(Math.random() * 100) + 50,
+      failedSignIns: Math.floor(Math.random() * 5),
+      riskySignIns: Math.floor(Math.random() * 2),
+      recentSignIns: [
+        { timestamp: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000).toISOString(), app: 'Microsoft 365', status: 'Success', location: 'San Francisco, CA' },
+        { timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), app: 'Azure Portal', status: 'Success', location: 'San Francisco, CA' },
+        { timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), app: 'Teams', status: 'Success', location: 'San Francisco, CA' },
+      ],
+      mfaCompletions: Math.floor(Math.random() * 30) + 10,
+      devices: baseData.devices || [],
+    },
+  };
+
+  return dataGenerators[system] || null;
+}
+
 // Load system details data
 function loadSystemDetails(system: string) {
   try {
@@ -434,6 +547,41 @@ export async function GET(
 
     // For sub-systems, generate specific data
     const detailsData = generateSaviyntSubSystemData(system, query, userData);
+    
+    if (!detailsData) {
+      return NextResponse.json({ error: `System ${system} not found` }, { status: 404 });
+    }
+
+    console.log(`✅ Generated ${system} details for ${query}`);
+    return NextResponse.json({ data: detailsData });
+  }
+
+  // Check if it's an EntraAD sub-system - generate data dynamically
+  if (ENTRAID_SUB_SYSTEMS.includes(system)) {
+    // Load base Azure AD data
+    const azureAdPath = join(process.cwd(), 'backend/mocks/azure-ad-details.json');
+    let azureAdData;
+    try {
+      azureAdData = JSON.parse(readFileSync(azureAdPath, 'utf-8'));
+    } catch (error) {
+      console.error('❌ Error loading azure-ad-details.json:', error);
+      return NextResponse.json({ error: 'Azure AD data not available' }, { status: 500 });
+    }
+
+    const userData = azureAdData[query];
+    if (!userData) {
+      console.log(`⚠️ User ${query} not found in azure-ad details`);
+      return NextResponse.json({ error: `User ${query} not found in Azure AD` }, { status: 404 });
+    }
+
+    // For base azure-ad system, return the data directly
+    if (system === 'azure-ad') {
+      console.log(`✅ Found Azure AD details for ${query}`);
+      return NextResponse.json({ data: userData });
+    }
+
+    // For sub-systems, generate specific data
+    const detailsData = generateEntraADSubSystemData(system, query, userData);
     
     if (!detailsData) {
       return NextResponse.json({ error: `System ${system} not found` }, { status: 404 });

@@ -3,7 +3,7 @@
  */
 
 import type { SystemKey } from "./types";
-import { PING_SYSTEMS, PAM_SYSTEMS, IGA_SYSTEMS, TPAG_SYSTEMS, ORIGINAL_SYSTEMS } from "./constants";
+import { PING_SYSTEMS, PAM_SYSTEMS, IGA_SYSTEMS, ENTRAID_SYSTEMS, TPAG_SYSTEMS, ORIGINAL_SYSTEMS } from "./constants";
 
 /**
  * Determines if a role is an ops-like role (has ops privileges)
@@ -14,6 +14,7 @@ export function isOpsRole(role: string | null | undefined): boolean {
          role === "sso_ops" || 
          role === "pam_ops" || 
          role === "iga_ops" || 
+         role === "entraid_ops" ||
          role === "tpag_ops";
 }
 
@@ -33,6 +34,8 @@ export function getAllowedSystemsForRole(role: string | null | undefined): Syste
       return PAM_SYSTEMS;
     case "iga_ops":
       return IGA_SYSTEMS;
+    case "entraid_ops":
+      return ENTRAID_SYSTEMS;
     case "tpag_ops":
       return TPAG_SYSTEMS;
     case "employee":
@@ -87,6 +90,8 @@ export function getOpsModeDescription(role: string | null | undefined): string {
       return "PAM Operations (CyberArk)";
     case "iga_ops":
       return "IGA Operations (Saviynt)";
+    case "entraid_ops":
+      return "Entra ID Operations (Azure AD)";
     case "tpag_ops":
       return "TPAG Operations";
     default:

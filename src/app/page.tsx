@@ -151,6 +151,26 @@ export default function HomePage() {
     loadSaviyntProvisioningTasks,
     loadSaviyntProvisioningFailed,
     loadSaviyntProvisioningQueue,
+    // EntraAD Users
+    loadEntraUsersAll,
+    loadEntraUsersGuests,
+    loadEntraUsersLicenses,
+    // EntraAD Groups
+    loadEntraGroupsAll,
+    loadEntraGroupsDynamic,
+    loadEntraGroupsMembership,
+    // EntraAD Apps
+    loadEntraAppsEnterprise,
+    loadEntraAppsRegistrations,
+    loadEntraAppsConsent,
+    // EntraAD Conditional Access
+    loadEntraConditionalPolicies,
+    loadEntraConditionalNamedLocations,
+    loadEntraConditionalReports,
+    // EntraAD Sign-in Logs
+    loadEntraSigninLogs,
+    loadEntraSigninRisky,
+    loadEntraSigninFailures,
   } = usePfOps();
 
   // Apply theme class to root element
@@ -199,6 +219,8 @@ export default function HomePage() {
     failVault,
     failIgaAccess,
     failIgaProvisioning,
+    failEntraAuth,
+    failEntraAccess,
     loading: opsLoading,
     error: opsError,
     loadFailures,
@@ -409,6 +431,26 @@ export default function HomePage() {
             onLoadSaviyntProvisioningTasks={loadSaviyntProvisioningTasks}
             onLoadSaviyntProvisioningFailed={loadSaviyntProvisioningFailed}
             onLoadSaviyntProvisioningQueue={loadSaviyntProvisioningQueue}
+            // EntraAD Users
+            onLoadEntraUsersAll={loadEntraUsersAll}
+            onLoadEntraUsersGuests={loadEntraUsersGuests}
+            onLoadEntraUsersLicenses={loadEntraUsersLicenses}
+            // EntraAD Groups
+            onLoadEntraGroupsAll={loadEntraGroupsAll}
+            onLoadEntraGroupsDynamic={loadEntraGroupsDynamic}
+            onLoadEntraGroupsMembership={loadEntraGroupsMembership}
+            // EntraAD Apps
+            onLoadEntraAppsEnterprise={loadEntraAppsEnterprise}
+            onLoadEntraAppsRegistrations={loadEntraAppsRegistrations}
+            onLoadEntraAppsConsent={loadEntraAppsConsent}
+            // EntraAD Conditional Access
+            onLoadEntraConditionalPolicies={loadEntraConditionalPolicies}
+            onLoadEntraConditionalNamedLocations={loadEntraConditionalNamedLocations}
+            onLoadEntraConditionalReports={loadEntraConditionalReports}
+            // EntraAD Sign-in Logs
+            onLoadEntraSigninLogs={loadEntraSigninLogs}
+            onLoadEntraSigninRisky={loadEntraSigninRisky}
+            onLoadEntraSigninFailures={loadEntraSigninFailures}
             splunkUrl={splunkUrl}
             cloudwatchUrl={cloudwatchUrl}
           />
@@ -429,6 +471,8 @@ export default function HomePage() {
             failVault={failVault}
             failIgaAccess={failIgaAccess}
             failIgaProvisioning={failIgaProvisioning}
+            failEntraAuth={failEntraAuth}
+            failEntraAccess={failEntraAccess}
           />
         )}
 

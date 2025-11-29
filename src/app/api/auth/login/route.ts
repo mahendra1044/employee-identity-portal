@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
       role = 'pam_ops';
     } else if (emailLower.includes('iga_ops@') || emailLower === 'iga_ops@company.com') {
       role = 'iga_ops';
+    } else if (emailLower.includes('entraid_ops@') || emailLower === 'entraid_ops@company.com') {
+      role = 'entraid_ops';
     } else if (emailLower.includes('tpag_ops@') || emailLower === 'tpag_ops@company.com') {
       role = 'tpag_ops';
     } else if (emailLower.includes('ops@') || emailLower.startsWith('ops')) {

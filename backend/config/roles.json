@@ -47,5 +47,13 @@
     "saviynt-controls": { "own": true, "all": true, "search": false },
     "saviynt-requests": { "own": true, "all": true, "search": false },
     "saviynt-provisioning": { "own": true, "all": true, "search": false }
+  },
+  "entraid_ops": {
+    "azure-ad": { "own": true, "all": true, "search": true },
+    "azure-ad-users": { "own": true, "all": true, "search": true },
+    "azure-ad-groups": { "own": true, "all": true, "search": true },
+    "azure-ad-apps": { "own": true, "all": true, "search": true },
+    "azure-ad-conditional": { "own": true, "all": true, "search": true },
+    "azure-ad-signin": { "own": true, "all": true, "search": true }
   }
 }

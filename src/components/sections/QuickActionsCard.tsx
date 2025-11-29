@@ -114,6 +114,26 @@ interface QuickActionsCardProps {
   onLoadSaviyntProvisioningTasks: () => void;
   onLoadSaviyntProvisioningFailed: () => void;
   onLoadSaviyntProvisioningQueue: () => void;
+  // EntraAD Users
+  onLoadEntraUsersAll: () => void;
+  onLoadEntraUsersGuests: () => void;
+  onLoadEntraUsersLicenses: () => void;
+  // EntraAD Groups
+  onLoadEntraGroupsAll: () => void;
+  onLoadEntraGroupsDynamic: () => void;
+  onLoadEntraGroupsMembership: () => void;
+  // EntraAD Apps
+  onLoadEntraAppsEnterprise: () => void;
+  onLoadEntraAppsRegistrations: () => void;
+  onLoadEntraAppsConsent: () => void;
+  // EntraAD Conditional Access
+  onLoadEntraConditionalPolicies: () => void;
+  onLoadEntraConditionalNamedLocations: () => void;
+  onLoadEntraConditionalReports: () => void;
+  // EntraAD Sign-in Logs
+  onLoadEntraSigninLogs: () => void;
+  onLoadEntraSigninRisky: () => void;
+  onLoadEntraSigninFailures: () => void;
   splunkUrl: string;
   cloudwatchUrl: string;
 }
@@ -177,6 +197,26 @@ export function QuickActionsCard({
   onLoadSaviyntProvisioningTasks,
   onLoadSaviyntProvisioningFailed,
   onLoadSaviyntProvisioningQueue,
+  // EntraAD Users
+  onLoadEntraUsersAll,
+  onLoadEntraUsersGuests,
+  onLoadEntraUsersLicenses,
+  // EntraAD Groups
+  onLoadEntraGroupsAll,
+  onLoadEntraGroupsDynamic,
+  onLoadEntraGroupsMembership,
+  // EntraAD Apps
+  onLoadEntraAppsEnterprise,
+  onLoadEntraAppsRegistrations,
+  onLoadEntraAppsConsent,
+  // EntraAD Conditional Access
+  onLoadEntraConditionalPolicies,
+  onLoadEntraConditionalNamedLocations,
+  onLoadEntraConditionalReports,
+  // EntraAD Sign-in Logs
+  onLoadEntraSigninLogs,
+  onLoadEntraSigninRisky,
+  onLoadEntraSigninFailures,
   splunkUrl,
   cloudwatchUrl,
 }: QuickActionsCardProps) {
@@ -494,6 +534,109 @@ export function QuickActionsCard({
                 <Button size="sm" variant="secondary" onClick={onLoadSaviyntProvisioningQueue} title="Queue">
                   <ListOrdered className="h-4 w-4 mr-1" />
                   Queue
+                </Button>
+              </div>
+            )}
+
+            {/* EntraAD Tabs */}
+            {qaActive === "azure-ad" && qaEnabledTabs["azure-ad"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadAadUser} title="User Profile">
+                  <User className="h-4 w-4 mr-1" />
+                  User Profile
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadAadGroups} title="Groups">
+                  <Users className="h-4 w-4 mr-1" />
+                  Groups
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadAadSignins} title="Sign-ins">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Sign-ins
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "azure-ad-users" && qaEnabledTabs["azure-ad-users"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadEntraUsersAll} title="All Users">
+                  <Users className="h-4 w-4 mr-1" />
+                  All Users
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraUsersGuests} title="Guest Users">
+                  <User className="h-4 w-4 mr-1" />
+                  Guests
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraUsersLicenses} title="Licenses">
+                  <Badge className="h-4 w-4 mr-1" />
+                  Licenses
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "azure-ad-groups" && qaEnabledTabs["azure-ad-groups"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadEntraGroupsAll} title="All Groups">
+                  <Users className="h-4 w-4 mr-1" />
+                  All Groups
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraGroupsDynamic} title="Dynamic Groups">
+                  <RotateCw className="h-4 w-4 mr-1" />
+                  Dynamic
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraGroupsMembership} title="Membership">
+                  <Layers className="h-4 w-4 mr-1" />
+                  Membership
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "azure-ad-apps" && qaEnabledTabs["azure-ad-apps"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadEntraAppsEnterprise} title="Enterprise Apps">
+                  <Globe className="h-4 w-4 mr-1" />
+                  Enterprise Apps
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraAppsRegistrations} title="App Registrations">
+                  <Server className="h-4 w-4 mr-1" />
+                  Registrations
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraAppsConsent} title="Admin Consent">
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Consent
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "azure-ad-conditional" && qaEnabledTabs["azure-ad-conditional"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadEntraConditionalPolicies} title="CA Policies">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Policies
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraConditionalNamedLocations} title="Named Locations">
+                  <Database className="h-4 w-4 mr-1" />
+                  Locations
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraConditionalReports} title="Reports">
+                  <BarChart2 className="h-4 w-4 mr-1" />
+                  Reports
+                </Button>
+              </div>
+            )}
+
+            {qaActive === "azure-ad-signin" && qaEnabledTabs["azure-ad-signin"] && (
+              <div className="flex flex-wrap gap-2 justify-start">
+                <Button size="sm" variant="secondary" onClick={onLoadEntraSigninLogs} title="Sign-in Logs">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Sign-in Logs
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraSigninRisky} title="Risky Sign-ins">
+                  <AlertTriangle className="h-4 w-4 mr-1" />
+                  Risky
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onLoadEntraSigninFailures} title="Failures">
+                  <XCircle className="h-4 w-4 mr-1" />
+                  Failures
                 </Button>
               </div>
             )}

@@ -247,6 +247,73 @@ export function usePfOps() {
     await loadEndpoint("/api/saviynt-provisioning/queue", "Saviynt Provisioning — Queue");
   }, [loadEndpoint]);
 
+  // ===== EntraAD (Azure AD) Endpoints =====
+
+  // EntraAD Users endpoints
+  const loadEntraUsersAll = useCallback(async () => {
+    await loadEndpoint("/api/aad/users/all", "Entra ID Users — All Users");
+  }, [loadEndpoint]);
+
+  const loadEntraUsersGuests = useCallback(async () => {
+    await loadEndpoint("/api/aad/users/guests", "Entra ID Users — Guest Users");
+  }, [loadEndpoint]);
+
+  const loadEntraUsersLicenses = useCallback(async () => {
+    await loadEndpoint("/api/aad/users/licenses", "Entra ID Users — License Assignments");
+  }, [loadEndpoint]);
+
+  // EntraAD Groups endpoints
+  const loadEntraGroupsAll = useCallback(async () => {
+    await loadEndpoint("/api/aad/groups/all", "Entra ID Groups — All Groups");
+  }, [loadEndpoint]);
+
+  const loadEntraGroupsDynamic = useCallback(async () => {
+    await loadEndpoint("/api/aad/groups/dynamic", "Entra ID Groups — Dynamic Groups");
+  }, [loadEndpoint]);
+
+  const loadEntraGroupsMembership = useCallback(async () => {
+    await loadEndpoint("/api/aad/groups/membership", "Entra ID Groups — Group Membership");
+  }, [loadEndpoint]);
+
+  // EntraAD Apps endpoints
+  const loadEntraAppsEnterprise = useCallback(async () => {
+    await loadEndpoint("/api/aad/apps/enterprise", "Entra ID Apps — Enterprise Applications");
+  }, [loadEndpoint]);
+
+  const loadEntraAppsRegistrations = useCallback(async () => {
+    await loadEndpoint("/api/aad/apps/registrations", "Entra ID Apps — App Registrations");
+  }, [loadEndpoint]);
+
+  const loadEntraAppsConsent = useCallback(async () => {
+    await loadEndpoint("/api/aad/apps/consent", "Entra ID Apps — Admin Consent");
+  }, [loadEndpoint]);
+
+  // EntraAD Conditional Access endpoints
+  const loadEntraConditionalPolicies = useCallback(async () => {
+    await loadEndpoint("/api/aad/conditional/policies", "Conditional Access — Policies");
+  }, [loadEndpoint]);
+
+  const loadEntraConditionalNamedLocations = useCallback(async () => {
+    await loadEndpoint("/api/aad/conditional/named-locations", "Conditional Access — Named Locations");
+  }, [loadEndpoint]);
+
+  const loadEntraConditionalReports = useCallback(async () => {
+    await loadEndpoint("/api/aad/conditional/reports", "Conditional Access — Sign-in Reports");
+  }, [loadEndpoint]);
+
+  // EntraAD Sign-in endpoints
+  const loadEntraSigninLogs = useCallback(async () => {
+    await loadEndpoint("/api/aad/signin/logs", "Sign-in Logs — Recent Sign-ins");
+  }, [loadEndpoint]);
+
+  const loadEntraSigninRisky = useCallback(async () => {
+    await loadEndpoint("/api/aad/signin/risky", "Sign-in Logs — Risky Sign-ins");
+  }, [loadEndpoint]);
+
+  const loadEntraSigninFailures = useCallback(async () => {
+    await loadEndpoint("/api/aad/signin/failures", "Sign-in Logs — Failed Sign-ins");
+  }, [loadEndpoint]);
+
   return {
     pfOpsOpen,
     setPfOpsOpen,
@@ -308,6 +375,26 @@ export function usePfOps() {
     loadSaviyntProvisioningTasks,
     loadSaviyntProvisioningFailed,
     loadSaviyntProvisioningQueue,
+    // EntraAD Users
+    loadEntraUsersAll,
+    loadEntraUsersGuests,
+    loadEntraUsersLicenses,
+    // EntraAD Groups
+    loadEntraGroupsAll,
+    loadEntraGroupsDynamic,
+    loadEntraGroupsMembership,
+    // EntraAD Apps
+    loadEntraAppsEnterprise,
+    loadEntraAppsRegistrations,
+    loadEntraAppsConsent,
+    // EntraAD Conditional Access
+    loadEntraConditionalPolicies,
+    loadEntraConditionalNamedLocations,
+    loadEntraConditionalReports,
+    // EntraAD Sign-in Logs
+    loadEntraSigninLogs,
+    loadEntraSigninRisky,
+    loadEntraSigninFailures,
   };
 }
 

@@ -30,16 +30,19 @@ interface RecentFailuresPanelProps {
   // SSO failures (for sso_ops and general ops)
   failFed?: FailureItem[];
   failMfa?: FailureItem[];
-  // PAM failures (for pam_ops and general ops)
+  // PAM failures (for pam_ops)
   failPam?: FailureItem[];
   failVault?: FailureItem[];
-  // IGA failures (for iga_ops and general ops)
+  // IGA failures (for iga_ops)
   failIgaAccess?: FailureItem[];
   failIgaProvisioning?: FailureItem[];
+  // EntraAD failures (for entraid_ops)
+  failEntraAuth?: FailureItem[];
+  failEntraAccess?: FailureItem[];
 }
 
 // Helper to render a failure item based on its type
-function renderFailureItem(it: FailureItem, type: 'sso' | 'pam' | 'iga') {
+function renderFailureItem(it: FailureItem, type: 'sso' | 'pam' | 'iga' | 'entra') {
   const user = it.userId || it.email || "unknown";
   const reason = it.reason || it.error || "failure";
   const time = it.time || it.timestamp || "";
@@ -51,6 +54,11 @@ function renderFailureItem(it: FailureItem, type: 'sso' | 'pam' | 'iga') {
   
   if (type === 'iga') {
     const context = it.application ? ` [App: ${it.application}]` : it.entitlement ? ` [Entitlement: ${it.entitlement}]` : it.system ? ` [${it.system}]` : '';
+    return `${user} — ${reason}${context} — ${time}`;
+  }
+
+  if (type === 'entra') {
+    const context = it.application ? ` [App: ${it.application}]` : it.system ? ` [${it.system}]` : '';
     return `${user} — ${reason}${context} — ${time}`;
   }
   
@@ -66,6 +74,8 @@ function getPanelTitle(role: string | null | undefined, minutes: number): string
       return `PAM Recent Failures (last ${minutes} min)`;
     case 'iga_ops':
       return `IGA Recent Failures (last ${minutes} min)`;
+    case 'entraid_ops':
+      return `Entra ID Recent Failures (last ${minutes} min)`;
     default:
       return `Recent Failures (last ${minutes} min)`;
   }
@@ -84,14 +94,18 @@ export function RecentFailuresPanel({
   failVault = [],
   failIgaAccess = [],
   failIgaProvisioning = [],
+  failEntraAuth = [],
+  failEntraAccess = [],
 }: RecentFailuresPanelProps) {
   // Determine which failure panels to show based on role
   // SSO failures: shown for sso_ops and base ops roles
   // PAM failures: shown only for pam_ops role
   // IGA failures: shown only for iga_ops role
+  // EntraAD failures: shown only for entraid_ops role
   const showSsoFailures = role === 'sso_ops' || role === 'ops';
   const showPamFailures = role === 'pam_ops';
   const showIgaFailures = role === 'iga_ops';
+  const showEntraFailures = role === 'entraid_ops';
 
   return (
     <section>
@@ -211,9 +225,9 @@ export function RecentFailuresPanel({
             </div>
           )}
 
-          {/* IGA Failures Section (for iga_ops and general ops) */}
+          {/* IGA Failures Section (for iga_ops) */}
           {showIgaFailures && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Saviynt – Access Request Failures</CardTitle>
@@ -247,6 +261,53 @@ export function RecentFailuresPanel({
                       {failIgaProvisioning!.slice(0, 25).map((it: FailureItem, idx: number) => (
                         <li key={`iga-prov-${idx}`}>
                           {renderFailureItem(it, 'iga')}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No failures in window</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* EntraAD Failures Section (for entraid_ops) */}
+          {showEntraFailures && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Entra ID – Authentication Failures</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p className="text-sm animate-pulse">Loading...</p>
+                  ) : (failEntraAuth?.length || 0) > 0 ? (
+                    <ul className="text-sm list-disc pl-4 space-y-1">
+                      {failEntraAuth!.slice(0, 25).map((it: FailureItem, idx: number) => (
+                        <li key={`entra-auth-${idx}`}>
+                          {renderFailureItem(it, 'entra')}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No failures in window</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Entra ID – Access Failures</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p className="text-sm animate-pulse">Loading...</p>
+                  ) : (failEntraAccess?.length || 0) > 0 ? (
+                    <ul className="text-sm list-disc pl-4 space-y-1">
+                      {failEntraAccess!.slice(0, 25).map((it: FailureItem, idx: number) => (
+                        <li key={`entra-access-${idx}`}>
+                          {renderFailureItem(it, 'entra')}
                         </li>
                       ))}
                     </ul>

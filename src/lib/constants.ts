@@ -20,6 +20,11 @@ export const SYSTEMS: SystemKey[] = [
   "saviynt-requests",
   "saviynt-provisioning",
   "azure-ad",
+  "azure-ad-users",
+  "azure-ad-groups",
+  "azure-ad-apps",
+  "azure-ad-conditional",
+  "azure-ad-signin",
   "ping-mfa",
   "ping-access",
   "ping-authorize",
@@ -41,7 +46,12 @@ export const SYSTEM_LABELS: Record<SystemKey, string> = {
   "saviynt-controls": "Saviynt Controls",
   "saviynt-requests": "Saviynt Requests",
   "saviynt-provisioning": "Saviynt Provisioning",
-  "azure-ad": "Azure AD",
+  "azure-ad": "Microsoft Entra ID",
+  "azure-ad-users": "Entra ID Users",
+  "azure-ad-groups": "Entra ID Groups",
+  "azure-ad-apps": "Entra ID Apps",
+  "azure-ad-conditional": "Conditional Access",
+  "azure-ad-signin": "Sign-in Logs",
   "ping-mfa": "Ping MFA",
   "ping-access": "Ping Access",
   "ping-authorize": "Ping Authorize",
@@ -53,6 +63,7 @@ export const ROLE_MAP: Record<string, string> = {
   "sso_ops": "SSO Operations",
   "pam_ops": "PAM Operations",
   "iga_ops": "IGA Operations",
+  "entraid_ops": "Entra ID Operations",
   "tpag_ops": "TPAG Operations",
   "employee": "Employee Access",
   "management": "Management",
@@ -96,6 +107,15 @@ export const IGA_SYSTEMS: SystemKey[] = [
   "saviynt-controls",
   "saviynt-requests",
   "saviynt-provisioning",
+];
+
+export const ENTRAID_SYSTEMS: SystemKey[] = [
+  "azure-ad",
+  "azure-ad-users",
+  "azure-ad-groups",
+  "azure-ad-apps",
+  "azure-ad-conditional",
+  "azure-ad-signin",
 ];
 
 export const TPAG_SYSTEMS: SystemKey[] = [

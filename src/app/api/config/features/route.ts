@@ -21,6 +21,11 @@ export async function GET() {
       "saviynt-requests": true,
       "saviynt-provisioning": true,
       "azure-ad": true,
+      "azure-ad-users": true,
+      "azure-ad-groups": true,
+      "azure-ad-apps": true,
+      "azure-ad-conditional": true,
+      "azure-ad-signin": true,
       "ping-mfa": true,
       "ping-access": true,
       "ping-authorize": true,
@@ -35,7 +40,7 @@ export async function GET() {
       "ping-directory", "ping-federate", "ping-mfa", "ping-access", "ping-authorize", "ping-intelligence",
       "cyberark", "cyberark-epm", "cyberark-alero", "cyberark-conjur", "cyberark-dpa", "cyberark-identity",
       "saviynt", "saviynt-certifications", "saviynt-analytics", "saviynt-controls", "saviynt-requests", "saviynt-provisioning",
-      "azure-ad"
+      "azure-ad", "azure-ad-users", "azure-ad-groups", "azure-ad-apps", "azure-ad-conditional", "azure-ad-signin"
     ],
     employeeEducateGuideEnabled: true,
     quickActionsTabs: {
@@ -54,6 +59,11 @@ export async function GET() {
       "saviynt-requests": true,
       "saviynt-provisioning": true,
       "azure-ad": true,
+      "azure-ad-users": true,
+      "azure-ad-groups": true,
+      "azure-ad-apps": true,
+      "azure-ad-conditional": true,
+      "azure-ad-signin": true,
       "ping-mfa": true,
       "ping-access": true,
       "ping-authorize": true,
