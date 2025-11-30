@@ -1057,6 +1057,9 @@ export function SearchSection({
           loading={dialogLoading}
           maxWidth="5xl"
           showCopy={!isAggregate}
+          externalMode={dialogMode}
+          onModeChange={(mode) => setDialogMode(mode)}
+          showModeToggle={!isAggregate}
         >
           {/* Custom content for aggregate and single views */}
           {dialogLoading ? (
@@ -1065,18 +1068,6 @@ export function SearchSection({
             </div>
           ) : dialogData ? (
             <div className="flex-1 overflow-auto">
-              {/* Mode toggle for non-aggregate */}
-              {!isAggregate && (
-                <div className="flex justify-end p-4 pb-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setDialogMode((m) => m === "json" ? "html" : "json")}
-                  >
-                    {dialogMode === "json" ? "Key/Value" : "JSON"}
-                  </Button>
-                </div>
-              )}
               {isAggregate ? renderAggregateContent() : renderSingleContent()}
             </div>
           ) : (

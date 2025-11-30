@@ -16,7 +16,7 @@
  */
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,7 +26,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Copy } from "lucide-react";
+import { Copy, FileText, Code } from "lucide-react";
 import { toast } from "sonner";
 import { toPairs } from "@/lib/formatters";
 
@@ -48,6 +48,10 @@ export interface DataDialogProps {
   showCopy?: boolean;
   /** Custom content to render inside dialog (overrides default rendering) */
   children?: React.ReactNode;
+  /** External mode control for custom children */
+  externalMode?: DialogViewMode;
+  onModeChange?: (mode: DialogViewMode) => void;
+  showModeToggle?: boolean;
 }
 
 // ============================================================================
@@ -856,13 +860,57 @@ export function DataDialog({
   maxWidth = '4xl',
   showCopy = true,
   children,
+  externalMode,
+  onModeChange,
+  showModeToggle = false,
 }: DataDialogProps) {
   const maxWidthClass = getMaxWidthClass(maxWidth);
+  const [currentMode, setCurrentMode] = useState<DialogViewMode>(mode);
+
+  // Reset mode when prop changes
+  useEffect(() => {
+    setCurrentMode(mode);
+  }, [mode]);
+
+  // Use external mode if provided, otherwise use internal mode
+  const displayMode = externalMode || currentMode;
+  
+  // Handle mode changes (external or internal)
+  const handleModeChange = (newMode: DialogViewMode) => {
+    if (onModeChange) {
+      onModeChange(newMode);
+    } else {
+      setCurrentMode(newMode);
+    }
+  };
 
   // Determine effective mode - auto-detect table if data is array
-  const effectiveMode = mode === 'table' || (Array.isArray(data) && mode !== 'html' && mode !== 'json')
+  const effectiveMode = currentMode === 'table' || (Array.isArray(data) && currentMode !== 'html' && currentMode !== 'json')
     ? 'table'
-    : mode;
+    : currentMode;
+
+  // Extract system name from title
+  const getSystemInfo = (title: string) => {
+    const systemMatch = title.match(/^(.+?)\s*(?:Details|→)/);
+    const systemName = systemMatch ? systemMatch[1].trim() : title;
+    
+    // Get icon based on system name
+    const getIcon = () => {
+      const lower = systemName.toLowerCase();
+      if (lower.includes('azure') || lower.includes('aad')) return '☁️';
+      if (lower.includes('ping') && lower.includes('directory')) return '📁';
+      if (lower.includes('ping') && lower.includes('federate')) return '🔐';
+      if (lower.includes('ping') && lower.includes('mfa')) return '🔒';
+      if (lower.includes('cyberark')) return '🔑';
+      if (lower.includes('saviynt')) return '🛡️';
+      if (lower.includes('snow') || lower.includes('service')) return '📋';
+      return '📊';
+    };
+
+    return { name: systemName, icon: getIcon() };
+  };
+
+  const systemInfo = getSystemInfo(title);
 
   // Render content based on state
   const renderContent = () => {
@@ -891,26 +939,85 @@ export function DataDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${maxWidthClass} max-h-[90vh] flex flex-col`}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between w-full pr-12">
-            <span>{title}</span>
-            {showCopy && data && !loading && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => copyToClipboard(data, title)}
-                title="Copy JSON to clipboard"
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            )}
-          </DialogTitle>
-          {description && (
-            <DialogDescription>{description}</DialogDescription>
-          )}
-        </DialogHeader>
-        {renderContent()}
+      <DialogContent className={`${maxWidthClass} max-h-[90vh] flex flex-col overflow-hidden border-2 border-white/20 dark:border-white/10 backdrop-blur-xl bg-white/95 dark:bg-slate-900/95 shadow-2xl`}>
+        {/* Enhanced Header with Gradient */}
+        <div className="sticky top-0 z-10 -mx-6 -mt-6 px-6 py-4 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 border-b border-slate-200 dark:border-slate-700 backdrop-blur-sm">
+          <div className="flex items-start gap-4">
+            {/* System Icon */}
+            <div className="text-5xl animate-in zoom-in duration-300 mt-1">
+              {systemInfo.icon}
+            </div>
+            
+            {/* Title and Mode Switcher */}
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                {systemInfo.name}
+              </DialogTitle>
+              
+              {description && (
+                <DialogDescription className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                  {description}
+                </DialogDescription>
+              )}
+              
+              {/* Pill-Style Mode Switcher */}
+              {((children && showModeToggle) || (!children && data && !loading)) && (
+                <div className="flex items-center gap-3">
+                  <div className="inline-flex items-center gap-1 p-1 bg-white/80 dark:bg-slate-800/80 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                    <button
+                      onClick={() => handleModeChange('html')}
+                      className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                        displayMode === 'html'
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      <FileText className="h-4 w-4" />
+                      Readable
+                    </button>
+                    <button
+                      onClick={() => handleModeChange('json')}
+                      className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                        displayMode === 'json'
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      <Code className="h-4 w-4" />
+                      JSON
+                    </button>
+                  </div>
+                  
+                  {/* Floating Copy Button */}
+                  {showCopy && (
+                    <button
+                      onClick={() => copyToClipboard(data, title)}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 font-medium text-sm"
+                      title="Copy all data"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy All
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Content Area with Pattern Background */}
+        <div className="flex-1 overflow-auto relative bg-gradient-to-br from-slate-50/50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-950/50">
+          {/* Subtle Pattern Overlay */}
+          <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+            backgroundSize: '24px 24px'
+          }}></div>
+          
+          {/* Content */}
+          <div className="relative">
+            {renderContent()}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
