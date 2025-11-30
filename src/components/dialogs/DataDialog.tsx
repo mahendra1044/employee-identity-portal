@@ -354,27 +354,312 @@ function JsonView({ data }: { data: any }) {
 
 /** HTML/Key-Value pairs view renderer */
 function HtmlView({ data }: { data: any }) {
+  const [expandedArrays, setExpandedArrays] = useState<Set<string>>(new Set());
+
+  // Utility: Detect field types
+  const isEmail = (value: any): boolean => {
+    return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
+
+  const isUrl = (value: any): boolean => {
+    if (typeof value !== 'string') return false;
+    try {
+      new URL(value);
+      return value.startsWith('http://') || value.startsWith('https://');
+    } catch {
+      return false;
+    }
+  };
+
+  const isDate = (value: any): boolean => {
+    if (typeof value !== 'string') return false;
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+    return isoDateRegex.test(value);
+  };
+
+  const isTimestamp = (value: any): boolean => {
+    if (typeof value !== 'string' && typeof value !== 'number') return false;
+    const num = typeof value === 'string' ? parseInt(value) : value;
+    return !isNaN(num) && num > 946684800000 && num < 4102444800000;
+  };
+
+  // Utility: Get relative time
+  const getRelativeTime = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 30) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
+  // Utility: Get icon for field
+  const getFieldIcon = (key: string, value: any): string => {
+    const lowerKey = key.toLowerCase();
+    
+    if (isEmail(value)) return '📧';
+    if (isUrl(value)) return '🔗';
+    if (lowerKey.includes('password') || lowerKey.includes('secret')) return '🔒';
+    if (lowerKey.includes('user') || lowerKey === 'upn' || lowerKey.includes('username')) return '👤';
+    if (lowerKey.includes('email') || lowerKey.includes('mail')) return '📧';
+    if (lowerKey.includes('phone') || lowerKey.includes('mobile')) return '📱';
+    if (lowerKey.includes('date') || lowerKey.includes('time') || lowerKey.includes('sync')) return '📅';
+    if (lowerKey.includes('department') || lowerKey.includes('org')) return '🏢';
+    if (lowerKey.includes('title') || lowerKey.includes('job')) return '💼';
+    if (lowerKey.includes('manager') || lowerKey.includes('supervisor')) return '👔';
+    if (lowerKey.includes('group') || lowerKey.includes('team')) return '👥';
+    if (lowerKey.includes('role')) return '🎭';
+    if (lowerKey.includes('license') || lowerKey.includes('subscription')) return '🎫';
+    if (lowerKey.includes('device') || lowerKey.includes('computer')) return '💻';
+    if (lowerKey.includes('status') || lowerKey.includes('state')) return '📊';
+    if (lowerKey.includes('risk') || lowerKey.includes('security')) return '🛡️';
+    if (lowerKey.includes('access') || lowerKey.includes('permission')) return '🔐';
+    if (lowerKey.includes('policy') || lowerKey.includes('policies')) return '📋';
+    if (lowerKey.includes('id') || lowerKey.includes('guid')) return '🔑';
+    if (lowerKey.includes('location') || lowerKey.includes('address')) return '📍';
+    if (typeof value === 'boolean') return value ? '✅' : '❌';
+    if (Array.isArray(value)) return '📦';
+    if (typeof value === 'object' && value !== null) return '📄';
+    if (typeof value === 'number') return '🔢';
+    
+    return '📌';
+  };
+
+  // Copy value to clipboard
+  const copyValue = (key: string, value: any) => {
+    const textToCopy = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+    navigator.clipboard.writeText(textToCopy);
+    toast.success(`Copied ${key}`);
+  };
+
+  // Toggle array expansion
+  const toggleArray = (key: string) => {
+    setExpandedArrays(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  // Render a single value with smart formatting
+  const renderValue = (key: string, value: any) => {
+    // Null
+    if (value === null) {
+      return (
+        <span className="text-slate-400 italic flex items-center gap-1">
+          <span className="opacity-50">∅</span>
+          null
+        </span>
+      );
+    }
+
+    // Boolean
+    if (typeof value === 'boolean') {
+      return (
+        <span className={`font-semibold flex items-center gap-2 ${value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+          <span className="text-xl">{value ? '✅' : '❌'}</span>
+          <span>{value ? 'Yes' : 'No'}</span>
+        </span>
+      );
+    }
+
+    // Email
+    if (isEmail(value)) {
+      return (
+        <div className="flex items-center gap-2 flex-wrap">
+          <a 
+            href={`mailto:${value}`} 
+            className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+          >
+            {value}
+          </a>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 px-2 text-xs"
+            onClick={() => window.location.href = `mailto:${value}`}
+          >
+            Send Email
+          </Button>
+        </div>
+      );
+    }
+
+    // URL
+    if (isUrl(value)) {
+      return (
+        <a 
+          href={value} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 hover:underline font-medium break-all"
+        >
+          {value} 🔗
+        </a>
+      );
+    }
+
+    // Date/Timestamp
+    if (isDate(value) || isTimestamp(value)) {
+      const dateStr = isTimestamp(value) ? new Date(Number(value)).toISOString() : value;
+      const date = new Date(dateStr);
+      return (
+        <div className="flex flex-col gap-1">
+          <span className="font-medium">{date.toLocaleString()}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 italic">
+            {getRelativeTime(dateStr)}
+          </span>
+        </div>
+      );
+    }
+
+    // Number
+    if (typeof value === 'number') {
+      return (
+        <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
+          {value.toLocaleString()}
+        </span>
+      );
+    }
+
+    // String
+    if (typeof value === 'string') {
+      return (
+        <span className="break-words font-medium">
+          {value}
+        </span>
+      );
+    }
+
+    // Array
+    if (Array.isArray(value)) {
+      const isExpanded = expandedArrays.has(key);
+      const showLimit = 3;
+      const hasMore = value.length > showLimit;
+      const displayItems = isExpanded ? value : value.slice(0, showLimit);
+
+      // Check if array contains objects (complex data)
+      const isObjectArray = value.length > 0 && typeof value[0] === 'object' && value[0] !== null;
+
+      if (isObjectArray) {
+        return (
+          <div className="space-y-2 mt-2">
+            {displayItems.map((item, idx) => (
+              <div key={idx} className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
+                {Object.entries(item).map(([k, v]) => (
+                  <div key={k} className="flex items-start gap-2 py-1">
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 min-w-[100px]">
+                      {k}:
+                    </span>
+                    <span className="text-sm flex-1">
+                      {typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+                        ? String(v)
+                        : JSON.stringify(v)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
+            {hasMore && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => toggleArray(key)}
+                className="w-full"
+              >
+                {isExpanded ? 'Show Less' : `Show ${value.length - showLimit} More`}
+              </Button>
+            )}
+          </div>
+        );
+      }
+
+      // Simple array (strings, numbers)
+      return (
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {displayItems.map((item, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800"
+              >
+                {String(item)}
+              </span>
+            ))}
+          </div>
+          {hasMore && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => toggleArray(key)}
+              className="text-xs h-7"
+            >
+              {isExpanded ? 'Show Less' : `+${value.length - showLimit} more`}
+            </Button>
+          )}
+        </div>
+      );
+    }
+
+    // Object
+    if (typeof value === 'object') {
+      return (
+        <pre className="text-xs bg-slate-100 dark:bg-slate-900 p-3 rounded border border-slate-200 dark:border-slate-700 overflow-x-auto">
+          {JSON.stringify(value, null, 2)}
+        </pre>
+      );
+    }
+
+    return <span>{String(value)}</span>;
+  };
+
   const pairs = toPairs(data).slice(0, 1000);
+
   return (
     <div className="flex-1 overflow-auto pr-1 -mr-4">
       <div className="space-y-3 pr-4">
-        {pairs.map(({ k, v }) => (
-          <div 
-            key={k} 
-            className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:shadow-xl hover:border-primary/30"
-          >
-            <div className="p-4">
-              <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80 mb-2">
-                {k}
-              </h4>
-              <p className="text-base text-foreground break-words font-mono leading-relaxed">
-                {typeof v === "string" || typeof v === "number" || typeof v === "boolean"
-                  ? String(v)
-                  : JSON.stringify(v, null, 2)}
-              </p>
+        {pairs.map(({ k, v }) => {
+          const fieldIcon = getFieldIcon(k, v);
+          return (
+            <div 
+              key={k} 
+              className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:shadow-md hover:border-primary/30"
+            >
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-xl flex-shrink-0">{fieldIcon}</span>
+                    <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80">
+                      {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
+                    </h4>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0"
+                    onClick={() => copyValue(k, v)}
+                    title="Copy value"
+                  >
+                    📋
+                  </Button>
+                </div>
+                <div className="text-base text-foreground">
+                  {renderValue(k, v)}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
