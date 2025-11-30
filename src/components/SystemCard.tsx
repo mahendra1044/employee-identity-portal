@@ -476,9 +476,9 @@ export function SystemCard({
                   <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${jsonCollapsed ? '' : 'rotate-180'}`} />
                 </button>
                 
-                <div className={`overflow-hidden transition-all duration-300 ${jsonCollapsed ? 'max-h-0' : 'max-h-96'}`}>
-                  <div className="bg-slate-50 dark:bg-slate-900">
-                    <pre className="text-xs font-mono overflow-x-auto p-2">
+                <div className={`transition-all duration-300 ${jsonCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-96'}`}>
+                  <div className="h-full max-h-96 overflow-y-auto bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
+                    <pre className="text-sm font-mono p-4 text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words">
                       {JSON.stringify(data, null, 2)}
                     </pre>
                   </div>
