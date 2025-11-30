@@ -95,7 +95,7 @@ export async function getSaviynt() {
   return res.json();
 }
 
-export default {
+const api = {
   searchEmployee,
   fetchFeatures,
   getSnowIncidents,
@@ -109,3 +109,5 @@ export default {
   getCyberarkSafes,
   getSaviynt,
 };
+
+export default api;

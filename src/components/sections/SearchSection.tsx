@@ -1058,7 +1058,11 @@ export function SearchSection({
           maxWidth="5xl"
           showCopy={!isAggregate}
           externalMode={dialogMode}
-          onModeChange={(mode) => setDialogMode(mode)}
+          onModeChange={(mode) => {
+            if (mode === 'json' || mode === 'html') {
+              setDialogMode(mode);
+            }
+          }}
           showModeToggle={!isAggregate}
         >
           {/* Custom content for aggregate and single views */}

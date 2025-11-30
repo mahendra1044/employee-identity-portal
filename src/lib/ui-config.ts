@@ -67,7 +67,7 @@ export const OPS_CONFIG = {
   AUTO_LOAD_ON_LOGIN: true,
 } as const;
 
-export default {
+const uiConfig = {
   THEME_CONFIG,
   THEME_CLASSES,
   DIALOG_DEFAULTS,
@@ -78,3 +78,5 @@ export default {
   SNOW_CONFIG,
   OPS_CONFIG,
 };
+
+export default uiConfig;

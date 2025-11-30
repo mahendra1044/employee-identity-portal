@@ -776,10 +776,10 @@ function TableView({ data }: { data: any[] }) {
   return (
     <div className="flex-1 overflow-auto pr-1">
       <Table>
-        <TableHeader>
-          <TableRow>
+        <TableHeader className="sticky top-0 bg-white dark:bg-slate-900 z-10">
+          <TableRow className="border-b-2 border-slate-200 dark:border-slate-700">
             {columns.map((k) => (
-              <TableHead key={k} className="capitalize">
+              <TableHead key={k} className="capitalize font-semibold text-slate-700 dark:text-slate-300">
                 {k.replace(/([A-Z])/g, ' $1')}
               </TableHead>
             ))}
@@ -787,9 +787,12 @@ function TableView({ data }: { data: any[] }) {
         </TableHeader>
         <TableBody>
           {data.map((row: any, idx: number) => (
-            <TableRow key={idx}>
+            <TableRow 
+              key={idx}
+              className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
               {columns.map((k) => (
-                <TableCell key={k} className="text-sm break-words">
+                <TableCell key={k} className="text-sm break-words py-3">
                   {String(row[k])}
                 </TableCell>
               ))}
