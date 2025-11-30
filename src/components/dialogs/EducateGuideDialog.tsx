@@ -156,41 +156,53 @@ export function EducateGuideDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Educational Guides — By System</DialogTitle>
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-800">
+        {/* Glassmorphism Header with Gradient */}
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-pink-500/20 border-b border-slate-200/50 dark:border-slate-700/50">
+          <DialogTitle className="pr-12 flex items-center gap-2 text-lg font-semibold">
+            <span className="text-2xl">📚</span>
+            <span>Educational Guides</span>
+            <span className="text-sm font-normal text-slate-600 dark:text-slate-400">— By System</span>
+          </DialogTitle>
         </DialogHeader>
-        <div className="space-y-0">
-          <Accordion type="single" collapsible className="w-full">
+
+        {/* Content Area with improved spacing */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <Accordion type="single" collapsible className="w-full space-y-2">
             {SYSTEMS.map((sys) => {
               const points =
                 (EDUCATE_CONFIG as Record<string, string[]>)[sys] || [];
               const guide = EDUCATE_GUIDE[sys];
               return (
-                <AccordionItem key={sys} value={sys}>
-                  <AccordionTrigger className="text-left hover:no-underline">
-                    <div className="flex items-center justify-between w-full">
-                      <span className="font-medium">
+                <AccordionItem 
+                  key={sys} 
+                  value={sys}
+                  className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+                >
+                  <AccordionTrigger className="text-left hover:no-underline px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors">
+                    <div className="flex items-center gap-3 w-full pr-2">
+                      <span className="font-medium text-slate-900 dark:text-slate-100">
                         {SYSTEM_LABELS[sys as SystemKey]}
                       </span>
-                      <span className="text-xs px-2 py-0.5 rounded border bg-muted ml-auto whitespace-nowrap">
+                      <span className="text-[10px] px-2 py-1 rounded-full border border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 ml-auto whitespace-nowrap font-medium">
                         {sys.replace(/-/g, " ").toUpperCase()}
                       </span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="space-y-3 pt-3">
+                  <AccordionContent className="px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30">
                     {points.length > 0 ? (
-                      <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                      <ol className="list-decimal list-inside space-y-2.5 text-sm">
                         {points.map((point: string, idx: number) => (
-                          <li key={idx} className="text-sm">
+                          <li key={idx} className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed pl-1">
                             {point}
                           </li>
                         ))}
                       </ol>
                     ) : (
-                      <p className="text-sm text-muted-foreground italic">
-                        No educational points configured for this system.
-                      </p>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 italic py-2">
+                        <span>💡</span>
+                        <span>No educational points configured for this system.</span>
+                      </div>
                     )}
                   </AccordionContent>
                 </AccordionItem>
