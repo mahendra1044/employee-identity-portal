@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Copy, RefreshCw, Eye, Code, FileText } from "lucide-react";
+import { Copy, RefreshCw, Eye, Code, FileText, ChevronDown, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -51,6 +51,53 @@ export function SystemCard({
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [jsonCollapsed, setJsonCollapsed] = useState(true);
+
+  // Helper: Detect status from data
+  const getDataStatus = (data: SystemData | null): 'success' | 'warning' | 'error' | 'loading' | 'empty' => {
+    if (loading) return 'loading';
+    if (error) return 'error';
+    if (!data) return 'empty';
+    
+    // Check for common status indicators
+    const status = String(data?.status || data?.state || data?.enabled || '').toLowerCase();
+    if (status.includes('active') || status === 'true' || status === '1') return 'success';
+    if (status.includes('inactive') || status.includes('disabled') || status === 'false') return 'warning';
+    
+    return 'success'; // Default to success if data exists
+  };
+
+  // Helper: Extract key metrics from data
+  const extractKeyMetrics = (data: SystemData | null): Array<{ icon: string; label: string; value: string }> => {
+    if (!data || typeof data !== 'object') return [];
+    
+    const metrics: Array<{ icon: string; label: string; value: string }> = [];
+    const dataObj = data as Record<string, any>;
+    
+    // Extract common patterns
+    if (dataObj.groups || dataObj.memberOf) {
+      const groups = Array.isArray(dataObj.groups) ? dataObj.groups : (Array.isArray(dataObj.memberOf) ? dataObj.memberOf : []);
+      if (groups.length > 0) metrics.push({ icon: '👥', label: 'Groups', value: String(groups.length) });
+    }
+    
+    if (dataObj.status || dataObj.state) {
+      const status = String(dataObj.status || dataObj.state);
+      metrics.push({ icon: '🔐', label: 'Status', value: status });
+    }
+    
+    if (dataObj.lastLogin || dataObj.lastSignIn || dataObj.lastActivity) {
+      const time = dataObj.lastLogin || dataObj.lastSignIn || dataObj.lastActivity;
+      metrics.push({ icon: '📅', label: 'Activity', value: String(time).substring(0, 10) });
+    }
+    
+    if (dataObj.email || dataObj.mail || dataObj.userPrincipalName) {
+      const email = dataObj.email || dataObj.mail || dataObj.userPrincipalName;
+      metrics.push({ icon: '📧', label: 'Email', value: String(email).substring(0, 20) });
+    }
+    
+    // Limit to 3 metrics
+    return metrics.slice(0, 3);
+  };
 
   const loadInitial = async (showToast = true) => {
     console.log(`🔄 [${system}] loadInitial START - enabled:`, enabled, 'userKey:', userKey, 'token:', !!token);
@@ -251,11 +298,26 @@ export function SystemCard({
 
   return (
     <>
-      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-slate-200 dark:border-slate-700 shadow-sm">
+      <Card className={`transition-all duration-300 ${
+        getDataStatus(data) === 'success' ? 'border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600' :
+        getDataStatus(data) === 'warning' ? 'border-2 border-yellow-200 dark:border-yellow-800/50' :
+        getDataStatus(data) === 'error' ? 'border-2 border-red-200 dark:border-red-800/50' :
+        'border border-slate-200 dark:border-slate-700'
+      } bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm`}>
         <CardContent className="p-0">
-          {/* Ultra-compact header with inline name, user badge, and action buttons */}
-          <div className="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 min-w-0">
+          {/* Enhanced Header with Status Badge */}
+          <div className="flex items-center justify-between gap-2 px-2 py-1.5 bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {/* Status Indicator */}
+              {getDataStatus(data) === 'success' && <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />}
+              {getDataStatus(data) === 'warning' && <AlertCircle className="h-3.5 w-3.5 text-yellow-500 shrink-0" />}
+              {getDataStatus(data) === 'error' && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+              {getDataStatus(data) === 'loading' && (
+                <div className="h-3.5 w-3.5 shrink-0">
+                  <RefreshCw className="h-3.5 w-3.5 text-blue-500 animate-spin" />
+                </div>
+              )}
+              
               <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{name}</span>
               {userKey && (
                 <span className="text-xs bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded shrink-0">
@@ -263,54 +325,78 @@ export function SystemCard({
                 </span>
               )}
             </div>
-            <div className="flex gap-0.5 shrink-0">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="sm" variant="ghost" onClick={() => loadInitial(true)} disabled={!enabled || loading} className="h-5 w-5 p-0">
-                    <RefreshCw className={`h-2.5 w-2.5 ${loading ? 'animate-spin' : ''}`} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent><p>Refresh</p></TooltipContent>
-              </Tooltip>
-              {data && (
+            
+            {/* Grouped Action Buttons */}
+            <div className="flex gap-1 shrink-0">
+              {/* Primary Actions */}
+              <div className="flex gap-0.5 pr-1 border-r border-slate-300 dark:border-slate-600">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button size="sm" variant="ghost" className="h-5 w-5 p-0" onClick={() => {
-                      navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-                      toast.success(`Copied ${name} JSON`);
-                    }}>
-                      <Copy className="h-2.5 w-2.5" />
+                    <Button size="sm" variant="ghost" onClick={() => loadInitial(true)} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
+                      <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>Copy</p></TooltipContent>
+                  <TooltipContent><p>Refresh</p></TooltipContent>
                 </Tooltip>
-              )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="sm" variant="ghost" onClick={loadDetails} disabled={!enabled || loading} className="h-5 w-5 p-0">
-                    <Eye className="h-2.5 w-2.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent><p>Details</p></TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="sm" variant="ghost" onClick={openHtmlView} disabled={!enabled || loading} className="h-5 w-5 p-0">
-                    <Code className="h-2.5 w-2.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent><p>View</p></TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="sm" variant="ghost" onClick={openTicketDialog} disabled={!enabled} className="h-5 w-5 p-0">
-                    <FileText className="h-2.5 w-2.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent><p>Ticket</p></TooltipContent>
-              </Tooltip>
+                {data && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700" onClick={() => {
+                        navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+                        toast.success(`Copied ${name} JSON`);
+                      }}>
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Copy JSON</p></TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+              
+              {/* View Actions */}
+              <div className="flex gap-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="ghost" onClick={loadDetails} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
+                      <Eye className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Details</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="ghost" onClick={openHtmlView} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
+                      <Code className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>HTML View</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="ghost" onClick={openTicketDialog} disabled={!enabled} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
+                      <FileText className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Create Ticket</p></TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
+          
+          {/* Key Metrics Row - Phase 2 Lite */}
+          {data && !loading && !error && extractKeyMetrics(data).length > 0 && (
+            <div className="flex items-center gap-3 px-2 py-1.5 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200 dark:border-slate-700">
+              {extractKeyMetrics(data).map((metric, idx) => (
+                <div key={idx} className="flex items-center gap-1.5">
+                  <span className="text-sm">{metric.icon}</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 leading-none">{metric.label}</span>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-none mt-0.5 truncate max-w-[100px]" title={metric.value}>{metric.value}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           {system === "ping-federate" && role === "employee" && (
             <div className="flex flex-wrap gap-1 px-2 py-1 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
               <Button
@@ -380,25 +466,64 @@ export function SystemCard({
           )}
           <div>
             {loading ? (
-              <div className="text-center py-3 px-2">
-                <p className="text-xs text-muted-foreground animate-pulse">Loading...</p>
+              <div className="flex flex-col items-center justify-center py-8 px-2 space-y-2">
+                <RefreshCw className="h-8 w-8 text-blue-500 animate-spin" />
+                <p className="text-xs text-slate-600 dark:text-slate-400">Loading {name} data...</p>
               </div>
             ) : error ? (
-              <div className="text-center py-3 px-2">
-                <p className="text-xs text-red-600">{error}</p>
-                <Button size="sm" variant="outline" onClick={() => loadInitial(true)} className="mt-1 h-6 text-xs">
+              <div className="flex flex-col items-center justify-center py-6 px-2 space-y-3">
+                <XCircle className="h-10 w-10 text-red-500" />
+                <p className="text-xs text-red-600 dark:text-red-400 text-center max-w-[250px]">{error}</p>
+                <Button size="sm" variant="outline" onClick={() => loadInitial(true)} className="h-7 text-xs hover:bg-red-50 dark:hover:bg-red-950 border-red-200 dark:border-red-800">
+                  <RefreshCw className="h-3 w-3 mr-1" />
                   Retry
                 </Button>
               </div>
             ) : data ? (
-              <div className="bg-slate-50 dark:bg-slate-900">
-                <pre className="text-xs font-mono overflow-x-auto p-2 max-h-96">
-                  {JSON.stringify(data, null, 2)}
-                </pre>
+              <div>
+                {/* Collapsible JSON Section */}
+                <button
+                  onClick={() => setJsonCollapsed(!jsonCollapsed)}
+                  className="w-full flex items-center justify-between px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-700 text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <Code className="h-3 w-3 text-slate-500" />
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Raw JSON Data</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">({Object.keys(data).length} fields)</span>
+                  </div>
+                  <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${jsonCollapsed ? '' : 'rotate-180'}`} />
+                </button>
+                
+                <div className={`overflow-hidden transition-all duration-300 ${jsonCollapsed ? 'max-h-0' : 'max-h-96'}`}>
+                  <div className="bg-slate-50 dark:bg-slate-900">
+                    <pre className="text-xs font-mono overflow-x-auto p-2">
+                      {JSON.stringify(data, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+                
+                {/* Quick Action for collapsed state */}
+                {jsonCollapsed && (
+                  <div className="px-2 py-2 text-center">
+                    <button
+                      onClick={() => setJsonCollapsed(false)}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      Expand to view full JSON ↓
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="text-center py-3 px-2">
-                <p className="text-xs text-muted-foreground">No data</p>
+              <div className="flex flex-col items-center justify-center py-8 px-2 space-y-3">
+                <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                  <Code className="h-6 w-6 text-slate-400" />
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">No data available</p>
+                <Button size="sm" variant="outline" onClick={() => loadInitial(true)} disabled={!enabled} className="h-7 text-xs">
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Load Data
+                </Button>
               </div>
             )}
           </div>
