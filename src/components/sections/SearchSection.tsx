@@ -8,7 +8,7 @@
  */
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -200,21 +200,24 @@ export function SearchSection({
               {dialogMode === "html" ? (
                 <div className="space-y-3">
                   {val ? (
-                    <div className="bg-card border rounded-lg p-4">
-                      <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {toPairs(val).slice(0, 50).map(({ k, v }, idx) => (
-                          <div key={idx} className="space-y-1.5 pb-3 border-b last:border-b-0">
-                            <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    <div className="space-y-3">
+                      {toPairs(val).slice(0, 50).map(({ k, v }, idx) => (
+                        <div 
+                          key={idx} 
+                          className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:shadow-xl hover:border-primary/30"
+                        >
+                          <div className="p-4">
+                            <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80 mb-2">
                               {k}
-                            </dt>
-                            <dd className="text-sm font-medium break-words leading-relaxed">
+                            </h4>
+                            <p className="text-base text-foreground break-words font-mono leading-relaxed">
                               {typeof v === "string" || typeof v === "number" || typeof v === "boolean"
                                 ? String(v)
                                 : JSON.stringify(v, null, 2)}
-                            </dd>
+                            </p>
                           </div>
-                        ))}
-                      </dl>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div className="bg-muted/30 border border-dashed rounded-lg p-6 text-center">
@@ -223,10 +226,13 @@ export function SearchSection({
                   )}
                 </div>
               ) : (
-                <div className="bg-card border rounded-lg p-4">
-                  <pre className="text-xs bg-muted/30 p-3 rounded overflow-auto font-mono leading-relaxed">
-                    {JSON.stringify(val, null, 2)}
-                  </pre>
+                <div>
+                  <div className="bg-slate-950 text-slate-100 p-3 rounded-lg overflow-auto font-mono text-sm leading-relaxed shadow-inner">
+                    {(() => {
+                      jsonLineNumberRef.current = 1;
+                      return renderJsonValue(val, `agg-${sys}`);
+                    })()}
+                  </div>
                 </div>
               )}
             </div>
@@ -236,39 +242,283 @@ export function SearchSection({
     );
   };
 
-  // Render single item view content
+  // Interactive JSON tree renderer
+  const [jsonCollapsed, setJsonCollapsed] = useState<Set<string>>(new Set());
+  const jsonLineNumberRef = React.useRef(1);
+  
+  const toggleJsonCollapse = (path: string) => {
+    setJsonCollapsed(prev => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+      return next;
+    });
+  };
+  
+  const getNextJsonLineNumber = () => {
+    const current = jsonLineNumberRef.current;
+    jsonLineNumberRef.current += 1;
+    return current;
+  };
+
+  const copyJsonValue = (value: any, key?: string) => {
+    const textToCopy = key 
+      ? `"${key}": ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`
+      : typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+    navigator.clipboard.writeText(textToCopy);
+    toast.success('Copied to clipboard');
+  };
+
+  const isTimestamp = (value: any): boolean => {
+    if (typeof value !== 'string' && typeof value !== 'number') return false;
+    const num = typeof value === 'string' ? parseInt(value) : value;
+    return !isNaN(num) && num > 946684800000 && num < 4102444800000;
+  };
+
+  const isUrl = (value: any): boolean => {
+    if (typeof value !== 'string') return false;
+    try {
+      new URL(value);
+      return value.startsWith('http://') || value.startsWith('https://');
+    } catch {
+      return false;
+    }
+  };
+
+  const isEmail = (value: any): boolean => {
+    if (typeof value !== 'string') return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
+
+  const renderJsonValue = (value: any, path: string, key?: string, indent: number = 0): React.ReactNode => {
+    const isCollapsed = jsonCollapsed.has(path);
+    const indentStyle = { paddingLeft: `${indent * 8}px` };
+    const lineNum = getNextJsonLineNumber();
+    
+    if (value === null) {
+      return (
+        <div key={path} className="flex items-start group">
+          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{lineNum}</span>
+          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
+            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
+            <span className="text-purple-400 flex items-center gap-1">
+              <span className="text-xs opacity-70">∅</span>
+              null
+            </span>
+          </div>
+        </div>
+      );
+    }
+    
+    if (typeof value === 'boolean') {
+      const boolLineNum = getNextJsonLineNumber();
+      return (
+        <div key={path} className="flex items-start group">
+          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{boolLineNum}</span>
+          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
+            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
+            <span className={`flex items-center gap-1 font-semibold ${value ? 'text-green-400' : 'text-red-400'}`}>
+              <span className="text-xs">{value ? '✓' : '✗'}</span>
+              {String(value)}
+            </span>
+            <button
+              onClick={() => copyJsonValue(value, key)}
+              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+            >
+              📋
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    if (typeof value === 'number') {
+      const numLineNum = getNextJsonLineNumber();
+      const isTs = isTimestamp(value);
+      return (
+        <div key={path} className="flex items-start group">
+          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{numLineNum}</span>
+          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
+            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
+            <span className="text-blue-400 flex items-center gap-1 font-semibold">
+              <span className="text-xs opacity-70">#</span>
+              {value}
+            </span>
+            {isTs && (
+              <span className="text-xs text-slate-500 italic">
+                ({new Date(value).toLocaleString()})
+              </span>
+            )}
+            <button
+              onClick={() => copyJsonValue(value, key)}
+              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+            >
+              📋
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    if (typeof value === 'string') {
+      const strLineNum = getNextJsonLineNumber();
+      const isLong = value.length > 100;
+      const displayValue = isLong && isCollapsed ? value.substring(0, 100) + '...' : value;
+      const isUrlVal = isUrl(value);
+      const isEmailVal = isEmail(value);
+      
+      return (
+        <div key={path} className="flex items-start group">
+          <span className="text-slate-600 text-xs w-12 text-right pr-4 select-none flex-shrink-0 pt-1">{strLineNum}</span>
+          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
+            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
+            <span className="text-green-400 flex items-center gap-1">
+              <span className="text-xs opacity-70">"</span>
+              <span className="text-green-300">
+                {isUrlVal ? (
+                  <a href={value} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-100">
+                    {displayValue} 🔗
+                  </a>
+                ) : isEmailVal ? (
+                  <a href={`mailto:${value}`} className="underline hover:text-green-100">
+                    {displayValue} 📧
+                  </a>
+                ) : (
+                  displayValue
+                )}
+              </span>
+              <span className="text-xs opacity-70">"</span>
+            </span>
+            {isLong && (
+              <button
+                onClick={() => toggleJsonCollapse(path)}
+                className="text-xs text-blue-400 hover:text-blue-300 ml-1"
+              >
+                {isCollapsed ? 'Show more' : 'Show less'}
+              </button>
+            )}
+            <button
+              onClick={() => copyJsonValue(value, key)}
+              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+            >
+              📋
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    if (Array.isArray(value)) {
+      const arrLineNum = getNextJsonLineNumber();
+      const count = value.length;
+      return (
+        <div key={path} className="py-1">
+          <div className="flex items-start group">
+            <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{arrLineNum}</span>
+            <div style={indentStyle} className="flex items-center gap-2 flex-1">
+              <button
+                onClick={() => toggleJsonCollapse(path)}
+                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold"
+              >
+                <span className="text-xs">{isCollapsed ? '▶' : '▼'}</span>
+                {key && <span className="text-cyan-300">"{key}":</span>}
+                <span>[{isCollapsed ? '...' : ''}]</span>
+                <span className="text-xs bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
+              </button>
+              <button
+                onClick={() => copyJsonValue(value, key)}
+                className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+              >
+                📋
+              </button>
+            </div>
+          </div>
+          {!isCollapsed && (
+            <div className="border-l-2 border-slate-700/50 ml-7">
+              {value.map((item, i) => renderJsonValue(item, `${path}[${i}]`, undefined, indent + 1))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    if (typeof value === 'object') {
+      const objLineNum = getNextJsonLineNumber();
+      const entries = Object.entries(value);
+      const count = entries.length;
+      return (
+        <div key={path} className="py-1">
+          <div className="flex items-start group">
+            <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{objLineNum}</span>
+            <div style={indentStyle} className="flex items-center gap-2 flex-1">
+              <button
+                onClick={() => toggleJsonCollapse(path)}
+                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold"
+              >
+                <span className="text-xs">{isCollapsed ? '▶' : '▼'}</span>
+                {key && <span className="text-cyan-300">"{key}":</span>}
+                <span>{'{'}{isCollapsed ? '...' : ''}{'}'}</span>
+                <span className="text-xs bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
+              </button>
+              <button
+                onClick={() => copyJsonValue(value, key)}
+                className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+              >
+                📋
+              </button>
+            </div>
+          </div>
+          {!isCollapsed && (
+            <div className="border-l-2 border-slate-700/50 ml-7">
+              {entries.map(([k, v]) => renderJsonValue(v, `${path}.${k}`, k, indent + 1))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
   const renderSingleContent = () => {
     if (!dialogData) return null;
     
     if (dialogMode === "html") {
       return (
         <div className="p-4">
-          <div className="bg-card border rounded-lg p-5">
-            <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {toPairs(dialogData).slice(0, 80).map(({ k, v }, idx) => (
-                <div key={idx} className="space-y-1.5 pb-3 border-b last:border-b-0">
-                  <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <div className="space-y-3">
+            {toPairs(dialogData).slice(0, 80).map(({ k, v }, idx) => (
+              <div 
+                key={idx} 
+                className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:shadow-xl hover:border-primary/30"
+              >
+                <div className="p-4">
+                  <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80 mb-2">
                     {k}
-                  </dt>
-                  <dd className="text-sm font-medium break-words leading-relaxed">
+                  </h4>
+                  <p className="text-base text-foreground break-words font-mono leading-relaxed">
                     {typeof v === "string" || typeof v === "number" || typeof v === "boolean"
                       ? String(v)
-                      : JSON.stringify(v)}
-                  </dd>
+                      : JSON.stringify(v, null, 2)}
+                  </p>
                 </div>
-              ))}
-            </dl>
+              </div>
+            ))}
           </div>
         </div>
       );
     }
     
+    // Reset line counter before rendering
+    jsonLineNumberRef.current = 1;
+    
     return (
-      <div className="p-4">
-        <div className="bg-card border rounded-lg p-4">
-          <pre className="text-xs bg-muted/30 p-3 rounded overflow-auto font-mono leading-relaxed">
-            {JSON.stringify(dialogData, null, 2)}
-          </pre>
+      <div className="p-2">
+        <div className="bg-slate-950 text-slate-100 p-3 rounded-lg overflow-auto font-mono text-sm leading-relaxed shadow-inner">
+          {renderJsonValue(dialogData, 'root')}
         </div>
       </div>
     );
