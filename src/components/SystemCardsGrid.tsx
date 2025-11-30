@@ -26,7 +26,7 @@ export function SystemCardsGrid({
 }: SystemCardsGridProps) {
   if (!anyEnabled) {
     return (
-      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
+      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
         <CardContent className="p-3">
           <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
             No systems enabled
@@ -41,7 +41,7 @@ export function SystemCardsGrid({
 
   if (visibleSystems.length === 0) {
     return (
-      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
+      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
         <CardContent className="p-3">
           <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
             No cards visible

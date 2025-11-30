@@ -977,8 +977,17 @@ export function SearchSection({
 
   return (
     <>
-      <section>
-        <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
+      <section className="mb-6">
+        <div className="mb-2 px-1">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Employee Search
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Search for employees across all connected systems</p>
+        </div>
+        <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
           <CardContent className="p-3">
             {/* Integrated search bar with button inside */}
             <div className="mb-2">

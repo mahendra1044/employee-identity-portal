@@ -320,7 +320,16 @@ export default function HomePage() {
         )}
 
         {/* System Cards (hide by default for ops) */}
-        <section>
+        <section className="mb-6">
+          <div className="mb-2 px-1">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+              System Cards
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">View and manage identity data across all integrated systems</p>
+          </div>
           <SystemCardsGrid
             visibleSystems={visibleSystems}
             enabled={enabled}

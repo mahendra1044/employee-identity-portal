@@ -112,8 +112,8 @@ export function QuickActionsCard({
   const effectiveActive = qaEnabledTabs[qaActive] ? qaActive : enabledSystems[0];
 
   return (
-    <section>
-      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
+    <section className="mb-6">
+      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
         <CardContent className="p-2">
           {/* Header: Title, External Tools, and Target User */}
           <div className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
