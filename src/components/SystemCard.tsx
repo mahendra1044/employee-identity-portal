@@ -91,7 +91,7 @@ export function SystemCard({
     
     if (dataObj.email || dataObj.mail || dataObj.userPrincipalName) {
       const email = dataObj.email || dataObj.mail || dataObj.userPrincipalName;
-      metrics.push({ icon: '📧', label: 'Email', value: String(email).substring(0, 20) });
+      metrics.push({ icon: '📧', label: 'Email', value: String(email) });
     }
     
     // Limit to 3 metrics
@@ -373,7 +373,7 @@ export function SystemCard({
                   <span className="text-sm">{metric.icon}</span>
                   <div className="flex flex-col">
                     <span className="text-xs text-slate-500 dark:text-slate-400 leading-none">{metric.label}</span>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-none mt-0.5 truncate max-w-[100px]" title={metric.value}>{metric.value}</span>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-none mt-0.5" title={metric.value}>{metric.value}</span>
                   </div>
                 </div>
               ))}

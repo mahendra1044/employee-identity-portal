@@ -82,27 +82,27 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-800">
-        {/* Glassmorphism Header with Gradient */}
-        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 bg-gradient-to-r from-slate-500/10 via-slate-400/10 to-slate-500/10 dark:from-slate-500/20 dark:via-slate-400/20 dark:to-slate-500/20 border-b border-slate-200/50 dark:border-slate-700/50">
-          <DialogTitle className="pr-12 flex items-center gap-2 text-lg font-semibold">
-            <span className="text-2xl">⚙️</span>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 border-2 border-slate-300 dark:border-slate-600 shadow-md">
+        {/* Header */}
+        <DialogHeader className="flex-shrink-0 px-6 pt-4 pb-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
+          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold">
+            <span className="text-lg">⚙️</span>
             <span>System Visibility Settings</span>
           </DialogTitle>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 pr-12">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 pr-12">
             Customize which system cards appear on your dashboard. Changes reset on logout.
           </p>
         </DialogHeader>
 
         {/* Stats Bar */}
-        <div className="flex items-center justify-between gap-3 flex-shrink-0 px-6 py-3 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex items-center gap-3 text-xs">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-medium bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400">
-              <span className="text-sm">✅</span>
+        <div className="flex items-center justify-between gap-3 flex-shrink-0 px-6 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
+              <span className="text-xs">✅</span>
               {enabledCount} Active
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-medium bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
-              <span className="text-sm">📊</span>
+            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
+              <span className="text-xs">📊</span>
               {totalSystems} Total
             </span>
           </div>
@@ -110,9 +110,9 @@ export function SettingsDialog({
             variant="outline" 
             size="sm"
             onClick={handleReset}
-            className="transition-all hover:scale-105"
+            className="h-7 text-xs"
           >
-            🔄 Reset to Defaults
+            🔄 Reset
           </Button>
         </div>
 
@@ -126,9 +126,9 @@ export function SettingsDialog({
               return (
                 <div key={category} className="space-y-2">
                   {/* Category Header */}
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r ${info.color} border border-slate-200 dark:border-slate-700`}>
-                    <span className="text-xl">{info.icon}</span>
-                    <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{info.name}</span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border border-slate-200 dark:border-slate-700">
+                    <span className="text-sm">{info.icon}</span>
+                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">{info.name}</span>
                     <span className="text-xs text-slate-500 dark:text-slate-400 ml-auto">
                       {systems.filter(s => userToggles[s] ?? false).length}/{systems.length}
                     </span>

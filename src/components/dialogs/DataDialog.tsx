@@ -155,10 +155,10 @@ function JsonView({ data }: { data: any }) {
       return (
         <div className="flex items-start group">
           <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{lineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
-            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
-            <span className="text-purple-400 flex items-center gap-1">
-              <span className="text-xs opacity-70">∅</span>
+          <div style={indentStyle} className="flex items-center gap-2 py-0.5 flex-1">
+            {key && <span className="text-cyan-300 font-semibold text-xs">"{key}":</span>}
+            <span className="text-purple-400 flex items-center gap-1 text-xs">
+              <span className="text-[10px] opacity-70">∅</span>
               null
             </span>
           </div>
@@ -172,15 +172,15 @@ function JsonView({ data }: { data: any }) {
       return (
         <div className="flex items-start group">
           <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{boolLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
-            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
-            <span className={`flex items-center gap-1 font-semibold ${value ? 'text-green-400' : 'text-red-400'}`}>
-              <span className="text-xs">{value ? '✓' : '✗'}</span>
+          <div style={indentStyle} className="flex items-center gap-2 py-0.5 flex-1">
+            {key && <span className="text-cyan-300 font-semibold text-xs">"{key}":</span>}
+            <span className={`flex items-center gap-1 font-semibold text-xs ${value ? 'text-green-400' : 'text-red-400'}`}>
+              <span className="text-[10px]">{value ? '✓' : '✗'}</span>
               {String(value)}
             </span>
             <button
               onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
               title="Copy key-value"
             >
               📋
@@ -197,20 +197,20 @@ function JsonView({ data }: { data: any }) {
       return (
         <div className="flex items-start group">
           <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{numLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
-            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
-            <span className="text-blue-400 flex items-center gap-1 font-semibold">
-              <span className="text-xs opacity-70">#</span>
+          <div style={indentStyle} className="flex items-center gap-2 py-0.5 flex-1">
+            {key && <span className="text-cyan-300 font-semibold text-xs">"{key}":</span>}
+            <span className="text-blue-400 flex items-center gap-1 font-semibold text-xs">
+              <span className="text-[10px] opacity-70">#</span>
               {value}
             </span>
             {isTs && (
-              <span className="text-xs text-slate-500 italic">
+              <span className="text-[10px] text-slate-500 italic">
                 ({new Date(value).toLocaleString()})
               </span>
             )}
             <button
               onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
               title="Copy key-value"
             >
               📋
@@ -231,18 +231,18 @@ function JsonView({ data }: { data: any }) {
       return (
         <div className="flex items-start group">
           <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{strLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
-            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
-            <span className="text-green-400 flex items-center gap-1">
-              <span className="text-xs opacity-70">"</span>
+          <div style={indentStyle} className="flex items-center gap-2 py-0.5 flex-1">
+            {key && <span className="text-cyan-300 font-semibold text-xs">"{key}":</span>}
+            <span className="text-green-400 flex items-center gap-1 text-xs">
+              <span className="text-[10px] opacity-70">"</span>
               <span className="text-green-300">
                 {isUrlVal ? (
                   <a href={value} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-100">
-                    {displayValue} 🔗
+                    {displayValue}
                   </a>
                 ) : isEmailVal ? (
                   <a href={`mailto:${value}`} className="underline hover:text-green-100">
-                    {displayValue} 📧
+                    {displayValue}
                   </a>
                 ) : (
                   displayValue
@@ -253,14 +253,14 @@ function JsonView({ data }: { data: any }) {
             {isLong && (
               <button
                 onClick={() => toggleCollapse(path)}
-                className="text-xs text-blue-400 hover:text-blue-300 ml-1"
+                className="text-[10px] text-blue-400 hover:text-blue-300 ml-1"
               >
                 {isCollapsed ? 'Show more' : 'Show less'}
               </button>
             )}
             <button
               onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
               title="Copy key-value"
             >
               📋
@@ -281,16 +281,16 @@ function JsonView({ data }: { data: any }) {
             <div style={indentStyle} className="flex items-center gap-2 flex-1">
               <button
                 onClick={() => toggleCollapse(path)}
-                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold"
+                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs"
               >
-                <span className="text-xs">{isCollapsed ? '▶' : '▼'}</span>
+                <span className="text-[10px]">{isCollapsed ? '▶' : '▼'}</span>
                 {key && <span className="text-cyan-300">"{key}":</span>}
                 <span>[{isCollapsed ? '...' : ''}]</span>
-                <span className="text-xs bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
+                <span className="text-[10px] bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
               </button>
               <button
                 onClick={() => copyValue(value, key)}
-                className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
                 title="Copy key-value"
               >
                 📋
@@ -318,16 +318,16 @@ function JsonView({ data }: { data: any }) {
             <div style={indentStyle} className="flex items-center gap-2 flex-1">
               <button
                 onClick={() => toggleCollapse(path)}
-                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold"
+                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs"
               >
-                <span className="text-xs">{isCollapsed ? '▶' : '▼'}</span>
+                <span className="text-[10px]">{isCollapsed ? '▶' : '▼'}</span>
                 {key && <span className="text-cyan-300">"{key}":</span>}
                 <span>{'{'}{isCollapsed ? '...' : ''}{'}'}</span>
-                <span className="text-xs bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
+                <span className="text-[10px] bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
               </button>
               <button
                 onClick={() => copyValue(value, key)}
-                className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
                 title="Copy key-value"
               >
                 📋
@@ -350,7 +350,7 @@ function JsonView({ data }: { data: any }) {
   lineNumberRef.current = 1;
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 p-3 rounded-lg overflow-auto font-mono text-sm leading-relaxed shadow-inner">
+    <div className="flex-1 bg-slate-950 text-slate-100 p-3 rounded-lg overflow-auto font-mono text-xs leading-relaxed shadow-inner">
       {renderValue(data, 'root')}
     </div>
   );
@@ -510,8 +510,8 @@ function HtmlView({ data }: { data: any }) {
     // Boolean
     if (typeof value === 'boolean') {
       return (
-        <span className={`font-semibold flex items-center gap-2 ${value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-          <span className="text-xl">{value ? '✅' : '❌'}</span>
+        <span className={`font-medium flex items-center gap-1 ${value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+          <span className="text-xs">{value ? '✅' : '❌'}</span>
           <span>{value ? 'Yes' : 'No'}</span>
         </span>
       );
@@ -635,7 +635,7 @@ function HtmlView({ data }: { data: any }) {
             {displayItems.map((item, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800"
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
               >
                 {String(item)}
               </span>
@@ -646,7 +646,7 @@ function HtmlView({ data }: { data: any }) {
               size="sm"
               variant="ghost"
               onClick={() => toggleArray(key)}
-              className="text-xs h-7"
+              className="text-xs h-6"
             >
               {isExpanded ? 'Show Less' : `+${value.length - showLimit} more`}
             </Button>
@@ -701,54 +701,54 @@ function HtmlView({ data }: { data: any }) {
           return (
             <div 
               key={`${group.section}-${groupIndex}`}
-              className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-card shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
+              className="border border-slate-200 dark:border-slate-700 rounded overflow-hidden bg-card shadow-sm"
             >
               <button
                 onClick={() => toggleSection(`${group.section}-${groupIndex}`)}
-                className={`w-full flex items-center justify-between p-4 bg-gradient-to-r ${group.gradient} hover:opacity-90 transition-all duration-200`}
+                className="w-full flex items-center justify-between p-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl transition-transform duration-200">{group.icon}</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs">{group.icon}</span>
+                  <h3 className="text-[10px] font-semibold text-slate-700 dark:text-slate-200">
                     {group.title}
                   </h3>
-                  <span className="text-xs bg-white/60 dark:bg-black/30 px-2 py-1 rounded-full font-semibold">
+                  <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded font-medium text-slate-600 dark:text-slate-400">
                     {group.fields.length}
                   </span>
                 </div>
-                <span className={`text-slate-600 dark:text-slate-400 text-xl transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}>
+                <span className={`text-slate-600 dark:text-slate-400 text-xs transition-transform ${isCollapsed ? '' : 'rotate-90'}`}>
                   ▶
                 </span>
               </button>
               
               {!isCollapsed && (
-                <div className="p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="p-2 space-y-1.5">
                   {group.fields.map(({ k, v }, fieldIndex) => {
                     const fieldIcon = getFieldIcon(k, v);
                     return (
                       <div 
                         key={`${group.section}-${groupIndex}-${k}-${fieldIndex}`}
-                        className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200 ease-in-out hover:shadow-md hover:border-primary/30 hover:scale-[1.01]"
+                        className="group rounded border bg-card text-card-foreground hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                       >
-                        <div className="p-4">
-                          <div className="flex items-start justify-between gap-3 mb-3">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <span className="text-xl flex-shrink-0">{fieldIcon}</span>
-                              <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80">
+                        <div className="p-2">
+                          <div className="flex items-start justify-between gap-1.5 mb-1">
+                            <div className="flex items-center gap-1 min-w-0 flex-1">
+                              <span className="text-xs flex-shrink-0">{fieldIcon}</span>
+                              <h4 className="text-[10px] font-semibold text-slate-700 dark:text-slate-300">
                                 {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
                               </h4>
                             </div>
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0 transition-opacity duration-200"
+                              className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0 transition-opacity text-[10px]"
                               onClick={() => copyValue(k, v)}
                               title="Copy value"
                             >
                               📋
                             </Button>
                           </div>
-                          <div className="text-base text-foreground">
+                          <div className="text-xs text-foreground">
                             {renderValue(k, v)}
                           </div>
                         </div>
@@ -942,63 +942,63 @@ export function DataDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${maxWidthClass} max-h-[90vh] flex flex-col overflow-hidden border-2 border-white/20 dark:border-white/10 backdrop-blur-xl bg-white/95 dark:bg-slate-900/95 shadow-2xl`}>
-        {/* Enhanced Header with Gradient */}
-        <div className="sticky top-0 z-10 -mx-6 -mt-6 px-6 py-4 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 border-b border-slate-200 dark:border-slate-700 backdrop-blur-sm">
-          <div className="flex items-start gap-4">
+      <DialogContent className={`${maxWidthClass} max-h-[90vh] flex flex-col overflow-hidden border-2 border-slate-300 dark:border-slate-600 bg-white/95 dark:bg-slate-900/95 shadow-md`}>
+        {/* Header */}
+        <div className="sticky top-0 z-10 -mx-6 -mt-6 px-6 py-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-start gap-3">
             {/* System Icon */}
-            <div className="text-5xl animate-in zoom-in duration-300 mt-1">
+            <div className="text-lg mt-1">
               {systemInfo.icon}
             </div>
             
             {/* Title and Mode Switcher */}
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              <DialogTitle className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">
                 {systemInfo.name}
               </DialogTitle>
               
               {description && (
-                <DialogDescription className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                <DialogDescription className="text-xs text-slate-600 dark:text-slate-400 mb-2">
                   {description}
                 </DialogDescription>
               )}
               
-              {/* Pill-Style Mode Switcher */}
+              {/* Mode Switcher */}
               {((children && showModeToggle) || (!children && data && !loading)) && (
-                <div className="flex items-center gap-3">
-                  <div className="inline-flex items-center gap-1 p-1 bg-white/80 dark:bg-slate-800/80 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-2">
+                  <div className="inline-flex items-center gap-0.5 p-0.5 bg-slate-100 dark:bg-slate-800 rounded-md">
                     <button
                       onClick={() => handleModeChange('html')}
-                      className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-colors ${
                         displayMode === 'html'
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
+                          ? 'bg-slate-700 text-white dark:bg-slate-600'
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                       }`}
                     >
-                      <FileText className="h-4 w-4" />
+                      <FileText className="h-3 w-3" />
                       Readable
                     </button>
                     <button
                       onClick={() => handleModeChange('json')}
-                      className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-colors ${
                         displayMode === 'json'
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
+                          ? 'bg-slate-700 text-white dark:bg-slate-600'
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                       }`}
                     >
-                      <Code className="h-4 w-4" />
+                      <Code className="h-3 w-3" />
                       JSON
                     </button>
                   </div>
                   
-                  {/* Floating Copy Button */}
+                  {/* Copy Button */}
                   {showCopy && (
                     <button
                       onClick={() => copyToClipboard(data, title)}
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 font-medium text-sm"
+                      className="flex items-center gap-1.5 px-3 py-1 bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white rounded text-xs font-medium transition-colors"
                       title="Copy all data"
                     >
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-3 w-3" />
                       Copy All
                     </button>
                   )}
@@ -1008,18 +1008,9 @@ export function DataDialog({
           </div>
         </div>
 
-        {/* Content Area with Pattern Background */}
-        <div className="flex-1 overflow-auto relative bg-gradient-to-br from-slate-50/50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-950/50">
-          {/* Subtle Pattern Overlay */}
-          <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-            backgroundSize: '24px 24px'
-          }}></div>
-          
-          {/* Content */}
-          <div className="relative">
-            {renderContent()}
-          </div>
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
+          {renderContent()}
         </div>
       </DialogContent>
     </Dialog>

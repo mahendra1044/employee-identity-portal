@@ -65,32 +65,26 @@ export function SnowIncidentsDialog({
 }: SnowIncidentsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-800">
-        {/* Glassmorphism Header with Gradient */}
-        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 bg-gradient-to-r from-teal-500/10 via-blue-500/10 to-cyan-500/10 dark:from-teal-500/20 dark:via-blue-500/20 dark:to-cyan-500/20 border-b border-slate-200/50 dark:border-slate-700/50">
-          <DialogTitle className="pr-12 flex items-center gap-2 text-lg font-semibold">
-            <span className="text-2xl">🎫</span>
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 border-2 border-slate-300 dark:border-slate-600 shadow-md">
+        {/* Header */}
+        <DialogHeader className="flex-shrink-0 px-6 pt-4 pb-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
+          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold">
+            <span className="text-lg">🎫</span>
             <span>ServiceNow Incidents</span>
-            {snowEmail && <span className="text-sm font-normal text-slate-600 dark:text-slate-400">— {snowEmail}</span>}
+            {snowEmail && <span className="text-xs font-normal text-slate-600 dark:text-slate-400">— {snowEmail}</span>}
           </DialogTitle>
         </DialogHeader>
 
-        {/* Stats Bar with Enhanced Badges */}
-        <div className="flex items-center justify-between gap-3 flex-shrink-0 px-6 py-3 bg-slate-50/50 dark:bg-slate-800/30">
+        {/* Stats Bar */}
+        <div className="flex items-center justify-between gap-3 flex-shrink-0 px-6 py-2 bg-slate-50 dark:bg-slate-800">
           <div className="flex items-center gap-2 text-xs">
             {typeof snowCount === 'number' && (
-              <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 font-medium border ${
-                snowCount === 0 
-                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400'
-                  : snowCount < 5
-                  ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400'
-                  : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
-              }`}>
+              <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium border bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
                 {snowCount === 0 ? '✅' : '⚠️'} Open/In-Progress: {snowCount}
               </span>
             )}
             {(snowItems?.length || 0) > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 font-medium bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
+              <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
                 📊 Total: {snowItems!.length}
               </span>
             )}
@@ -102,9 +96,9 @@ export function SnowIncidentsDialog({
                 variant="outline" 
                 onClick={onRefresh} 
                 disabled={snowLoading}
-                className="transition-all hover:scale-105"
+                className="h-7"
               >
-                <RefreshCw className={`h-4 w-4 ${snowLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-3 w-3 ${snowLoading ? 'animate-spin' : ''}`} />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -153,15 +147,15 @@ export function SnowIncidentsDialog({
                             {it.short_description}
                           </p>
                         </TableCell>
-                        <TableCell className="py-2.5 align-top">
-                          <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium border ${statusStyle.bg} ${statusStyle.color} ${statusStyle.border} shadow-sm`}>
+                        <TableCell className="py-2 align-top">
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded font-medium border bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
                             <span className="text-[10px]">{statusStyle.icon}</span>
                             {it.state}
                           </span>
                         </TableCell>
-                        <TableCell className="py-2.5 align-top">
+                        <TableCell className="py-2 align-top">
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-700 dark:text-slate-300">
-                            <span className="text-xs">{getPriorityDot(it.priority)}</span>
+                            <span className="text-[10px]">{getPriorityDot(it.priority)}</span>
                             {it.priority}
                           </span>
                         </TableCell>
@@ -177,10 +171,10 @@ export function SnowIncidentsDialog({
               </Table>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="text-6xl mb-3">✅</div>
-              <p className="text-base font-medium text-slate-700 dark:text-slate-300 mb-1">All Clear!</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">No incidents found</p>
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="text-3xl mb-2">✅</div>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">All Clear!</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">No incidents found</p>
             </div>
           )}
         </div>

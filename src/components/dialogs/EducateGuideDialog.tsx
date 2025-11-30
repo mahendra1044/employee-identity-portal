@@ -156,13 +156,13 @@ export function EducateGuideDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-800">
-        {/* Glassmorphism Header with Gradient */}
-        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-pink-500/20 border-b border-slate-200/50 dark:border-slate-700/50">
-          <DialogTitle className="pr-12 flex items-center gap-2 text-lg font-semibold">
-            <span className="text-2xl">📚</span>
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 border-2 border-slate-300 dark:border-slate-600 shadow-md">
+        {/* Header */}
+        <DialogHeader className="flex-shrink-0 px-6 pt-4 pb-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
+          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold">
+            <span className="text-lg">📚</span>
             <span>Educational Guides</span>
-            <span className="text-sm font-normal text-slate-600 dark:text-slate-400">— By System</span>
+            <span className="text-xs font-normal text-slate-600 dark:text-slate-400">— By System</span>
           </DialogTitle>
         </DialogHeader>
 
