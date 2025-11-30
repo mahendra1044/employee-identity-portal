@@ -768,7 +768,7 @@ function HtmlView({ data }: { data: any }) {
 /** Table view renderer for array data */
 function TableView({ data }: { data: any[] }) {
   if (!Array.isArray(data) || data.length === 0) {
-    return <p className="text-sm text-muted-foreground">No data available</p>;
+    return <p className="text-xs text-muted-foreground">No data available</p>;
   }
 
   const columns = Object.keys(data[0] || {});
@@ -776,10 +776,10 @@ function TableView({ data }: { data: any[] }) {
   return (
     <div className="flex-1 overflow-auto pr-1">
       <Table>
-        <TableHeader className="sticky top-0 bg-white dark:bg-slate-900 z-10">
-          <TableRow className="border-b-2 border-slate-200 dark:border-slate-700">
+        <TableHeader className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-10">
+          <TableRow className="border-b border-slate-300 dark:border-slate-600">
             {columns.map((k) => (
-              <TableHead key={k} className="capitalize font-semibold text-slate-700 dark:text-slate-300">
+              <TableHead key={k} className="capitalize font-semibold text-xs text-slate-700 dark:text-slate-300 py-2">
                 {k.replace(/([A-Z])/g, ' $1')}
               </TableHead>
             ))}
@@ -789,10 +789,12 @@ function TableView({ data }: { data: any[] }) {
           {data.map((row: any, idx: number) => (
             <TableRow 
               key={idx}
-              className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+              className={`transition-colors hover:bg-slate-100 dark:hover:bg-slate-700/50 ${
+                idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/50 dark:bg-slate-800/30'
+              }`}
             >
               {columns.map((k) => (
-                <TableCell key={k} className="text-sm break-words py-3">
+                <TableCell key={k} className="text-xs break-words py-2">
                   {String(row[k])}
                 </TableCell>
               ))}
