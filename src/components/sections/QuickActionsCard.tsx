@@ -18,6 +18,8 @@
 import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { ExternalLink } from "lucide-react";
 import type { SystemKey } from "@/lib/types";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
 import { OPS_ENDPOINTS, type EndpointAction } from "@/lib/ops-endpoints";
@@ -113,53 +115,76 @@ export function QuickActionsCard({
     <section>
       <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
         <CardContent className="p-2">
-          {/* Compact header with tabs and links inline */}
-          <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
+          {/* Header: Title, External Tools, and Target User */}
+          <div className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Quick Actions</span>
-              <button
-                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 underline"
-                onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
-              >
-                Splunk
-              </button>
-              <span className="text-xs text-slate-300 dark:text-slate-700">•</span>
-              <button
-                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 underline"
-                onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
-              >
-                CloudWatch
-              </button>
+              <div className="flex items-center gap-1 pl-2 border-l border-slate-300 dark:border-slate-600">
+                <span className="text-xs text-slate-500 dark:text-slate-400 mr-1">External Tools:</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
+                      className="h-6 px-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      Splunk
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Open Splunk logs</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
+                      className="h-6 px-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      CloudWatch
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Open CloudWatch logs</p></TooltipContent>
+                </Tooltip>
+              </div>
             </div>
             <span className="text-xs text-muted-foreground truncate">Target: {resolveSnowEmail() || search || "(unknown)"}</span>
           </div>
-          {/* Tab navigation */}
-          <div className="flex items-center gap-1 mb-2">
+          
+          {/* Segmented Tab Navigation (Pill Style) */}
+          <div className="flex items-center gap-0.5 mb-2 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-md w-fit">
             {enabledSystems.map((system) => (
-              <Button
+              <button
                 key={system}
-                size="sm"
-                variant={effectiveActive === system ? "default" : "ghost"}
                 onClick={() => onSetQaActive(system)}
-                className={`whitespace-nowrap text-xs h-6 px-2 transition-colors ${
+                className={`whitespace-nowrap text-xs px-3 py-1 rounded transition-all ${
                   effectiveActive === system
-                    ? "bg-slate-700 text-white hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700"
-                    : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                    ? "bg-slate-700 text-white shadow-sm dark:bg-slate-600"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
                 }`}
               >
                 {SYSTEM_LABELS[system]}
-              </Button>
+              </button>
             ))}
           </div>
 
-          {/* Action buttons for active tab - data-driven rendering */}
-          <div className="rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2">
-            {effectiveActive && qaEnabledTabs[effectiveActive] && (
-              <ActionButtons 
-                system={effectiveActive} 
-                actionHandlers={actionHandlers}
-              />
-            )}
+          {/* Action Container with Label */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Actions:</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent dark:from-slate-700"></div>
+            </div>
+            <div className="rounded-md border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800 dark:to-slate-800/50 p-2 shadow-inner">
+              {effectiveActive && qaEnabledTabs[effectiveActive] && (
+                <ActionButtons 
+                  system={effectiveActive} 
+                  actionHandlers={actionHandlers}
+                />
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
