@@ -129,21 +129,46 @@ export function Header(props: {
 
   return (
     <header className="sticky top-0 z-10 bg-gradient-to-r from-white/95 via-slate-50/95 to-white/95 dark:from-slate-900/95 dark:via-slate-800/95 dark:to-slate-900/95 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 rounded opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"></div>
-            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=64&q=60&auto=format&fit=crop" alt="Logo" className="w-8 h-8 rounded relative z-10 transition-transform duration-300 group-hover:scale-110" />
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-4 min-w-0">
+          {/* Logo with enhanced hover effect */}
+          <div className="relative group flex-shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300"></div>
+            <div className="relative bg-white dark:bg-slate-800 p-1.5 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-600 transition-all duration-300">
+              <img src="/logo.svg" alt="Identity Sphere Logo" className="w-7 h-7 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" />
+            </div>
           </div>
-          <div className="min-w-0">
-            <div className="font-bold text-sm bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">Identity Sphere</div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="truncate text-slate-600 dark:text-slate-400">{email}</span>
+
+          {/* Vertical divider */}
+          <div className="h-12 w-px bg-gradient-to-b from-transparent via-slate-300 dark:via-slate-600 to-transparent flex-shrink-0"></div>
+          
+          {/* Brand and User Section */}
+          <div className="min-w-0 flex flex-col gap-2">
+            {/* Brand Title */}
+            <div className="flex items-baseline gap-2">
+              <h1 className="font-extrabold text-base tracking-tight relative leading-none">
+                <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent blur-[2px] opacity-40"></span>
+                <span className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Identity Sphere
+                </span>
+              </h1>
+              <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                Unified Access Hub
+              </span>
+            </div>
+            
+            {/* User Info Row */}
+            <div className="flex items-center gap-2 -mt-0.5">
+              <div className="flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)] animate-pulse"></div>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px]">{email}</span>
+              </div>
+              
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r ${getRoleGradient()} text-white font-semibold whitespace-nowrap cursor-help shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105`}>
-                    {getRoleIcon()}
-                    <span className="text-xs">{getRoleDisplay()}</span>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-gradient-to-r ${getRoleGradient()} text-white text-[11px] font-bold whitespace-nowrap cursor-help shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105`}>
+                    <span className="scale-90">{getRoleIcon()}</span>
+                    {getRoleDisplay()}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>

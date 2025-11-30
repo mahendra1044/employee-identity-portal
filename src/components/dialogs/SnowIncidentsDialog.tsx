@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { RefreshCw } from "lucide-react";
 
 interface SnowIncidentsDialogProps {
@@ -94,16 +95,22 @@ export function SnowIncidentsDialog({
               </span>
             )}
           </div>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={onRefresh} 
-            disabled={snowLoading} 
-            title="Refresh incidents"
-            className="transition-all hover:scale-105"
-          >
-            <RefreshCw className={`h-4 w-4 ${snowLoading ? 'animate-spin' : ''}`} />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={onRefresh} 
+                disabled={snowLoading}
+                className="transition-all hover:scale-105"
+              >
+                <RefreshCw className={`h-4 w-4 ${snowLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Refresh incidents</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Content Area */}

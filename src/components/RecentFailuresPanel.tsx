@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { RefreshCw } from "lucide-react";
 import {
   type FailureKey,
@@ -140,9 +141,16 @@ export function RecentFailuresPanel({
                 onChange={(e) => onMinutesChange(Math.max(1, Number(e.target.value)))}
               />
             </div>
-            <Button size="sm" variant="outline" onClick={onRefresh} disabled={loading} title="Refresh recent failures data">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="outline" onClick={onRefresh} disabled={loading}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Refresh recent failures data</p>
+              </TooltipContent>
+            </Tooltip>
             {error && <span className="text-xs text-red-600">{error}</span>}
           </div>
 

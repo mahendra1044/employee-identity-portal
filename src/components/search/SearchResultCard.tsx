@@ -11,6 +11,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Eye } from "lucide-react";
 import { API_BASE } from "@/lib/constants";
 import type { SearchSystemConfig } from "@/lib/search-config";
@@ -92,14 +93,20 @@ export function SearchResultCard({
       <CardContent className="space-y-2">
         <div className="flex justify-end gap-2">
           {displayResults.length > 0 && (
-            <Button
-              size="sm"
-              onClick={handleViewDetails}
-              title="View detailed information for primary result"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              View Details
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  onClick={handleViewDetails}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>View detailed information for primary result</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
         

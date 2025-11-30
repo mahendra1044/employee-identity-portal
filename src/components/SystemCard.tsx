@@ -341,7 +341,6 @@ export function SystemCard({
                     setPfLoading(false);
                   }
                 }}
-                title="Fetch and view user information from Ping Federate"
               >
                 <User className="h-4 w-4 mr-1" />
                 User Info
@@ -363,7 +362,6 @@ export function SystemCard({
                     setPfLoading(false);
                   }
                 }}
-                title="View OIDC connections in Ping Federate"
               >
                 <Globe className="h-4 w-4 mr-1" />
                 OIDC
@@ -385,7 +383,6 @@ export function SystemCard({
                     setPfLoading(false);
                   }
                 }}
-                title="View SAML connections in Ping Federate"
               >
                 <Shield className="h-4 w-4 mr-1" />
                 SAML

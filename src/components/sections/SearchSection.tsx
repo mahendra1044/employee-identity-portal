@@ -12,6 +12,7 @@ import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Code, FileText, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
@@ -491,18 +492,24 @@ export function SearchSection({
                   }`}>
                     {enabled[sys] ? "Enabled" : "Disabled"}
                   </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 px-2"
-                    onClick={() => {
-                      navigator.clipboard.writeText(JSON.stringify(val, null, 2));
-                      toast.success(`Copied ${SYSTEM_LABELS[sys]} data to clipboard`);
-                    }}
-                    title="Copy system data"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-2"
+                        onClick={() => {
+                          navigator.clipboard.writeText(JSON.stringify(val, null, 2));
+                          toast.success(`Copied ${SYSTEM_LABELS[sys]} data to clipboard`);
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Copy system data</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
               
@@ -577,15 +584,21 @@ export function SearchSection({
                                                   {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
                                                 </h4>
                                               </div>
-                                              <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0 transition-opacity duration-200"
-                                                onClick={() => copyFieldValue(k, v)}
-                                                title="Copy value"
-                                              >
-                                                📋
-                                              </Button>
+                                              <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                  <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0 transition-opacity duration-200"
+                                                    onClick={() => copyFieldValue(k, v)}
+                                                  >
+                                                    📋
+                                                  </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  <p>Copy value</p>
+                                                </TooltipContent>
+                                              </Tooltip>
                                             </div>
                                             <div className="text-base text-foreground">
                                               {renderSmartValue(k, v, `agg-${sys}-${group.section}-${fieldIndex}`)}
@@ -917,15 +930,21 @@ export function SearchSection({
                                     {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
                                   </h4>
                                 </div>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0 transition-opacity duration-200"
-                                  onClick={() => copyFieldValue(k, v)}
-                                  title="Copy value"
-                                >
-                                  📋
-                                </Button>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0 transition-opacity duration-200"
+                                      onClick={() => copyFieldValue(k, v)}
+                                    >
+                                      📋
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Copy value</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               </div>
                               <div className="text-base text-foreground">
                                 {renderSmartValue(k, v, `single-${group.section}-${fieldIndex}`)}
@@ -1020,28 +1039,40 @@ export function SearchSection({
 
                 {/* Consolidated view buttons */}
                 <div className="flex flex-col sm:flex-row gap-2 justify-start mt-4 pt-4 border-t col-span-full">
-                  <Button
-                    className="flex-1 sm:flex-none min-w-0"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleConsolidatedView("json")}
-                    title="View all system data in JSON format"
-                  >
-                    <FileText className="h-4 w-4 mr-1 flex-shrink-0" />
-                    <span className="hidden sm:inline">Consolidated View</span>
-                    <span className="sm:hidden">View All</span>
-                  </Button>
-                  <Button
-                    className="flex-1 sm:flex-none min-w-0"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleConsolidatedView("html")}
-                    title="View data in structured, human-readable format"
-                  >
-                    <Code className="h-4 w-4 mr-1 flex-shrink-0" />
-                    <span className="hidden sm:inline">Readable Layout</span>
-                    <span className="sm:hidden">Format</span>
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="flex-1 sm:flex-none min-w-0"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleConsolidatedView("json")}
+                      >
+                        <FileText className="h-4 w-4 mr-1 flex-shrink-0" />
+                        <span className="hidden sm:inline">Consolidated View</span>
+                        <span className="sm:hidden">View All</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View all system data in JSON format</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="flex-1 sm:flex-none min-w-0"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleConsolidatedView("html")}
+                      >
+                        <Code className="h-4 w-4 mr-1 flex-shrink-0" />
+                        <span className="hidden sm:inline">Readable Layout</span>
+                        <span className="sm:hidden">Format</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View data in structured, human-readable format</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             )}
