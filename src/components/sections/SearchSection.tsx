@@ -462,7 +462,7 @@ export function SearchSection({
     if (!dialogData) return null;
     
     return (
-      <div className="space-y-6 p-4">
+      <div className="space-y-3 p-3">
         {searchSystemKeys.map((sys) => {
           const rawVal = sys in dialogData ? dialogData[sys] : null;
           const val = rawVal && typeof rawVal === "object" ? rawVal as Record<string, unknown> : null;
@@ -471,46 +471,41 @@ export function SearchSection({
           if (!enabled[sys] && !hasData) return null;
 
           return (
-            <div key={sys} className="space-y-3">
-              <div className="flex items-center justify-between border-b pb-3">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-bold text-foreground">
+            <div key={sys} className="space-y-2">
+              <div className="flex items-center justify-between border-b pb-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">
+                    {sys.includes('azure') || sys.includes('ad') ? '☁️' :
+                     sys.includes('ping') ? '🔐' :
+                     sys.includes('cyber') ? '🛡️' :
+                     sys.includes('saviynt') ? '⚡' : '📦'}
+                  </span>
+                  <h3 className="text-sm font-semibold text-foreground">
                     {SYSTEM_LABELS[sys]}
                   </h3>
                   {hasData && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-green-600 dark:text-green-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-600 dark:bg-green-400" />
-                      Data Available
+                      Active
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${
-                    enabled[sys]
-                      ? "text-blue-700 border-blue-300 bg-blue-50 dark:text-blue-300 dark:border-blue-700 dark:bg-blue-900/30"
-                      : "text-muted-foreground border-border bg-muted/50"
-                  }`}>
-                    {enabled[sys] ? "Enabled" : "Disabled"}
-                  </span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 px-2"
-                        onClick={() => {
-                          navigator.clipboard.writeText(JSON.stringify(val, null, 2));
-                          toast.success(`Copied ${SYSTEM_LABELS[sys]} data to clipboard`);
-                        }}
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Copy system data</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className="h-6 w-6 p-0 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded text-slate-700 dark:text-slate-300 transition-colors"
+                      onClick={() => {
+                        navigator.clipboard.writeText(JSON.stringify(val, null, 2));
+                        toast.success(`Copied ${SYSTEM_LABELS[sys]} data`);
+                      }}
+                    >
+                      <Copy className="h-3 w-3" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Copy {SYSTEM_LABELS[sys]} data</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
               
               {dialogMode === "html" ? (
