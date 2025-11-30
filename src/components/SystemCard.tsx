@@ -523,67 +523,100 @@ export function SystemCard({
         maxWidth="4xl"
       />
 
-      {/* SNOW Ticket Dialog - Enhanced Design */}
+      {/* SNOW Ticket Dialog - Redesigned for Better UX */}
       <Dialog open={ticketDialogOpen} onOpenChange={(open) => !isSubmitting && setTicketDialogOpen(open)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden border-2 border-white/20 dark:border-white/10 backdrop-blur-xl bg-white/95 dark:bg-slate-900/95 shadow-2xl">
-          {/* Phase 1: Enhanced Header with Gradient */}
-          <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-blue-50/30 via-indigo-50/30 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 border-b border-slate-200/50 dark:border-slate-700/50">
-            <div className="flex items-start gap-4">
-              <div className="text-4xl mt-1">🎫</div>
-              <div className="flex-1 min-w-0">
-                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                  Create ServiceNow Ticket
-                </DialogTitle>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">System:</span>
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-sm">
-                    {name}
-                  </span>
-                </div>
-                <DialogDescription className="text-sm text-slate-600 dark:text-slate-400">
-                  Enter additional details if needed. This will be included in the ticket description.
-                </DialogDescription>
-              </div>
-            </div>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border-2 border-slate-300 dark:border-slate-600 bg-white/95 dark:bg-slate-900/95 shadow-md">
+          {/* Compact Header */}
+          <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
+            <DialogTitle className="text-base font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <span className="text-lg">🎫</span>
+              Create ServiceNow Ticket
+            </DialogTitle>
           </div>
 
-          {/* Content Area with Pattern Background */}
-          <div className="flex-1 overflow-y-auto relative bg-gradient-to-br from-slate-50/50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-950/50">
-            <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-              backgroundSize: '24px 24px'
-            }}></div>
-            
-            <div className="relative p-6 space-y-4">
-              {/* Phase 2: Smart Textarea */}
+          {/* Content Area - Reordered Layout */}
+          <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-900">
+            <div className="p-4 space-y-3">
+              {/* Live Preview Section - Moved to Top */}
+              <div className="border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-base">👁️</span>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Live Preview
+                  </h3>
+                  <span className="text-xs text-green-600 dark:text-green-400">● Live</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs min-w-[65px]">User:</span>
+                      <span className="text-slate-700 dark:text-slate-300 font-mono text-xs break-all">{email}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 dark:text-purple-400 font-semibold text-xs min-w-[65px]">System:</span>
+                      <span className="text-slate-700 dark:text-slate-300 text-xs">{system}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-600 dark:text-green-400 font-semibold text-xs min-w-[65px]">Payload:</span>
+                      <span className="text-slate-700 dark:text-slate-300 text-xs">
+                        {details || data ? `${Object.keys(details || data || {}).length} fields included` : 'No data attached'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {description ? (
+                    <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-700">
+                      <div className="flex items-start gap-2 mb-1.5">
+                        <span className="text-orange-600 dark:text-orange-400 font-semibold text-xs">Your Note:</span>
+                      </div>
+                      <div className="bg-white dark:bg-slate-900 rounded p-2 border border-slate-200 dark:border-slate-700">
+                        <p className="text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap break-words">
+                          "{description}"
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-700">
+                      <div className="text-center py-3">
+                        <span className="text-xl">✍️</span>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Start typing to see your note preview</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Description Input - Moved Below Preview */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">📝</span>
+                  <span className="text-base">📝</span>
                   <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Additional Information <span className="text-slate-400 dark:text-slate-500 font-normal">(Optional)</span>
+                    Your Description
                   </h3>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">(Optional)</span>
                 </div>
                 <Textarea
-                  placeholder="Example: User reports access denied when trying to authenticate. Need to investigate group memberships..."
+                  placeholder="Describe the issue or provide additional context...&#x0a;&#x0a;Example: User unable to access application. Need to verify group memberships and authentication logs."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   maxLength={500}
                   disabled={isSubmitting}
-                  className={`w-full min-h-[120px] resize-none transition-colors ${
-                    description.length > 0 ? 'border-blue-300 dark:border-blue-600' : ''
-                  } ${description.length > 400 ? 'border-orange-400 dark:border-orange-500' : ''} ${
-                    description.length === 500 ? 'border-red-400 dark:border-red-500' : ''
+                  className={`w-full min-h-[140px] resize-none transition-all text-sm ${
+                    description.length > 0 ? 'border-blue-300 dark:border-blue-600 ring-1 ring-blue-200 dark:ring-blue-800' : ''
+                  } ${description.length > 400 ? 'border-orange-400 dark:border-orange-600 ring-1 ring-orange-200 dark:ring-orange-800' : ''} ${
+                    description.length === 500 ? 'border-red-400 dark:border-red-600 ring-1 ring-red-200 dark:ring-red-800' : ''
                   }`}
                 />
                 <div className="flex items-center justify-between mt-2 text-xs">
                   <span className="text-slate-500 dark:text-slate-400">
-                    {description.length === 0 ? 'Provide context to help resolve faster' : 
-                     description.length < 50 ? 'Add more details' : 
-                     description.length < 200 ? 'Good detail' : 'Comprehensive'}
+                    {description.length === 0 ? '💡 Add context to help resolve faster' : 
+                     description.length < 50 ? '✍️ Consider adding more details' : 
+                     description.length < 200 ? '✅ Good detail level' : 
+                     description.length < 400 ? '🎯 Comprehensive description' : '⚠️ Approaching limit'}
                   </span>
-                  <span className={`font-mono font-medium ${
+                  <span className={`font-mono font-semibold ${
                     description.length < 200 ? 'text-green-600 dark:text-green-400' : 
-                    description.length < 400 ? 'text-yellow-600 dark:text-yellow-400' : 
+                    description.length < 400 ? 'text-blue-600 dark:text-blue-400' : 
                     description.length < 500 ? 'text-orange-600 dark:text-orange-400' : 
                     'text-red-600 dark:text-red-400'
                   }`}>
@@ -591,95 +624,58 @@ export function SystemCard({
                   </span>
                 </div>
               </div>
-
-              {/* Phase 3: Preview Section */}
-              <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white/80 dark:bg-slate-800/80">
-                <button
-                  onClick={() => setShowPreview(!showPreview)}
-                  className="w-full flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                  type="button"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">👁️</span>
-                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ticket Preview</h3>
-                  </div>
-                  <svg className={`h-4 w-4 text-slate-500 transition-transform ${showPreview ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {showPreview && (
-                  <div className="px-4 pb-4 space-y-2">
-                    <div className="bg-slate-50 dark:bg-slate-900 rounded p-3 space-y-2 text-sm">
-                      <div className="flex gap-2">
-                        <span className="text-blue-600 dark:text-blue-400 font-medium min-w-[70px]">User:</span>
-                        <span className="text-slate-700 dark:text-slate-300 font-mono text-xs">{email}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-purple-600 dark:text-purple-400 font-medium min-w-[70px]">System:</span>
-                        <span className="text-slate-700 dark:text-slate-300">{system}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-green-600 dark:text-green-400 font-medium min-w-[70px]">Payload:</span>
-                        <span className="text-slate-700 dark:text-slate-300">
-                          {details || data ? `${Object.keys(details || data || {}).length} fields` : 'No data'}
-                        </span>
-                      </div>
-                      {description && (
-                        <div className="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                          <span className="text-orange-600 dark:text-orange-400 font-medium min-w-[70px]">Note:</span>
-                          <span className="text-slate-700 dark:text-slate-300 italic text-xs">
-                            "{description.substring(0, 80)}{description.length > 80 ? '...' : ''}"
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
-          {/* Phase 4 & 5: Enhanced Buttons with Submit Flow */}
-          <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
-            <button
-              type="button"
-              onClick={() => setTicketDialogOpen(false)}
-              disabled={isSubmitting}
-              className={`px-5 py-2 rounded-lg text-sm font-medium border shadow-sm transition-all ${
-                isSubmitting
-                  ? 'text-slate-400 bg-slate-100 border-slate-200 cursor-not-allowed opacity-50'
-                  : 'text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
-              }`}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmitTicket}
-              disabled={isSubmitting}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-sm shadow-lg transition-all ${
-                isSubmitting
-                  ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white cursor-wait'
-                  : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:shadow-xl'
-              }`}
-            >
-              {isSubmitting ? (
-                <>
-                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Submit Ticket
-                </>
-              )}
-            </button>
+          {/* Compact Footer with Actions */}
+          <div className="flex items-center justify-between gap-3 px-4 py-2 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Target System:</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                {name}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setTicketDialogOpen(false)}
+                disabled={isSubmitting}
+                className={`px-3 py-1.5 rounded text-xs font-medium border transition-all ${
+                  isSubmitting
+                    ? 'text-slate-400 bg-slate-100 border-slate-200 cursor-not-allowed opacity-50'
+                    : 'text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitTicket}
+                disabled={isSubmitting}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded font-semibold text-xs transition-all ${
+                  isSubmitting
+                    ? 'bg-green-400 text-white cursor-wait opacity-80'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Submit Ticket
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -232,8 +232,8 @@ export function SearchSection({
     // Boolean
     if (typeof value === 'boolean') {
       return (
-        <span className={`font-semibold flex items-center gap-2 ${value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-          <span className="text-xl">{value ? '✅' : '❌'}</span>
+        <span className={`font-medium flex items-center gap-1 ${value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+          <span className="text-xs">{value ? '✅' : '❌'}</span>
           <span>{value ? 'Yes' : 'No'}</span>
         </span>
       );
@@ -547,40 +547,40 @@ export function SearchSection({
                             return (
                               <div 
                                 key={sectionKey}
-                                className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-card shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
+                                className="border border-slate-200 dark:border-slate-700 rounded overflow-hidden bg-card shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
                               >
                                 <button
                                   onClick={() => toggleSection(sectionKey)}
-                                  className={`w-full flex items-center justify-between p-4 bg-gradient-to-r ${group.gradient} hover:opacity-90 transition-all duration-200`}
+                                  className={`w-full flex items-center justify-between p-2 bg-gradient-to-r ${group.gradient} hover:opacity-90 transition-all duration-200`}
                                 >
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-2xl transition-transform duration-200">{group.icon}</span>
-                                    <h3 className="text-sm font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs transition-transform duration-200">{group.icon}</span>
+                                    <h3 className="text-[10px] font-semibold text-slate-700 dark:text-slate-200">
                                       {group.title}
                                     </h3>
-                                    <span className="text-xs bg-white/60 dark:bg-black/30 px-2 py-1 rounded-full font-semibold">
+                                    <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded font-medium text-slate-600 dark:text-slate-400">
                                       {group.fields.length}
                                     </span>
                                   </div>
-                                  <span className={`text-slate-600 dark:text-slate-400 text-xl transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}>
+                                  <span className={`text-slate-600 dark:text-slate-400 text-xs transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}>
                                     ▶
                                   </span>
                                 </button>
                                 
                                 {!isCollapsed && (
-                                  <div className="p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                                  <div className="p-2 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                     {group.fields.map(({ k, v }, fieldIndex) => {
                                       const fieldIcon = getFieldIcon(k, v);
                                       return (
                                         <div 
                                           key={`${sectionKey}-${k}-${fieldIndex}`}
-                                          className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200 ease-in-out hover:shadow-md hover:border-primary/30 hover:scale-[1.01]"
+                                          className="group rounded border bg-card text-card-foreground hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                                         >
-                                          <div className="p-4">
-                                            <div className="flex items-start justify-between gap-3 mb-3">
-                                              <div className="flex items-center gap-2 min-w-0 flex-1">
-                                                <span className="text-xl flex-shrink-0">{fieldIcon}</span>
-                                                <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80">
+                                          <div className="p-2">
+                                            <div className="flex items-start justify-between gap-1.5 mb-1">
+                                              <div className="flex items-center gap-1 min-w-0 flex-1">
+                                                <span className="text-xs flex-shrink-0">{fieldIcon}</span>
+                                                <h4 className="text-[10px] font-semibold text-slate-700 dark:text-slate-300">
                                                   {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
                                                 </h4>
                                               </div>
@@ -589,7 +589,7 @@ export function SearchSection({
                                                   <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0 transition-opacity duration-200"
+                                                    className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0 transition-opacity duration-200 text-[10px]"
                                                     onClick={() => copyFieldValue(k, v)}
                                                   >
                                                     📋
@@ -600,7 +600,7 @@ export function SearchSection({
                                                 </TooltipContent>
                                               </Tooltip>
                                             </div>
-                                            <div className="text-base text-foreground">
+                                            <div className="text-xs text-foreground">
                                               {renderSmartValue(k, v, `agg-${sys}-${group.section}-${fieldIndex}`)}
                                             </div>
                                           </div>
@@ -893,40 +893,40 @@ export function SearchSection({
               return (
                 <div 
                   key={sectionKey}
-                  className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-card shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
+                  className="border border-slate-200 dark:border-slate-700 rounded overflow-hidden bg-card shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
                 >
                   <button
                     onClick={() => toggleSection(sectionKey)}
-                    className={`w-full flex items-center justify-between p-4 bg-gradient-to-r ${group.gradient} hover:opacity-90 transition-all duration-200`}
+                    className={`w-full flex items-center justify-between p-2 bg-gradient-to-r ${group.gradient} hover:opacity-90 transition-all duration-200`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl transition-transform duration-200">{group.icon}</span>
-                      <h3 className="text-sm font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs transition-transform duration-200">{group.icon}</span>
+                      <h3 className="text-[10px] font-semibold text-slate-700 dark:text-slate-200">
                         {group.title}
                       </h3>
-                      <span className="text-xs bg-white/60 dark:bg-black/30 px-2 py-1 rounded-full font-semibold">
+                      <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded font-medium text-slate-600 dark:text-slate-400">
                         {group.fields.length}
                       </span>
                     </div>
-                    <span className={`text-slate-600 dark:text-slate-400 text-xl transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}>
+                    <span className={`text-slate-600 dark:text-slate-400 text-xs transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}>
                       ▶
                     </span>
                   </button>
                   
                   {!isCollapsed && (
-                    <div className="p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div className="p-2 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                       {group.fields.map(({ k, v }, fieldIndex) => {
                         const fieldIcon = getFieldIcon(k, v);
                         return (
                           <div 
                             key={`${sectionKey}-${k}-${fieldIndex}`}
-                            className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200 ease-in-out hover:shadow-md hover:border-primary/30 hover:scale-[1.01]"
+                            className="group rounded border bg-card text-card-foreground hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                           >
-                            <div className="p-4">
-                              <div className="flex items-start justify-between gap-3 mb-3">
-                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                  <span className="text-xl flex-shrink-0">{fieldIcon}</span>
-                                  <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80">
+                            <div className="p-2">
+                              <div className="flex items-start justify-between gap-1.5 mb-1">
+                                <div className="flex items-center gap-1 min-w-0 flex-1">
+                                  <span className="text-xs flex-shrink-0">{fieldIcon}</span>
+                                  <h4 className="text-[10px] font-semibold text-slate-700 dark:text-slate-300">
                                     {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
                                   </h4>
                                 </div>
@@ -935,7 +935,7 @@ export function SearchSection({
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0 transition-opacity duration-200"
+                                      className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0 transition-opacity duration-200 text-[10px]"
                                       onClick={() => copyFieldValue(k, v)}
                                     >
                                       📋
@@ -946,7 +946,7 @@ export function SearchSection({
                                   </TooltipContent>
                                 </Tooltip>
                               </div>
-                              <div className="text-base text-foreground">
+                              <div className="text-xs text-foreground">
                                 {renderSmartValue(k, v, `single-${group.section}-${fieldIndex}`)}
                               </div>
                             </div>
