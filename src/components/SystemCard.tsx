@@ -42,7 +42,6 @@ export function SystemCard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [htmlOpen, setHtmlOpen] = useState(false);
   const [pfOpen, setPfOpen] = useState(false);
   const [pfTitle, setPfTitle] = useState<string>("");
   const [pfLoading, setPfLoading] = useState(false);
@@ -228,15 +227,6 @@ export function SystemCard({
 
   // toPairs moved to DataDialog component - no longer needed here
 
-  const openHtmlView = async () => {
-    if (!details && !data && enabled && !loading) {
-      try {
-        await loadInitial();
-      } catch {}
-    }
-    setHtmlOpen(true);
-  };
-
   const submitSnowTicket = async (description?: string): Promise<boolean> => {
     if (!email) {
       toast.error("Email not available - please log in again");
@@ -362,14 +352,6 @@ export function SystemCard({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent><p>Details</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="ghost" onClick={openHtmlView} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
-                      <Code className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>HTML View</p></TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -539,17 +521,6 @@ export function SystemCard({
         loading={loading}
         mode="json"
         maxWidth="4xl"
-      />
-
-      {/* HTML View Dialog - uses DataDialog with html mode */}
-      <DataDialog
-        open={htmlOpen}
-        onOpenChange={setHtmlOpen}
-        title={`${name} — HTML View`}
-        data={details || data}
-        mode="html"
-        maxWidth="5xl"
-        showCopy={false}
       />
 
       {/* SNOW Ticket Dialog - Enhanced Design */}
