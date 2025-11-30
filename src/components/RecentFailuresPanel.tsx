@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ChevronDown, CheckCircle2 } from "lucide-react";
 import {
   type FailureKey,
   type FailureData,
@@ -26,9 +27,28 @@ interface RecentFailuresPanelProps {
   failures: Record<FailureKey, FailureData[]>;
 }
 
+/** Get severity color based on failure count */
+function getSeverity(count: number): 'success' | 'warning' | 'danger' | 'critical' {
+  if (count === 0) return 'success';
+  if (count <= 5) return 'warning';
+  if (count <= 15) return 'danger';
+  return 'critical';
+}
+
+/** Get severity colors for badges - simple neutral styling */
+function getSeverityColors(severity: 'success' | 'warning' | 'danger' | 'critical') {
+  // Use neutral slate colors for all severities, slightly darker for higher counts
+  const hasManyFailures = severity === 'critical' || severity === 'danger';
+  return {
+    badge: hasManyFailures 
+      ? 'bg-slate-300 dark:bg-slate-600 text-slate-800 dark:text-slate-200 font-medium'
+      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300',
+  };
+}
+
 /** 
  * Single failure card component - renders one failure type 
- * Eliminates the repetitive Card sections from the original implementation
+ * Enhanced with severity colors and better visual hierarchy
  */
 function FailureCard({
   title,
@@ -44,41 +64,59 @@ function FailureCard({
   loading: boolean;
 }) {
   const count = failures?.length || 0;
+  const severity = getSeverity(count);
+  const colors = getSeverityColors(severity);
   
   return (
-    <Card className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+    <Card className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:shadow-md transition-shadow duration-200">
       <CardHeader className="py-1 px-2">
         <CardTitle className="text-xs flex items-center justify-between">
-          <span>{title}</span>
-          <span className="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+          <span className="font-medium">{title}</span>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${colors.badge}`}>
             {count}
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-1 pb-2 px-2">
         {loading ? (
-          <p className="text-sm animate-pulse">Loading...</p>
+          <div className="space-y-1">
+            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-4/5"></div>
+          </div>
         ) : (failures?.length || 0) > 0 ? (
-          <ul className="text-sm list-disc pl-4 space-y-1">
+          <ul className="text-xs list-disc pl-4 space-y-0.5">
             {failures.slice(0, 25).map((it: FailureData, idx: number) => (
-              <li key={`${keyPrefix}-${idx}`}>
+              <li key={`${keyPrefix}-${idx}`} className="text-slate-700 dark:text-slate-300">
                 {formatFailureItem(it, renderType)}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-xs text-muted-foreground">
-            No failures in window
-          </p>
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <CheckCircle2 className="h-3 w-3" />
+            <span>No failures detected</span>
+          </div>
         )}
       </CardContent>
     </Card>
   );
 }
 
+/** Get category icon */
+function getCategoryIcon(category: FailureCategory): string {
+  switch (category) {
+    case 'sso': return '🔐';
+    case 'pam': return '🛡️';
+    case 'iga': return '👥';
+    case 'entra': return '☁️';
+    case 'tpag': return '🔑';
+    default: return '📊';
+  }
+}
+
 /**
  * Failure category section - renders a grid of failure cards for a category
- * Replaces the repetitive showXxxFailures && (...) blocks
+ * Enhanced with collapsible functionality and visual improvements
  */
 function FailureCategorySection({
   category,
@@ -93,6 +131,8 @@ function FailureCategorySection({
   loading: boolean;
   isLast: boolean;
 }) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  
   // Check if this category should be shown for the current role
   if (!shouldShowCategory(category, role ?? null)) {
     return null;
@@ -102,24 +142,44 @@ function FailureCategorySection({
   const categoryConfig = FAILURE_CATEGORIES.find(c => c.category === category);
   if (!categoryConfig) return null;
   
+  // Calculate total failures in this category
+  const totalFailures = categoryConfig.failures.reduce(
+    (sum, failureType) => sum + (failures[failureType.key]?.length || 0),
+    0
+  );
+  
+  const icon = getCategoryIcon(category);
+  
   return (
-    <div className={!isLast ? 'mb-2' : ''}>
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{categoryConfig.category.toUpperCase()}</span>
-        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {categoryConfig.failures.map((failureType) => (
-          <FailureCard
-            key={failureType.key}
-            title={failureType.title}
-            failures={failures[failureType.key] || []}
-            keyPrefix={failureType.key}
-            renderType={failureType.renderType}
-            loading={loading}
-          />
-        ))}
-      </div>
+    <div className={!isLast ? 'mb-3' : ''}>
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="flex items-center gap-2 mb-2 w-full hover:bg-slate-50 dark:hover:bg-slate-800/50 p-1 rounded transition-colors"
+      >
+        <span className="text-sm">{icon}</span>
+        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          {categoryConfig.category.toUpperCase()}
+        </span>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+          {totalFailures}
+        </span>
+        <div className="flex-1 h-px bg-gradient-to-r from-slate-300 to-transparent dark:from-slate-600"></div>
+        <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+      </button>
+      {!isCollapsed && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {categoryConfig.failures.map((failureType) => (
+            <FailureCard
+              key={failureType.key}
+              title={failureType.title}
+              failures={failures[failureType.key] || []}
+              keyPrefix={failureType.key}
+              renderType={failureType.renderType}
+              loading={loading}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -138,27 +198,41 @@ export function RecentFailuresPanel({
     .filter(cat => shouldShowCategory(cat.category, role ?? null))
     .map(cat => cat.category);
 
+  const timePresets = [5, 15, 30, 60];
+
   return (
     <section>
       <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
         <CardContent className="p-2">
+          {/* Header with controls */}
           <div className="flex flex-wrap items-center gap-2 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
             <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{getPanelTitle(role, minutes)}</span>
             <span className="text-slate-300 dark:text-slate-700">•</span>
-            <div className="flex items-center gap-2">
-              <label className="text-xs">Window</label>
+            <div className="flex items-center gap-1">
+              <label className="text-xs text-slate-500 dark:text-slate-400">Window:</label>
               <Input
                 type="number"
                 min={1}
-                className="w-20 h-8 text-xs"
+                className="w-16 h-7 text-xs px-2"
                 value={minutes}
                 onChange={(e) => onMinutesChange(Math.max(1, Number(e.target.value)))}
               />
-              <span className="text-xs text-muted-foreground">mins</span>
+              <span className="text-xs text-muted-foreground">min</span>
             </div>
+            {timePresets.map((preset) => (
+              <Button
+                key={preset}
+                size="sm"
+                variant={minutes === preset ? "default" : "ghost"}
+                onClick={() => onMinutesChange(preset)}
+                className={`h-6 px-2 text-xs ${minutes === preset ? 'bg-slate-700 hover:bg-slate-800 dark:bg-slate-600' : ''}`}
+              >
+                {preset}m
+              </Button>
+            ))}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={onRefresh} disabled={loading} className="h-8">
+                <Button size="sm" variant="outline" onClick={onRefresh} disabled={loading} className="h-7">
                   <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
               </TooltipTrigger>
