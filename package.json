@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "prebuild": "rimraf .next && rimraf node_modules/.cache",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -112,6 +113,7 @@
     "@types/three": "^0.178.0",
     "eslint": "^9.35.0",
     "eslint-config-next": "^15.5.3",
+    "rimraf": "^6.1.2",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.8",
     "typescript": "^5"
