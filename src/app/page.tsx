@@ -241,14 +241,14 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900">
       <Header
         onShowSnowTickets={openSnowDialog}
         snowTicketsCount={snowCount ?? undefined}
         educateEnabled={educateEnabled}
       />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 space-y-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-3 space-y-3">
         {/* All dialogs - rendered as section */}
         <DialogsSection
           settingsOpen={ui.settingsOpen}
@@ -336,15 +336,12 @@ export default function HomePage() {
       </main>
 
       {/* Dashboard Footer */}
-      <footer className="border-t bg-background/80 backdrop-blur py-6 mt-8">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-3">
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-            <button className="hover:text-foreground transition-colors">Privacy Policy</button>
-            <span className="text-border">•</span>
-            <button className="hover:text-foreground transition-colors">Support</button>
-          </div>
+      <footer className="border-t bg-slate-50 dark:bg-slate-900 py-2 mt-3">
+        <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Identity Sphere. All rights reserved.
+            © {new Date().getFullYear()} Identity Sphere • 
+            <button className="hover:text-foreground transition-colors ml-1">Privacy</button> • 
+            <button className="hover:text-foreground transition-colors">Support</button>
           </p>
         </div>
       </footer>

@@ -26,13 +26,13 @@ export function SystemCardsGrid({
 }: SystemCardsGridProps) {
   if (!anyEnabled) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>No systems enabled</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Feature not enabled. Please contact your administrator or update features.json.
+      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
+        <CardContent className="p-3">
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+            No systems enabled
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Feature not enabled. Please contact your administrator.
           </p>
         </CardContent>
       </Card>
@@ -41,15 +41,15 @@ export function SystemCardsGrid({
 
   if (visibleSystems.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>No cards visible</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
+      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
+        <CardContent className="p-3">
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+            No cards visible
+          </p>
+          <p className="text-xs text-muted-foreground">
             {role === "ops" 
               ? "System cards appear after a successful search." 
-              : "All system cards are hidden via settings. Open Settings to enable some."
+              : "All system cards are hidden. Open Settings to enable some."
             }
           </p>
         </CardContent>

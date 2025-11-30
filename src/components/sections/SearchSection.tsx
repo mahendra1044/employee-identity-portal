@@ -978,40 +978,87 @@ export function SearchSection({
   return (
     <>
       <section>
-        <Card>
-          <CardHeader>
-            <CardTitle>Employee Search</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Search input */}
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input
-                placeholder="Search by name, email, or ID"
-                value={search}
-                onChange={(e) => onSearchChange(e.target.value)}
-                aria-label="Search employees"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") onDoSearch();
-                }}
-              />
-              <Button onClick={onDoSearch}>Search</Button>
+        <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
+          <CardContent className="p-3">
+            {/* Integrated search bar with button inside */}
+            <div className="mb-2">
+              <div className="relative">
+                <Input
+                  placeholder={!hasSearched && !searchError ? "Search by name, email, or ID - press Enter or click search" : "Search by name, email, or ID"}
+                  value={search}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  aria-label="Search employees"
+                  className="pr-24 border-slate-300 dark:border-slate-600 focus-visible:ring-2 focus-visible:ring-slate-400 transition-all"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") onDoSearch();
+                  }}
+                />
+                {search && (
+                  <button
+                    onClick={() => onSearchChange("")}
+                    className="absolute right-12 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+                <Button 
+                  onClick={onDoSearch} 
+                  size="sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white transition-colors px-3"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </Button>
+              </div>
             </div>
-            
-            {/* Helper text */}
-            {!hasSearched && !searchError && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Enter a query and click Search to see results.
-              </p>
-            )}
             
             {/* Error message */}
             {searchError && (
-              <p className="text-sm text-red-600 mt-2">{searchError}</p>
+              <p className="text-xs text-red-600 px-1">{searchError}</p>
+            )}
+            
+            {/* Consolidated actions - shown when results exist */}
+            {hasSearched && searchResults && Object.keys(searchResults).length > 0 && (
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+                <span className="text-xs text-muted-foreground">View all data:</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleConsolidatedView("json")}
+                      className="h-6 px-2 text-xs"
+                    >
+                      <FileText className="h-3 w-3 mr-1" />
+                      JSON
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>View all systems as JSON</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleConsolidatedView("html")}
+                      className="h-6 px-2 text-xs"
+                    >
+                      <Code className="h-3 w-3 mr-1" />
+                      Formatted
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>View formatted layout</p></TooltipContent>
+                </Tooltip>
+              </div>
             )}
             
             {/* Search results */}
             {hasSearched && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                 {/* System cards */}
                 {SEARCH_SYSTEMS.map((config) => {
                   // Check employee access
@@ -1036,44 +1083,6 @@ export function SearchSection({
                     />
                   );
                 })}
-
-                {/* Consolidated view buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 justify-start mt-4 pt-4 border-t col-span-full">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        className="flex-1 sm:flex-none min-w-0"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleConsolidatedView("json")}
-                      >
-                        <FileText className="h-4 w-4 mr-1 flex-shrink-0" />
-                        <span className="hidden sm:inline">Consolidated View</span>
-                        <span className="sm:hidden">View All</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>View all system data in JSON format</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        className="flex-1 sm:flex-none min-w-0"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleConsolidatedView("html")}
-                      >
-                        <Code className="h-4 w-4 mr-1 flex-shrink-0" />
-                        <span className="hidden sm:inline">Readable Layout</span>
-                        <span className="sm:hidden">Format</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>View data in structured, human-readable format</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
               </div>
             )}
           </CardContent>

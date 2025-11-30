@@ -251,79 +251,68 @@ export function SystemCard({
 
   return (
     <>
-      <Card className="shadow-sm relative">
-        {userKey && (
-          <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded opacity-90">
-            For: {userKey}
-          </div>
-        )}
-        <CardHeader className="text-center pb-3">
-          <CardTitle className="text-lg font-semibold">{name}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-end gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="secondary" onClick={() => loadInitial(true)} disabled={!enabled || loading}>
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Refresh system data</p>
-              </TooltipContent>
-            </Tooltip>
-            {data && (
+      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-slate-200 dark:border-slate-700 shadow-sm">
+        <CardContent className="p-0">
+          {/* Ultra-compact header with inline name, user badge, and action buttons */}
+          <div className="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{name}</span>
+              {userKey && (
+                <span className="text-xs bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded shrink-0">
+                  {userKey}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-0.5 shrink-0">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-                      toast.success(`Copied ${name} JSON to clipboard`);
-                    }}
-                  >
-                    <Copy className="h-4 w-4" />
+                  <Button size="sm" variant="ghost" onClick={() => loadInitial(true)} disabled={!enabled || loading} className="h-5 w-5 p-0">
+                    <RefreshCw className={`h-2.5 w-2.5 ${loading ? 'animate-spin' : ''}`} />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Copy JSON to clipboard</p>
-                </TooltipContent>
+                <TooltipContent><p>Refresh</p></TooltipContent>
               </Tooltip>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" onClick={loadDetails} disabled={!enabled || loading}>
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>View detailed information</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={openHtmlView} disabled={!enabled || loading}>
-                  <Code className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>View in readable format</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={openTicketDialog} disabled={!enabled}>
-                  <FileText className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Create ServiceNow ticket</p>
-              </TooltipContent>
-            </Tooltip>
+              {data && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="ghost" className="h-5 w-5 p-0" onClick={() => {
+                      navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+                      toast.success(`Copied ${name} JSON`);
+                    }}>
+                      <Copy className="h-2.5 w-2.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Copy</p></TooltipContent>
+                </Tooltip>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="ghost" onClick={loadDetails} disabled={!enabled || loading} className="h-5 w-5 p-0">
+                    <Eye className="h-2.5 w-2.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Details</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="ghost" onClick={openHtmlView} disabled={!enabled || loading} className="h-5 w-5 p-0">
+                    <Code className="h-2.5 w-2.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>View</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="ghost" onClick={openTicketDialog} disabled={!enabled} className="h-5 w-5 p-0">
+                    <FileText className="h-2.5 w-2.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Ticket</p></TooltipContent>
+              </Tooltip>
+            </div>
           </div>
           {system === "ping-federate" && role === "employee" && (
-            <div className="flex flex-wrap gap-2 justify-center p-3 bg-muted/50 rounded-lg">
+            <div className="flex flex-wrap gap-1 px-2 py-1 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
               <Button
                 size="sm"
                 variant="secondary"
@@ -389,29 +378,27 @@ export function SystemCard({
               </Button>
             </div>
           )}
-          <div className="space-y-3">
+          <div>
             {loading ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground animate-pulse">Loading data...</p>
-                {userKey && <p className="text-xs text-muted-foreground mt-1">Fetching data for {userKey}</p>}
+              <div className="text-center py-3 px-2">
+                <p className="text-xs text-muted-foreground animate-pulse">Loading...</p>
               </div>
             ) : error ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-red-600">{error}</p>
-                <Button size="sm" variant="outline" onClick={() => loadInitial(true)} className="mt-2">
+              <div className="text-center py-3 px-2">
+                <p className="text-xs text-red-600">{error}</p>
+                <Button size="sm" variant="outline" onClick={() => loadInitial(true)} className="mt-1 h-6 text-xs">
                   Retry
                 </Button>
               </div>
             ) : data ? (
-              <div>
-                <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-96">
+              <div className="bg-slate-50 dark:bg-slate-900">
+                <pre className="text-xs font-mono overflow-x-auto p-2 max-h-96">
                   {JSON.stringify(data, null, 2)}
                 </pre>
               </div>
             ) : (
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground">No data yet</p>
-                {userKey && <p className="text-xs text-muted-foreground mt-1">Expected data for {userKey}</p>}
+              <div className="text-center py-3 px-2">
+                <p className="text-xs text-muted-foreground">No data</p>
               </div>
             )}
           </div>

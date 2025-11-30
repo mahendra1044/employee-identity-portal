@@ -83,58 +83,60 @@ export function SearchResultCard({
     }
   };
 
+  const hasManyResults = displayResults.length > 10;
+  const hasSomeResults = displayResults.length > 0;
+  
   return (
     <Card>
-      <CardHeader className="text-center pb-2">
-        <CardTitle className="text-base font-semibold">
-          {config.label}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex justify-end gap-2">
+      <CardContent className="p-0">
+        <div className="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{config.label}</span>
+            <span className={hasManyResults ? "text-xs px-1.5 py-0.5 rounded bg-slate-300 dark:bg-slate-600 text-slate-800 dark:text-slate-200 font-medium" : "text-xs px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}>
+              {displayResults.length}
+            </span>
+          </div>
           {displayResults.length > 0 && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  onClick={handleViewDetails}
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Details
+                <Button size="sm" variant="ghost" onClick={handleViewDetails} className="h-5 w-5 p-0">
+                  <Eye className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                <p>View detailed information for primary result</p>
-              </TooltipContent>
+              <TooltipContent><p>View details</p></TooltipContent>
             </Tooltip>
           )}
         </div>
         
         {displayResults.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {config.columns.map((col) => (
-                  <TableHead key={col.key}>{col.header}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {displayResults.map((item, idx) => (
-                <TableRow key={`${config.system}-${item[config.rowKey] || idx}`}>
+          <div className="p-2">
+            <Table>
+              <TableHeader>
+                <TableRow>
                   {config.columns.map((col) => (
-                    <TableCell key={col.key}>
-                      {col.accessor 
-                        ? col.accessor(item) 
-                        : String(item[col.key] ?? "")}
-                    </TableCell>
+                    <TableHead key={col.key} className="h-7 px-2 text-xs">{col.header}</TableHead>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {displayResults.map((item, idx) => (
+                  <TableRow key={`${config.system}-${item[config.rowKey] || idx}`}>
+                    {config.columns.map((col) => (
+                      <TableCell key={col.key} className="py-1.5 px-2 text-xs">
+                        {col.accessor 
+                          ? col.accessor(item) 
+                          : String(item[col.key] ?? "")}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No results</p>
+          <div className="p-2 text-center">
+            <p className="text-xs text-muted-foreground">No results found</p>
+          </div>
         )}
       </CardContent>
     </Card>

@@ -111,51 +111,49 @@ export function QuickActionsCard({
 
   return (
     <section>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between p-6 space-y-0">
-          <CardTitle>Quick Actions</CardTitle>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
-            >
-              Take Me to Splunk
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
-            >
-              Take Me to Cloud Watch
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Tab navigation */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex flex-wrap gap-1">
-              <div className="flex flex-wrap gap-1 items-center">
-                {enabledSystems.map((system) => (
-                  <Button
-                    key={system}
-                    size="sm"
-                    variant={effectiveActive === system ? "default" : "outline"}
-                    onClick={() => onSetQaActive(system)}
-                    className="whitespace-nowrap"
-                  >
-                    {SYSTEM_LABELS[system]}
-                  </Button>
-                ))}
-              </div>
+      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm">
+        <CardContent className="p-2">
+          {/* Compact header with tabs and links inline */}
+          <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Quick Actions</span>
+              <button
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 underline"
+                onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
+              >
+                Splunk
+              </button>
+              <span className="text-xs text-slate-300 dark:text-slate-700">•</span>
+              <button
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 underline"
+                onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
+              >
+                CloudWatch
+              </button>
             </div>
-            <span className="text-xs text-muted-foreground truncate max-w-[60%]">
-              Target: {resolveSnowEmail() || search || "(unknown)"}
-            </span>
+            <span className="text-xs text-muted-foreground truncate">Target: {resolveSnowEmail() || search || "(unknown)"}</span>
+          </div>
+          {/* Tab navigation */}
+          <div className="flex items-center gap-1 mb-2">
+            {enabledSystems.map((system) => (
+              <Button
+                key={system}
+                size="sm"
+                variant={effectiveActive === system ? "default" : "ghost"}
+                onClick={() => onSetQaActive(system)}
+                className={`whitespace-nowrap text-xs h-6 px-2 transition-colors ${
+                  effectiveActive === system
+                    ? "bg-slate-700 text-white hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700"
+                    : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                {SYSTEM_LABELS[system]}
+              </Button>
+            ))}
           </div>
 
           {/* Action buttons for active tab - data-driven rendering */}
-          <div className="rounded-lg border bg-gradient-to-r from-muted/60 to-background p-3 sm:p-4">
+          <div className="rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2">
             {effectiveActive && qaEnabledTabs[effectiveActive] && (
               <ActionButtons 
                 system={effectiveActive} 
