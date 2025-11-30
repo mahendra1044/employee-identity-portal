@@ -49,6 +49,8 @@ export function SystemCard({
   const [pfData, setPfData] = useState<SystemData | null>(null);
   const [description, setDescription] = useState("");
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadInitial = async (showToast = true) => {
     console.log(`🔄 [${system}] loadInitial START - enabled:`, enabled, 'userKey:', userKey, 'token:', !!token);
@@ -188,10 +190,10 @@ export function SystemCard({
     setHtmlOpen(true);
   };
 
-  const submitSnowTicket = async (description?: string) => {
+  const submitSnowTicket = async (description?: string): Promise<boolean> => {
     if (!email) {
       toast.error("Email not available - please log in again");
-      return;
+      return false;
     }
     const payload = details || data || {};
     const defaultDesc = `Access issue investigation request for user ${email} in ${system} system. Please review attached payload for details.`;
@@ -211,31 +213,40 @@ export function SystemCard({
         const text = await res.text();
         console.error('SNOW API returned non-JSON response:', { status: res.status, responseText: text.substring(0, 200) });
         toast.error(`Server error: ${res.status}. Please check server logs.`);
-        return;
+        return false;
       }
       
       if (res.ok) {
         const { ticketNumber } = result;
         toast.success(`SNOW ticket submitted: ${ticketNumber}`);
         console.info('SNOW Ticket Success:', { ticketNumber, system, userEmail: email, description: ticketDesc, payload });
+        return true;
       } else {
         toast.error(result.error || "Failed to submit SNOW ticket");
         console.warn('SNOW Ticket Failure:', { system, userEmail: email, status: res.status, error: result.error, description: ticketDesc, payload });
+        return false;
       }
     } catch (error) {
       toast.error("Failed to submit SNOW ticket");
       console.error('SNOW Ticket Error:', { system, userEmail: email, error: (error as Error).message, description: ticketDesc, payload });
+      return false;
     }
   };
 
   const openTicketDialog = () => {
     setDescription("");
+    setShowPreview(false);
     setTicketDialogOpen(true);
   };
 
-  const handleSubmitTicket = () => {
-    submitSnowTicket(description);
-    setTicketDialogOpen(false);
+  const handleSubmitTicket = async () => {
+    setIsSubmitting(true);
+    const success = await submitSnowTicket(description);
+    setIsSubmitting(false);
+    
+    if (success) {
+      setTicketDialogOpen(false);
+    }
   };
 
   return (
@@ -432,30 +443,163 @@ export function SystemCard({
         showCopy={false}
       />
 
-      {/* SNOW Ticket Dialog - custom content, can't use DataDialog */}
-      <Dialog open={ticketDialogOpen} onOpenChange={setTicketDialogOpen}>
-        <DialogContent className="max-h-[80vh] flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle>Create SNOW Ticket for {name}</DialogTitle>
-            <DialogDescription>Enter additional details if needed. This will be included in the ticket description.</DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col flex-1 min-h-0">
-            <div className="flex-1 overflow-y-auto p-6">
-              <Textarea
-                placeholder="Optional: Add more information about the access issue or investigation needed..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full min-h-[120px] resize-none"
-              />
+      {/* SNOW Ticket Dialog - Enhanced Design */}
+      <Dialog open={ticketDialogOpen} onOpenChange={(open) => !isSubmitting && setTicketDialogOpen(open)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden border-2 border-white/20 dark:border-white/10 backdrop-blur-xl bg-white/95 dark:bg-slate-900/95 shadow-2xl">
+          {/* Phase 1: Enhanced Header with Gradient */}
+          <div className="px-6 pt-6 pb-4 bg-gradient-to-br from-blue-50/30 via-indigo-50/30 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 border-b border-slate-200/50 dark:border-slate-700/50">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl mt-1">🎫</div>
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                  Create ServiceNow Ticket
+                </DialogTitle>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">System:</span>
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-sm">
+                    {name}
+                  </span>
+                </div>
+                <DialogDescription className="text-sm text-slate-600 dark:text-slate-400">
+                  Enter additional details if needed. This will be included in the ticket description.
+                </DialogDescription>
+              </div>
             </div>
-            <div className="flex justify-end gap-3 p-6 pt-4 border-t flex-shrink-0">
-              <Button type="button" variant="outline" onClick={() => setTicketDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="button" onClick={handleSubmitTicket}>
-                Submit Ticket
-              </Button>
+          </div>
+
+          {/* Content Area with Pattern Background */}
+          <div className="flex-1 overflow-y-auto relative bg-gradient-to-br from-slate-50/50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-950/50">
+            <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+              backgroundSize: '24px 24px'
+            }}></div>
+            
+            <div className="relative p-6 space-y-4">
+              {/* Phase 2: Smart Textarea */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">📝</span>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Additional Information <span className="text-slate-400 dark:text-slate-500 font-normal">(Optional)</span>
+                  </h3>
+                </div>
+                <Textarea
+                  placeholder="Example: User reports access denied when trying to authenticate. Need to investigate group memberships..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  maxLength={500}
+                  disabled={isSubmitting}
+                  className={`w-full min-h-[120px] resize-none transition-colors ${
+                    description.length > 0 ? 'border-blue-300 dark:border-blue-600' : ''
+                  } ${description.length > 400 ? 'border-orange-400 dark:border-orange-500' : ''} ${
+                    description.length === 500 ? 'border-red-400 dark:border-red-500' : ''
+                  }`}
+                />
+                <div className="flex items-center justify-between mt-2 text-xs">
+                  <span className="text-slate-500 dark:text-slate-400">
+                    {description.length === 0 ? 'Provide context to help resolve faster' : 
+                     description.length < 50 ? 'Add more details' : 
+                     description.length < 200 ? 'Good detail' : 'Comprehensive'}
+                  </span>
+                  <span className={`font-mono font-medium ${
+                    description.length < 200 ? 'text-green-600 dark:text-green-400' : 
+                    description.length < 400 ? 'text-yellow-600 dark:text-yellow-400' : 
+                    description.length < 500 ? 'text-orange-600 dark:text-orange-400' : 
+                    'text-red-600 dark:text-red-400'
+                  }`}>
+                    {description.length} / 500
+                  </span>
+                </div>
+              </div>
+
+              {/* Phase 3: Preview Section */}
+              <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white/80 dark:bg-slate-800/80">
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="w-full flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  type="button"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">👁️</span>
+                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ticket Preview</h3>
+                  </div>
+                  <svg className={`h-4 w-4 text-slate-500 transition-transform ${showPreview ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showPreview && (
+                  <div className="px-4 pb-4 space-y-2">
+                    <div className="bg-slate-50 dark:bg-slate-900 rounded p-3 space-y-2 text-sm">
+                      <div className="flex gap-2">
+                        <span className="text-blue-600 dark:text-blue-400 font-medium min-w-[70px]">User:</span>
+                        <span className="text-slate-700 dark:text-slate-300 font-mono text-xs">{email}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-purple-600 dark:text-purple-400 font-medium min-w-[70px]">System:</span>
+                        <span className="text-slate-700 dark:text-slate-300">{system}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-green-600 dark:text-green-400 font-medium min-w-[70px]">Payload:</span>
+                        <span className="text-slate-700 dark:text-slate-300">
+                          {details || data ? `${Object.keys(details || data || {}).length} fields` : 'No data'}
+                        </span>
+                      </div>
+                      {description && (
+                        <div className="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                          <span className="text-orange-600 dark:text-orange-400 font-medium min-w-[70px]">Note:</span>
+                          <span className="text-slate-700 dark:text-slate-300 italic text-xs">
+                            "{description.substring(0, 80)}{description.length > 80 ? '...' : ''}"
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* Phase 4 & 5: Enhanced Buttons with Submit Flow */}
+          <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+            <button
+              type="button"
+              onClick={() => setTicketDialogOpen(false)}
+              disabled={isSubmitting}
+              className={`px-5 py-2 rounded-lg text-sm font-medium border shadow-sm transition-all ${
+                isSubmitting
+                  ? 'text-slate-400 bg-slate-100 border-slate-200 cursor-not-allowed opacity-50'
+                  : 'text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
+              }`}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmitTicket}
+              disabled={isSubmitting}
+              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-sm shadow-lg transition-all ${
+                isSubmitting
+                  ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white cursor-wait'
+                  : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:shadow-xl'
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Submit Ticket
+                </>
+              )}
+            </button>
           </div>
         </DialogContent>
       </Dialog>
