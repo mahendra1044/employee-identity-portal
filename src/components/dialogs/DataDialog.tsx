@@ -355,6 +355,7 @@ function JsonView({ data }: { data: any }) {
 /** HTML/Key-Value pairs view renderer */
 function HtmlView({ data }: { data: any }) {
   const [expandedArrays, setExpandedArrays] = useState<Set<string>>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
   // Utility: Detect field types
   const isEmail = (value: any): boolean => {
@@ -449,6 +450,45 @@ function HtmlView({ data }: { data: any }) {
       }
       return next;
     });
+  };
+
+  // Toggle section collapse
+  const toggleSection = (section: string) => {
+    setCollapsedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
+  };
+
+  // Determine section for a field
+  const getSectionForField = (key: string): { section: string; title: string; icon: string; gradient: string } => {
+    const lowerKey = key.toLowerCase();
+    
+    if (lowerKey.includes('upn') || lowerKey.includes('objectid') || lowerKey.includes('tenant') || 
+        lowerKey.includes('username') || lowerKey.includes('userid') || lowerKey === 'id') {
+      return { section: 'identity', title: 'Identity Information', icon: '👤', gradient: 'from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900' };
+    } else if (lowerKey.includes('job') || lowerKey.includes('title') || lowerKey.includes('department') || 
+               lowerKey.includes('manager') || lowerKey.includes('organization')) {
+      return { section: 'organization', title: 'Organization', icon: '🏢', gradient: 'from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900' };
+    } else if (lowerKey.includes('license') || lowerKey.includes('group') || lowerKey.includes('role') || 
+               lowerKey.includes('permission') || lowerKey.includes('entitlement')) {
+      return { section: 'access', title: 'Licenses & Access', icon: '🔐', gradient: 'from-green-50 to-green-100 dark:from-green-950 dark:to-green-900' };
+    } else if (lowerKey.includes('device') || lowerKey.includes('computer') || lowerKey.includes('machine')) {
+      return { section: 'devices', title: 'Devices', icon: '💻', gradient: 'from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900' };
+    } else if (lowerKey.includes('risk') || lowerKey.includes('security') || lowerKey.includes('conditional') || 
+               lowerKey.includes('mfa') || lowerKey.includes('authentication')) {
+      return { section: 'security', title: 'Security', icon: '🛡️', gradient: 'from-red-50 to-red-100 dark:from-red-950 dark:to-red-900' };
+    } else if (lowerKey.includes('sync') || lowerKey.includes('modified') || lowerKey.includes('created') || 
+               lowerKey.includes('updated') || lowerKey.includes('last')) {
+      return { section: 'metadata', title: 'Metadata', icon: '📊', gradient: 'from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800' };
+    } else {
+      return { section: 'other', title: 'Other Information', icon: '📌', gradient: 'from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800' };
+    }
   };
 
   // Render a single value with smart formatting
@@ -625,38 +665,94 @@ function HtmlView({ data }: { data: any }) {
 
   const pairs = toPairs(data).slice(0, 1000);
 
+  // Group consecutive fields by section while maintaining order
+  const groupedPairs: Array<{ section: string; title: string; icon: string; gradient: string; fields: Array<{ k: string; v: any }> }> = [];
+  let currentSection: string | null = null;
+  
+  pairs.forEach(({ k, v }) => {
+    const fieldSection = getSectionForField(k);
+    
+    if (fieldSection.section !== currentSection) {
+      // Start a new section
+      currentSection = fieldSection.section;
+      groupedPairs.push({
+        section: fieldSection.section,
+        title: fieldSection.title,
+        icon: fieldSection.icon,
+        gradient: fieldSection.gradient,
+        fields: [{ k, v }]
+      });
+    } else {
+      // Add to current section
+      groupedPairs[groupedPairs.length - 1].fields.push({ k, v });
+    }
+  });
+
   return (
     <div className="flex-1 overflow-auto pr-1 -mr-4">
-      <div className="space-y-3 pr-4">
-        {pairs.map(({ k, v }) => {
-          const fieldIcon = getFieldIcon(k, v);
+      <div className="space-y-4 pr-4">
+        {groupedPairs.map((group, groupIndex) => {
+          const isCollapsed = collapsedSections.has(`${group.section}-${groupIndex}`);
+
           return (
             <div 
-              key={k} 
-              className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300 ease-in-out hover:shadow-md hover:border-primary/30"
+              key={`${group.section}-${groupIndex}`}
+              className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-card shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
             >
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="text-xl flex-shrink-0">{fieldIcon}</span>
-                    <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80">
-                      {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
-                    </h4>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0"
-                    onClick={() => copyValue(k, v)}
-                    title="Copy value"
-                  >
-                    📋
-                  </Button>
+              <button
+                onClick={() => toggleSection(`${group.section}-${groupIndex}`)}
+                className={`w-full flex items-center justify-between p-4 bg-gradient-to-r ${group.gradient} hover:opacity-90 transition-all duration-200`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl transition-transform duration-200">{group.icon}</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">
+                    {group.title}
+                  </h3>
+                  <span className="text-xs bg-white/60 dark:bg-black/30 px-2 py-1 rounded-full font-semibold">
+                    {group.fields.length}
+                  </span>
                 </div>
-                <div className="text-base text-foreground">
-                  {renderValue(k, v)}
+                <span className={`text-slate-600 dark:text-slate-400 text-xl transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}>
+                  ▶
+                </span>
+              </button>
+              
+              {!isCollapsed && (
+                <div className="p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                  {group.fields.map(({ k, v }, fieldIndex) => {
+                    const fieldIcon = getFieldIcon(k, v);
+                    return (
+                      <div 
+                        key={`${group.section}-${groupIndex}-${k}-${fieldIndex}`}
+                        className="group rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200 ease-in-out hover:shadow-md hover:border-primary/30 hover:scale-[1.01]"
+                      >
+                        <div className="p-4">
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <span className="text-xl flex-shrink-0">{fieldIcon}</span>
+                              <h4 className="text-sm font-bold tracking-wide uppercase text-primary/80">
+                                {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
+                              </h4>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="opacity-0 group-hover:opacity-100 h-7 w-7 p-0 flex-shrink-0 transition-opacity duration-200"
+                              onClick={() => copyValue(k, v)}
+                              title="Copy value"
+                            >
+                              📋
+                            </Button>
+                          </div>
+                          <div className="text-base text-foreground">
+                            {renderValue(k, v)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              )}
             </div>
           );
         })}
