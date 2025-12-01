@@ -114,11 +114,27 @@ export function QuickActionsCard({
   return (
     <section className="mb-6">
       <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
-        <CardContent className="p-2">
-          {/* Header: Title, External Tools, and Target User */}
+        <CardContent className="pt-0 px-2 pb-2">
+          {/* Section Header */}
+          <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-800/30">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-slate-700 text-white shrink-0">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none">
+                  Quick Actions
+                </h2>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight mt-0.5">Execute operations and view system data for searched users</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Header: External Tools and Target User */}
           <div className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Quick Actions</span>
               <div className="flex items-center gap-1 pl-2 border-l border-slate-300 dark:border-slate-600">
                 <span className="text-xs text-slate-500 dark:text-slate-400 mr-1">External Tools:</span>
                 <Tooltip>

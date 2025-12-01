@@ -321,14 +321,21 @@ export default function HomePage() {
 
         {/* System Cards (hide by default for ops) */}
         <section className="mb-6">
-          <div className="mb-2 px-1">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-              System Cards
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">View and manage identity data across all integrated systems</p>
+          {/* Section Header */}
+          <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-800/30">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-slate-700 text-white shrink-0">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none">
+                  System Cards
+                </h2>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight mt-0.5">View and manage identity data across all integrated systems</p>
+              </div>
+            </div>
           </div>
           <SystemCardsGrid
             visibleSystems={visibleSystems}
