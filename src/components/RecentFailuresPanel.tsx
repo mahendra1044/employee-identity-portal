@@ -205,18 +205,18 @@ export function RecentFailuresPanel({
       <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
         <CardContent className="pt-0 px-2 pb-2">
           {/* Section Header */}
-          <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-800/30">
+          <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-neutral-800/40 [.navy_&]:from-blue-900/50">
             <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-slate-700 text-white shrink-0">
+              <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-neutral-600 [.navy_&]:bg-blue-600 text-white shrink-0">
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-neutral-50 [.navy_&]:text-blue-50 leading-none">
                   Recent Failures
                 </h2>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight mt-0.5">Monitor authentication and access failures across systems</p>
+                <p className="text-[11px] text-slate-600 dark:text-neutral-300 [.navy_&]:text-blue-200 leading-tight mt-0.5">Monitor authentication and access failures across systems</p>
               </div>
             </div>
           </div>
