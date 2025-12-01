@@ -35,6 +35,33 @@ export type SystemKey =
   | "saviynt-tpag-risk"
   | "saviynt-tpag-lifecycle";
 
+// ============================================================================
+// RBAC TYPES
+// ============================================================================
+
+/** Role definition from RBAC config */
+export interface RBACRole {
+  id: string;
+  name: string;
+  priority: number;
+  systems: string[];
+  isMaster: boolean;
+  description: string;
+}
+
+/** RBAC data included in login response */
+export interface RBACData {
+  userId: string | null;
+  assignedRoles: string[];
+  availableRoles: RBACRole[];
+  activeRole: RBACRole;
+  isMaster: boolean;
+}
+
+// ============================================================================
+// FEATURE & LOGIN TYPES
+// ============================================================================
+
 export type Features = {
   credentialSource: string;
   useMocks: boolean;
@@ -50,7 +77,12 @@ export type Features = {
 export type LoginResponse = {
   token: string;
   role: string;
-  email: string;
+  // RBAC fields
+  userId: string | null;
+  assignedRoles?: string[];
+  availableRoles?: RBACRole[];
+  activeRole?: RBACRole;
+  isMaster?: boolean;
 };
 
 export type SystemData = Record<string, unknown>;
@@ -90,7 +122,7 @@ export type SnowResponse = {
 export type AuthData = {
   token: string | null;
   role: string | null;
-  email: string | null;
+  userId: string | null;
 };
 
 export type SystemToggleState = Record<SystemKey, boolean>;

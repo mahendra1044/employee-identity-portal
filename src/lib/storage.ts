@@ -92,25 +92,55 @@ export class StorageService {
     }
   }
 
-  // Auth-specific methods
-  static saveAuth(token: string, role: string, email: string): void {
+  // Auth-specific methods (with RBAC support)
+  static saveAuth(token: string, role: string, userId: string, rbacData?: {
+    assignedRoles?: string[];
+    availableRoles?: unknown[];
+    activeRole?: unknown;
+    isMaster?: boolean;
+  }): void {
     this.setItem("token", token);
     this.setItem("role", role);
-    this.setItem("email", email);
+    this.setItem("userId", userId);
+    // Save RBAC data if provided
+    if (rbacData) {
+      if (rbacData.assignedRoles) this.setJson("assignedRoles", rbacData.assignedRoles);
+      if (rbacData.availableRoles) this.setJson("availableRoles", rbacData.availableRoles);
+      if (rbacData.activeRole) this.setJson("activeRole", rbacData.activeRole);
+      if (rbacData.isMaster !== undefined) this.setItem("isMaster", String(rbacData.isMaster));
+    }
   }
 
-  static getAuth(): AuthData {
+  static getAuth(): AuthData & {
+    assignedRoles?: string[];
+    availableRoles?: unknown[];
+    activeRole?: unknown;
+    isMaster?: boolean;
+  } {
     return {
       token: this.getItem("token"),
       role: this.getItem("role"),
-      email: this.getItem("email"),
+      userId: this.getItem("userId"),
+      assignedRoles: this.getJson<string[]>("assignedRoles", []),
+      availableRoles: this.getJson<unknown[]>("availableRoles", []),
+      activeRole: this.getJson<unknown>("activeRole", null),
+      isMaster: this.getItem("isMaster") === "true",
     };
   }
 
   static clearAuth(): void {
     this.removeItem("token");
     this.removeItem("role");
-    this.removeItem("email");
+    this.removeItem("userId");
+    this.removeItem("assignedRoles");
+    this.removeItem("availableRoles");
+    this.removeItem("activeRole");
+    this.removeItem("isMaster");
+  }
+
+  // Save active role separately (for role switching)
+  static saveActiveRole(role: unknown): void {
+    this.setJson("activeRole", role);
   }
 
   // Theme-specific methods

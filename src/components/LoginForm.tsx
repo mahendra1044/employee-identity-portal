@@ -8,12 +8,12 @@ import { ErrorHandler } from "@/lib/error-handler";
 import type { LoginResponse } from "@/lib/types";
 
 type Props = {
-  onLogin?: (email: string, password: string) => Promise<void>;
+  onLogin?: (userId: string, password: string) => Promise<void>;
 };
 
 export function LoginForm({ onLogin }: Props) {
   const { login } = useAppAuth();
-  const [email, setEmail] = useState("");
+  const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,17 +25,23 @@ export function LoginForm({ onLogin }: Props) {
     try {
       if (onLogin) {
         // Use provided onLogin callback if available
-        await onLogin(email, password);
+        await onLogin(userId, password);
       } else {
         // Otherwise use context login which performs API call and stores token in context
         const res = await fetch(`/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ userId, password }),
         });
         if (!res.ok) throw new Error("Login failed");
         const data: LoginResponse = await res.json();
-        login(data.token, data.role, data.email);
+        // Pass RBAC data to login - use userId for display instead of email
+        login(data.token, data.role, data.userId || userId, {
+          assignedRoles: data.assignedRoles,
+          availableRoles: data.availableRoles,
+          activeRole: data.activeRole,
+          isMaster: data.isMaster,
+        });
       }
     } catch (err: unknown) {
       setError(ErrorHandler.getUserFriendlyMessage(err));
@@ -50,8 +56,8 @@ export function LoginForm({ onLogin }: Props) {
         <h2 className="text-2xl font-semibold mb-4">Sign in</h2>
         <form onSubmit={submit} className="space-y-3">
           <div>
-            <label className="block text-sm mb-1">Email</label>
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+            <label className="block text-sm mb-1">User ID</label>
+            <Input value={userId} onChange={(e) => setUserId(e.target.value)} type="text" placeholder="e.g., u1001" required />
           </div>
           <div>
             <label className="block text-sm mb-1">Password</label>

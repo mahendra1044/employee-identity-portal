@@ -9,17 +9,39 @@ export function setupAuthRoutes(app, features, logger) {
       return res.status(501).json({ error: 'Real auth not implemented' });
     }
     
-    const { email, password } = req.body || {};
+    // Accept userId field for login
+    const { userId: userIdInput, password } = req.body || {};
     
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
+    if (!userIdInput || !password) {
+      return res.status(400).json({ error: 'User ID and password required' });
     }
     
-    const role = rbacService.getRoleFromEmail(email);
-    const token = jwt.sign({ email, role }, JWT_SECRET, { expiresIn: '24h' });
+    // Get RBAC data for user (accepts "u1001")
+    const rbacData = rbacService.getRbacLoginResponse(userIdInput);
     
-    logger.info({ msg: 'login', role, email });
+    const token = jwt.sign({ 
+      userId: rbacData.userId,
+      role: rbacData.legacyRole,
+      activeRoleId: rbacData.activeRole.id 
+    }, JWT_SECRET, { expiresIn: '24h' });
     
-    return res.json({ token, role, email });
+    logger.info({ 
+      msg: 'login', 
+      userId: rbacData.userId,
+      role: rbacData.legacyRole, 
+      activeRole: rbacData.activeRole.name,
+      isMaster: rbacData.isMaster
+    });
+    
+    return res.json({ 
+      token, 
+      role: rbacData.legacyRole,
+      // RBAC fields
+      userId: rbacData.userId || userIdInput,
+      assignedRoles: rbacData.assignedRoles,
+      availableRoles: rbacData.availableRoles,
+      activeRole: rbacData.activeRole,
+      isMaster: rbacData.isMaster,
+    });
   });
 }
