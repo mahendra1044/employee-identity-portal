@@ -37,7 +37,7 @@ export function LoginForm({ onLogin }: Props) {
         const data: LoginResponse = await res.json();
         login(data.token, data.role, data.email);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(ErrorHandler.getUserFriendlyMessage(err));
     } finally {
       setLoading(false);

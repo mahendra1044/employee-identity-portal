@@ -101,6 +101,20 @@ export type ApiErrorResponse = {
   status?: number;
 };
 
-export type FetchOptions = RequestInit & {
-  headers?: Record<string, string>;
+// ============================================================================
+// DATA DISPLAY TYPES (for DataDialog, SearchSection, etc.)
+// ============================================================================
+
+/** JSON-serializable primitive values */
+export type JsonPrimitive = string | number | boolean | null;
+
+/** JSON-serializable value (recursive) */
+export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+
+/** Field section grouping for organized display */
+export type FieldSection = {
+  section: string;
+  title: string;
+  icon: string;
+  gradient: string;
 };

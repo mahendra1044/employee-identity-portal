@@ -22,7 +22,6 @@ import { useAppUI } from "@/hooks/useAppUI";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useThemeDOM } from "@/hooks/useThemeDOM";
 import { useOpsFeatures } from "@/hooks/useOpsFeatures";
-import { usePageState } from "@/hooks/usePageState";
 import { Header } from "@/components/Header";
 import { LoginForm } from "@/components/LoginForm";
 import { EducateGuideDialog } from "@/components/dialogs/EducateGuideDialog";
@@ -39,6 +38,8 @@ import { QuickActionsCard } from "@/components/sections/QuickActionsCard";
 import { toPairs, formatRoleName, getRoleIconType } from "@/lib/formatters";
 // Import from constants
 import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
+// Import from centralized config
+import { SPLUNK_CONFIG, CLOUDWATCH_CONFIG } from "@/config";
 // Import from services
 import { StorageService } from "@/lib/storage";
 import { ErrorHandler } from "@/lib/error-handler";
@@ -128,10 +129,7 @@ export default function HomePage() {
   const { features, educateEnabled } = useFeatures(token);
   useThemeDOM(theme);
 
-  // Create page-level state for all dialogs and UI toggles
-  const pageState = usePageState();
-
-  // userToggles initialization is now handled by useUserToggles hook
+  // userToggles initialization is handled by useAppToggles hook
 
   const enabled = useMemo(() => {
     const all = features?.systems || {};
@@ -191,8 +189,9 @@ export default function HomePage() {
     return baseTabs;
   }, [enabled, features, role]);
 
-  const splunkUrl = "https://splunk.company.com";
-  const cloudwatchUrl = "https://console.aws.amazon.com/cloudwatch/home";
+  // External service URLs from centralized config
+  const splunkUrl = SPLUNK_CONFIG.baseUrl;
+  const cloudwatchUrl = CLOUDWATCH_CONFIG.baseUrl;
 
   // FIXED: Remove searchKey state - just use resolveUserKey directly
   const resolveUserKey = useMemo(() => {

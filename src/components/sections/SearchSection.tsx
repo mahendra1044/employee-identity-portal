@@ -25,6 +25,17 @@ import {
   canEmployeeViewSystem,
   buildCandidateKeys 
 } from "@/lib/search-config";
+import {
+  isEmail,
+  isUrl,
+  isDate,
+  isTimestamp,
+  getRelativeTime,
+  getFieldIcon,
+  getSectionForField,
+  getSystemIcon,
+  copyFieldValue,
+} from "@/lib/data-display-utils";
 import type { SystemKey, Features, SearchResults } from "@/lib/types";
 
 // ============================================================================
@@ -81,87 +92,8 @@ export function SearchSection({
   const [isAggregateView, setIsAggregateView] = useState(false);
   const [expandedArrays, setExpandedArrays] = useState<Set<string>>(new Set());
 
-  // Utility: Detect field types
-  const isEmail = (value: any): boolean => {
-    return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  };
-
-  const isUrl = (value: any): boolean => {
-    if (typeof value !== 'string') return false;
-    try {
-      new URL(value);
-      return value.startsWith('http://') || value.startsWith('https://');
-    } catch {
-      return false;
-    }
-  };
-
-  const isDate = (value: any): boolean => {
-    if (typeof value !== 'string') return false;
-    const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-    return isoDateRegex.test(value);
-  };
-
-  const isTimestamp = (value: any): boolean => {
-    if (typeof value !== 'string' && typeof value !== 'number') return false;
-    const num = typeof value === 'string' ? parseInt(value) : value;
-    return !isNaN(num) && num > 946684800000 && num < 4102444800000;
-  };
-
-  // Utility: Get relative time
-  const getRelativeTime = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    if (diffDays < 30) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    return date.toLocaleDateString();
-  };
-
-  // Utility: Get icon for field
-  const getFieldIcon = (key: string, value: any): string => {
-    const lowerKey = key.toLowerCase();
-    
-    if (isEmail(value)) return '📧';
-    if (isUrl(value)) return '🔗';
-    if (lowerKey.includes('password') || lowerKey.includes('secret')) return '🔒';
-    if (lowerKey.includes('user') || lowerKey === 'upn' || lowerKey.includes('username')) return '👤';
-    if (lowerKey.includes('email') || lowerKey.includes('mail')) return '📧';
-    if (lowerKey.includes('phone') || lowerKey.includes('mobile')) return '📱';
-    if (lowerKey.includes('date') || lowerKey.includes('time') || lowerKey.includes('sync')) return '📅';
-    if (lowerKey.includes('department') || lowerKey.includes('org')) return '🏢';
-    if (lowerKey.includes('title') || lowerKey.includes('job')) return '💼';
-    if (lowerKey.includes('manager') || lowerKey.includes('supervisor')) return '👔';
-    if (lowerKey.includes('group') || lowerKey.includes('team')) return '👥';
-    if (lowerKey.includes('role')) return '🎭';
-    if (lowerKey.includes('license') || lowerKey.includes('subscription')) return '🎫';
-    if (lowerKey.includes('device') || lowerKey.includes('computer')) return '💻';
-    if (lowerKey.includes('status') || lowerKey.includes('state')) return '📊';
-    if (lowerKey.includes('risk') || lowerKey.includes('security')) return '🛡️';
-    if (lowerKey.includes('access') || lowerKey.includes('permission')) return '🔐';
-    if (lowerKey.includes('policy') || lowerKey.includes('policies')) return '📋';
-    if (lowerKey.includes('id') || lowerKey.includes('guid')) return '🔑';
-    if (lowerKey.includes('location') || lowerKey.includes('address')) return '📍';
-    if (typeof value === 'boolean') return value ? '✅' : '❌';
-    if (Array.isArray(value)) return '📦';
-    if (typeof value === 'object' && value !== null) return '📄';
-    if (typeof value === 'number') return '🔢';
-    
-    return '📌';
-  };
-
-  // Copy field value to clipboard
-  const copyFieldValue = (key: string, value: any) => {
-    const textToCopy = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-    navigator.clipboard.writeText(textToCopy);
-    toast.success(`Copied ${key}`);
-  };
+  // Note: Utility functions (isEmail, isUrl, isDate, isTimestamp, getRelativeTime, 
+  // getFieldIcon, copyFieldValue) are imported from @/lib/data-display-utils
 
   // Toggle array expansion
   const toggleArray = (key: string) => {
@@ -585,7 +517,7 @@ export function SearchSection({
                                                     size="sm"
                                                     variant="ghost"
                                                     className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0 transition-opacity duration-200 text-[10px]"
-                                                    onClick={() => copyFieldValue(k, v)}
+                                                    onClick={() => copyFieldValue(k, v, toast.success)}
                                                   >
                                                     📋
                                                   </Button>
@@ -931,7 +863,7 @@ export function SearchSection({
                                       size="sm"
                                       variant="ghost"
                                       className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0 transition-opacity duration-200 text-[10px]"
-                                      onClick={() => copyFieldValue(k, v)}
+                                      onClick={() => copyFieldValue(k, v, toast.success)}
                                     >
                                       📋
                                     </Button>

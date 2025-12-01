@@ -1,30 +1,21 @@
 /**
  * useFeatures Hook
  * 
- * Manages application features state including:
- * - Loading features configuration from backend API
- * - Falling back to default features if API fails
- * - Calculating educateEnabled based on environment overrides
- * 
- * @hook
- * @param {string | null} token - Authentication token for API requests
- * @returns {UseFeatureResult} Object containing features, educateEnabled, and isLoading state
- * 
- * @example
- * const { features, educateEnabled, isLoading } = useFeatures(token);
+ * Loads feature configuration from the backend API.
+ * Falls back to defaults if API fails.
  */
 
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { API_BASE } from "@/lib/constants";
-import { FEATURE_DEFAULTS } from "@/lib/ui-config";
+import { FEATURE_FLAGS } from "@/config";
 import type { Features } from "@/lib/types";
 
+// Default features when API is unavailable
 const DEFAULT_FEATURES: Features = {
   credentialSource: "env",
-  useMocks: FEATURE_DEFAULTS.USE_MOCKS,
-  useMockAuth: FEATURE_DEFAULTS.USE_MOCK_AUTH,
+  useMocks: FEATURE_FLAGS.useMockData,
+  useMockAuth: FEATURE_FLAGS.useMockAuth,
   systems: {
     "ping-directory": true,
     "ping-federate": true,
@@ -46,7 +37,6 @@ interface UseFeatureResult {
 
 /**
  * Hook for loading and managing application features
- * Fetches from /config/features endpoint and handles environment overrides
  */
 export function useFeatures(token: string | null): UseFeatureResult {
   const [features, setFeatures] = useState<Features | undefined>(undefined);
@@ -90,8 +80,8 @@ export function useFeatures(token: string | null): UseFeatureResult {
       return ["1", "true", "on", "yes", "enabled"].includes(envVal);
     }
 
-    // Fall back to feature configuration
-    return features?.employeeEducateGuideEnabled ?? FEATURE_DEFAULTS.EDUCATE_ENABLED;
+    // Fall back to feature configuration, then to centralized config
+    return features?.employeeEducateGuideEnabled ?? FEATURE_FLAGS.educateGuideEnabled;
   }, [features]);
 
   return {
