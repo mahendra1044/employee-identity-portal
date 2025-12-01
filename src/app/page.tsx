@@ -321,31 +321,35 @@ export default function HomePage() {
 
         {/* System Cards (hide by default for ops) */}
         <section className="mb-6">
-          {/* Section Header */}
-          <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-800/30">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-slate-700 text-white shrink-0">
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
+          <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
+            <CardContent className="pt-0 px-2 pb-2">
+              {/* Section Header */}
+              <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-800/30">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-slate-700 text-white shrink-0">
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none">
+                      System Cards
+                    </h2>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight mt-0.5">View and manage identity data across all integrated systems</p>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none">
-                  System Cards
-                </h2>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight mt-0.5">View and manage identity data across all integrated systems</p>
-              </div>
-            </div>
-          </div>
-          <SystemCardsGrid
-            visibleSystems={visibleSystems}
-            enabled={enabled}
-            token={token!}
-            role={role!}
-            email={email!}
-            userKey={resolveUserKey}
-            anyEnabled={anyEnabled}
-          />
+              <SystemCardsGrid
+                visibleSystems={visibleSystems}
+                enabled={enabled}
+                token={token!}
+                role={role!}
+                email={email!}
+                userKey={resolveUserKey}
+                anyEnabled={anyEnabled}
+              />
+            </CardContent>
+          </Card>
         </section>
 
         {/* All Users feature removed as requested */}
