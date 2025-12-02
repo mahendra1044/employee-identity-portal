@@ -53,6 +53,3 @@ export { useConsolidatedView } from './useConsolidatedView';
 // Utility Hooks
 export { useThemeDOM } from './useThemeDOM';
 export { useIsMobile } from './use-mobile';
-
-// Backward Compatibility (legacy exports)
-export { usePfOps } from './usePfOps';

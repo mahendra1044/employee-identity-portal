@@ -16,7 +16,7 @@
  */
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,18 +28,10 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Copy, FileText, Code } from "lucide-react";
 import { toast } from "sonner";
-import { toPairs } from "@/lib/formatters";
 import {
-  isEmail,
-  isUrl,
-  isDate,
-  isTimestamp,
-  getRelativeTime,
-  getFieldIcon,
-  getSectionForField,
-  getTypeIcon,
-  formatForCopy,
-} from "@/lib/data-display-utils";
+  GroupedFieldsRenderer,
+  JsonTreeRenderer,
+} from "@/components/data-views";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -94,568 +86,31 @@ function copyToClipboard(data: any, name?: string) {
 // SUB-COMPONENTS
 // ============================================================================
 
-/** Interactive JSON tree renderer with collapsible nodes */
-function JsonView({ data }: { data: any }) {
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-  const lineNumberRef = useRef(1);
-  
-  const toggleCollapse = (path: string) => {
-    setCollapsed(prev => {
-      const next = new Set(prev);
-      if (next.has(path)) {
-        next.delete(path);
-      } else {
-        next.add(path);
-      }
-      return next;
-    });
-  };
-  
-  const getNextLineNumber = () => {
-    const current = lineNumberRef.current;
-    lineNumberRef.current += 1;
-    return current;
-  };
-
-  const copyValue = (value: any, key?: string) => {
-    const textToCopy = key 
-      ? `"${key}": ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`
-      : typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-    navigator.clipboard.writeText(textToCopy);
-    toast.success('Copied to clipboard');
-  };
-
-  // Note: isTimestamp, isUrl, isEmail, getTypeIcon are imported from @/lib/data-display-utils
-
-  const renderValue = (value: any, path: string, key?: string, indent: number = 0): React.ReactNode => {
-    const isCollapsed = collapsed.has(path);
-    const indentStyle = { paddingLeft: `${indent * 8}px` };
-    const lineNum = getNextLineNumber();
-    
-    // Null
-    if (value === null) {
-      return (
-        <div className="flex items-start group">
-          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{lineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-0.5 flex-1">
-            {key && <span className="text-cyan-300 font-semibold text-xs">"{key}":</span>}
-            <span className="text-purple-400 flex items-center gap-1 text-xs">
-              <span className="text-[10px] opacity-70">∅</span>
-              null
-            </span>
-          </div>
-        </div>
-      );
-    }
-    
-    // Boolean
-    if (typeof value === 'boolean') {
-      const boolLineNum = getNextLineNumber();
-      return (
-        <div className="flex items-start group">
-          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{boolLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-0.5 flex-1">
-            {key && <span className="text-cyan-300 font-semibold text-xs">"{key}":</span>}
-            <span className={`flex items-center gap-1 font-semibold text-xs ${value ? 'text-green-400' : 'text-red-400'}`}>
-              <span className="text-[10px]">{value ? '✓' : '✗'}</span>
-              {String(value)}
-            </span>
-            <button
-              onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
-              title="Copy key-value"
-            >
-              📋
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
-    // Number
-    if (typeof value === 'number') {
-      const numLineNum = getNextLineNumber();
-      const isTs = isTimestamp(value);
-      return (
-        <div className="flex items-start group">
-          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{numLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-0.5 flex-1">
-            {key && <span className="text-cyan-300 font-semibold text-xs">"{key}":</span>}
-            <span className="text-blue-400 flex items-center gap-1 font-semibold text-xs">
-              <span className="text-[10px] opacity-70">#</span>
-              {value}
-            </span>
-            {isTs && (
-              <span className="text-[10px] text-slate-500 italic">
-                ({new Date(value).toLocaleString()})
-              </span>
-            )}
-            <button
-              onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
-              title="Copy key-value"
-            >
-              📋
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
-    // String
-    if (typeof value === 'string') {
-      const strLineNum = getNextLineNumber();
-      const isLong = value.length > 100;
-      const displayValue = isLong && isCollapsed ? value.substring(0, 100) + '...' : value;
-      const isUrlVal = isUrl(value);
-      const isEmailVal = isEmail(value);
-      
-      return (
-        <div className="flex items-start group">
-          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{strLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-0.5 flex-1">
-            {key && <span className="text-cyan-300 font-semibold text-xs">"{key}":</span>}
-            <span className="text-green-400 flex items-center gap-1 text-xs">
-              <span className="text-[10px] opacity-70">"</span>
-              <span className="text-green-300">
-                {isUrlVal ? (
-                  <a href={value} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-100">
-                    {displayValue}
-                  </a>
-                ) : isEmailVal ? (
-                  <a href={`mailto:${value}`} className="underline hover:text-green-100">
-                    {displayValue}
-                  </a>
-                ) : (
-                  displayValue
-                )}
-              </span>
-              <span className="text-xs opacity-70">"</span>
-            </span>
-            {isLong && (
-              <button
-                onClick={() => toggleCollapse(path)}
-                className="text-[10px] text-blue-400 hover:text-blue-300 ml-1"
-              >
-                {isCollapsed ? 'Show more' : 'Show less'}
-              </button>
-            )}
-            <button
-              onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
-              title="Copy key-value"
-            >
-              📋
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
-    // Array
-    if (Array.isArray(value)) {
-      const arrLineNum = getNextLineNumber();
-      const count = value.length;
-      return (
-        <div className="py-1">
-          <div className="flex items-start group">
-            <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{arrLineNum}</span>
-            <div style={indentStyle} className="flex items-center gap-2 flex-1">
-              <button
-                onClick={() => toggleCollapse(path)}
-                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs"
-              >
-                <span className="text-[10px]">{isCollapsed ? '▶' : '▼'}</span>
-                {key && <span className="text-cyan-300">"{key}":</span>}
-                <span>[{isCollapsed ? '...' : ''}]</span>
-                <span className="text-[10px] bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
-              </button>
-              <button
-                onClick={() => copyValue(value, key)}
-                className="opacity-0 group-hover:opacity-100 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
-                title="Copy key-value"
-              >
-                📋
-              </button>
-            </div>
-          </div>
-          {!isCollapsed && (
-            <div className="border-l-2 border-slate-700/50 ml-7">
-              {value.map((item, i) => renderValue(item, `${path}[${i}]`, undefined, indent + 1))}
-            </div>
-          )}
-        </div>
-      );
-    }
-    
-    // Object
-    if (typeof value === 'object') {
-      const objLineNum = getNextLineNumber();
-      const entries = Object.entries(value);
-      const count = entries.length;
-      return (
-        <div className="py-1">
-          <div className="flex items-start group">
-            <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{objLineNum}</span>
-            <div style={indentStyle} className="flex items-center gap-2 flex-1">
-              <button
-                onClick={() => toggleCollapse(path)}
-                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs"
-              >
-                <span className="text-[10px]">{isCollapsed ? '▶' : '▼'}</span>
-                {key && <span className="text-cyan-300">"{key}":</span>}
-                <span>{'{'}{isCollapsed ? '...' : ''}{'}'}</span>
-                <span className="text-[10px] bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
-              </button>
-              <button
-                onClick={() => copyValue(value, key)}
-                className="opacity-0 group-hover:opacity-100 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity"
-                title="Copy key-value"
-              >
-                📋
-              </button>
-            </div>
-          </div>
-          {!isCollapsed && (
-            <div className="border-l-2 border-slate-700/50 ml-7">
-              {entries.map(([k, v]) => renderValue(v, `${path}.${k}`, k, indent + 1))}
-            </div>
-          )}
-        </div>
-      );
-    }
-    
-    return null;
-  };
-
-  // Reset line counter before rendering
-  lineNumberRef.current = 1;
-
+/** JSON view using shared JsonTreeRenderer */
+function JsonView({ data }: { data: unknown }) {
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 p-3 rounded-lg overflow-auto font-mono text-xs leading-relaxed shadow-inner">
-      {renderValue(data, 'root')}
+    <div className="flex-1 overflow-auto">
+      <JsonTreeRenderer data={data} />
     </div>
   );
 }
 
-/** HTML/Key-Value pairs view renderer */
-function HtmlView({ data }: { data: any }) {
-  const [expandedArrays, setExpandedArrays] = useState<Set<string>>(new Set());
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
-
-  // Note: Utility functions (isEmail, isUrl, isDate, isTimestamp, getRelativeTime, 
-  // getFieldIcon, getSectionForField) are imported from @/lib/data-display-utils
-
-  // Copy value to clipboard
-  const copyValue = (key: string, value: any) => {
-    const textToCopy = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-    navigator.clipboard.writeText(textToCopy);
-    toast.success(`Copied ${key}`);
-  };
-
-  // Toggle array expansion
-  const toggleArray = (key: string) => {
-    setExpandedArrays(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  };
-
-  // Toggle section collapse
-  const toggleSection = (section: string) => {
-    setCollapsedSections(prev => {
-      const next = new Set(prev);
-      if (next.has(section)) {
-        next.delete(section);
-      } else {
-        next.add(section);
-      }
-      return next;
-    });
-  };
-
-  // Render a single value with smart formatting
-  const renderValue = (key: string, value: any) => {
-    // Null
-    if (value === null) {
-      return (
-        <span className="text-slate-400 italic flex items-center gap-1">
-          <span className="opacity-50">∅</span>
-          null
-        </span>
-      );
-    }
-
-    // Boolean
-    if (typeof value === 'boolean') {
-      return (
-        <span className={`font-medium flex items-center gap-1 ${value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-          <span className="text-xs">{value ? '✅' : '❌'}</span>
-          <span>{value ? 'Yes' : 'No'}</span>
-        </span>
-      );
-    }
-
-    // Email
-    if (isEmail(value)) {
-      return (
-        <div className="flex items-center gap-2 flex-wrap">
-          <a 
-            href={`mailto:${value}`} 
-            className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-          >
-            {value}
-          </a>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 px-2 text-xs"
-            onClick={() => window.location.href = `mailto:${value}`}
-          >
-            Send Email
-          </Button>
-        </div>
-      );
-    }
-
-    // URL
-    if (isUrl(value)) {
-      return (
-        <a 
-          href={value} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-blue-600 dark:text-blue-400 hover:underline font-medium break-all"
-        >
-          {value} 🔗
-        </a>
-      );
-    }
-
-    // Date/Timestamp
-    if (isDate(value) || isTimestamp(value)) {
-      const dateStr = isTimestamp(value) ? new Date(Number(value)).toISOString() : value;
-      const date = new Date(dateStr);
-      return (
-        <div className="flex flex-col gap-1">
-          <span className="font-medium">{date.toLocaleString()}</span>
-          <span className="text-xs text-slate-500 dark:text-slate-400 italic">
-            {getRelativeTime(dateStr)}
-          </span>
-        </div>
-      );
-    }
-
-    // Number
-    if (typeof value === 'number') {
-      return (
-        <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
-          {value.toLocaleString()}
-        </span>
-      );
-    }
-
-    // String
-    if (typeof value === 'string') {
-      return (
-        <span className="break-words font-medium">
-          {value}
-        </span>
-      );
-    }
-
-    // Array
-    if (Array.isArray(value)) {
-      const isExpanded = expandedArrays.has(key);
-      const showLimit = 3;
-      const hasMore = value.length > showLimit;
-      const displayItems = isExpanded ? value : value.slice(0, showLimit);
-
-      // Check if array contains objects (complex data)
-      const isObjectArray = value.length > 0 && typeof value[0] === 'object' && value[0] !== null;
-
-      if (isObjectArray) {
-        return (
-          <div className="space-y-2 mt-2">
-            {displayItems.map((item, idx) => (
-              <div key={idx} className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
-                {Object.entries(item).map(([k, v]) => (
-                  <div key={k} className="flex items-start gap-2 py-1">
-                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 min-w-[100px]">
-                      {k}:
-                    </span>
-                    <span className="text-sm flex-1">
-                      {typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
-                        ? String(v)
-                        : JSON.stringify(v)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ))}
-            {hasMore && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => toggleArray(key)}
-                className="w-full"
-              >
-                {isExpanded ? 'Show Less' : `Show ${value.length - showLimit} More`}
-              </Button>
-            )}
-          </div>
-        );
-      }
-
-      // Simple array (strings, numbers)
-      return (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
-            {displayItems.map((item, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-              >
-                {String(item)}
-              </span>
-            ))}
-          </div>
-          {hasMore && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => toggleArray(key)}
-              className="text-xs h-6"
-            >
-              {isExpanded ? 'Show Less' : `+${value.length - showLimit} more`}
-            </Button>
-          )}
-        </div>
-      );
-    }
-
-    // Object
-    if (typeof value === 'object') {
-      return (
-        <pre className="text-xs bg-slate-100 dark:bg-slate-900 p-3 rounded border border-slate-200 dark:border-slate-700 overflow-x-auto">
-          {JSON.stringify(value, null, 2)}
-        </pre>
-      );
-    }
-
-    return <span>{String(value)}</span>;
-  };
-
-  const pairs = toPairs(data).slice(0, 1000);
-
-  // Group consecutive fields by section while maintaining order
-  const groupedPairs: Array<{ section: string; title: string; icon: string; gradient: string; fields: Array<{ k: string; v: any }> }> = [];
-  let currentSection: string | null = null;
-  
-  pairs.forEach(({ k, v }) => {
-    const fieldSection = getSectionForField(k);
-    
-    if (fieldSection.section !== currentSection) {
-      // Start a new section
-      currentSection = fieldSection.section;
-      groupedPairs.push({
-        section: fieldSection.section,
-        title: fieldSection.title,
-        icon: fieldSection.icon,
-        gradient: fieldSection.gradient,
-        fields: [{ k, v }]
-      });
-    } else {
-      // Add to current section
-      groupedPairs[groupedPairs.length - 1].fields.push({ k, v });
-    }
-  });
-
+/** HTML/Key-Value pairs view using shared GroupedFieldsRenderer */
+function HtmlView({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="flex-1 overflow-auto pr-1 -mr-4">
-      <div className="space-y-4 pr-4">
-        {groupedPairs.map((group, groupIndex) => {
-          const isCollapsed = collapsedSections.has(`${group.section}-${groupIndex}`);
-
-          return (
-            <div 
-              key={`${group.section}-${groupIndex}`}
-              className="border border-slate-200 dark:border-slate-700 rounded overflow-hidden bg-card shadow-sm"
-            >
-              <button
-                onClick={() => toggleSection(`${group.section}-${groupIndex}`)}
-                className="w-full flex items-center justify-between p-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs">{group.icon}</span>
-                  <h3 className="text-[10px] font-semibold text-slate-700 dark:text-slate-200">
-                    {group.title}
-                  </h3>
-                  <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded font-medium text-slate-600 dark:text-slate-400">
-                    {group.fields.length}
-                  </span>
-                </div>
-                <span className={`text-slate-600 dark:text-slate-400 text-xs transition-transform ${isCollapsed ? '' : 'rotate-90'}`}>
-                  ▶
-                </span>
-              </button>
-              
-              {!isCollapsed && (
-                <div className="p-2 space-y-1.5">
-                  {group.fields.map(({ k, v }, fieldIndex) => {
-                    const fieldIcon = getFieldIcon(k, v);
-                    return (
-                      <div 
-                        key={`${group.section}-${groupIndex}-${k}-${fieldIndex}`}
-                        className="group rounded border bg-card text-card-foreground hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                      >
-                        <div className="p-2">
-                          <div className="flex items-start justify-between gap-1.5 mb-1">
-                            <div className="flex items-center gap-1 min-w-0 flex-1">
-                              <span className="text-xs flex-shrink-0">{fieldIcon}</span>
-                              <h4 className="text-[10px] font-semibold text-slate-700 dark:text-slate-300">
-                                {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
-                              </h4>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0 transition-opacity text-[10px]"
-                              onClick={() => copyValue(k, v)}
-                              title="Copy value"
-                            >
-                              📋
-                            </Button>
-                          </div>
-                          <div className="text-xs text-foreground">
-                            {renderValue(k, v)}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <GroupedFieldsRenderer data={data} className="pr-4" />
     </div>
   );
 }
 
 /** Table view renderer for array data */
-function TableView({ data }: { data: any[] }) {
+function TableView({ data }: { data: unknown[] }) {
   if (!Array.isArray(data) || data.length === 0) {
     return <p className="text-xs text-muted-foreground">No data available</p>;
   }
 
-  const columns = Object.keys(data[0] || {});
+  const columns = Object.keys((data[0] as Record<string, unknown>) || {});
 
   return (
     <div className="flex-1 overflow-auto pr-1">
@@ -670,7 +125,7 @@ function TableView({ data }: { data: any[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((row: any, idx: number) => (
+          {data.map((row: unknown, idx: number) => (
             <TableRow 
               key={idx}
               className={`transition-colors hover:bg-slate-100 dark:hover:bg-slate-700/50 ${
@@ -679,7 +134,7 @@ function TableView({ data }: { data: any[] }) {
             >
               {columns.map((k) => (
                 <TableCell key={k} className="text-xs break-words py-2">
-                  {String(row[k])}
+                  {String((row as Record<string, unknown>)[k])}
                 </TableCell>
               ))}
             </TableRow>

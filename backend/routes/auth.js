@@ -21,21 +21,21 @@ export function setupAuthRoutes(app, features, logger) {
     
     const token = jwt.sign({ 
       userId: rbacData.userId,
-      role: rbacData.legacyRole,
+      role: rbacData.roleKey,
       activeRoleId: rbacData.activeRole.id 
     }, JWT_SECRET, { expiresIn: '24h' });
     
     logger.info({ 
       msg: 'login', 
       userId: rbacData.userId,
-      role: rbacData.legacyRole, 
+      role: rbacData.roleKey, 
       activeRole: rbacData.activeRole.name,
       isMaster: rbacData.isMaster
     });
     
     return res.json({ 
       token, 
-      role: rbacData.legacyRole,
+      role: rbacData.roleKey,
       // RBAC fields
       userId: rbacData.userId || userIdInput,
       assignedRoles: rbacData.assignedRoles,

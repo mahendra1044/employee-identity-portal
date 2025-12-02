@@ -202,6 +202,29 @@ export const ROLE_LABELS: Record<string, string> = {
 
 
 /**
+ * RBAC Role ID to Role Key Mapping
+ * --------------------------------
+ * Maps RBAC role IDs (R001, R002, etc.) to role keys used in UI
+ * This must match backend/config/rbac.json roleKeyMapping
+ */
+export const ROLE_ID_TO_KEY: Record<string, string> = {
+  'R001': 'ops',
+  'R002': 'sso_ops',
+  'R003': 'pam_ops',
+  'R004': 'iga_ops',
+  'R005': 'entraid_ops',
+  'R006': 'tpag_ops',
+  'R007': 'ops',
+  'R008': 'employee',
+};
+
+// Helper: Get role key from role ID
+export function getRoleKeyFromId(roleId: string): string {
+  return ROLE_ID_TO_KEY[roleId] || 'employee';
+}
+
+
+/**
  * Role to System Group Mapping
  * ----------------------------
  * Maps each role to the systems they can access

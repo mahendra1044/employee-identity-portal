@@ -51,7 +51,6 @@ export function useAppAuth() {
     token: state.auth.token,
     role: state.auth.role,
     userId: state.auth.userId,
-    email: state.auth.userId, // Alias for backward compatibility - email = userId
     isLoading: state.auth.isLoading,
     // RBAC
     assignedRoles: state.auth.assignedRoles,

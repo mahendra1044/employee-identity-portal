@@ -93,9 +93,8 @@ export function SnowTicketDialog({
       } else {
         toast.error(result.error || "Failed to submit SNOW ticket");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to submit SNOW ticket");
-      console.error('SNOW Ticket Error:', error);
     } finally {
       setIsSubmitting(false);
     }

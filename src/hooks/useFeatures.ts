@@ -57,8 +57,8 @@ export function useFeatures(token: string | null): UseFeatureResult {
         } else {
           setFeatures(DEFAULT_FEATURES);
         }
-      } catch (error) {
-        console.error("Failed to load features:", error);
+      } catch {
+        // Failed to load features, use defaults
         setFeatures(DEFAULT_FEATURES);
       } finally {
         setIsLoading(false);

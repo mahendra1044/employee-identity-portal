@@ -28,7 +28,7 @@ const RBAC_CONFIG = {
     u1009: ['R002', 'R003', 'R004'],
   } as Record<string, string[]>,
   defaultRole: 'R008',
-  roleToLegacyMapping: {
+  roleKeyMapping: {
     R001: 'ops',
     R002: 'sso_ops',
     R003: 'pam_ops',
@@ -40,15 +40,13 @@ const RBAC_CONFIG = {
   } as Record<string, string>,
 };
 
-function extractUserId(usernameOrEmail: string): string | null {
-  const input = usernameOrEmail.toLowerCase().trim();
-  // First try to match userId pattern directly (e.g., "u1001")
+function extractUserId(userId: string): string | null {
+  const input = userId.toLowerCase().trim();
+  // Only accept userId pattern directly (e.g., "u1001")
   if (/^u\d+$/.test(input)) {
     return input;
   }
-  // Fallback: try to extract from email format (e.g., "u1001@company.com")
-  const match = input.match(/^(u\d+)@/);
-  return match ? match[1] : null;
+  return null;
 }
 
 function getUserRoleIds(userId: string | null): string[] {
@@ -81,7 +79,7 @@ function getRbacLoginResponse(email: string) {
   const availableRoles = getAvailableRoles(userId);
   const activeRole = availableRoles.length > 0 ? availableRoles[0] : RBAC_CONFIG.roles.R008;
   const isMaster = assignedRoleIds.includes('R001');
-  const legacyRole = RBAC_CONFIG.roleToLegacyMapping[activeRole.id] || 'employee';
+  const roleKey = RBAC_CONFIG.roleKeyMapping[activeRole.id] || 'employee';
   
   return {
     userId,
@@ -89,7 +87,7 @@ function getRbacLoginResponse(email: string) {
     availableRoles,
     activeRole,
     isMaster,
-    legacyRole,
+    roleKey,
   };
 }
 
@@ -107,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     // Get RBAC data for user (accepts userId like "u1001")
     const rbacData = getRbacLoginResponse(userIdInput);
-    const role = rbacData.legacyRole;
+    const role = rbacData.roleKey;
 
     // Generate JWT token
     const token = jwt.sign(

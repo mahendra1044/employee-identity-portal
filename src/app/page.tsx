@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import useSearch from "@/hooks/useSearch";
 import { useSnow } from "@/hooks/useSnow";
-import { usePfOps } from "@/hooks/usePfOps";
+import { useOpsActions } from "@/hooks/useOpsActions";
 import { useAppAuth } from "@/hooks/useAppAuth";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppToggles } from "@/hooks/useAppToggles";
@@ -34,8 +34,6 @@ import { RecentFailuresPanel } from "@/components/RecentFailuresPanel";
 import { SystemCardsGrid } from "@/components/SystemCardsGrid";
 import { DialogsSection } from "@/components/sections/DialogsSection";
 import { QuickActionsCard } from "@/components/sections/QuickActionsCard";
-// Import from formatters
-import { toPairs } from "@/lib/formatters";
 // Import from constants
 import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
 // Import from centralized config
@@ -49,7 +47,7 @@ import { isOpsRole, filterSystemsByRole } from "@/lib/role-utils";
 import type { Features, LoginResponse, SystemKey } from "@/lib/types";
 
 export default function HomePage() {
-  const { token, role: originalRole, email, login, logout } = useAppAuth();
+  const { token, role: originalRole, userId, login, logout } = useAppAuth();
   const { theme, setTheme } = useAppTheme();
   const { toggles: userToggles, toggleSystem, resetToggles } = useAppToggles();
   const { ui, setUIState } = useAppUI();
@@ -89,19 +87,19 @@ export default function HomePage() {
     snowEmail,
     openSnowDialog,
     resolveSnowEmail,
-  } = useSnow(token, role, search, searchResults, hasSearched, email);
+  } = useSnow(token, role, search, searchResults, hasSearched, userId);
 
-  // Simplified usePfOps - now uses actionHandlers map instead of 70+ individual functions
+  // Quick Actions state - uses config-driven actionHandlers map
   const {
-    pfOpsOpen,
-    setPfOpsOpen,
-    pfOpsTitle,
-    pfOpsLoading,
-    pfOpsData,
-    qaActive,
-    setQaActive,
+    dialogOpen: pfOpsOpen,
+    setDialogOpen: setPfOpsOpen,
+    dialogTitle: pfOpsTitle,
+    dialogLoading: pfOpsLoading,
+    dialogData: pfOpsData,
+    activeTab: qaActive,
+    setActiveTab: setQaActive,
     actionHandlers,
-  } = usePfOps();
+  } = useOpsActions();
 
   // Apply theme class to root element
   useEffect(() => {
@@ -121,9 +119,6 @@ export default function HomePage() {
   const isAggregate = useMemo(() => {
     return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
   }, [searchDialogData]);
-
-  // Use toPairs from formatters service
-  const toPairsGlobal = toPairs;
 
   // Load features and theme using custom hooks
   const { features, educateEnabled } = useFeatures(token);
@@ -166,8 +161,6 @@ export default function HomePage() {
     // Filter systems based on role (applies to ALL roles, not just ops)
     result = filterSystemsByRole(result, role);
     
-    console.log('👁️ [VISIBLE SYSTEMS] Calculated visible systems:', result);
-    console.log('👁️ [VISIBLE SYSTEMS] Filters - role:', role, 'hasSearched:', hasSearched);
     return result;
   }, [orderedSystems, enabled, userToggles, role, hasSearched]);
 
@@ -193,21 +186,15 @@ export default function HomePage() {
   const splunkUrl = SPLUNK_CONFIG.baseUrl;
   const cloudwatchUrl = CLOUDWATCH_CONFIG.baseUrl;
 
-  // FIXED: Remove searchKey state - just use resolveUserKey directly
+  // Resolve the user key for system card queries
   const resolveUserKey = useMemo(() => {
-    console.log('🔑 [RESOLVE KEY] Starting - hasSearched:', hasSearched, 'hasResults:', !!searchResults, 'search:', search);
-    
     // Only resolve user key for ALL roles if search was performed
     if (!hasSearched || !searchResults) {
-      console.log('🔑 [RESOLVE KEY] No search performed yet, returning undefined');
       return undefined;
     }
     
     const q = String(search || '').trim().toLowerCase();
-    console.log('🔑 [RESOLVE KEY] Search query (lowercase):', q);
-    
     const pd = Array.isArray(searchResults?.["ping-directory"]) ? searchResults["ping-directory"] : [];
-    console.log('🔑 [RESOLVE KEY] Ping Directory results:', pd);
     
     const exact = pd.find((u: any) => 
       String(u?.email || '').toLowerCase() === q || 
@@ -215,22 +202,15 @@ export default function HomePage() {
     );
     
     if (exact?.userId || exact?.email) {
-      const resolved = exact.userId || exact.email;
-      console.log('🔑 [RESOLVE KEY] Found exact match:', resolved);
-      return resolved;
+      return exact.userId || exact.email;
     }
     
     if (pd[0]?.userId || pd[0]?.email) {
-      const resolved = pd[0].userId || pd[0].email;
-      console.log('🔑 [RESOLVE KEY] Using first result:', resolved);
-      return resolved;
+      return pd[0].userId || pd[0].email;
     }
     
-    console.log('🔑 [RESOLVE KEY] Falling back to search query:', q);
     return q || undefined;
   }, [search, searchResults, hasSearched]);
-
-  console.log('🎯 [MAIN RENDER] resolveUserKey:', resolveUserKey, 'hasSearched:', hasSearched);
 
   // Clear currentUserKey when search empties (ops only)
   // Remove old searchKey useEffects - no longer needed
@@ -259,7 +239,7 @@ export default function HomePage() {
           role={role}
           educateOpen={ui.educateOpen}
           onEducateOpenChange={(open) => setUIState('educateOpen', open)}
-          email={email}
+          email={userId}
           snowOpen={snowOpen}
           onSnowOpenChange={setSnowOpen}
           snowEmail={snowEmail}
@@ -280,7 +260,7 @@ export default function HomePage() {
           token={token!}
           role={role!}
           originalRole={originalRole!}
-          email={email!}
+          email={userId!}
           search={search}
           onSearchChange={setSearch}
           onDoSearch={doSearch}
@@ -343,7 +323,7 @@ export default function HomePage() {
                 enabled={enabled}
                 token={token!}
                 role={role!}
-                email={email!}
+                email={userId!}
                 userKey={resolveUserKey}
                 anyEnabled={anyEnabled}
               />

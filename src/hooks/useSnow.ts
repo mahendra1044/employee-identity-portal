@@ -20,7 +20,7 @@ export function useSnow(
 
   // Helper: decide which email to use for SNOW incidents based on role/search
   const resolveSnowEmail = useCallback((): string | undefined => {
-    const self = String(email || (typeof window !== 'undefined' ? localStorage.getItem("email") : '') || '').toLowerCase();
+    const self = String(email || '').toLowerCase();
     if (role === 'ops') {
       // Only after a search should ops see incidents for a user
       if (!hasSearched) return undefined;
@@ -57,8 +57,6 @@ export function useSnow(
         json = await res.json();
       } catch {
         // If JSON parsing fails, it's likely HTML (404, 500 error page)
-        // Use the original response text since json() already consumed the clone
-        console.error('SNOW API returned non-JSON response:', { status: res.status });
         setSnowError(`Server error: ${res.status}`);
         setSnowItems([]);
         setSnowCount(0);

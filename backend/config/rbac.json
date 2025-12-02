@@ -77,7 +77,7 @@
     "u1009": ["R002", "R003", "R004"]
   },
   "defaultRole": "R008",
-  "roleToLegacyMapping": {
+  "roleKeyMapping": {
     "R001": "ops",
     "R002": "sso_ops",
     "R003": "pam_ops",

@@ -9,14 +9,13 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Code, FileText, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
-import { toPairs } from "@/lib/formatters";
 import { DataDialog } from "@/components/dialogs/DataDialog";
 import { SearchResultCard } from "@/components/search/SearchResultCard";
 import { useConsolidatedView } from "@/hooks/useConsolidatedView";
@@ -25,17 +24,11 @@ import {
   canEmployeeViewSystem,
   buildCandidateKeys 
 } from "@/lib/search-config";
+import { getSystemIcon } from "@/lib/data-display-utils";
 import {
-  isEmail,
-  isUrl,
-  isDate,
-  isTimestamp,
-  getRelativeTime,
-  getFieldIcon,
-  getSectionForField,
-  getSystemIcon,
-  copyFieldValue,
-} from "@/lib/data-display-utils";
+  GroupedFieldsRenderer,
+  JsonTreeRenderer,
+} from "@/components/data-views";
 import type { SystemKey, Features, SearchResults } from "@/lib/types";
 
 // ============================================================================
@@ -90,236 +83,6 @@ export function SearchSection({
   const [dialogLoading, setDialogLoading] = useState(false);
   const [dialogMode, setDialogMode] = useState<"json" | "html">("html");
   const [isAggregateView, setIsAggregateView] = useState(false);
-  const [expandedArrays, setExpandedArrays] = useState<Set<string>>(new Set());
-
-  // Note: Utility functions (isEmail, isUrl, isDate, isTimestamp, getRelativeTime, 
-  // getFieldIcon, copyFieldValue) are imported from @/lib/data-display-utils
-
-  // Toggle array expansion
-  const toggleArray = (key: string) => {
-    setExpandedArrays(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  };
-
-  // Toggle section collapse
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
-  
-  const toggleSection = (section: string) => {
-    setCollapsedSections(prev => {
-      const next = new Set(prev);
-      if (next.has(section)) {
-        next.delete(section);
-      } else {
-        next.add(section);
-      }
-      return next;
-    });
-  };
-
-  // Determine section for a field
-  const getSectionForField = (key: string): { section: string; title: string; icon: string; gradient: string } => {
-    const lowerKey = key.toLowerCase();
-    
-    if (lowerKey.includes('upn') || lowerKey.includes('objectid') || lowerKey.includes('tenant') || 
-        lowerKey.includes('username') || lowerKey.includes('userid') || lowerKey === 'id') {
-      return { section: 'identity', title: 'Identity Information', icon: '👤', gradient: 'from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900' };
-    } else if (lowerKey.includes('job') || lowerKey.includes('title') || lowerKey.includes('department') || 
-               lowerKey.includes('manager') || lowerKey.includes('organization')) {
-      return { section: 'organization', title: 'Organization', icon: '🏢', gradient: 'from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900' };
-    } else if (lowerKey.includes('license') || lowerKey.includes('group') || lowerKey.includes('role') || 
-               lowerKey.includes('permission') || lowerKey.includes('entitlement')) {
-      return { section: 'access', title: 'Licenses & Access', icon: '🔐', gradient: 'from-green-50 to-green-100 dark:from-green-950 dark:to-green-900' };
-    } else if (lowerKey.includes('device') || lowerKey.includes('computer') || lowerKey.includes('machine')) {
-      return { section: 'devices', title: 'Devices', icon: '💻', gradient: 'from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900' };
-    } else if (lowerKey.includes('risk') || lowerKey.includes('security') || lowerKey.includes('conditional') || 
-               lowerKey.includes('mfa') || lowerKey.includes('authentication')) {
-      return { section: 'security', title: 'Security', icon: '🛡️', gradient: 'from-red-50 to-red-100 dark:from-red-950 dark:to-red-900' };
-    } else if (lowerKey.includes('sync') || lowerKey.includes('modified') || lowerKey.includes('created') || 
-               lowerKey.includes('updated') || lowerKey.includes('last')) {
-      return { section: 'metadata', title: 'Metadata', icon: '📊', gradient: 'from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800' };
-    } else {
-      return { section: 'other', title: 'Other Information', icon: '📌', gradient: 'from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800' };
-    }
-  };
-
-  // Render a single value with smart formatting
-  const renderSmartValue = (key: string, value: any, uniqueKey: string) => {
-    // Null
-    if (value === null) {
-      return (
-        <span className="text-slate-400 italic flex items-center gap-1">
-          <span className="opacity-50">∅</span>
-          null
-        </span>
-      );
-    }
-
-    // Boolean
-    if (typeof value === 'boolean') {
-      return (
-        <span className={`font-medium flex items-center gap-1 ${value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-          <span className="text-xs">{value ? '✅' : '❌'}</span>
-          <span>{value ? 'Yes' : 'No'}</span>
-        </span>
-      );
-    }
-
-    // Email
-    if (isEmail(value)) {
-      return (
-        <div className="flex items-center gap-2 flex-wrap">
-          <a 
-            href={`mailto:${value}`} 
-            className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-          >
-            {value}
-          </a>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 px-2 text-xs"
-            onClick={() => window.location.href = `mailto:${value}`}
-          >
-            Send Email
-          </Button>
-        </div>
-      );
-    }
-
-    // URL
-    if (isUrl(value)) {
-      return (
-        <a 
-          href={value} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-blue-600 dark:text-blue-400 hover:underline font-medium break-all"
-        >
-          {value} 🔗
-        </a>
-      );
-    }
-
-    // Date/Timestamp
-    if (isDate(value) || isTimestamp(value)) {
-      const dateStr = isTimestamp(value) ? new Date(Number(value)).toISOString() : value;
-      const date = new Date(dateStr);
-      return (
-        <div className="flex flex-col gap-1">
-          <span className="font-medium">{date.toLocaleString()}</span>
-          <span className="text-xs text-slate-500 dark:text-slate-400 italic">
-            {getRelativeTime(dateStr)}
-          </span>
-        </div>
-      );
-    }
-
-    // Number
-    if (typeof value === 'number') {
-      return (
-        <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
-          {value.toLocaleString()}
-        </span>
-      );
-    }
-
-    // String
-    if (typeof value === 'string') {
-      return (
-        <span className="break-words font-medium">
-          {value}
-        </span>
-      );
-    }
-
-    // Array
-    if (Array.isArray(value)) {
-      const isExpanded = expandedArrays.has(uniqueKey);
-      const showLimit = 3;
-      const hasMore = value.length > showLimit;
-      const displayItems = isExpanded ? value : value.slice(0, showLimit);
-
-      // Check if array contains objects (complex data)
-      const isObjectArray = value.length > 0 && typeof value[0] === 'object' && value[0] !== null;
-
-      if (isObjectArray) {
-        return (
-          <div className="space-y-2 mt-2">
-            {displayItems.map((item, idx) => (
-              <div key={idx} className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50 dark:bg-slate-900/50">
-                {Object.entries(item).map(([k, v]) => (
-                  <div key={k} className="flex items-start gap-2 py-1">
-                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 min-w-[100px]">
-                      {k}:
-                    </span>
-                    <span className="text-sm flex-1">
-                      {typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
-                        ? String(v)
-                        : JSON.stringify(v)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ))}
-            {hasMore && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => toggleArray(uniqueKey)}
-                className="w-full"
-              >
-                {isExpanded ? 'Show Less' : `Show ${value.length - showLimit} More`}
-              </Button>
-            )}
-          </div>
-        );
-      }
-
-      // Simple array (strings, numbers)
-      return (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
-            {displayItems.map((item, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800"
-              >
-                {String(item)}
-              </span>
-            ))}
-          </div>
-          {hasMore && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => toggleArray(uniqueKey)}
-              className="text-xs h-7"
-            >
-              {isExpanded ? 'Show Less' : `+${value.length - showLimit} more`}
-            </Button>
-          )}
-        </div>
-      );
-    }
-
-    // Object
-    if (typeof value === 'object') {
-      return (
-        <pre className="text-xs bg-slate-100 dark:bg-slate-900 p-3 rounded border border-slate-200 dark:border-slate-700 overflow-x-auto">
-          {JSON.stringify(value, null, 2)}
-        </pre>
-      );
-    }
-
-    return <span>{String(value)}</span>;
-  };
 
   // Hooks
   const { fetchConsolidatedData } = useConsolidatedView();
@@ -389,7 +152,7 @@ export function SearchSection({
     }
   };
 
-  // Render aggregate view content
+  // Render aggregate view content using shared components
   const renderAggregateContent = () => {
     if (!dialogData) return null;
     
@@ -406,12 +169,7 @@ export function SearchSection({
             <div key={sys} className="space-y-2">
               <div className="flex items-center justify-between border-b pb-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">
-                    {sys.includes('azure') || sys.includes('ad') ? '☁️' :
-                     sys.includes('ping') ? '🔐' :
-                     sys.includes('cyber') ? '🛡️' :
-                     sys.includes('saviynt') ? '⚡' : '📦'}
-                  </span>
+                  <span className="text-base">{getSystemIcon(sys)}</span>
                   <h3 className="text-sm font-semibold text-foreground">
                     {SYSTEM_LABELS[sys]}
                   </h3>
@@ -441,122 +199,15 @@ export function SearchSection({
               </div>
               
               {dialogMode === "html" ? (
-                <div className="space-y-4">
-                  {val ? (
-                    (() => {
-                      const pairs = toPairs(val).slice(0, 50);
-                      const groupedPairs: Array<{ section: string; title: string; icon: string; gradient: string; fields: Array<{ k: string; v: any }> }> = [];
-                      let currentSection: string | null = null;
-                      
-                      pairs.forEach(({ k, v }) => {
-                        const fieldSection = getSectionForField(k);
-                        
-                        if (fieldSection.section !== currentSection) {
-                          currentSection = fieldSection.section;
-                          groupedPairs.push({
-                            section: fieldSection.section,
-                            title: fieldSection.title,
-                            icon: fieldSection.icon,
-                            gradient: fieldSection.gradient,
-                            fields: [{ k, v }]
-                          });
-                        } else {
-                          groupedPairs[groupedPairs.length - 1].fields.push({ k, v });
-                        }
-                      });
-
-                      return (
-                        <div className="space-y-4">
-                          {groupedPairs.map((group, groupIndex) => {
-                            const sectionKey = `agg-${sys}-${group.section}-${groupIndex}`;
-                            const isCollapsed = collapsedSections.has(sectionKey);
-
-                            return (
-                              <div 
-                                key={sectionKey}
-                                className="border border-slate-200 dark:border-slate-700 rounded overflow-hidden bg-card shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
-                              >
-                                <button
-                                  onClick={() => toggleSection(sectionKey)}
-                                  className={`w-full flex items-center justify-between p-2 bg-gradient-to-r ${group.gradient} hover:opacity-90 transition-all duration-200`}
-                                >
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-xs transition-transform duration-200">{group.icon}</span>
-                                    <h3 className="text-[10px] font-semibold text-slate-700 dark:text-slate-200">
-                                      {group.title}
-                                    </h3>
-                                    <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded font-medium text-slate-600 dark:text-slate-400">
-                                      {group.fields.length}
-                                    </span>
-                                  </div>
-                                  <span className={`text-slate-600 dark:text-slate-400 text-xs transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}>
-                                    ▶
-                                  </span>
-                                </button>
-                                
-                                {!isCollapsed && (
-                                  <div className="p-2 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-                                    {group.fields.map(({ k, v }, fieldIndex) => {
-                                      const fieldIcon = getFieldIcon(k, v);
-                                      return (
-                                        <div 
-                                          key={`${sectionKey}-${k}-${fieldIndex}`}
-                                          className="group rounded border bg-card text-card-foreground hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                                        >
-                                          <div className="p-2">
-                                            <div className="flex items-start justify-between gap-1.5 mb-1">
-                                              <div className="flex items-center gap-1 min-w-0 flex-1">
-                                                <span className="text-xs flex-shrink-0">{fieldIcon}</span>
-                                                <h4 className="text-[10px] font-semibold text-slate-700 dark:text-slate-300">
-                                                  {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
-                                                </h4>
-                                              </div>
-                                              <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                  <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0 transition-opacity duration-200 text-[10px]"
-                                                    onClick={() => copyFieldValue(k, v, toast.success)}
-                                                  >
-                                                    📋
-                                                  </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                  <p>Copy value</p>
-                                                </TooltipContent>
-                                              </Tooltip>
-                                            </div>
-                                            <div className="text-xs text-foreground">
-                                              {renderSmartValue(k, v, `agg-${sys}-${group.section}-${fieldIndex}`)}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })()
-                  ) : (
-                    <div className="bg-muted/30 border border-dashed rounded-lg p-6 text-center">
-                      <p className="text-sm text-muted-foreground italic">No data available</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <div className="bg-slate-950 text-slate-100 p-3 rounded-lg overflow-auto font-mono text-sm leading-relaxed shadow-inner">
-                    {(() => {
-                      jsonLineNumberRef.current = 1;
-                      return renderJsonValue(val, `agg-${sys}`);
-                    })()}
+                val ? (
+                  <GroupedFieldsRenderer data={val} className="p-0" />
+                ) : (
+                  <div className="bg-muted/30 border border-dashed rounded-lg p-6 text-center">
+                    <p className="text-sm text-muted-foreground italic">No data available</p>
                   </div>
-                </div>
+                )
+              ) : (
+                <JsonTreeRenderer data={val} />
               )}
             </div>
           );
@@ -565,339 +216,17 @@ export function SearchSection({
     );
   };
 
-  // Interactive JSON tree renderer
-  const [jsonCollapsed, setJsonCollapsed] = useState<Set<string>>(new Set());
-  const jsonLineNumberRef = React.useRef(1);
-  
-  const toggleJsonCollapse = (path: string) => {
-    setJsonCollapsed(prev => {
-      const next = new Set(prev);
-      if (next.has(path)) {
-        next.delete(path);
-      } else {
-        next.add(path);
-      }
-      return next;
-    });
-  };
-  
-  const getNextJsonLineNumber = () => {
-    const current = jsonLineNumberRef.current;
-    jsonLineNumberRef.current += 1;
-    return current;
-  };
-
-  const copyJsonValue = (value: any, key?: string) => {
-    const textToCopy = key 
-      ? `"${key}": ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`
-      : typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-    navigator.clipboard.writeText(textToCopy);
-    toast.success('Copied to clipboard');
-  };
-
-  const renderJsonValue = (value: any, path: string, key?: string, indent: number = 0): React.ReactNode => {
-    const isCollapsed = jsonCollapsed.has(path);
-    const indentStyle = { paddingLeft: `${indent * 8}px` };
-    const lineNum = getNextJsonLineNumber();
-    
-    if (value === null) {
-      return (
-        <div key={path} className="flex items-start group">
-          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{lineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
-            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
-            <span className="text-purple-400 flex items-center gap-1">
-              <span className="text-xs opacity-70">∅</span>
-              null
-            </span>
-          </div>
-        </div>
-      );
-    }
-    
-    if (typeof value === 'boolean') {
-      const boolLineNum = getNextJsonLineNumber();
-      return (
-        <div key={path} className="flex items-start group">
-          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{boolLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
-            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
-            <span className={`flex items-center gap-1 font-semibold ${value ? 'text-green-400' : 'text-red-400'}`}>
-              <span className="text-xs">{value ? '✓' : '✗'}</span>
-              {String(value)}
-            </span>
-            <button
-              onClick={() => copyJsonValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
-            >
-              📋
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
-    if (typeof value === 'number') {
-      const numLineNum = getNextJsonLineNumber();
-      const isTs = isTimestamp(value);
-      return (
-        <div key={path} className="flex items-start group">
-          <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{numLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
-            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
-            <span className="text-blue-400 flex items-center gap-1 font-semibold">
-              <span className="text-xs opacity-70">#</span>
-              {value}
-            </span>
-            {isTs && (
-              <span className="text-xs text-slate-500 italic">
-                ({new Date(value).toLocaleString()})
-              </span>
-            )}
-            <button
-              onClick={() => copyJsonValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
-            >
-              📋
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
-    if (typeof value === 'string') {
-      const strLineNum = getNextJsonLineNumber();
-      const isLong = value.length > 100;
-      const displayValue = isLong && isCollapsed ? value.substring(0, 100) + '...' : value;
-      const isUrlVal = isUrl(value);
-      const isEmailVal = isEmail(value);
-      
-      return (
-        <div key={path} className="flex items-start group">
-          <span className="text-slate-600 text-xs w-12 text-right pr-4 select-none flex-shrink-0 pt-1">{strLineNum}</span>
-          <div style={indentStyle} className="flex items-center gap-2 py-1 flex-1">
-            {key && <span className="text-cyan-300 font-semibold">"{key}":</span>}
-            <span className="text-green-400 flex items-center gap-1">
-              <span className="text-xs opacity-70">"</span>
-              <span className="text-green-300">
-                {isUrlVal ? (
-                  <a href={value} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-100">
-                    {displayValue} 🔗
-                  </a>
-                ) : isEmailVal ? (
-                  <a href={`mailto:${value}`} className="underline hover:text-green-100">
-                    {displayValue} 📧
-                  </a>
-                ) : (
-                  displayValue
-                )}
-              </span>
-              <span className="text-xs opacity-70">"</span>
-            </span>
-            {isLong && (
-              <button
-                onClick={() => toggleJsonCollapse(path)}
-                className="text-xs text-blue-400 hover:text-blue-300 ml-1"
-              >
-                {isCollapsed ? 'Show more' : 'Show less'}
-              </button>
-            )}
-            <button
-              onClick={() => copyJsonValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
-            >
-              📋
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
-    if (Array.isArray(value)) {
-      const arrLineNum = getNextJsonLineNumber();
-      const count = value.length;
-      return (
-        <div key={path} className="py-1">
-          <div className="flex items-start group">
-            <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{arrLineNum}</span>
-            <div style={indentStyle} className="flex items-center gap-2 flex-1">
-              <button
-                onClick={() => toggleJsonCollapse(path)}
-                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold"
-              >
-                <span className="text-xs">{isCollapsed ? '▶' : '▼'}</span>
-                {key && <span className="text-cyan-300">"{key}":</span>}
-                <span>[{isCollapsed ? '...' : ''}]</span>
-                <span className="text-xs bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
-              </button>
-              <button
-                onClick={() => copyJsonValue(value, key)}
-                className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
-              >
-                📋
-              </button>
-            </div>
-          </div>
-          {!isCollapsed && (
-            <div className="border-l-2 border-slate-700/50 ml-7">
-              {value.map((item, i) => renderJsonValue(item, `${path}[${i}]`, undefined, indent + 1))}
-            </div>
-          )}
-        </div>
-      );
-    }
-    
-    if (typeof value === 'object') {
-      const objLineNum = getNextJsonLineNumber();
-      const entries = Object.entries(value);
-      const count = entries.length;
-      return (
-        <div key={path} className="py-1">
-          <div className="flex items-start group">
-            <span className="text-slate-600 text-xs w-6 text-right pr-1 select-none flex-shrink-0 pt-1">{objLineNum}</span>
-            <div style={indentStyle} className="flex items-center gap-2 flex-1">
-              <button
-                onClick={() => toggleJsonCollapse(path)}
-                className="text-yellow-400 hover:text-yellow-300 flex items-center gap-1 font-semibold"
-              >
-                <span className="text-xs">{isCollapsed ? '▶' : '▼'}</span>
-                {key && <span className="text-cyan-300">"{key}":</span>}
-                <span>{'{'}{isCollapsed ? '...' : ''}{'}'}</span>
-                <span className="text-xs bg-yellow-400/20 px-1.5 py-0.5 rounded">{count}</span>
-              </button>
-              <button
-                onClick={() => copyJsonValue(value, key)}
-                className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-slate-200 transition-opacity"
-              >
-                📋
-              </button>
-            </div>
-          </div>
-          {!isCollapsed && (
-            <div className="border-l-2 border-slate-700/50 ml-7">
-              {entries.map(([k, v]) => renderJsonValue(v, `${path}.${k}`, k, indent + 1))}
-            </div>
-          )}
-        </div>
-      );
-    }
-    
-    return null;
-  };
-
+  // Render single content view using shared components
   const renderSingleContent = () => {
     if (!dialogData) return null;
     
     if (dialogMode === "html") {
-      const pairs = toPairs(dialogData).slice(0, 80);
-      const groupedPairs: Array<{ section: string; title: string; icon: string; gradient: string; fields: Array<{ k: string; v: any }> }> = [];
-      let currentSection: string | null = null;
-      
-      pairs.forEach(({ k, v }) => {
-        const fieldSection = getSectionForField(k);
-        
-        if (fieldSection.section !== currentSection) {
-          currentSection = fieldSection.section;
-          groupedPairs.push({
-            section: fieldSection.section,
-            title: fieldSection.title,
-            icon: fieldSection.icon,
-            gradient: fieldSection.gradient,
-            fields: [{ k, v }]
-          });
-        } else {
-          groupedPairs[groupedPairs.length - 1].fields.push({ k, v });
-        }
-      });
-
-      return (
-        <div className="p-4">
-          <div className="space-y-4">
-            {groupedPairs.map((group, groupIndex) => {
-              const sectionKey = `single-${group.section}-${groupIndex}`;
-              const isCollapsed = collapsedSections.has(sectionKey);
-
-              return (
-                <div 
-                  key={sectionKey}
-                  className="border border-slate-200 dark:border-slate-700 rounded overflow-hidden bg-card shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
-                >
-                  <button
-                    onClick={() => toggleSection(sectionKey)}
-                    className={`w-full flex items-center justify-between p-2 bg-gradient-to-r ${group.gradient} hover:opacity-90 transition-all duration-200`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs transition-transform duration-200">{group.icon}</span>
-                      <h3 className="text-[10px] font-semibold text-slate-700 dark:text-slate-200">
-                        {group.title}
-                      </h3>
-                      <span className="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded font-medium text-slate-600 dark:text-slate-400">
-                        {group.fields.length}
-                      </span>
-                    </div>
-                    <span className={`text-slate-600 dark:text-slate-400 text-xs transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`}>
-                      ▶
-                    </span>
-                  </button>
-                  
-                  {!isCollapsed && (
-                    <div className="p-2 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-                      {group.fields.map(({ k, v }, fieldIndex) => {
-                        const fieldIcon = getFieldIcon(k, v);
-                        return (
-                          <div 
-                            key={`${sectionKey}-${k}-${fieldIndex}`}
-                            className="group rounded border bg-card text-card-foreground hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                          >
-                            <div className="p-2">
-                              <div className="flex items-start justify-between gap-1.5 mb-1">
-                                <div className="flex items-center gap-1 min-w-0 flex-1">
-                                  <span className="text-xs flex-shrink-0">{fieldIcon}</span>
-                                  <h4 className="text-[10px] font-semibold text-slate-700 dark:text-slate-300">
-                                    {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}
-                                  </h4>
-                                </div>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0 transition-opacity duration-200 text-[10px]"
-                                      onClick={() => copyFieldValue(k, v, toast.success)}
-                                    >
-                                      📋
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Copy value</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </div>
-                              <div className="text-xs text-foreground">
-                                {renderSmartValue(k, v, `single-${group.section}-${fieldIndex}`)}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
+      return <GroupedFieldsRenderer data={dialogData} />;
     }
-    
-    // Reset line counter before rendering
-    jsonLineNumberRef.current = 1;
     
     return (
       <div className="p-2">
-        <div className="bg-slate-950 text-slate-100 p-3 rounded-lg overflow-auto font-mono text-sm leading-relaxed shadow-inner">
-          {renderJsonValue(dialogData, 'root')}
-        </div>
+        <JsonTreeRenderer data={dialogData} />
       </div>
     );
   };

@@ -23,7 +23,7 @@ import { ExternalLink } from "lucide-react";
 import type { SystemKey } from "@/lib/types";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
 import { OPS_ENDPOINTS, type EndpointAction } from "@/lib/ops-endpoints";
-import type { ActionHandlers } from "@/hooks/usePfOps";
+import type { ActionHandlers } from "@/hooks/useOpsActions";
 
 // Simplified props interface - no longer needs 80+ individual handlers
 interface QuickActionsCardProps {

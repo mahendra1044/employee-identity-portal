@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode, Dispatch } from 'react';
 import { StorageService } from '@/lib/storage';
+import { getRoleKeyFromId } from '@/config/systems.config';
 import type { SystemKey, RBACRole } from '@/lib/types';
 
 /**
@@ -162,30 +163,20 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SWITCH_RBAC_ROLE': {
       const newRole = action.payload;
-      // Map RBAC role to legacy role for UI compatibility
-      const legacyRoleMap: Record<string, string> = {
-        'R001': 'ops',
-        'R002': 'sso_ops',
-        'R003': 'pam_ops',
-        'R004': 'iga_ops',
-        'R005': 'entraid_ops',
-        'R006': 'tpag_ops',
-        'R007': 'ops',
-        'R008': 'employee',
-      };
-      const legacyRole = legacyRoleMap[newRole.id] || 'employee';
+      // Get role key from centralized config
+      const roleKey = getRoleKeyFromId(newRole.id);
       
       return {
         ...state,
         auth: {
           ...state.auth,
           activeRole: newRole,
-          role: legacyRole,
+          role: roleKey,
         },
         ui: {
           ...state.ui,
-          currentRole: legacyRole,
-          originalRole: legacyRole,
+          currentRole: roleKey,
+          originalRole: roleKey,
         },
       };
     }

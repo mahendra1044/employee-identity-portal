@@ -56,15 +56,7 @@ export function SystemCard({
 
   // Memoized load function to prevent unnecessary re-renders
   const loadInitial = useCallback(async (showToast = true) => {
-    console.log(`🔄 [${system}] loadInitial START - enabled:`, enabled, 'userKey:', userKey, 'token:', !!token);
-    
-    if (!enabled) {
-      console.log(`⏭️ [${system}] SKIP - system not enabled`);
-      return;
-    }
-    
-    if (!token) {
-      console.log(`⏭️ [${system}] SKIP - no token`);
+    if (!enabled || !token) {
       return;
     }
     
@@ -86,13 +78,10 @@ export function SystemCard({
       }
       
       const fullUrl = userKey ? endpoint : `${API_BASE}${endpoint}`;
-      console.log(`📡 [${system}] FETCH START:`, fullUrl);
       
       const res = await fetch(fullUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
-      console.log(`📥 [${system}] RESPONSE:`, res.status, res.statusText, res.ok);
       
       if (!res.ok) {
         let message = `HTTP ${res.status}`;
@@ -105,32 +94,24 @@ export function SystemCard({
             message = t || message;
           } catch {}
         }
-        console.error(`❌ [${system}] FETCH FAILED:`, message);
         throw new Error(message);
       }
       
       const json = await res.json();
-      console.log(`✅ [${system}] DATA RECEIVED:`, json);
-      
       const extractedData = json.data || json;
-      console.log(`💾 [${system}] EXTRACTED DATA:`, extractedData);
-      
       setData(extractedData);
-      console.log(`🎉 [${system}] STATE UPDATED - data is now set`);
       
       if (showToast) {
         toast.success(`Refreshed ${name}${userKey ? ` for ${userKey}` : ''}`, { id: refreshToast });
       }
     } catch (e: unknown) {
       const errorMessage = ErrorHandler.parseError(e);
-      console.error(`❌ [${system}] ERROR:`, errorMessage);
       setError(errorMessage);
       if (showToast) {
         toast.error(`Failed to refresh ${name}: ${ErrorHandler.getUserFriendlyMessage(e)}`, { id: refreshToast });
       }
     } finally {
       setLoading(false);
-      console.log(`🏁 [${system}] loadInitial COMPLETE - loading:false, hasData:${!!data}, hasError:${!!error}`);
     }
   }, [enabled, name, system, token, userKey]);
 
@@ -164,10 +145,7 @@ export function SystemCard({
   }, [system, token, userKey]);
 
   useEffect(() => {
-    console.log(`🔁 [${system}] useEffect TRIGGERED - token:${!!token}, enabled:${enabled}, userKey:"${userKey}"`);
-    
     if (userKey !== undefined) {
-      console.log(`🔄 [${system}] UserKey changed to "${userKey}", resetting and loading...`);
       setData(null);
       setError(null);
     }

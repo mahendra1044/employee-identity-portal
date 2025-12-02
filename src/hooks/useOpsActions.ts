@@ -134,6 +134,4 @@ export function useOpsActions(): UseOpsActionsReturn {
   };
 }
 
-// Also export with old name for backward compatibility
-export { useOpsActions as usePfOps };
 export default useOpsActions;
