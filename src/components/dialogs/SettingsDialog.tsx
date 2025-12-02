@@ -82,26 +82,26 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 border-2 border-slate-300 dark:border-slate-600 shadow-md">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-card dark:bg-card shadow-2xl dark:shadow-black/40 rounded-none" showCloseButton={true}>
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-6 pt-4 pb-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
-          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold">
+        <DialogHeader className="flex-shrink-0 px-6 pt-4 pb-3 bg-gradient-to-r from-card to-card/80 dark:from-card dark:to-card/95 border-b border-border/20 dark:border-border/10">
+          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold text-foreground">
             <span className="text-lg">⚙️</span>
             <span>System Visibility Settings</span>
           </DialogTitle>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 pr-12">
+          <p className="text-xs text-muted-foreground mt-1 pr-12">
             Customize which system cards appear on your dashboard. Changes reset on logout.
           </p>
         </DialogHeader>
 
         {/* Stats Bar */}
-        <div className="flex items-center justify-between gap-3 flex-shrink-0 px-6 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between gap-3 flex-shrink-0 px-6 py-2 bg-muted/20 dark:bg-muted/10 border-b border-border/20 dark:border-border/10">
           <div className="flex items-center gap-2 text-xs">
-            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 font-medium bg-muted/40 dark:bg-muted/20 border border-border/40 dark:border-border/30 text-muted-foreground">
               <span className="text-xs">✅</span>
               {enabledCount} Active
             </span>
-            <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 font-medium bg-muted/40 dark:bg-muted/20 border border-border/40 dark:border-border/30 text-muted-foreground">
               <span className="text-xs">📊</span>
               {totalSystems} Total
             </span>
@@ -117,7 +117,7 @@ export function SettingsDialog({
         </div>
 
         {/* Content Area with Grouped Systems */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 bg-card/50 dark:bg-card/30">
           <div className="space-y-4">
             {Object.entries(groupedSystems).map(([category, systems]) => {
               if (systems.length === 0) return null;
@@ -126,10 +126,10 @@ export function SettingsDialog({
               return (
                 <div key={category} className="space-y-2">
                   {/* Category Header */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-card/50 to-card dark:from-card/50 dark:to-card border border-border/30 dark:border-border/20">
                     <span className="text-sm">{info.icon}</span>
-                    <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">{info.name}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 ml-auto">
+                    <span className="font-semibold text-xs text-foreground">{info.name}</span>
+                    <span className="text-xs text-muted-foreground ml-auto">
                       {systems.filter(s => userToggles[s] ?? false).length}/{systems.length}
                     </span>
                   </div>
@@ -143,14 +143,14 @@ export function SettingsDialog({
                       return (
                         <div 
                           key={sys} 
-                          className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                          className={`flex items-center justify-between p-3 border transition-all ${
                             isEnabled 
-                              ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600' 
-                              : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200/50 dark:border-slate-800 opacity-60'
+                              ? 'bg-card dark:bg-card border-border/40 dark:border-border/30 hover:border-border/60 dark:hover:border-border/50' 
+                              : 'bg-muted/20 dark:bg-muted/10 border-border/20 dark:border-border/10 opacity-60'
                           }`}
                         >
                           <div className="flex-1">
-                            <label className="text-sm font-medium text-slate-900 dark:text-slate-100 cursor-pointer">
+                            <label className="text-sm font-medium text-foreground cursor-pointer">
                               {SYSTEM_LABELS[sys as SystemKey]}
                             </label>
                             {isAdminDisabled && (

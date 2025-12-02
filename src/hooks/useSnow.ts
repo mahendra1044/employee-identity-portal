@@ -52,11 +52,13 @@ export function useSnow(
       
       let json: any;
       try {
+        // Clone response before parsing so we can read body again if JSON parsing fails
+        const resClone = res.clone();
         json = await res.json();
       } catch {
         // If JSON parsing fails, it's likely HTML (404, 500 error page)
-        const text = await res.text();
-        console.error('SNOW API returned non-JSON response:', { status: res.status, responseText: text.substring(0, 200) });
+        // Use the original response text since json() already consumed the clone
+        console.error('SNOW API returned non-JSON response:', { status: res.status });
         setSnowError(`Server error: ${res.status}`);
         setSnowItems([]);
         setSnowCount(0);

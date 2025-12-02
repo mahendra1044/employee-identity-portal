@@ -156,18 +156,18 @@ export function EducateGuideDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 border-2 border-slate-300 dark:border-slate-600 shadow-md">
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col space-y-0 p-0 gap-0 bg-card dark:bg-card shadow-2xl dark:shadow-black/40 rounded-none" showCloseButton={true}>
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-6 pt-4 pb-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
-          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold">
+        <DialogHeader className="-mx-6 -mt-6 px-6 pt-4 pb-3 bg-gradient-to-r from-card to-card/80 dark:from-card dark:to-card/95 border-b border-border/20 dark:border-border/10">
+          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold text-foreground">
             <span className="text-lg">📚</span>
             <span>Educational Guides</span>
-            <span className="text-xs font-normal text-slate-600 dark:text-slate-400">— By System</span>
+            <span className="text-xs font-normal text-muted-foreground">— By System</span>
           </DialogTitle>
         </DialogHeader>
 
         {/* Content Area with improved spacing */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 bg-card/50 dark:bg-card/30">
           <Accordion type="single" collapsible className="w-full space-y-2">
             {SYSTEMS.map((sys) => {
               const points =
@@ -177,29 +177,29 @@ export function EducateGuideDialog({
                 <AccordionItem 
                   key={sys} 
                   value={sys}
-                  className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+                  className="border border-border/30 dark:border-border/20 overflow-hidden bg-card dark:bg-card/50 hover:border-border/50 dark:hover:border-border/30 transition-colors"
                 >
-                  <AccordionTrigger className="text-left hover:no-underline px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors">
+                  <AccordionTrigger className="text-left hover:no-underline px-4 py-3 hover:bg-muted/30 dark:hover:bg-muted/20 transition-colors">
                     <div className="flex items-center gap-3 w-full pr-2">
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                      <span className="font-medium text-foreground">
                         {SYSTEM_LABELS[sys as SystemKey]}
                       </span>
-                      <span className="text-[10px] px-2 py-1 rounded-full border border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 ml-auto whitespace-nowrap font-medium">
+                      <span className="text-[10px] px-2 py-1 border border-border/40 dark:border-border/30 bg-muted/40 dark:bg-muted/20 text-muted-foreground ml-auto whitespace-nowrap font-medium">
                         {sys.replace(/-/g, " ").toUpperCase()}
                       </span>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30">
+                  <AccordionContent className="px-4 py-3 bg-muted/20 dark:bg-muted/10">
                     {points.length > 0 ? (
                       <ol className="list-decimal list-inside space-y-2.5 text-sm">
                         {points.map((point: string, idx: number) => (
-                          <li key={idx} className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed pl-1">
+                          <li key={idx} className="text-sm text-foreground/80 leading-relaxed pl-1">
                             {point}
                           </li>
                         ))}
                       </ol>
                     ) : (
-                      <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 italic py-2">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground italic py-2">
                         <span>💡</span>
                         <span>No educational points configured for this system.</span>
                       </div>

@@ -65,26 +65,26 @@ export function SnowIncidentsDialog({
 }: SnowIncidentsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col space-y-0 p-0 gap-0 bg-white/95 dark:bg-slate-900/95 border-2 border-slate-300 dark:border-slate-600 shadow-md">
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col space-y-0 p-0 gap-0 bg-card dark:bg-card shadow-2xl dark:shadow-black/40" showCloseButton={true}>
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-6 pt-4 pb-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
-          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold">
+        <DialogHeader className="flex-shrink-0 px-6 pt-4 pb-3 bg-gradient-to-r from-card to-card/80 dark:from-card dark:to-card/95 border-b border-border/20 dark:border-border/10">
+          <DialogTitle className="pr-12 flex items-center gap-2 text-base font-semibold text-foreground">
             <span className="text-lg">🎫</span>
             <span>ServiceNow Incidents</span>
-            {snowEmail && <span className="text-xs font-normal text-slate-600 dark:text-slate-400">— {snowEmail}</span>}
+            {snowEmail && <span className="text-xs font-normal text-muted-foreground">— {snowEmail}</span>}
           </DialogTitle>
         </DialogHeader>
 
         {/* Stats Bar */}
-        <div className="flex items-center justify-between gap-3 flex-shrink-0 px-6 py-2 bg-slate-50 dark:bg-slate-800">
+        <div className="flex items-center justify-between gap-3 flex-shrink-0 px-6 py-2 bg-muted/20 dark:bg-muted/10 border-b border-border/20 dark:border-border/10">
           <div className="flex items-center gap-2 text-xs">
             {typeof snowCount === 'number' && (
-              <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium border bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
+              <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium border bg-muted/40 dark:bg-muted/20 border-border/40 dark:border-border/30 text-muted-foreground">
                 {snowCount === 0 ? '✅' : '⚠️'} Open/In-Progress: {snowCount}
               </span>
             )}
             {(snowItems?.length || 0) > 0 && (
-              <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300">
+              <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium bg-muted/40 dark:bg-muted/20 border border-border/40 dark:border-border/30 text-muted-foreground">
                 📊 Total: {snowItems!.length}
               </span>
             )}
@@ -108,25 +108,25 @@ export function SnowIncidentsDialog({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto px-6 pb-6">
+        <div className="flex-1 overflow-auto px-6 pb-6 bg-card/50 dark:bg-card/30">
           {snowLoading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-sm text-slate-600 dark:text-slate-400 animate-pulse">Loading incidents...</p>
+              <p className="text-sm text-muted-foreground animate-pulse">Loading incidents...</p>
             </div>
           ) : snowError ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-sm text-red-600 dark:text-red-400">{snowError}</p>
+              <p className="text-sm text-destructive">{snowError}</p>
             </div>
           ) : (snowItems?.length || 0) > 0 ? (
             <div className="mt-4">
               <Table>
-                <TableHeader className="sticky top-0 bg-white dark:bg-slate-900 z-10">
-                  <TableRow className="border-b-2 border-slate-200 dark:border-slate-700">
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Number</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Summary</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Status</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Priority</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Updated</TableHead>
+                <TableHeader className="sticky top-0 bg-card dark:bg-card z-10">
+                  <TableRow className="border-b border-border/30 dark:border-border/20">
+                    <TableHead className="font-semibold text-foreground">Number</TableHead>
+                    <TableHead className="font-semibold text-foreground">Summary</TableHead>
+                    <TableHead className="font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground">Priority</TableHead>
+                    <TableHead className="font-semibold text-foreground">Updated</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -135,7 +135,7 @@ export function SnowIncidentsDialog({
                     return (
                       <TableRow 
                         key={it.number}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-200 border-b border-slate-100 dark:border-slate-800 last:border-0"
+                        className="hover:bg-muted/30 dark:hover:bg-muted/20 transition-all duration-200 border-b border-border/20 dark:border-border/10 last:border-0"
                       >
                         <TableCell className="py-2.5 align-top">
                           <span className="font-mono text-xs font-semibold text-blue-600 dark:text-blue-400">
@@ -143,7 +143,7 @@ export function SnowIncidentsDialog({
                           </span>
                         </TableCell>
                         <TableCell className="py-2.5 align-top">
-                          <p className="text-sm leading-snug text-slate-900 dark:text-slate-100 whitespace-normal break-words">
+                          <p className="text-sm leading-snug text-foreground whitespace-normal break-words">
                             {it.short_description}
                           </p>
                         </TableCell>

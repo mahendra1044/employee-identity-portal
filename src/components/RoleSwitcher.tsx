@@ -100,8 +100,25 @@ const defaultConfig = {
   accentColor: 'bg-slate-500'
 };
 
+// Role display name mappings
+const roleDisplayNames: Record<string, string> = {
+  'R001': 'Super User',
+  'R002': 'SSO Ops',
+  'R003': 'PAM Ops',
+  'R004': 'IGA Ops',
+  'R005': 'Entra ID Ops',
+  'R006': 'TPAG Ops',
+  'R007': 'Employee',
+  'R008': 'Management',
+};
+
 function getRoleConfig(roleId: string) {
   return roleConfig[roleId] || defaultConfig;
+}
+
+function getDisplayName(role: RBACRole): string {
+  // Use mapped display name if available, otherwise use the role name from backend
+  return roleDisplayNames[role.id] || role.name;
 }
 
 /**
@@ -163,7 +180,7 @@ export function RoleSwitcher() {
                 {/* Role name */}
                 <SelectValue placeholder="Select Role">
                   <span className={`text-xs font-medium ${activeConfig.color} truncate`}>
-                    {activeRole.name}
+                    {getDisplayName(activeRole)}
                   </span>
                 </SelectValue>
                 
@@ -230,7 +247,7 @@ export function RoleSwitcher() {
                           text-sm font-medium truncate
                           ${isActive ? config.color : 'text-slate-700 dark:text-slate-200'}
                         `}>
-                          {role.name}
+                          {getDisplayName(role)}
                         </span>
                         <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
                           {role.description}

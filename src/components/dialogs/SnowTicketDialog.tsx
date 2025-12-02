@@ -117,23 +117,23 @@ export function SnowTicketDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border-2 border-slate-300 dark:border-slate-600 bg-white/95 dark:bg-slate-900/95 shadow-md">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col overflow-hidden bg-card dark:bg-card shadow-2xl dark:shadow-black/40 rounded-none" showCloseButton={true}>
         {/* Header */}
-        <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
-          <DialogTitle className="text-base font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+        <div className="px-6 py-4 bg-gradient-to-r from-card to-card/80 dark:from-card dark:to-card/95 border-b border-border/60 dark:border-border/40 flex-shrink-0">
+          <DialogTitle className="text-base font-semibold text-foreground flex items-center gap-2">
             <span className="text-lg">🎫</span>
             Create ServiceNow Ticket
           </DialogTitle>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-900">
-          <div className="p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto bg-card/50 dark:bg-card/30 px-6 py-4">
+          <div className="space-y-3">
             {/* Live Preview */}
-            <div className="border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 p-3">
+            <div className="border border-border/60 dark:border-border/40 bg-muted/20 dark:bg-muted/10 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-base">👁️</span>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <h3 className="text-sm font-semibold text-foreground">
                   Live Preview
                 </h3>
                 <span className="text-xs text-green-600 dark:text-green-400">● Live</span>
@@ -142,36 +142,36 @@ export function SnowTicketDialog({
                 <div className="space-y-1.5 text-sm">
                   <div className="flex items-start gap-2">
                     <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs min-w-[65px]">User:</span>
-                    <span className="text-slate-700 dark:text-slate-300 font-mono text-xs break-all">{email}</span>
+                    <span className="text-foreground/80 font-mono text-xs break-all">{email}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-purple-600 dark:text-purple-400 font-semibold text-xs min-w-[65px]">System:</span>
-                    <span className="text-slate-700 dark:text-slate-300 text-xs">{systemKey}</span>
+                    <span className="text-foreground/80 text-xs">{systemKey}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-600 dark:text-green-400 font-semibold text-xs min-w-[65px]">Payload:</span>
-                    <span className="text-slate-700 dark:text-slate-300 text-xs">
+                    <span className="text-foreground/80 text-xs">
                       {payloadFieldCount > 0 ? `${payloadFieldCount} fields included` : 'No data attached'}
                     </span>
                   </div>
                 </div>
 
                 {description ? (
-                  <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-700">
+                  <div className="pt-2 mt-2 border-t border-border/60 dark:border-border/40">
                     <div className="flex items-start gap-2 mb-1.5">
                       <span className="text-orange-600 dark:text-orange-400 font-semibold text-xs">Your Note:</span>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded p-2 border border-slate-200 dark:border-slate-700">
-                      <p className="text-slate-700 dark:text-slate-300 text-xs italic leading-relaxed whitespace-pre-wrap break-words">
+                    <div className="bg-background dark:bg-background/80 p-2 border border-border/60 dark:border-border/40">
+                      <p className="text-foreground/80 text-xs italic leading-relaxed whitespace-pre-wrap break-words">
                         "{description}"
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-700">
+                  <div className="pt-2 mt-2 border-t border-border/60 dark:border-border/40">
                     <div className="text-center py-3">
                       <span className="text-xl">✍️</span>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Start typing to see your note preview
                       </p>
                     </div>
@@ -184,10 +184,10 @@ export function SnowTicketDialog({
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-base">📝</span>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <h3 className="text-sm font-semibold text-foreground">
                   Your Description
                 </h3>
-                <span className="text-xs text-slate-400 dark:text-slate-500">(Optional)</span>
+                <span className="text-xs text-muted-foreground">(Optional)</span>
               </div>
               <Textarea
                 placeholder="Describe the issue or provide additional context...&#x0a;&#x0a;Example: User unable to access application. Need to verify group memberships and authentication logs."
@@ -196,13 +196,13 @@ export function SnowTicketDialog({
                 maxLength={500}
                 disabled={isSubmitting}
                 className={`w-full min-h-[140px] resize-none transition-all text-sm ${
-                  description.length > 0 ? 'border-blue-300 dark:border-blue-600 ring-1 ring-blue-200 dark:ring-blue-800' : ''
-                } ${description.length > 400 ? 'border-orange-400 dark:border-orange-600 ring-1 ring-orange-200 dark:ring-orange-800' : ''} ${
-                  description.length === 500 ? 'border-red-400 dark:border-red-600 ring-1 ring-red-200 dark:ring-red-800' : ''
+                  description.length > 0 ? 'border-blue-300 dark:border-blue-600 ring-1 ring-blue-200/50 dark:ring-blue-900/50' : ''
+                } ${description.length > 400 ? 'border-orange-400 dark:border-orange-600 ring-1 ring-orange-200/50 dark:ring-orange-900/50' : ''} ${
+                  description.length === 500 ? 'border-red-400 dark:border-red-600 ring-1 ring-red-200/50 dark:ring-red-900/50' : ''
                 }`}
               />
               <div className="flex items-center justify-between mt-2 text-xs">
-                <span className="text-slate-500 dark:text-slate-400">
+                <span className="text-muted-foreground">
                   {description.length === 0 ? '💡 Add context to help resolve faster' :
                    description.length < 50 ? '✍️ Consider adding more details' :
                    description.length < 200 ? '✅ Good detail level' :
@@ -222,10 +222,10 @@ export function SnowTicketDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 px-4 py-2 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        <div className="flex items-center justify-between gap-3 px-4 py-2 border-t border-border/60 dark:border-border/40 bg-muted/20 dark:bg-muted/10">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400">Target System:</span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+            <span className="text-[10px] text-muted-foreground">Target System:</span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-blue-100/50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50">
               {systemName}
             </span>
           </div>
@@ -234,10 +234,10 @@ export function SnowTicketDialog({
               type="button"
               onClick={() => handleClose(false)}
               disabled={isSubmitting}
-              className={`px-3 py-1.5 rounded text-xs font-medium border transition-all ${
+              className={`px-3 py-1.5 text-xs font-medium border transition-all ${
                 isSubmitting
-                  ? 'text-slate-400 bg-slate-100 border-slate-200 cursor-not-allowed opacity-50'
-                  : 'text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  ? 'text-slate-400 bg-muted/30 border-border/30 cursor-not-allowed opacity-50'
+                  : 'text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               Cancel
@@ -246,9 +246,9 @@ export function SnowTicketDialog({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded font-semibold text-xs transition-all ${
+              className={`flex items-center gap-1.5 px-4 py-1.5 font-semibold text-xs transition-all ${
                 isSubmitting
-                  ? 'bg-green-400 text-white cursor-wait opacity-80'
+                  ? 'bg-green-500/80 text-white cursor-wait opacity-80'
                   : 'bg-green-600 hover:bg-green-700 text-white'
               }`}
             >

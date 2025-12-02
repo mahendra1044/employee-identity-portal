@@ -2,7 +2,7 @@
   "roles": {
     "R001": {
       "id": "R001",
-      "name": "Master Ops",
+      "name": "Super User",
       "priority": 1,
       "systems": ["all"],
       "isMaster": true,
@@ -30,7 +30,7 @@
       "priority": 4,
       "systems": ["saviynt", "saviynt-certifications", "saviynt-analytics", "saviynt-controls", "saviynt-requests", "saviynt-provisioning"],
       "isMaster": false,
-      "description": "Identity Governance & Administration operations"
+      "description": "Identity Governance and Administration operations"
     },
     "R005": {
       "id": "R005",

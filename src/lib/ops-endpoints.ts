@@ -76,7 +76,7 @@ export const OPS_ENDPOINTS: SystemEndpoints[] = [
     actions: [
       { key: "pfUserInfo", url: "/api/pf/userinfo", title: "Ping Federate — User Info", label: "User Info", icon: User },
       { key: "pfOidc", url: "/api/pf/oidc", title: "Ping Federate — OIDC Connections", label: "OIDC", icon: Globe },
-      { key: "pfConnections", url: "/api/pf/connections", title: "Ping Federate — Connections", label: "Connections", icon: Database },
+      { key: "pfSaml", url: "/api/pf/saml", title: "Ping Federate — SAML Connections", label: "SAML", icon: Shield },
     ],
   },
   // Ping Directory

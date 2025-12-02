@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { LogOut, Users, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen, Briefcase, User, Shield, UserCheck, ArrowLeftRight, UserCircle, Radio, RefreshCw } from "lucide-react";
+import { LogOut, Sun, Moon, FileText, Settings as SettingsIcon, BookOpen, Briefcase, User, ArrowLeftRight, UserCircle, Radio } from "lucide-react";
 import { useAppAuth } from "@/hooks/useAppAuth";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppUI } from "@/hooks/useAppUI";
 import { getOpsModeDescription, isOpsRole } from "@/lib/role-utils";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
-import EDUCATE_CONFIG from "@/lib/educate-config.json";
 
 export function Header(props: {
   onShowSnowTickets?: () => void;
@@ -18,7 +17,7 @@ export function Header(props: {
 }) {
   const { userId, logout, availableRoles } = useAppAuth();
   const { theme, setTheme } = useAppTheme();
-  const { ui, setUIState, toggleRole, setRole } = useAppUI();
+  const { ui, setUIState, setRole } = useAppUI();
 
   const originalRole = ui.originalRole;
   const currentRole = ui.currentRole || 'employee';
@@ -27,60 +26,20 @@ export function Header(props: {
   // Check if RBAC switcher should be shown (user has multiple roles)
   const hasMultipleRoles = availableRoles && availableRoles.length > 1;
 
-  // Determine if toggle button should show (only when NOT using RBAC switcher)
-  const canToggleRole = !hasMultipleRoles && isOpsRole(originalRole);
+  // Check if user is in a specialized ops mode (not general ops, not employee)
+  const isInSpecializedOps = currentRole !== 'employee' && currentRole !== 'ops' && isOpsRole(currentRole);
   
-  // Check if user is specialized ops (sso_ops, pam_ops, etc.) - they get TWO buttons
-  const isSpecializedOps = !hasMultipleRoles && originalRole && originalRole !== 'ops' && isOpsRole(originalRole);
+  // Check if user is in general ops mode but came from specialized ops
+  const isInGeneralOpsFromSpecialized = currentRole === 'ops' && originalRole && originalRole !== 'ops' && isOpsRole(originalRole);
   
-  // Get toggle tooltip text based on current and original role
-  const getToggleTooltip = () => {
-    if (!originalRole) return "";
-    
-    // For specialized ops modes (sso_ops, pam_ops, etc.)
-    if (isSpecializedOps) {
-      if (currentRole === 'ops') {
-        // Currently in general ops, can switch back to specialized
-        return `Switch to ${getOpsModeDescription(originalRole)}`;
-      } else if (currentRole === 'employee') {
-        // Currently in employee mode, switch back to specialized
-        return `Switch to ${getOpsModeDescription(originalRole)}`;
-      } else {
-        // Currently in specialized mode, can switch to general ops
-        return "Switch to General Operations (All Systems)";
-      }
-    }
-    
-    // For regular ops users
-    if (originalRole === 'ops') {
-      return `Switch to ${currentRole === "ops" ? "Employee" : "Operations"} view`;
-    }
-    
-    return "";
-  };
-
-  const getEmployeeToggleTooltip = () => {
-    return "Switch to Employee view";
-  };
+  // Check if user is in employee mode but has ops role
+  const isInEmployeeFromOps = currentRole === 'employee' && originalRole && isOpsRole(originalRole);
 
   const getRoleIcon = () => {
-    switch (currentRole) {
-      case "ops":
-      case "sso_ops":
-      case "pam_ops":
-      case "iga_ops":
-      case "entraid_ops":
-      case "tpag_ops":
-        return <Briefcase className="h-3 w-3" />;
-      case "employee":
-        return <User className="h-3 w-3" />;
-      case "admin":
-        return <Shield className="h-3 w-3" />;
-      case "manager":
-        return <UserCheck className="h-3 w-3" />;
-      default:
-        return <User className="h-3 w-3" />;
+    if (isOpsRole(currentRole)) {
+      return <Briefcase className="h-3 w-3" />;
     }
+    return <User className="h-3 w-3" />;
   };
 
   const getRoleDisplay = () => {
@@ -88,45 +47,29 @@ export function Header(props: {
       case "ops":
         return "Operations Team";
       case "sso_ops":
-        return "SSO Operations";
+        return "SSO Ops";
       case "pam_ops":
-        return "PAM Operations";
+        return "PAM Ops";
       case "iga_ops":
-        return "IGA Operations";
+        return "IGA Ops";
       case "entraid_ops":
-        return "Entra ID Operations";
+        return "Entra ID Ops";
       case "tpag_ops":
-        return "TPAG Operations";
+        return "TPAG Ops";
       case "employee":
-        return "Employee Access";
-      case "admin":
-        return "Admin";
-      case "manager":
-        return "Manager";
+        return "Employee";
       default:
         return currentRole || "User";
     }
   };
 
-  const getOpsModeTooltip = () => {
-    const description = getOpsModeDescription(currentRole);
-    if (description) {
-      return description;
-    }
-    return getRoleDisplay();
-  };
-
   // Get role-specific gradient
   const getRoleGradient = () => {
-    const role = currentRole;
-    if (role === 'ops' || role === 'sso_ops' || role === 'pam_ops' || role === 'iga_ops' || role === 'entraid_ops' || role === 'tpag_ops') {
+    if (isOpsRole(currentRole)) {
       return 'from-blue-500/90 to-cyan-500/90';
     }
-    if (role === 'employee') {
+    if (currentRole === 'employee') {
       return 'from-green-500/90 to-emerald-500/90';
-    }
-    if (role === 'admin') {
-      return 'from-red-500/90 to-orange-500/90';
     }
     return 'from-slate-500/90 to-slate-400/90';
   };
@@ -176,7 +119,7 @@ export function Header(props: {
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{getOpsModeTooltip()}</p>
+                  <p>{getOpsModeDescription(currentRole) || getRoleDisplay()}</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -191,6 +134,7 @@ export function Header(props: {
 
           {/* System Actions Group - Pill Container */}
           <div className="flex items-center gap-1 p-1 rounded-full bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            {/* Theme Toggle */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
@@ -212,95 +156,10 @@ export function Header(props: {
               </TooltipContent>
             </Tooltip>
 
-            {/* For specialized ops (sso_ops, pam_ops, etc.): Show TWO buttons */}
-            {isSpecializedOps && (
+            {/* Ops Mode Toggle Buttons - Only shown for ops users */}
+            {isInSpecializedOps && (
               <>
-                {/* Button 1: Toggle between specialized ops ↔ general ops */}
-                {currentRole !== 'employee' && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={toggleRole} 
-                        aria-label="Toggle ops mode"
-                        className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110 hover:shadow-md"
-                      >
-                        <ArrowLeftRight className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{getToggleTooltip()}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                
-                {/* Button 2: Switch to employee mode */}
-                {currentRole !== 'employee' && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => setRole('employee')} 
-                        aria-label="Switch to employee view"
-                        className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110 hover:shadow-md"
-                      >
-                        <UserCircle className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{getEmployeeToggleTooltip()}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                
-                {/* If in employee mode, show button to go back to specialized ops */}
-                {currentRole === 'employee' && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => setRole(originalRole)} 
-                        aria-label="Switch back to ops mode"
-                        className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110 hover:shadow-md"
-                      >
-                        <Radio className="h-4 w-4 animate-pulse" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Switch back to {getOpsModeDescription(originalRole)}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </>
-            )}
-            
-            {/* For regular ops: Show single toggle button (existing behavior) */}
-            {!isSpecializedOps && canToggleRole && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={toggleRole} 
-                    aria-label="Toggle role"
-                    className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110 hover:shadow-md"
-                  >
-                    <RefreshCw className="h-4 w-4 transition-transform duration-200 hover:rotate-180" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{getToggleTooltip()}</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* For RBAC users with specialized ops roles (not general ops, not employee): Show TWO buttons */}
-            {hasMultipleRoles && currentRole !== 'employee' && currentRole !== 'ops' && isOpsRole(currentRole) && (
-              <>
-                {/* Button 1: Toggle between specialized ops ↔ general ops */}
+                {/* Switch to General Ops */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
@@ -318,7 +177,7 @@ export function Header(props: {
                   </TooltipContent>
                 </Tooltip>
 
-                {/* Button 2: Switch to employee view */}
+                {/* Switch to Employee View */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
@@ -338,16 +197,15 @@ export function Header(props: {
               </>
             )}
 
-            {/* For RBAC users in general ops view: Show TWO buttons */}
-            {hasMultipleRoles && currentRole === 'ops' && ui.originalRole && ui.originalRole !== 'ops' && isOpsRole(ui.originalRole) && (
+            {/* From General Ops: Go back to Specialized or to Employee */}
+            {isInGeneralOpsFromSpecialized && (
               <>
-                {/* Button 1: Go back to specialized ops */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => setRole(ui.originalRole || 'ops')} 
+                      onClick={() => setRole(originalRole || 'ops')} 
                       aria-label="Switch to specialized ops"
                       className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110 hover:shadow-md"
                     >
@@ -355,11 +213,10 @@ export function Header(props: {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Switch to {getOpsModeDescription(ui.originalRole)}</p>
+                    <p>Switch to {getOpsModeDescription(originalRole)}</p>
                   </TooltipContent>
                 </Tooltip>
 
-                {/* Button 2: Switch to employee view */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
@@ -379,14 +236,14 @@ export function Header(props: {
               </>
             )}
 
-            {/* For RBAC users in employee view (from ops role): Show button to go back */}
-            {hasMultipleRoles && currentRole === 'employee' && ui.originalRole && isOpsRole(ui.originalRole) && (
+            {/* From Employee View: Go back to Ops */}
+            {isInEmployeeFromOps && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={() => setRole(ui.originalRole || 'ops')} 
+                    onClick={() => setRole(originalRole || 'ops')} 
                     aria-label="Switch back to ops view"
                     className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110 hover:shadow-md"
                   >
@@ -394,7 +251,7 @@ export function Header(props: {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Switch back to {getOpsModeDescription(ui.originalRole)}</p>
+                  <p>Switch back to {getOpsModeDescription(originalRole)}</p>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -422,7 +279,7 @@ export function Header(props: {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{currentRole === 'ops' ? `View incidents for ${userId}` : "View your ServiceNow incidents"}</p>
+                  <p>{isOpsRole(currentRole) ? `View incidents for ${userId}` : "View your ServiceNow incidents"}</p>
                 </TooltipContent>
               </Tooltip>
             )}

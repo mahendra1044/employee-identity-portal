@@ -59,20 +59,6 @@ export const THEME_CONFIG = {
 
 
 /**
- * Storage Keys
- * ------------
- * Keys used for localStorage to keep things consistent
- */
-export const STORAGE_KEYS = {
-  token: 'token',
-  role: 'role',
-  email: 'email',
-  theme: 'theme',
-  systemToggles: 'systemToggles',
-} as const;
-
-
-/**
  * UI Defaults
  * -----------
  * Default values for various UI elements
@@ -92,50 +78,5 @@ export const UI_DEFAULTS = {
 } as const;
 
 
-/**
- * HTTP Status Codes
- * -----------------
- * Common status codes for reference
- */
-export const HTTP_STATUS = {
-  OK: 200,
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  SERVER_ERROR: 500,
-} as const;
-
-
-/**
- * Toast Messages
- * --------------
- * Standard messages shown to users
- */
-export const TOAST_MESSAGES = {
-  login: {
-    success: 'Login successful',
-    error: 'Login failed',
-  },
-  logout: {
-    success: 'Logged out successfully',
-  },
-  settings: {
-    saved: 'Settings saved',
-    reset: 'Reset to defaults',
-  },
-  clipboard: {
-    success: 'Copied to clipboard',
-    error: 'Failed to copy',
-  },
-  data: {
-    refreshing: 'Refreshing data...',
-    refreshed: 'Data refreshed',
-    error: 'Failed to load data',
-  },
-} as const;
-
-
 // Type exports for TypeScript users
 export type Theme = typeof THEME_CONFIG.available[number];
-export type StorageKey = keyof typeof STORAGE_KEYS;

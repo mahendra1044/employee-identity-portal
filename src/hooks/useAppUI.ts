@@ -17,10 +17,6 @@ export function useAppUI() {
     [dispatch]
   );
 
-  const toggleRole = useCallback(() => {
-    dispatch({ type: 'TOGGLE_ROLE' });
-  }, [dispatch]);
-
   const setRole = useCallback((role: string) => {
     dispatch({ type: 'SET_ROLE', payload: role });
   }, [dispatch]);
@@ -52,7 +48,6 @@ export function useAppUI() {
   return {
     ui: state.ui,
     setUIState,
-    toggleRole,
     setRole,
     openSettings,
     closeSettings,

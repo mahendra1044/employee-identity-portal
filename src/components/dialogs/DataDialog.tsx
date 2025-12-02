@@ -828,9 +828,9 @@ export function DataDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${maxWidthClass} max-h-[90vh] flex flex-col overflow-hidden border-2 border-slate-300 dark:border-slate-600 bg-white/95 dark:bg-slate-900/95 shadow-md`}>
+      <DialogContent className={`${maxWidthClass} max-h-[90vh] flex flex-col overflow-hidden bg-card dark:bg-card shadow-2xl dark:shadow-black/40 p-0`} showCloseButton={true}>
         {/* Header */}
-        <div className="sticky top-0 z-10 -mx-6 -mt-6 px-6 py-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-850 border-b border-slate-200 dark:border-slate-700">
+        <div className="sticky top-0 z-10 px-6 py-4 bg-gradient-to-r from-card to-card/80 dark:from-card dark:to-card/95 border-b border-border/20 dark:border-border/10 rounded-t-lg">
           <div className="flex items-start gap-3">
             {/* System Icon */}
             <div className="text-lg mt-1">
@@ -839,12 +839,12 @@ export function DataDialog({
             
             {/* Title and Mode Switcher */}
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">
+              <DialogTitle className="text-base font-semibold text-foreground mb-1">
                 {systemInfo.name}
               </DialogTitle>
               
               {description && (
-                <DialogDescription className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+                <DialogDescription className="text-xs text-muted-foreground mb-2">
                   {description}
                 </DialogDescription>
               )}
@@ -895,7 +895,7 @@ export function DataDialog({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
+        <div className="flex-1 overflow-auto bg-card/50 dark:bg-card/30 px-6 py-4">
           {renderContent()}
         </div>
       </DialogContent>

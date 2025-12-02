@@ -35,7 +35,7 @@ import { SystemCardsGrid } from "@/components/SystemCardsGrid";
 import { DialogsSection } from "@/components/sections/DialogsSection";
 import { QuickActionsCard } from "@/components/sections/QuickActionsCard";
 // Import from formatters
-import { toPairs, formatRoleName, getRoleIconType } from "@/lib/formatters";
+import { toPairs } from "@/lib/formatters";
 // Import from constants
 import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
 // Import from centralized config
@@ -52,7 +52,7 @@ export default function HomePage() {
   const { token, role: originalRole, email, login, logout } = useAppAuth();
   const { theme, setTheme } = useAppTheme();
   const { toggles: userToggles, toggleSystem, resetToggles } = useAppToggles();
-  const { ui, setUIState, toggleRole } = useAppUI();
+  const { ui, setUIState } = useAppUI();
 
   const {
     search,

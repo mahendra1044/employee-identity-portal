@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode, Dispatch } from 'react';
 import { StorageService } from '@/lib/storage';
-import { isOpsRole } from '@/lib/role-utils';
 import type { SystemKey, RBACRole } from '@/lib/types';
 
 /**
@@ -53,7 +52,6 @@ export type AppAction =
   | { type: 'TOGGLE_SYSTEM'; payload: { system: SystemKey; enabled: boolean } }
   | { type: 'RESET_TOGGLES' }
   | { type: 'SET_UI_STATE'; payload: { key: keyof AppState['ui']; value: boolean | string | null } }
-  | { type: 'TOGGLE_ROLE' }
   | { type: 'SET_ROLE'; payload: string }
   | { type: 'SWITCH_RBAC_ROLE'; payload: RBACRole }
   | { type: 'INIT_STATE'; payload: Partial<AppState> };
@@ -214,38 +212,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         userToggles: initialState.userToggles,
       };
-
-    case 'TOGGLE_ROLE': {
-      const { currentRole, originalRole } = state.ui;
-      
-      // If no current role, do nothing
-      if (!currentRole) return state;
-      
-      let newRole: string;
-      
-      // For specialized ops modes (sso_ops, pam_ops, iga_ops, tpag_ops)
-      // Toggle between specialized mode ↔ general ops
-      if (originalRole && originalRole !== 'ops' && isOpsRole(originalRole)) {
-        // If currently in general ops, switch back to specialized mode
-        if (currentRole === 'ops') {
-          newRole = originalRole;
-        } else {
-          // If in specialized mode, switch to general ops
-          newRole = 'ops';
-        }
-      } else {
-        // For regular ops users: toggle between ops ↔ employee
-        newRole = currentRole === 'ops' ? 'employee' : 'ops';
-      }
-      
-      return {
-        ...state,
-        ui: {
-          ...state.ui,
-          currentRole: newRole,
-        },
-      };
-    }
 
     case 'SET_ROLE':
       return {

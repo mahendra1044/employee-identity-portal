@@ -18,7 +18,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { API_BASE } from "@/lib/constants";
 import { OPS_CONFIG } from "@/lib/ui-config";
 import { isOpsRole } from "@/lib/role-utils";
 import type { SystemKey } from "@/lib/types";
@@ -88,8 +87,9 @@ export function useOpsFeatures(
       const mkTs = (minsAgo: number) => new Date(now - minsAgo * 60_000).toISOString();
 
       // Build fetch promises from config
+      // Note: /api/ops-failures is a Next.js frontend route, not backend
       const fetchPromises = failureTypesToLoad.map((config: FailureTypeConfig) =>
-        fetch(`${API_BASE}/api/ops-failures?system=${config.apiSystem}&minutes=${minutes}`, {
+        fetch(`/api/ops-failures?system=${config.apiSystem}&minutes=${minutes}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
       );

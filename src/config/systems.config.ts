@@ -189,11 +189,11 @@ export const SYSTEM_GROUPS = {
  */
 export const ROLE_LABELS: Record<string, string> = {
   'ops': 'Operations Team',
-  'sso_ops': 'SSO Operations',
-  'pam_ops': 'PAM Operations',
-  'iga_ops': 'IGA Operations',
-  'entraid_ops': 'Entra ID Operations',
-  'tpag_ops': 'TPAG Operations',
+  'sso_ops': 'SSO Ops',
+  'pam_ops': 'PAM Ops',
+  'iga_ops': 'IGA Ops',
+  'entraid_ops': 'Entra ID Ops',
+  'tpag_ops': 'TPAG Ops',
   'employee': 'Employee Access',
   'management': 'Management',
   'admin': 'Administrator',

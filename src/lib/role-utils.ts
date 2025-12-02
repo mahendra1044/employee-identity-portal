@@ -46,21 +46,6 @@ export function getAllowedSystemsForRole(role: string | null | undefined): Syste
 }
 
 /**
- * Checks if a system is allowed for a specific role
- */
-export function isSystemAllowedForRole(system: SystemKey, role: string | null | undefined): boolean {
-  if (!role) return true; // No role restrictions
-  
-  const allowedSystems = getAllowedSystemsForRole(role);
-  
-  // null means all systems are allowed (general ops)
-  if (allowedSystems === null) return true;
-  
-  // Check if system is in the allowed list
-  return allowedSystems.includes(system);
-}
-
-/**
  * Filters systems based on role permissions
  */
 export function filterSystemsByRole(systems: SystemKey[], role: string | null | undefined): SystemKey[] {

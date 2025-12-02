@@ -60,7 +60,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-none border-0 p-6 shadow-2xl dark:shadow-black/40 duration-200 sm:max-w-lg dark:bg-[hsl(var(--card))] dark:ring-1 dark:ring-white/10",
           className
         )}
         {...props}
@@ -69,9 +69,9 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-2 right-2 z-50 rounded p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors focus:ring-1 focus:ring-slate-400 focus:outline-hidden disabled:pointer-events-none group"
+            className="absolute top-4 right-4 z-50 rounded-lg p-2 bg-background/80 hover:bg-background text-foreground/70 hover:text-foreground transition-all duration-150 focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-background disabled:pointer-events-none border border-transparent hover:border-border/20"
           >
-            <XIcon className="h-3 w-3 text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-100 transition-colors" />
+            <XIcon className="h-5 w-5" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
@@ -110,7 +110,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-lg leading-none font-semibold tracking-tight", className)}
       {...props}
     />
   )
