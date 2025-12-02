@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppAuth } from "@/hooks/useAppAuth";
 import { api } from "@/lib/api-client";
+import { labels } from "@/config/labels";
 import { ErrorHandler } from "@/lib/error-handler";
 import type { LoginResponse } from "@/lib/types";
 
@@ -50,18 +51,18 @@ export function LoginForm({ onLogin }: Props) {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-[420px]">
-        <h2 className="text-2xl font-semibold mb-4">Sign in</h2>
+        <h2 className="text-2xl font-semibold mb-4">{labels.login.title}</h2>
         <form onSubmit={submit} className="space-y-3">
           <div>
-            <label className="block text-sm mb-1">User ID</label>
-            <Input value={userId} onChange={(e) => setUserId(e.target.value)} type="text" placeholder="e.g., u1001" required />
+            <label className="block text-sm mb-1">{labels.login.form.userId.label}</label>
+            <Input value={userId} onChange={(e) => setUserId(e.target.value)} type="text" placeholder={labels.login.form.userId.placeholder} required />
           </div>
           <div>
-            <label className="block text-sm mb-1">Password</label>
+            <label className="block text-sm mb-1">{labels.login.form.password.label}</label>
             <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
           </div>
           {error && <div className="text-sm text-red-600">{error}</div>}
-          <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Signing in...' : 'Sign in'}</Button>
+          <Button type="submit" className="w-full" disabled={loading}>{loading ? labels.login.buttons.submitting : labels.login.buttons.submit}</Button>
         </form>
       </div>
     </div>

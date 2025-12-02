@@ -1,0 +1,35 @@
+{
+  "buttons": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "refresh": "Refresh",
+    "viewDetails": "View Details",
+    "copyToClipboard": "Copy to Clipboard",
+    "search": "Search",
+    "clear": "Clear"
+  },
+  "status": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "noData": "No data available",
+    "active": "Active",
+    "inactive": "Inactive",
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "network": "Network error. Please try again.",
+    "unauthorized": "Session expired. Please log in again.",
+    "failed": "Failed"
+  },
+  "copy": {
+    "copiedToClipboard": "Copied to clipboard",
+    "copiedData": "Copied {name} to clipboard",
+    "copiedJson": "Copied {name} JSON",
+    "copiedUserId": "Copied User ID: {userId}"
+  }
+}

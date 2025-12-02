@@ -15,6 +15,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Code, FileText, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
+import { labels, t } from "@/config/labels";
 import { DataDialog } from "@/components/dialogs/DataDialog";
 import { SearchResultCard } from "@/components/search/SearchResultCard";
 import { useConsolidatedView } from "@/hooks/useConsolidatedView";
@@ -185,7 +186,7 @@ export function SearchSection({
                       className="h-6 w-6 p-0 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded text-slate-700 dark:text-slate-300 transition-colors"
                       onClick={() => {
                         navigator.clipboard.writeText(JSON.stringify(val, null, 2));
-                        toast.success(`Copied ${SYSTEM_LABELS[sys]} data`);
+                        toast.success(t(labels.search.consolidatedView.copiedData, { system: SYSTEM_LABELS[sys] }));
                       }}
                     >
                       <Copy className="h-3 w-3" />

@@ -29,6 +29,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Copy, FileText, Code, Database, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { labels, t } from "@/config/labels";
 import {
   GroupedFieldsRenderer,
   JsonTreeRenderer,
@@ -80,7 +81,7 @@ function getMaxWidthClass(size: DataDialogProps['maxWidth']): string {
 /** Copy data to clipboard with toast notification */
 function copyToClipboard(data: any, name?: string) {
   navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-  toast.success(`Copied ${name || 'data'} to clipboard`);
+  toast.success(t(labels.dialogs.dataDialog.copySuccess, { name: name || 'data' }));
 }
 
 /** Get icon and color based on system name */
@@ -131,7 +132,7 @@ function HtmlView({ data }: { data: Record<string, unknown> }) {
 /** Table view renderer for array data */
 function TableView({ data }: { data: unknown[] }) {
   if (!Array.isArray(data) || data.length === 0) {
-    return <p className="text-xs text-muted-foreground">No data available</p>;
+    return <p className="text-xs text-muted-foreground">{labels.dialogs.dataDialog.noDataAvailable}</p>;
   }
 
   const columns = Object.keys((data[0] as Record<string, unknown>) || {});

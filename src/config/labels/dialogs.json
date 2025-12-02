@@ -1,0 +1,19 @@
+{
+  "dataDialog": {
+    "copySuccess": "Copied {name} to clipboard",
+    "noDataAvailable": "No data available",
+    "tabs": {
+      "formatted": "Formatted",
+      "json": "JSON",
+      "table": "Table"
+    }
+  },
+  "confirmDialog": {
+    "title": "Confirm Action",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "settingsDialog": {
+    "resetSuccess": "Reset to defaults"
+  }
+}

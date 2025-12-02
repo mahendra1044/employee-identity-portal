@@ -1,0 +1,20 @@
+{
+  "title": "Quick Actions",
+  "subtitle": "Execute operations for searched users",
+  "external": {
+    "label": "External:",
+    "splunk": {
+      "button": "Splunk",
+      "tooltip": "Open Splunk logs"
+    },
+    "cloudwatch": {
+      "button": "CloudWatch",
+      "tooltip": "Open CloudWatch metrics"
+    }
+  },
+  "target": {
+    "label": "Target:",
+    "noTarget": "No target user"
+  },
+  "noActions": "No actions configured for this system."
+}

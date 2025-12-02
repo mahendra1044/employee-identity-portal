@@ -11,6 +11,7 @@ import { SnowTicketDialog } from "@/components/dialogs/SnowTicketDialog";
 import { getDataStatus, extractKeyMetrics } from "@/lib/system-card-utils";
 import { ErrorHandler } from "@/lib/error-handler";
 import { api } from "@/lib/api-client";
+import { labels, t } from "@/config/labels";
 import type { SystemKey, SystemData } from "@/lib/types";
 
 interface SystemCardProps {
@@ -62,7 +63,10 @@ export function SystemCard({
     
     let refreshToast: string | number | undefined;
     if (showToast) {
-      refreshToast = toast.loading(`Refreshing ${name}${userKey ? ` for ${userKey}` : ''}...`);
+      const msg = userKey 
+        ? t(labels.systemCards.messages.refreshingForUser, { name, userKey })
+        : t(labels.systemCards.messages.refreshing, { name });
+      refreshToast = toast.loading(msg);
     }
     
     setLoading(true);
@@ -93,13 +97,16 @@ export function SystemCard({
       setData(response.data || null);
       
       if (showToast) {
-        toast.success(`Refreshed ${name}${userKey ? ` for ${userKey}` : ''}`, { id: refreshToast });
+        const msg = userKey 
+          ? t(labels.systemCards.messages.refreshedForUser, { name, userKey })
+          : t(labels.systemCards.messages.refreshed, { name });
+        toast.success(msg, { id: refreshToast });
       }
     } catch (e: unknown) {
       const errorMessage = ErrorHandler.parseError(e);
       setError(errorMessage);
       if (showToast) {
-        toast.error(`Failed to refresh ${name}: ${ErrorHandler.getUserFriendlyMessage(e)}`, { id: refreshToast });
+        toast.error(t(labels.systemCards.messages.refreshFailed, { name, error: ErrorHandler.getUserFriendlyMessage(e) }), { id: refreshToast });
       }
     } finally {
       setLoading(false);
@@ -176,14 +183,14 @@ export function SystemCard({
                       onClick={(e) => {
                         e.stopPropagation();
                         navigator.clipboard.writeText(userKey);
-                        toast.success(`Copied User ID: ${userKey}`);
+                        toast.success(t(labels.systemCards.messages.copiedUserId, { userId: userKey }));
                       }}
                       className="inline-flex items-center justify-center px-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-r border border-l-0 border-blue-500/20 hover:bg-blue-500/20 transition-colors"
                     >
                       <Copy className="h-2.5 w-2.5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent><p>Copy User ID</p></TooltipContent>
+                  <TooltipContent><p>{labels.systemCards.tooltips.copyUserId}</p></TooltipContent>
                 </Tooltip>
               </div>
             )}
@@ -198,19 +205,19 @@ export function SystemCard({
                     <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>Refresh</p></TooltipContent>
+                <TooltipContent><p>{labels.systemCards.tooltips.refresh}</p></TooltipContent>
               </Tooltip>
               {data && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-muted/80" onClick={() => {
                       navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-                      toast.success(`Copied ${name} JSON`);
+                      toast.success(t(labels.systemCards.messages.copiedJson, { name }));
                     }}>
                       <Copy className="h-3 w-3" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>Copy JSON</p></TooltipContent>
+                  <TooltipContent><p>{labels.systemCards.tooltips.copyJson}</p></TooltipContent>
                 </Tooltip>
               )}
             </div>
@@ -222,7 +229,7 @@ export function SystemCard({
                     <Eye className="h-3 w-3" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>Details</p></TooltipContent>
+                <TooltipContent><p>{labels.systemCards.tooltips.viewDetails}</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -230,7 +237,7 @@ export function SystemCard({
                     <FileText className="h-3 w-3" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>Create Ticket</p></TooltipContent>
+                <TooltipContent><p>{labels.systemCards.tooltips.createTicket}</p></TooltipContent>
               </Tooltip>
             </div>
           </div>
@@ -242,14 +249,14 @@ export function SystemCard({
                 size="sm"
                 variant="secondary"
                 onClick={async () => {
-                  setPfTitle("Ping Federate — User Info");
+                  setPfTitle(labels.systemCards.pingFederate.userInfo.title);
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
                     const response = await api.sso.pingFederate.getUserInfo({ token });
                     setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
-                    setPfData({ error: "Failed to load User Info" });
+                    setPfData({ error: labels.systemCards.pingFederate.userInfo.error });
                   } finally {
                     setPfLoading(false);
                   }
@@ -257,20 +264,20 @@ export function SystemCard({
                 className="h-7 text-[11px]"
               >
                 <User className="h-3.5 w-3.5 mr-1" />
-                User Info
+                {labels.systemCards.pingFederate.userInfo.button}
               </Button>
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={async () => {
-                  setPfTitle("Ping Federate — OIDC Connections");
+                  setPfTitle(labels.systemCards.pingFederate.oidc.title);
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
                     const response = await api.sso.pingFederate.getOidcConfig({ token });
                     setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
-                    setPfData({ error: "Failed to load OIDC connections" });
+                    setPfData({ error: labels.systemCards.pingFederate.oidc.error });
                   } finally {
                     setPfLoading(false);
                   }
@@ -278,20 +285,20 @@ export function SystemCard({
                 className="h-7 text-[11px]"
               >
                 <Globe className="h-3.5 w-3.5 mr-1" />
-                OIDC
+                {labels.systemCards.pingFederate.oidc.button}
               </Button>
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={async () => {
-                  setPfTitle("Ping Federate — SAML Connections");
+                  setPfTitle(labels.systemCards.pingFederate.saml.title);
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
                     const response = await api.sso.pingFederate.getSamlConfig({ token });
                     setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
-                    setPfData({ error: "Failed to load SAML connections" });
+                    setPfData({ error: labels.systemCards.pingFederate.saml.error });
                   } finally {
                     setPfLoading(false);
                   }
@@ -299,7 +306,7 @@ export function SystemCard({
                 className="h-7 text-[11px]"
               >
                 <Shield className="h-3.5 w-3.5 mr-1" />
-                SAML
+                {labels.systemCards.pingFederate.saml.button}
               </Button>
             </div>
           )}

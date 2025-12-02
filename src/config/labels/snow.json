@@ -1,0 +1,25 @@
+{
+  "incidents": {
+    "title": "ServiceNow Incidents",
+    "noTarget": "No target user found for SNOW incidents"
+  },
+  "ticket": {
+    "dialogTitle": "Create ServiceNow Ticket",
+    "livePreview": "Live Preview",
+    "liveIndicator": "● Live",
+    "submit": "Submit Ticket",
+    "submitting": "Submitting...",
+    "successMessage": "SNOW ticket submitted: {ticketNumber}",
+    "errorMessages": {
+      "noEmail": "Email not available - please log in again",
+      "submitFailed": "Failed to submit SNOW ticket"
+    }
+  },
+  "table": {
+    "number": "Ticket #",
+    "description": "Description",
+    "state": "State",
+    "priority": "Priority",
+    "updated": "Updated"
+  }
+}

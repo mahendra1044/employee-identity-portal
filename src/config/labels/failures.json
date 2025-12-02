@@ -1,0 +1,13 @@
+{
+  "title": "Recent Failures",
+  "subtitle": "Last {minutes} minutes",
+  "table": {
+    "timestamp": "Timestamp",
+    "system": "System",
+    "userId": "User ID",
+    "error": "Error",
+    "details": "Details"
+  },
+  "noFailures": "No recent failures",
+  "loadError": "Failed to load failure data"
+}

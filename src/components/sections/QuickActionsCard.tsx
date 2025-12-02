@@ -21,6 +21,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { ExternalLink } from "lucide-react";
 import type { SystemKey } from "@/lib/types";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
+import { labels } from "@/config/labels";
 import { OPS_ENDPOINTS, type EndpointAction } from "@/lib/ops-endpoints";
 import type { ActionHandlers } from "@/hooks/useOpsActions";
 
@@ -59,7 +60,7 @@ function ActionButtons({
   if (actions.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No actions configured for this system.
+        {labels.quickActions.noActions}
       </p>
     );
   }
@@ -123,16 +124,16 @@ export function QuickActionsCard({
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-sm font-semibold text-foreground leading-none">
-                Quick Actions
+                {labels.quickActions.title}
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Execute operations for searched users</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{labels.quickActions.subtitle}</p>
             </div>
           </div>
           
           {/* External Tools & Target */}
           <div className="flex items-center justify-between gap-3 mb-3 pb-2 border-b border-border/30">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-muted-foreground">External:</span>
+              <span className="text-[11px] text-muted-foreground">{labels.quickActions.external.label}</span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -142,10 +143,10 @@ export function QuickActionsCard({
                     className="h-6 px-2 text-[11px] hover:bg-muted/80"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
-                    Splunk
+                    {labels.quickActions.external.splunk.button}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>Open Splunk logs</p></TooltipContent>
+                <TooltipContent><p>{labels.quickActions.external.splunk.tooltip}</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -156,13 +157,13 @@ export function QuickActionsCard({
                     className="h-6 px-2 text-[11px] hover:bg-muted/80"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
-                    CloudWatch
+                    {labels.quickActions.external.cloudwatch.button}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>Open CloudWatch logs</p></TooltipContent>
+                <TooltipContent><p>{labels.quickActions.external.cloudwatch.tooltip}</p></TooltipContent>
               </Tooltip>
             </div>
-            <span className="text-[11px] text-muted-foreground truncate">Target: {resolveSnowEmail() || search || "(unknown)"}</span>
+            <span className="text-[11px] text-muted-foreground truncate">{labels.quickActions.target.label} {resolveSnowEmail() || search || `(${labels.quickActions.target.noTarget})`}</span>
           </div>
           
           {/* Tab Navigation */}

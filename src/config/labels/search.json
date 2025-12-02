@@ -1,0 +1,17 @@
+{
+  "placeholder": "Search by User ID or Email...",
+  "results": {
+    "title": "Search Results",
+    "noResults": "No results found",
+    "multipleMatches": "Multiple matches found",
+    "rowDetails": "{system} — Row {index}: {key}"
+  },
+  "consolidatedView": {
+    "title": "Consolidated View ({mode}) — {key}",
+    "errorLoading": "Unable to load aggregated details",
+    "copiedData": "Copied {system} data"
+  },
+  "errors": {
+    "searchFailed": "Search failed"
+  }
+}

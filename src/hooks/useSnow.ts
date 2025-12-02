@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { labels } from "@/config/labels";
 
 export function useSnow(
   token: string | null,
@@ -101,7 +102,7 @@ export function useSnow(
     const target = resolveSnowEmail();
     // Only block when ops has no valid searched target; employees can proceed (backend uses self email)
     if (role === 'ops' && !target) {
-      toast.error('No target user found for SNOW incidents');
+      toast.error(labels.snow.incidents.noTarget);
       return;
     }
     setSnowOpen(true);

@@ -30,3 +30,7 @@ export * from './app.config';
 export * from './features.config';
 export * from './systems.config';
 export * from './external-services.config';
+
+// Export labels configuration
+export { labels, t } from './labels';
+export type { Labels } from './labels';

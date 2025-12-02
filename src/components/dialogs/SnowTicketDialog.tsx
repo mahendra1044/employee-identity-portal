@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { labels, t } from "@/config/labels";
 import { buildTicketDescription } from "@/lib/system-card-utils";
 import { Ticket, Eye, FileText, Send, X, Loader2 } from "lucide-react";
 
@@ -61,7 +62,7 @@ export function SnowTicketDialog({
    */
   const handleSubmit = async () => {
     if (!email) {
-      toast.error("Email not available - please log in again");
+      toast.error(labels.snow.ticket.errorMessages.noEmail);
       return;
     }
 
@@ -78,14 +79,14 @@ export function SnowTicketDialog({
       });
 
       if (response.ok && response.data?.ticketNumber) {
-        toast.success(`SNOW ticket submitted: ${response.data.ticketNumber}`);
+        toast.success(t(labels.snow.ticket.successMessage, { ticketNumber: response.data.ticketNumber }));
         setDescription("");
         onOpenChange(false);
       } else {
-        toast.error(response.data?.error || response.error || "Failed to submit SNOW ticket");
+        toast.error(response.data?.error || response.error || labels.snow.ticket.errorMessages.submitFailed);
       }
     } catch {
-      toast.error("Failed to submit SNOW ticket");
+      toast.error(labels.snow.ticket.errorMessages.submitFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +116,7 @@ export function SnowTicketDialog({
               <div className="p-1.5 rounded-md bg-gradient-to-br from-green-500 to-emerald-500 text-white shadow-md">
                 <Ticket className="h-4 w-4" />
               </div>
-              <span>Create ServiceNow Ticket</span>
+              <span>{labels.snow.ticket.dialogTitle}</span>
               <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 ml-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-0">
                 {systemName}
               </Badge>
@@ -131,10 +132,10 @@ export function SnowTicketDialog({
               <div className="px-4 py-2.5 flex items-center justify-between bg-muted/20 border-b border-border/20">
                 <div className="flex items-center gap-2">
                   <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Live Preview</span>
+                  <span className="text-sm font-medium text-foreground">{labels.snow.ticket.livePreview}</span>
                 </div>
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-green-500/10 text-green-600 dark:text-green-400 border-0">
-                  ● Live
+                  {labels.snow.ticket.liveIndicator}
                 </Badge>
               </div>
               <div className="px-4 py-3 space-y-2">
