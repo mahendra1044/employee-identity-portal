@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppAuth } from "@/hooks/useAppAuth";
+import { api } from "@/lib/api-client";
 import { ErrorHandler } from "@/lib/error-handler";
 import type { LoginResponse } from "@/lib/types";
 
@@ -28,13 +29,9 @@ export function LoginForm({ onLogin }: Props) {
         await onLogin(userId, password);
       } else {
         // Otherwise use context login which performs API call and stores token in context
-        const res = await fetch(`/api/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, password }),
-        });
-        if (!res.ok) throw new Error("Login failed");
-        const data: LoginResponse = await res.json();
+        const response = await api.auth.login(userId, password);
+        if (!response.ok) throw new Error(response.error || "Login failed");
+        const data = response.data as LoginResponse;
         // Pass RBAC data to login - use userId for display instead of email
         login(data.token, data.role, data.userId || userId, {
           assignedRoles: data.assignedRoles,

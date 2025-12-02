@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { api } from "@/lib/api-client";
 import { buildTicketDescription } from "@/lib/system-card-utils";
 import { Ticket, Eye, FileText, Send, X, Loader2 } from "lucide-react";
 
@@ -69,31 +70,19 @@ export function SnowTicketDialog({
     try {
       const ticketDesc = buildTicketDescription(email, systemKey, description);
       
-      const res = await fetch("/api/submit-snow-ticket", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system: systemKey,
-          payload: payload || {},
-          userEmail: email,
-          description: ticketDesc,
-        }),
+      const response = await api.ops.snow.submitTicket({
+        system: systemKey,
+        payload: payload || {},
+        userEmail: email,
+        description: ticketDesc,
       });
 
-      let result: { ticketNumber?: string; error?: string };
-      try {
-        result = await res.json();
-      } catch {
-        toast.error(`Server error: ${res.status}. Please check server logs.`);
-        return;
-      }
-
-      if (res.ok && result.ticketNumber) {
-        toast.success(`SNOW ticket submitted: ${result.ticketNumber}`);
+      if (response.ok && response.data?.ticketNumber) {
+        toast.success(`SNOW ticket submitted: ${response.data.ticketNumber}`);
         setDescription("");
         onOpenChange(false);
       } else {
-        toast.error(result.error || "Failed to submit SNOW ticket");
+        toast.error(response.data?.error || response.error || "Failed to submit SNOW ticket");
       }
     } catch {
       toast.error("Failed to submit SNOW ticket");

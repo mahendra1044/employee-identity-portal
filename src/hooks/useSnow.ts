@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { api } from "@/lib/api-client";
 
 export function useSnow(
   token: string | null,
@@ -47,30 +48,16 @@ export function useSnow(
     setSnowLoading(true);
     setSnowError(undefined);
     try {
-      const url = `/api/snow/incidents?email=${encodeURIComponent(targetEmail)}`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await api.ops.snow.getIncidents(targetEmail, { token });
       
-      let json: any;
-      try {
-        // Clone response before parsing so we can read body again if JSON parsing fails
-        const resClone = res.clone();
-        json = await res.json();
-      } catch {
-        // If JSON parsing fails, it's likely HTML (404, 500 error page)
-        setSnowError(`Server error: ${res.status}`);
-        setSnowItems([]);
-        setSnowCount(0);
-        setSnowLoading(false);
-        return;
-      }
-
-      if (!res.ok) {
-        setSnowError(json.error || 'Failed to load incidents');
+      if (!response.ok) {
+        setSnowError(response.error || 'Failed to load incidents');
         setSnowItems([]);
         setSnowCount(0);
         return;
       }
 
+      const json = response.data as { items?: unknown[]; open?: number; in_progress?: number };
       const items = Array.isArray(json?.items) ? json.items : [];
       
       // Generate demo incidents if empty

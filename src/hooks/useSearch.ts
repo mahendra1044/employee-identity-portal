@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { searchEmployee } from "@/lib/api";
+import { api } from "@/lib/api-client";
 
 export function useSearch(token: string | null, role: string | null) {
   const [search, setSearch] = useState("");
@@ -21,8 +21,9 @@ export function useSearch(token: string | null, role: string | null) {
     setSearchResults(null);
     setHasSearched(false);
     try {
-      const body = await searchEmployee(search, token);
-      setSearchResults(body);
+      const response = await api.ops.search.employee(search, { token });
+      if (!response.ok) throw new Error(response.error || "Search failed");
+      setSearchResults(response.data);
       setHasSearched(true);
     } catch (e: any) {
       setSearchError(e?.message || "Search failed");

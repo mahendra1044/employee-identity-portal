@@ -19,6 +19,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { UI_DEFAULTS } from "@/config";
+import { api } from "@/lib/api-client";
 import { OPS_ENDPOINTS, type EndpointAction } from "@/lib/ops-endpoints";
 import type { PfOpsResponse, SystemKey } from "@/lib/types";
 
@@ -70,15 +71,15 @@ export function useOpsActions(): UseOpsActionsReturn {
     setDialogLoading(true);
     
     try {
-      const res = await fetch(url);
+      const response = await api.get<Record<string, unknown>>(url);
       
-      if (!res.ok) {
-        setDialogData({ error: `Failed to load: HTTP ${res.status}` });
+      if (!response.ok) {
+        setDialogData({ error: `Failed to load: ${response.error || `HTTP ${response.status}`}` });
         return;
       }
       
-      const json = await res.json();
-      setDialogData(json?.data ?? json);
+      const data = response.data as { data?: unknown } | undefined;
+      setDialogData((data?.data ?? data ?? null) as PfOpsResponse);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       setDialogData({ error: `Failed to load: ${message}` });

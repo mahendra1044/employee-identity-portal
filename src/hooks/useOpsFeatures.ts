@@ -20,7 +20,7 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { OPS_CONFIG } from "@/lib/ui-config";
 import { isOpsRole } from "@/lib/role-utils";
-import { cachedFetch } from "@/lib/request-cache";
+import { api } from "@/lib/api-client";
 import type { SystemKey } from "@/lib/types";
 import {
   type FailureKey,
@@ -77,7 +77,7 @@ export function useOpsFeatures(
   const failureTypesToLoad = useMemo(() => getFailureTypesForRole(role), [role]);
 
   // Load recent failures for ops role (config-driven)
-  // Uses cachedFetch for deduplication and short-term caching
+  // Uses api client for deduplication and short-term caching
   const loadFailures = useCallback(async () => {
     if (!isOps || !token || failureTypesToLoad.length === 0) return;
 
@@ -88,17 +88,18 @@ export function useOpsFeatures(
       const now = Date.now();
       const mkTs = (minsAgo: number) => new Date(now - minsAgo * 60_000).toISOString();
 
-      // Build fetch promises from config using cachedFetch
+      // Build fetch promises from config using api client
       // Short cache TTL (10s) for failure data to allow near-real-time updates
       const fetchPromises = failureTypesToLoad.map((config: FailureTypeConfig) =>
-        cachedFetch(`/api/ops-failures?system=${config.apiSystem}&minutes=${minutes}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        api.ops.failures.get(config.apiSystem, minutes, {
+          token,
           cacheTtl: 10000, // 10 second cache for failure data
         })
       );
       const responses = await Promise.all(fetchPromises);
-      const dataPromises = responses.map(r => r.json().catch(() => ({ data: [] })));
-      const allData = await Promise.all(dataPromises);
+      
+      // Extract data from ApiResponse objects
+      const allData = responses.map(r => ({ data: r.ok ? r.data : [] }));
 
       // Process responses and build new failures state
       const newFailures = createEmptyFailuresState();

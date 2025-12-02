@@ -9,6 +9,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { FEATURE_FLAGS } from "@/config";
+import { api } from "@/lib/api-client";
 import type { Features } from "@/lib/types";
 
 // Default features when API is unavailable
@@ -50,10 +51,9 @@ export function useFeatures(token: string | null): UseFeatureResult {
 
     const loadFeatures = async () => {
       try {
-        const res = await fetch('/api/config/features');
-        if (res.ok) {
-          const data = await res.json();
-          setFeatures(data);
+        const response = await api.ops.config.getFeatures({ token });
+        if (response.ok && response.data) {
+          setFeatures(response.data as Features);
         } else {
           setFeatures(DEFAULT_FEATURES);
         }

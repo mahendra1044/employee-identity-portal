@@ -13,7 +13,7 @@ import { useCallback } from "react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { API_BASE } from "@/lib/constants";
+import { api } from "@/lib/api-client";
 import type { SearchSystemConfig } from "@/lib/search-config";
 import { filterSearchResults, getDetailKey } from "@/lib/search-config";
 import { PaginatedResultsTable } from "./PaginatedResultsTable";
@@ -65,14 +65,10 @@ export function SearchResultCard({
     onViewDetails(dialogTitle, null);
     
     try {
-      const url = `${API_BASE}/api/search-employee/${encodeURIComponent(detailKey)}/details?system=${config.system}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.ops.search.systemDetails(detailKey, config.system, { token });
       
-      if (res.ok) {
-        const json = await res.json();
-        onSetData(json.data ?? item);
+      if (response.ok && response.data) {
+        onSetData(response.data as Record<string, unknown>);
       } else {
         onSetData(item);
       }

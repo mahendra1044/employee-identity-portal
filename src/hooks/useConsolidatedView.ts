@@ -8,7 +8,8 @@
  */
 
 import { useCallback } from "react";
-import { API_BASE, SYSTEMS } from "@/lib/constants";
+import { SYSTEMS } from "@/lib/constants";
+import { api } from "@/lib/api-client";
 import { buildCandidateKeys } from "@/lib/search-config";
 import type { SystemKey, Features, SearchResults } from "@/lib/types";
 
@@ -75,15 +76,13 @@ export function useConsolidatedView() {
     // Try to fetch all-users data for fallback
     let allUsers: unknown[] | null = null;
     try {
-      const auRes = await fetch(`${API_BASE}/api/all-users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (auRes.ok) {
-        const auJson = await auRes.json();
-        allUsers = Array.isArray(auJson?.data)
-          ? auJson.data
-          : Array.isArray(auJson)
-          ? auJson
+      const response = await api.ops.users.getAll({ token });
+      if (response.ok) {
+        const data = response.data as { data?: unknown[] } | unknown[];
+        allUsers = Array.isArray(data)
+          ? data
+          : Array.isArray((data as { data?: unknown[] })?.data)
+          ? (data as { data: unknown[] }).data
           : null;
       }
     } catch {
@@ -108,16 +107,10 @@ export function useConsolidatedView() {
       // Try fetching details for each candidate key
       for (const key of candidateKeys) {
         try {
-          const url = `${API_BASE}/api/search-employee/${encodeURIComponent(key)}/details?system=${sys}`;
-          const res = await fetch(url, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const json = await res.json();
-            if (json?.data) {
-              found = json.data;
-              break;
-            }
+          const response = await api.ops.search.systemDetails(key, sys, { token });
+          if (response.ok && response.data) {
+            found = response.data;
+            break;
           }
         } catch {
           // Continue trying other keys

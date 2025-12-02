@@ -6,12 +6,11 @@ import { Copy, RefreshCw, Eye, Code, FileText, ChevronDown, CheckCircle2, AlertC
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { User, Globe, Shield } from "lucide-react";
-import { API_BASE } from "@/lib/constants";
 import { DataDialog } from "@/components/dialogs/DataDialog";
 import { SnowTicketDialog } from "@/components/dialogs/SnowTicketDialog";
 import { getDataStatus, extractKeyMetrics } from "@/lib/system-card-utils";
 import { ErrorHandler } from "@/lib/error-handler";
-import { cachedFetch } from "@/lib/request-cache";
+import { api } from "@/lib/api-client";
 import type { SystemKey, SystemData } from "@/lib/types";
 
 interface SystemCardProps {
@@ -55,7 +54,7 @@ export function SystemCard({
   const metrics = useMemo(() => extractKeyMetrics(data), [data]);
 
   // Memoized load function to prevent unnecessary re-renders
-  // Uses cachedFetch for deduplication and caching
+  // Uses api client for deduplication and caching
   const loadInitial = useCallback(async (showToast = true, skipCache = false) => {
     if (!enabled || !token) {
       return;
@@ -80,32 +79,18 @@ export function SystemCard({
         endpoint = `/api/own-${system}`;
       }
       
-      const fullUrl = userKey ? endpoint : `${API_BASE}${endpoint}`;
-      
-      // Use cachedFetch for deduplication and caching
-      const res = await cachedFetch(fullUrl, {
-        headers: { Authorization: `Bearer ${token}` },
+      // Use api client for deduplication and caching
+      const response = await api.get<SystemData>(endpoint, {
+        token,
         skipCache,
         cacheTtl: 30000, // 30 second cache
       });
       
-      if (!res.ok) {
-        let message = `HTTP ${res.status}`;
-        try {
-          const j = await res.json();
-          message = j?.error || j?.message || message;
-        } catch {
-          try {
-            const t = await res.text();
-            message = t || message;
-          } catch {}
-        }
-        throw new Error(message);
+      if (!response.ok) {
+        throw new Error(response.error || `HTTP ${response.status}`);
       }
       
-      const json = await res.json();
-      const extractedData = json.data || json;
-      setData(extractedData);
+      setData(response.data || null);
       
       if (showToast) {
         toast.success(`Refreshed ${name}${userKey ? ` for ${userKey}` : ''}`, { id: refreshToast });
@@ -126,22 +111,19 @@ export function SystemCard({
     setLoading(true);
     setError(null);
     try {
-      let endpoint;
+      let response;
       if (userKey) {
-        endpoint = `/api/search-employee/${encodeURIComponent(userKey)}/details?system=${system}`;
+        response = await api.ops.search.systemDetails(userKey, system, { token });
       } else {
-        endpoint = `/api/own-${system}/details`;
+        response = await api.get<SystemData>(`/api/own-${system}/details`, { token });
       }
-      const fullUrl = userKey ? endpoint : `${API_BASE}${endpoint}`;
-      const res = await fetch(fullUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        const errorMessage = await ErrorHandler.parseResponseError(res);
-        throw new Error(errorMessage);
+      
+      if (!response.ok) {
+        throw new Error(response.error || 'Failed to load details');
       }
-      const json = await res.json();
-      setDetails(json.data || json);
+      
+      const data = response.data as SystemData & { data?: SystemData };
+      setDetails(data?.data || data);
       setDetailsOpen(true);
     } catch (e: unknown) {
       setError(ErrorHandler.parseError(e));
@@ -264,9 +246,8 @@ export function SystemCard({
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
-                    const res = await fetch("/api/pf/userinfo");
-                    const j = await res.json().catch(() => ({}));
-                    setPfData(j?.data ?? j);
+                    const response = await api.sso.pingFederate.getUserInfo({ token });
+                    setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
                     setPfData({ error: "Failed to load User Info" });
                   } finally {
@@ -286,9 +267,8 @@ export function SystemCard({
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
-                    const res = await fetch("/api/pf/oidc");
-                    const j = await res.json().catch(() => ({}));
-                    setPfData(j?.data ?? j);
+                    const response = await api.sso.pingFederate.getOidcConfig({ token });
+                    setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
                     setPfData({ error: "Failed to load OIDC connections" });
                   } finally {
@@ -308,9 +288,8 @@ export function SystemCard({
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
-                    const res = await fetch("/api/pf/saml");
-                    const j = await res.json().catch(() => ({}));
-                    setPfData(j?.data ?? j);
+                    const response = await api.sso.pingFederate.getSamlConfig({ token });
+                    setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
                     setPfData({ error: "Failed to load SAML connections" });
                   } finally {
