@@ -112,7 +112,7 @@ export function QuickActionsCard({
 
   return (
     <section className="mb-4">
-      <div className="rounded-lg border border-border/40 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-sm overflow-hidden">
+      <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-gradient-to-br from-background via-background to-slate-50 dark:to-muted/10 shadow-sm overflow-hidden">
         <div className="px-4 py-3">
           {/* Section Header */}
           <div className="flex items-center gap-2 mb-3">
@@ -166,7 +166,7 @@ export function QuickActionsCard({
           </div>
           
           {/* Tab Navigation */}
-          <div className="flex items-center gap-0.5 mb-3 bg-muted/50 p-0.5 rounded-md w-fit border border-border/30">
+          <div className="flex items-center gap-0.5 mb-3 bg-slate-100 dark:bg-muted/50 p-0.5 rounded-md w-fit border border-slate-200 dark:border-border/30">
             {enabledSystems.map((system) => (
               <button
                 key={system}
@@ -183,7 +183,7 @@ export function QuickActionsCard({
           </div>
 
           {/* Actions Container */}
-          <div className="rounded-lg border border-border/40 bg-card/50 p-3">
+          <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-slate-50/50 dark:bg-card/50 p-3">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[11px] font-medium text-muted-foreground">Actions:</span>
               <div className="flex-1 h-px bg-border/30"></div>

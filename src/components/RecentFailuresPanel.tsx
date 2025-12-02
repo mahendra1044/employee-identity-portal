@@ -66,8 +66,8 @@ function FailureCard({
   const colors = getSeverityColors(severity);
   
   return (
-    <div className="rounded-lg border border-border/40 bg-card/50 overflow-hidden">
-      <div className="px-3 py-2 flex items-center justify-between bg-muted/20 border-b border-border/20">
+    <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-white dark:bg-card/50 overflow-hidden shadow-sm">
+      <div className="px-3 py-2 flex items-center justify-between bg-slate-50 dark:bg-muted/20 border-b border-slate-200 dark:border-border/20">
         <span className="text-xs font-medium text-foreground">{title}</span>
         <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${colors.badge}`}>
           {count}
@@ -198,7 +198,7 @@ export function RecentFailuresPanel({
 
   return (
     <section className="mb-4">
-      <div className="rounded-lg border border-border/40 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-sm overflow-hidden">
+      <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-gradient-to-br from-background via-background to-slate-50 dark:to-muted/10 shadow-sm overflow-hidden">
         <div className="px-4 py-3">
           {/* Section Header */}
           <div className="flex items-center gap-2 mb-3">

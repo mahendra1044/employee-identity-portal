@@ -97,8 +97,8 @@ export function SearchResultCard({
   const showPagination = shouldShowPagination(displayResults.length);
   
   return (
-    <div className="rounded-lg border border-border/40 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 overflow-hidden">
-      <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/20 border-b border-border/20">
+    <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-gradient-to-br from-background via-background to-slate-50 dark:to-muted/10 overflow-hidden shadow-sm">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 bg-slate-50 dark:bg-muted/20 border-b border-slate-200 dark:border-border/20">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-foreground">{config.label}</span>
           <span className={hasManyResults ? "text-[10px] px-1.5 py-0.5 rounded bg-muted text-foreground font-medium" : "text-[10px] px-1.5 py-0.5 rounded bg-muted/80 text-muted-foreground"}>

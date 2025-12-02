@@ -165,13 +165,13 @@ export function SystemCard({
   return (
     <>
       <div className={`rounded-lg border overflow-hidden transition-all duration-200 ${
-        status === 'success' ? 'border-border/40 hover:border-border/60' :
-        status === 'warning' ? 'border-yellow-500/30' :
-        status === 'error' ? 'border-red-500/30' :
-        'border-border/40'
-      } bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-sm`}>
+        status === 'success' ? 'border-slate-200 dark:border-border/40 hover:border-slate-300 dark:hover:border-border/60' :
+        status === 'warning' ? 'border-yellow-400 dark:border-yellow-500/30' :
+        status === 'error' ? 'border-red-400 dark:border-red-500/30' :
+        'border-slate-200 dark:border-border/40'
+      } bg-gradient-to-br from-background via-background to-slate-50 dark:to-muted/10 shadow-sm`}>
         {/* Header */}
-        <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/20 border-b border-border/30">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 bg-slate-50 dark:bg-muted/20 border-b border-slate-200 dark:border-border/30">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {/* Status Indicator */}
             {status === 'success' && <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />}
@@ -255,7 +255,7 @@ export function SystemCard({
         </div>
           
           {system === "ping-federate" && role === "employee" && (
-            <div className="flex flex-wrap gap-1.5 px-3 py-2 bg-muted/10 border-t border-border/20">
+            <div className="flex flex-wrap gap-1.5 px-3 py-2 bg-slate-50/50 dark:bg-muted/10 border-t border-slate-200 dark:border-border/20">
               <Button
                 size="sm"
                 variant="secondary"
@@ -346,7 +346,7 @@ export function SystemCard({
             ) : data ? (
               <div>
                 {/* Metrics + JSON Toggle */}
-                <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/10 border-b border-border/20">
+                <div className="flex items-center justify-between gap-2 px-3 py-2 bg-slate-50/50 dark:bg-muted/10 border-b border-slate-200 dark:border-border/20">
                   <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
                     {metrics.length > 0 ? (
                       metrics.slice(0, 2).map((metric, idx) => (

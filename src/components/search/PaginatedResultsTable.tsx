@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { usePagination } from "@/hooks/usePagination";
 import {
   SEARCH_RESULTS_CONFIG,
@@ -242,28 +243,36 @@ export function PaginatedResultsTable({
           {/* Page navigation */}
           <div className="flex items-center gap-1">
             {/* First page */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={firstPage}
-              disabled={!hasPrevPage}
-              className="h-6 w-6 p-0"
-              title="First page"
-            >
-              <ChevronsLeft className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={firstPage}
+                  disabled={!hasPrevPage}
+                  className="h-6 w-6 p-0"
+                >
+                  <ChevronsLeft className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>First page</p></TooltipContent>
+            </Tooltip>
 
             {/* Previous page */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={prevPage}
-              disabled={!hasPrevPage}
-              className="h-6 w-6 p-0"
-              title="Previous page"
-            >
-              <ChevronLeft className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={prevPage}
+                  disabled={!hasPrevPage}
+                  className="h-6 w-6 p-0"
+                >
+                  <ChevronLeft className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Previous page</p></TooltipContent>
+            </Tooltip>
 
             {/* Page indicator */}
             <span className="text-[10px] text-muted-foreground px-2 whitespace-nowrap">
@@ -271,28 +280,36 @@ export function PaginatedResultsTable({
             </span>
 
             {/* Next page */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={nextPage}
-              disabled={!hasNextPage}
-              className="h-6 w-6 p-0"
-              title="Next page"
-            >
-              <ChevronRight className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={nextPage}
+                  disabled={!hasNextPage}
+                  className="h-6 w-6 p-0"
+                >
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Next page</p></TooltipContent>
+            </Tooltip>
 
             {/* Last page */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={lastPage}
-              disabled={!hasNextPage}
-              className="h-6 w-6 p-0"
-              title="Last page"
-            >
-              <ChevronsRight className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={lastPage}
+                  disabled={!hasNextPage}
+                  className="h-6 w-6 p-0"
+                >
+                  <ChevronsRight className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p>Last page</p></TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Page size selector */}

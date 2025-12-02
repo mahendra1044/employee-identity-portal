@@ -28,7 +28,7 @@ export function SystemCardsGrid({
   if (!anyEnabled) {
     return (
       <div className={containerClass}>
-        <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-border/40 bg-muted/20">
+        <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-slate-200 dark:border-border/40 bg-muted/20">
           <p className="text-sm font-medium text-foreground mb-1">
             No systems enabled
           </p>
@@ -43,7 +43,7 @@ export function SystemCardsGrid({
   if (visibleSystems.length === 0) {
     return (
       <div className={containerClass}>
-        <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-border/40 bg-muted/20">
+        <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-slate-200 dark:border-border/40 bg-muted/20">
           <p className="text-sm font-medium text-foreground mb-1">
             No cards visible
           </p>

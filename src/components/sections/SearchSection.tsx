@@ -233,7 +233,7 @@ export function SearchSection({
   return (
     <>
       <section className="mb-4">
-        <div className="rounded-lg border border-border/40 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-sm overflow-hidden">
+        <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-gradient-to-br from-background via-background to-slate-50 dark:to-muted/10 shadow-sm overflow-hidden">
           <div className="px-4 py-3">
             {/* Section Header */}
             <div className="flex items-center gap-2 mb-3">
@@ -354,7 +354,7 @@ export function SearchSection({
                   })}
                 </div>
               ) : (
-                <div className="w-full flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed border-border/40 bg-muted/20">
+                <div className="w-full flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed border-slate-300 dark:border-border/40 bg-slate-50/50 dark:bg-muted/20">
                   <div className="p-2.5 rounded-full bg-muted/50 mb-2">
                     <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

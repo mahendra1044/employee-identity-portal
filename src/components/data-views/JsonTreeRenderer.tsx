@@ -15,6 +15,7 @@
 
 import React, { useState, useRef } from "react";
 import { toast } from "sonner";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   isEmail,
   isUrl,
@@ -89,13 +90,17 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
               <span className="text-[10px]">{value ? '✓' : '✗'}</span>
               {String(value)}
             </span>
-            <button
-              onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-200 transition-opacity"
-              title="Copy"
-            >
-              📋
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => copyValue(value, key)}
+                  className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-200 transition-opacity"
+                >
+                  📋
+                </button>
+              </TooltipTrigger>
+              <TooltipContent><p>Copy</p></TooltipContent>
+            </Tooltip>
           </div>
         </div>
       );
@@ -118,13 +123,17 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
                 ({new Date(value).toLocaleString()})
               </span>
             )}
-            <button
-              onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-200 transition-opacity"
-              title="Copy"
-            >
-              📋
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => copyValue(value, key)}
+                  className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-200 transition-opacity"
+                >
+                  📋
+                </button>
+              </TooltipTrigger>
+              <TooltipContent><p>Copy</p></TooltipContent>
+            </Tooltip>
           </div>
         </div>
       );
@@ -152,13 +161,17 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
             ) : (
               <span className="text-yellow-300 text-xs truncate">"{displayValue}"</span>
             )}
-            <button
-              onClick={() => copyValue(value, key)}
-              className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-200 transition-opacity flex-shrink-0"
-              title="Copy"
-            >
-              📋
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => copyValue(value, key)}
+                  className="opacity-0 group-hover:opacity-100 ml-2 text-[10px] text-slate-400 hover:text-slate-200 transition-opacity flex-shrink-0"
+                >
+                  📋
+                </button>
+              </TooltipTrigger>
+              <TooltipContent><p>Copy</p></TooltipContent>
+            </Tooltip>
           </div>
         </div>
       );

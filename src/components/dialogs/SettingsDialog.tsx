@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
 import { filterSystemsByRole, isOpsRole } from "@/lib/role-utils";
@@ -144,7 +145,7 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-2xl rounded-lg overflow-hidden [&>button]:top-4 [&>button]:right-4 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:p-1.5 [&>button]:shadow-md [&>button]:border [&>button]:border-border/50 [&>button]:hover:bg-muted [&>button]:z-50" showCloseButton={true}>
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-2xl rounded-lg overflow-hidden [&>button]:top-2 [&>button]:right-2 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:p-1.5 [&>button]:shadow-md [&>button]:border [&>button]:border-border/50 [&>button]:hover:bg-muted [&>button]:z-50" showCloseButton={true}>
         {/* Compact Header */}
         <DialogHeader className="px-4 pt-3 pb-2 bg-gradient-to-r from-slate-500/10 via-zinc-500/10 to-gray-500/10 dark:from-slate-500/5 dark:via-zinc-500/5 dark:to-gray-500/5 border-b border-border/30">
           <div className="flex items-center justify-between">
@@ -196,22 +197,25 @@ export function SettingsDialog({
                 const Icon = info.icon;
 
                 return (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    disabled={!hasMatches}
-                    title={info.name}
-                    className={`px-2 py-1 rounded text-[11px] font-medium transition-all flex items-center gap-1 ${
-                      selectedCategory === cat
-                        ? `${info.color} shadow-sm`
-                        : hasMatches
-                        ? "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                        : "bg-muted/20 text-muted-foreground/50 cursor-not-allowed"
-                    }`}
-                  >
-                    <Icon className="h-3 w-3" />
-                    {info.shortName}
-                  </button>
+                  <Tooltip key={cat}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setSelectedCategory(cat)}
+                        disabled={!hasMatches}
+                        className={`px-2 py-1 rounded text-[11px] font-medium transition-all flex items-center gap-1 ${
+                          selectedCategory === cat
+                            ? `${info.color} shadow-sm`
+                            : hasMatches
+                            ? "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            : "bg-muted/20 text-muted-foreground/50 cursor-not-allowed"
+                        }`}
+                      >
+                        <Icon className="h-3 w-3" />
+                        {info.shortName}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{info.name}</p></TooltipContent>
+                  </Tooltip>
                 );
               })}
             </div>

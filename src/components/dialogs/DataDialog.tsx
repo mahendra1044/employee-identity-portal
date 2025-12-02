@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Copy, FileText, Code, Database, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -305,7 +306,7 @@ export function DataDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${maxWidthClass} max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-2xl rounded-lg overflow-hidden [&>button]:top-4 [&>button]:right-4 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:p-1.5 [&>button]:shadow-md [&>button]:border [&>button]:border-border/50 [&>button]:hover:bg-muted [&>button]:z-50`} showCloseButton={true}>
+      <DialogContent className={`${maxWidthClass} max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-2xl rounded-lg overflow-hidden [&>button]:top-2 [&>button]:right-2 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:p-1.5 [&>button]:shadow-md [&>button]:border [&>button]:border-border/50 [&>button]:hover:bg-muted [&>button]:z-50`} showCloseButton={true}>
         {/* Compact Header */}
         <DialogHeader className={`px-4 pt-3 pb-2 bg-gradient-to-r ${systemInfo.headerGradient} border-b border-border/30`}>
           <div className="flex items-center justify-between">
@@ -350,14 +351,18 @@ export function DataDialog({
               )}
               {/* Copy Button */}
               {showCopy && data && !loading && (
-                <button
-                  onClick={() => copyToClipboard(data, title)}
-                  className="text-[11px] px-2 py-1 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                  title="Copy all data"
-                >
-                  <Copy className="h-3 w-3" />
-                  Copy
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => copyToClipboard(data, title)}
+                      className="text-[11px] px-2 py-1 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                    >
+                      <Copy className="h-3 w-3" />
+                      Copy
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Copy all data</p></TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
