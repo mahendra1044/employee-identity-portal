@@ -9,7 +9,6 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -233,34 +232,33 @@ export function SearchSection({
 
   return (
     <>
-      <section className="mb-6">
-        <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
-          <CardContent className="pt-0 px-2 pb-2">
+      <section className="mb-4">
+        <div className="rounded-lg border border-border/40 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-sm overflow-hidden">
+          <div className="px-4 py-3">
             {/* Section Header */}
-            <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-neutral-800/40 [.navy_&]:from-blue-900/50">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-neutral-600 [.navy_&]:bg-blue-600 text-white shrink-0">
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-neutral-50 [.navy_&]:text-blue-50 leading-none">
-                    Employee Search
-                  </h2>
-                  <p className="text-[11px] text-slate-600 dark:text-neutral-300 [.navy_&]:text-blue-200 leading-tight mt-0.5">Search for employees across all connected systems</p>
-                </div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-sm">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm font-semibold text-foreground leading-none">
+                  Employee Search
+                </h2>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Search across all connected identity systems</p>
               </div>
             </div>
-            {/* Integrated search bar with button inside */}
-            <div className="mb-2">
+            
+            {/* Search Input */}
+            <div className="mb-3">
               <div className="relative">
                 <Input
                   placeholder={!hasSearched && !searchError ? "Search by name, email, or ID - press Enter or click search" : "Search by name, email, or ID"}
                   value={search}
                   onChange={(e) => onSearchChange(e.target.value)}
                   aria-label="Search employees"
-                  className="pr-24 border-slate-300 dark:border-slate-600 focus-visible:ring-2 focus-visible:ring-slate-400 transition-all"
+                  className="pr-24 h-9 border-border/50 bg-background/50 focus-visible:ring-1 focus-visible:ring-violet-500/50 transition-all"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") onDoSearch();
                   }}
@@ -268,7 +266,7 @@ export function SearchSection({
                 {search && (
                   <button
                     onClick={() => onSearchChange("")}
-                    className="absolute right-12 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className="absolute right-12 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Clear search"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,9 +277,9 @@ export function SearchSection({
                 <Button 
                   onClick={onDoSearch} 
                   size="sm"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 text-white transition-colors px-3"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all px-3"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </Button>
@@ -290,20 +288,20 @@ export function SearchSection({
             
             {/* Error message */}
             {searchError && (
-              <p className="text-xs text-red-600 px-1">{searchError}</p>
+              <p className="text-xs text-red-600 dark:text-red-400 mb-2">{searchError}</p>
             )}
             
             {/* Consolidated actions - shown when results exist */}
             {hasSearched && searchResults && Object.keys(searchResults).length > 0 && (
-              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
-                <span className="text-xs text-muted-foreground">View all data:</span>
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/30">
+                <span className="text-[11px] text-muted-foreground">View all data:</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleConsolidatedView("json")}
-                      className="h-6 px-2 text-xs"
+                      className="h-6 px-2 text-[11px] hover:bg-muted/80"
                     >
                       <FileText className="h-3 w-3 mr-1" />
                       JSON
@@ -317,7 +315,7 @@ export function SearchSection({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleConsolidatedView("html")}
-                      className="h-6 px-2 text-xs"
+                      className="h-6 px-2 text-[11px] hover:bg-muted/80"
                     >
                       <Code className="h-3 w-3 mr-1" />
                       Formatted
@@ -328,13 +326,11 @@ export function SearchSection({
               </div>
             )}
             
-            {/* Search results - always show container for consistent layout */}
-            <div className="w-full min-h-[120px] mt-2">
+            {/* Search results */}
+            <div className="w-full min-h-[100px]">
               {hasSearched ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-                  {/* System cards */}
                   {SEARCH_SYSTEMS.map((config) => {
-                    // Check employee access
                     if (!canEmployeeViewSystem(config.system, role, search, email, features)) {
                       return null;
                     }
@@ -358,10 +354,9 @@ export function SearchSection({
                   })}
                 </div>
               ) : (
-                /* Placeholder state before search - full width */
-                <div className="w-full flex flex-col items-center justify-center py-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-md">
-                  <div className="text-slate-400 dark:text-slate-500 mb-2">
-                    <svg className="h-8 w-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-full flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed border-border/40 bg-muted/20">
+                  <div className="p-2.5 rounded-full bg-muted/50 mb-2">
+                    <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
@@ -371,8 +366,8 @@ export function SearchSection({
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Search result details dialog */}
         <DataDialog

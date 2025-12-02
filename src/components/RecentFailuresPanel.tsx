@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { RefreshCw, ChevronDown, CheckCircle2 } from "lucide-react";
@@ -48,7 +47,6 @@ function getSeverityColors(severity: 'success' | 'warning' | 'danger' | 'critica
 
 /** 
  * Single failure card component - renders one failure type 
- * Enhanced with severity colors and better visual hierarchy
  */
 function FailureCard({
   title,
@@ -68,37 +66,35 @@ function FailureCard({
   const colors = getSeverityColors(severity);
   
   return (
-    <Card className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:shadow-md transition-shadow duration-200">
-      <CardHeader className="py-1 px-2">
-        <CardTitle className="text-xs flex items-center justify-between">
-          <span className="font-medium">{title}</span>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${colors.badge}`}>
-            {count}
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-1 pb-2 px-2">
+    <div className="rounded-lg border border-border/40 bg-card/50 overflow-hidden">
+      <div className="px-3 py-2 flex items-center justify-between bg-muted/20 border-b border-border/20">
+        <span className="text-xs font-medium text-foreground">{title}</span>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${colors.badge}`}>
+          {count}
+        </span>
+      </div>
+      <div className="px-3 py-2">
         {loading ? (
           <div className="space-y-1">
-            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-4/5"></div>
+            <div className="h-3 bg-muted/50 rounded animate-pulse"></div>
+            <div className="h-3 bg-muted/50 rounded animate-pulse w-4/5"></div>
           </div>
         ) : (failures?.length || 0) > 0 ? (
-          <ul className="text-xs list-disc pl-4 space-y-0.5">
+          <ul className="text-[11px] list-disc pl-4 space-y-0.5">
             {failures.slice(0, 25).map((it: FailureData, idx: number) => (
-              <li key={`${keyPrefix}-${idx}`} className="text-slate-700 dark:text-slate-300">
+              <li key={`${keyPrefix}-${idx}`} className="text-muted-foreground">
                 {formatFailureItem(it, renderType)}
               </li>
             ))}
           </ul>
         ) : (
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <CheckCircle2 className="h-3 w-3" />
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <CheckCircle2 className="h-3 w-3 text-green-500" />
             <span>No failures detected</span>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -154,17 +150,17 @@ function FailureCategorySection({
     <div className={!isLast ? 'mb-3' : ''}>
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="flex items-center gap-2 mb-2 w-full hover:bg-slate-50 dark:hover:bg-slate-800/50 p-1 rounded transition-colors"
+        className="flex items-center gap-2 mb-2 w-full hover:bg-muted/50 p-1.5 rounded-md transition-colors"
       >
         <span className="text-sm">{icon}</span>
-        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+        <span className="text-[11px] font-medium text-foreground">
           {categoryConfig.category.toUpperCase()}
         </span>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted/80 text-muted-foreground">
           {totalFailures}
         </span>
-        <div className="flex-1 h-px bg-gradient-to-r from-slate-300 to-transparent dark:from-slate-600"></div>
-        <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+        <div className="flex-1 h-px bg-border/30"></div>
+        <ChevronDown className={`h-3 w-3 text-muted-foreground transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
       </button>
       {!isCollapsed && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -201,40 +197,38 @@ export function RecentFailuresPanel({
   const timePresets = [5, 15, 30, 60];
 
   return (
-    <section className="mb-6">
-      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
-        <CardContent className="pt-0 px-2 pb-2">
+    <section className="mb-4">
+      <div className="rounded-lg border border-border/40 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-sm overflow-hidden">
+        <div className="px-4 py-3">
           {/* Section Header */}
-          <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-neutral-800/40 [.navy_&]:from-blue-900/50">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-neutral-600 [.navy_&]:bg-blue-600 text-white shrink-0">
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-neutral-50 [.navy_&]:text-blue-50 leading-none">
-                  Recent Failures
-                </h2>
-                <p className="text-[11px] text-slate-600 dark:text-neutral-300 [.navy_&]:text-blue-200 leading-tight mt-0.5">Monitor authentication and access failures across systems</p>
-              </div>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded-md bg-gradient-to-br from-red-500 to-rose-500 text-white shadow-sm">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-semibold text-foreground leading-none">
+                Recent Failures
+              </h2>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Monitor authentication and access failures</p>
             </div>
           </div>
           
-          {/* Header with controls */}
-          <div className="flex flex-wrap items-center gap-2 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{getPanelTitle(role, minutes)}</span>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
+          {/* Controls */}
+          <div className="flex flex-wrap items-center gap-2 mb-3 pb-2 border-b border-border/30">
+            <span className="text-xs font-medium text-foreground">{getPanelTitle(role, minutes)}</span>
+            <span className="text-muted-foreground/40">•</span>
             <div className="flex items-center gap-1">
-              <label className="text-xs text-slate-500 dark:text-slate-400">Window:</label>
+              <label className="text-[11px] text-muted-foreground">Window:</label>
               <Input
                 type="number"
                 min={1}
-                className="w-16 h-7 text-xs px-2"
+                className="w-14 h-6 text-[11px] px-2 border-border/50"
                 value={minutes}
                 onChange={(e) => onMinutesChange(Math.max(1, Number(e.target.value)))}
               />
-              <span className="text-xs text-muted-foreground">min</span>
+              <span className="text-[11px] text-muted-foreground">min</span>
             </div>
             {timePresets.map((preset) => (
               <Button
@@ -242,26 +236,26 @@ export function RecentFailuresPanel({
                 size="sm"
                 variant={minutes === preset ? "default" : "ghost"}
                 onClick={() => onMinutesChange(preset)}
-                className={`h-6 px-2 text-xs ${minutes === preset ? 'bg-slate-700 hover:bg-slate-800 dark:bg-slate-600' : ''}`}
+                className={`h-6 px-2 text-[11px] ${minutes === preset ? 'bg-foreground text-background hover:bg-foreground/90' : 'hover:bg-muted/80'}`}
               >
                 {preset}m
               </Button>
             ))}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={onRefresh} disabled={loading} className="h-7">
+                <Button size="sm" variant="outline" onClick={onRefresh} disabled={loading} className="h-6 w-6 p-0 border-border/50">
                   <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Refresh recent failures data</p>
+                <p>Refresh failures data</p>
               </TooltipContent>
             </Tooltip>
-            {error && <span className="text-xs text-red-600 dark:text-red-400">{error}</span>}
+            {error && <span className="text-[11px] text-red-600 dark:text-red-400">{error}</span>}
           </div>
 
-          {/* Render all visible failure categories - data-driven approach */}
-          <div className="w-full min-h-[150px]">
+          {/* Failure Categories */}
+          <div className="w-full min-h-[120px]">
             {visibleCategories.map((category, index) => (
               <FailureCategorySection
                 key={category}
@@ -273,8 +267,8 @@ export function RecentFailuresPanel({
               />
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </section>
   );
 }

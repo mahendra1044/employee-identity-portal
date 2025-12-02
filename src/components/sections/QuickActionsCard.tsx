@@ -16,7 +16,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ExternalLink } from "lucide-react";
@@ -112,74 +111,70 @@ export function QuickActionsCard({
   const effectiveActive = qaEnabledTabs[qaActive] ? qaActive : enabledSystems[0];
 
   return (
-    <section className="mb-6">
-      <Card className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
-        <CardContent className="pt-0 px-2 pb-2">
+    <section className="mb-4">
+      <div className="rounded-lg border border-border/40 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-sm overflow-hidden">
+        <div className="px-4 py-3">
           {/* Section Header */}
-          <div className="relative pr-2 pb-0.5 mb-1 rounded-md bg-gradient-to-r from-slate-50 to-transparent dark:from-neutral-800/40 [.navy_&]:from-blue-900/50">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded-md bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-sm">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-semibold text-foreground leading-none">
+                Quick Actions
+              </h2>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Execute operations for searched users</p>
+            </div>
+          </div>
+          
+          {/* External Tools & Target */}
+          <div className="flex items-center justify-between gap-3 mb-3 pb-2 border-b border-border/30">
             <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-600 dark:bg-neutral-600 [.navy_&]:bg-blue-600 text-white shrink-0">
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-neutral-50 [.navy_&]:text-blue-50 leading-none">
-                  Quick Actions
-                </h2>
-                <p className="text-[11px] text-slate-600 dark:text-neutral-300 [.navy_&]:text-blue-200 leading-tight mt-0.5">Execute operations and view system data for searched users</p>
-              </div>
+              <span className="text-[11px] text-muted-foreground">External:</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
+                    className="h-6 px-2 text-[11px] hover:bg-muted/80"
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Splunk
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Open Splunk logs</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
+                    className="h-6 px-2 text-[11px] hover:bg-muted/80"
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    CloudWatch
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Open CloudWatch logs</p></TooltipContent>
+              </Tooltip>
             </div>
+            <span className="text-[11px] text-muted-foreground truncate">Target: {resolveSnowEmail() || search || "(unknown)"}</span>
           </div>
           
-          {/* Header: External Tools and Target User */}
-          <div className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 pl-2 border-l border-slate-300 dark:border-slate-600">
-                <span className="text-xs text-slate-500 dark:text-slate-400 mr-1">External Tools:</span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => window.open(splunkUrl, "_blank", "noopener,noreferrer")}
-                      className="h-6 px-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
-                    >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      Splunk
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Open Splunk logs</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => window.open(cloudwatchUrl, "_blank", "noopener,noreferrer")}
-                      className="h-6 px-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
-                    >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      CloudWatch
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Open CloudWatch logs</p></TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-            <span className="text-xs text-muted-foreground truncate">Target: {resolveSnowEmail() || search || "(unknown)"}</span>
-          </div>
-          
-          {/* Segmented Tab Navigation (Pill Style) */}
-          <div className="flex items-center gap-0.5 mb-2 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-md w-fit">
+          {/* Tab Navigation */}
+          <div className="flex items-center gap-0.5 mb-3 bg-muted/50 p-0.5 rounded-md w-fit border border-border/30">
             {enabledSystems.map((system) => (
               <button
                 key={system}
                 onClick={() => onSetQaActive(system)}
-                className={`whitespace-nowrap text-xs px-3 py-1 rounded transition-all ${
+                className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded transition-all ${
                   effectiveActive === system
-                    ? "bg-slate-700 text-white shadow-sm dark:bg-slate-600"
-                    : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
+                    ? "bg-background text-foreground shadow-sm border border-border/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                 }`}
               >
                 {SYSTEM_LABELS[system]}
@@ -187,23 +182,21 @@ export function QuickActionsCard({
             ))}
           </div>
 
-          {/* Action Container with Label */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Actions:</span>
-              <div className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent dark:from-slate-700"></div>
+          {/* Actions Container */}
+          <div className="rounded-lg border border-border/40 bg-card/50 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[11px] font-medium text-muted-foreground">Actions:</span>
+              <div className="flex-1 h-px bg-border/30"></div>
             </div>
-            <div className="rounded-md border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800 dark:to-slate-800/50 p-2 shadow-inner">
-              {effectiveActive && qaEnabledTabs[effectiveActive] && (
-                <ActionButtons 
-                  system={effectiveActive} 
-                  actionHandlers={actionHandlers}
-                />
-              )}
-            </div>
+            {effectiveActive && qaEnabledTabs[effectiveActive] && (
+              <ActionButtons 
+                system={effectiveActive} 
+                actionHandlers={actionHandlers}
+              />
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </section>
   );
 }

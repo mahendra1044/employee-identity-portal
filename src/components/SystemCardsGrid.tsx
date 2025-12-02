@@ -23,17 +23,16 @@ export function SystemCardsGrid({
   userKey,
   anyEnabled,
 }: SystemCardsGridProps) {
-  // Consistent dimensions for layout stability
-  const containerClass = "w-full min-h-[200px]";
+  const containerClass = "w-full min-h-[180px]";
 
   if (!anyEnabled) {
     return (
       <div className={containerClass}>
-        <div className="w-full h-full flex flex-col items-center justify-center py-8 border border-dashed border-slate-200 dark:border-slate-700 rounded-md">
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+        <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-border/40 bg-muted/20">
+          <p className="text-sm font-medium text-foreground mb-1">
             No systems enabled
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] text-muted-foreground">
             Feature not enabled. Please contact your administrator.
           </p>
         </div>
@@ -44,11 +43,11 @@ export function SystemCardsGrid({
   if (visibleSystems.length === 0) {
     return (
       <div className={containerClass}>
-        <div className="w-full h-full flex flex-col items-center justify-center py-8 border border-dashed border-slate-200 dark:border-slate-700 rounded-md">
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+        <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-border/40 bg-muted/20">
+          <p className="text-sm font-medium text-foreground mb-1">
             No cards visible
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] text-muted-foreground">
             {role === "ops" 
               ? "System cards appear after a successful search." 
               : "All system cards are hidden. Open Settings to enable some."
@@ -60,7 +59,7 @@ export function SystemCardsGrid({
   }
 
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ${containerClass}`}>
+    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 ${containerClass}`}>
       {visibleSystems.map((sys) => (
         <SystemCard
           key={`${sys}-${userKey || 'own'}`}

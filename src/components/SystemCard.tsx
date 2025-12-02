@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, RefreshCw, Eye, Code, FileText, ChevronDown, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -165,103 +164,98 @@ export function SystemCard({
 
   return (
     <>
-      <Card className={`transition-all duration-300 ${
-        status === 'success' ? 'border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600' :
-        status === 'warning' ? 'border-2 border-yellow-200 dark:border-yellow-800/50' :
-        status === 'error' ? 'border-2 border-red-200 dark:border-red-800/50' :
-        'border border-slate-200 dark:border-slate-700'
-      } bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm`}>
-        <CardContent className="p-0">
-          {/* Enhanced Header with Status Badge */}
-          <div className="flex items-center justify-between gap-2 px-2 py-1.5 bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              {/* Status Indicator */}
-              {status === 'success' && <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />}
-              {status === 'warning' && <AlertCircle className="h-3.5 w-3.5 text-yellow-500 shrink-0" />}
-              {status === 'error' && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
-              {status === 'loading' && (
-                <div className="h-3.5 w-3.5 shrink-0">
-                  <RefreshCw className="h-3.5 w-3.5 text-blue-500 animate-spin" />
-                </div>
-              )}
-              
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{name}</span>
-              {userKey && (
-                <div className="inline-flex items-stretch shrink-0">
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-l border border-blue-200 dark:border-blue-800/50">
-                    <span className="text-[10px]">👤</span>
-                    {userKey}
-                  </span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigator.clipboard.writeText(userKey);
-                          toast.success(`Copied User ID: ${userKey}`);
-                        }}
-                        className="inline-flex items-center justify-center px-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-r border border-l-0 border-blue-200 dark:border-blue-800/50 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
-                      >
-                        <Copy className="h-2.5 w-2.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Copy User ID</p></TooltipContent>
-                  </Tooltip>
-                </div>
+      <div className={`rounded-lg border overflow-hidden transition-all duration-200 ${
+        status === 'success' ? 'border-border/40 hover:border-border/60' :
+        status === 'warning' ? 'border-yellow-500/30' :
+        status === 'error' ? 'border-red-500/30' :
+        'border-border/40'
+      } bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 shadow-sm`}>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/20 border-b border-border/30">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* Status Indicator */}
+            {status === 'success' && <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />}
+            {status === 'warning' && <AlertCircle className="h-3.5 w-3.5 text-yellow-500 shrink-0" />}
+            {status === 'error' && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+            {status === 'loading' && (
+              <RefreshCw className="h-3.5 w-3.5 text-blue-500 animate-spin shrink-0" />
+            )}
+            
+            <span className="text-xs font-medium text-foreground truncate">{name}</span>
+            {userKey && (
+              <div className="inline-flex items-stretch shrink-0">
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-l border border-blue-500/20">
+                  <span className="text-[9px]">👤</span>
+                  {userKey}
+                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(userKey);
+                        toast.success(`Copied User ID: ${userKey}`);
+                      }}
+                      className="inline-flex items-center justify-center px-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-r border border-l-0 border-blue-500/20 hover:bg-blue-500/20 transition-colors"
+                    >
+                      <Copy className="h-2.5 w-2.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Copy User ID</p></TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-0.5 shrink-0">
+            <div className="flex gap-0.5 pr-1.5 border-r border-border/30">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="ghost" onClick={() => loadInitial(true, true)} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-muted/80">
+                    <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Refresh</p></TooltipContent>
+              </Tooltip>
+              {data && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-muted/80" onClick={() => {
+                      navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+                      toast.success(`Copied ${name} JSON`);
+                    }}>
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p>Copy JSON</p></TooltipContent>
+                </Tooltip>
               )}
             </div>
             
-            {/* Grouped Action Buttons */}
-            <div className="flex gap-1 shrink-0">
-              {/* Primary Actions */}
-              <div className="flex gap-0.5 pr-1 border-r border-slate-300 dark:border-slate-600">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="ghost" onClick={() => loadInitial(true, true)} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
-                      <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Refresh</p></TooltipContent>
-                </Tooltip>
-                {data && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700" onClick={() => {
-                        navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-                        toast.success(`Copied ${name} JSON`);
-                      }}>
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Copy JSON</p></TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-              
-              {/* View Actions */}
-              <div className="flex gap-0.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="ghost" onClick={loadDetails} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
-                      <Eye className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Details</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="ghost" onClick={() => setTicketDialogOpen(true)} disabled={!enabled} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
-                      <FileText className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>Create Ticket</p></TooltipContent>
-                </Tooltip>
-              </div>
+            <div className="flex gap-0.5 pl-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="ghost" onClick={loadDetails} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-muted/80">
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Details</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="sm" variant="ghost" onClick={() => setTicketDialogOpen(true)} disabled={!enabled} className="h-6 w-6 p-0 hover:bg-muted/80">
+                    <FileText className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Create Ticket</p></TooltipContent>
+              </Tooltip>
             </div>
           </div>
+        </div>
           
           {system === "ping-federate" && role === "employee" && (
-            <div className="flex flex-wrap gap-1 px-2 py-1 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex flex-wrap gap-1.5 px-3 py-2 bg-muted/10 border-t border-border/20">
               <Button
                 size="sm"
                 variant="secondary"
@@ -279,8 +273,9 @@ export function SystemCard({
                     setPfLoading(false);
                   }
                 }}
+                className="h-7 text-[11px]"
               >
-                <User className="h-4 w-4 mr-1" />
+                <User className="h-3.5 w-3.5 mr-1" />
                 User Info
               </Button>
               <Button
@@ -300,8 +295,9 @@ export function SystemCard({
                     setPfLoading(false);
                   }
                 }}
+                className="h-7 text-[11px]"
               >
-                <Globe className="h-4 w-4 mr-1" />
+                <Globe className="h-3.5 w-3.5 mr-1" />
                 OIDC
               </Button>
               <Button
@@ -321,65 +317,68 @@ export function SystemCard({
                     setPfLoading(false);
                   }
                 }}
+                className="h-7 text-[11px]"
               >
-                <Shield className="h-4 w-4 mr-1" />
+                <Shield className="h-3.5 w-3.5 mr-1" />
                 SAML
               </Button>
             </div>
           )}
           <div>
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-8 px-2 space-y-2">
-                <RefreshCw className="h-8 w-8 text-blue-500 animate-spin" />
-                <p className="text-xs text-slate-600 dark:text-slate-400">Loading {name} data...</p>
+              <div className="flex flex-col items-center justify-center py-6 px-3 space-y-2">
+                <div className="p-2 rounded-full bg-muted/50">
+                  <RefreshCw className="h-5 w-5 text-blue-500 animate-spin" />
+                </div>
+                <p className="text-[11px] text-muted-foreground">Loading {name} data...</p>
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center py-6 px-2 space-y-3">
-                <XCircle className="h-10 w-10 text-red-500" />
-                <p className="text-xs text-red-600 dark:text-red-400 text-center max-w-[250px]">{error}</p>
-                <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} className="h-7 text-xs hover:bg-red-50 dark:hover:bg-red-950 border-red-200 dark:border-red-800">
+              <div className="flex flex-col items-center justify-center py-6 px-3 space-y-2">
+                <div className="p-2 rounded-full bg-red-500/10">
+                  <XCircle className="h-5 w-5 text-red-500" />
+                </div>
+                <p className="text-[11px] text-red-600 dark:text-red-400 text-center max-w-[220px]">{error}</p>
+                <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} className="h-6 text-[11px] border-border/50">
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Retry
                 </Button>
               </div>
             ) : data ? (
               <div>
-                {/* Combined Metrics + JSON Toggle Row */}
-                <div className="flex items-center justify-between gap-2 px-2 py-1.5 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200 dark:border-slate-700">
-                  {/* LEFT: Key metrics (max 2 items to prevent overlap) */}
+                {/* Metrics + JSON Toggle */}
+                <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/10 border-b border-border/20">
                   <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
                     {metrics.length > 0 ? (
                       metrics.slice(0, 2).map((metric, idx) => (
                         <div key={idx} className="flex items-center gap-1 min-w-0">
-                          <span className="text-xs shrink-0">{metric.icon}</span>
-                          <span className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate" title={`${metric.label}: ${metric.value}`}>
+                          <span className="text-[11px] shrink-0">{metric.icon}</span>
+                          <span className="text-[11px] font-medium text-foreground truncate" title={`${metric.label}: ${metric.value}`}>
                             {metric.value}
                           </span>
                         </div>
                       ))
                     ) : (
-                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Data loaded</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">Data loaded</span>
                     )}
                   </div>
                   
-                  {/* RIGHT: Compact JSON toggle */}
                   <button
                     onClick={() => setJsonCollapsed(!jsonCollapsed)}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0"
+                    className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-muted/80 transition-colors shrink-0"
                   >
-                    <Code className="h-3 w-3 text-slate-500" />
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">JSON</span>
-                    <span className="text-[10px] px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-mono">
+                    <Code className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-[11px] font-medium text-foreground whitespace-nowrap">JSON</span>
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-muted text-muted-foreground font-mono">
                       {Object.keys(data).length}
                     </span>
-                    <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform duration-200 ${jsonCollapsed ? '' : 'rotate-180'}`} />
+                    <ChevronDown className={`h-3 w-3 text-muted-foreground transition-transform duration-200 ${jsonCollapsed ? '' : 'rotate-180'}`} />
                   </button>
                 </div>
                 
                 {/* Collapsible JSON Content */}
-                <div className={`transition-all duration-300 ${jsonCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-96'}`}>
-                  <div className="h-full max-h-96 overflow-y-auto bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
-                    <pre className="text-sm font-mono p-4 text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words">
+                <div className={`transition-all duration-300 ${jsonCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-80'}`}>
+                  <div className="h-full max-h-80 overflow-y-auto bg-muted/20 custom-scrollbar">
+                    <pre className="text-[11px] font-mono p-3 text-foreground/80 whitespace-pre-wrap break-words">
                       {JSON.stringify(data, null, 2)}
                     </pre>
                   </div>
@@ -387,31 +386,30 @@ export function SystemCard({
                 
                 {/* Quick Action for collapsed state */}
                 {jsonCollapsed && (
-                  <div className="px-2 py-2 text-center">
+                  <div className="px-3 py-2 text-center">
                     <button
                       onClick={() => setJsonCollapsed(false)}
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                      className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
                     >
-                      Expand to view full JSON ↓
+                      Expand to view JSON ↓
                     </button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 px-2 space-y-3">
-                <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                  <Code className="h-6 w-6 text-slate-400" />
+              <div className="flex flex-col items-center justify-center py-6 px-3 space-y-2">
+                <div className="p-2 rounded-full bg-muted/50">
+                  <Code className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">No data available</p>
-                <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} disabled={!enabled} className="h-7 text-xs">
+                <p className="text-[11px] text-muted-foreground">No data available</p>
+                <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} disabled={!enabled} className="h-6 text-[11px] border-border/50">
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Load Data
                 </Button>
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Details Dialog - uses DataDialog with JSON mode */}
       <DataDialog

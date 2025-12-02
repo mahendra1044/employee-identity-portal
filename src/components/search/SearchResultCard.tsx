@@ -10,7 +10,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
@@ -98,43 +97,41 @@ export function SearchResultCard({
   const showPagination = shouldShowPagination(displayResults.length);
   
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div className="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{config.label}</span>
-            <span className={hasManyResults ? "text-xs px-1.5 py-0.5 rounded bg-slate-300 dark:bg-slate-600 text-slate-800 dark:text-slate-200 font-medium" : "text-xs px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}>
-              {displayResults.length}
-            </span>
-            {showPagination && (
-              <span className="text-[10px] text-muted-foreground">(paginated)</span>
-            )}
-          </div>
-          {displayResults.length > 0 && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="ghost" onClick={handleViewDetails} className="h-5 w-5 p-0">
-                  <Eye className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>View first row details</p></TooltipContent>
-            </Tooltip>
+    <div className="rounded-lg border border-border/40 bg-gradient-to-br from-background via-background to-muted/20 dark:from-background dark:via-background dark:to-muted/10 overflow-hidden">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/20 border-b border-border/20">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-foreground">{config.label}</span>
+          <span className={hasManyResults ? "text-[10px] px-1.5 py-0.5 rounded bg-muted text-foreground font-medium" : "text-[10px] px-1.5 py-0.5 rounded bg-muted/80 text-muted-foreground"}>
+            {displayResults.length}
+          </span>
+          {showPagination && (
+            <span className="text-[10px] text-muted-foreground">(paginated)</span>
           )}
         </div>
-        
-        {displayResults.length > 0 ? (
-          <PaginatedResultsTable
-            config={config}
-            results={displayResults}
-            onRowClick={handleRowClick}
-            onViewDetails={handleViewDetails}
-          />
-        ) : (
-          <div className="p-2 text-center">
-            <p className="text-xs text-muted-foreground">No results found</p>
-          </div>
+        {displayResults.length > 0 && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="sm" variant="ghost" onClick={handleViewDetails} className="h-5 w-5 p-0 hover:bg-muted/80">
+                <Eye className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent><p>View first row details</p></TooltipContent>
+          </Tooltip>
         )}
-      </CardContent>
-    </Card>
+      </div>
+      
+      {displayResults.length > 0 ? (
+        <PaginatedResultsTable
+          config={config}
+          results={displayResults}
+          onRowClick={handleRowClick}
+          onViewDetails={handleViewDetails}
+        />
+      ) : (
+        <div className="px-3 py-4 text-center">
+          <p className="text-[11px] text-muted-foreground">No results found</p>
+        </div>
+      )}
+    </div>
   );
 }
