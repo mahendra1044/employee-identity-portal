@@ -53,3 +53,4 @@ export { useConsolidatedView } from './useConsolidatedView';
 // Utility Hooks
 export { useThemeDOM } from './useThemeDOM';
 export { useIsMobile } from './use-mobile';
+export { usePagination, type UsePaginationOptions, type UsePaginationResult } from './usePagination';

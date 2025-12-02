@@ -17,9 +17,10 @@
 
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { OPS_CONFIG } from "@/lib/ui-config";
 import { isOpsRole } from "@/lib/role-utils";
+import { cachedFetch } from "@/lib/request-cache";
 import type { SystemKey } from "@/lib/types";
 import {
   type FailureKey,
@@ -76,6 +77,7 @@ export function useOpsFeatures(
   const failureTypesToLoad = useMemo(() => getFailureTypesForRole(role), [role]);
 
   // Load recent failures for ops role (config-driven)
+  // Uses cachedFetch for deduplication and short-term caching
   const loadFailures = useCallback(async () => {
     if (!isOps || !token || failureTypesToLoad.length === 0) return;
 
@@ -86,11 +88,12 @@ export function useOpsFeatures(
       const now = Date.now();
       const mkTs = (minsAgo: number) => new Date(now - minsAgo * 60_000).toISOString();
 
-      // Build fetch promises from config
-      // Note: /api/ops-failures is a Next.js frontend route, not backend
+      // Build fetch promises from config using cachedFetch
+      // Short cache TTL (10s) for failure data to allow near-real-time updates
       const fetchPromises = failureTypesToLoad.map((config: FailureTypeConfig) =>
-        fetch(`/api/ops-failures?system=${config.apiSystem}&minutes=${minutes}`, {
+        cachedFetch(`/api/ops-failures?system=${config.apiSystem}&minutes=${minutes}`, {
           headers: { Authorization: `Bearer ${token}` },
+          cacheTtl: 10000, // 10 second cache for failure data
         })
       );
       const responses = await Promise.all(fetchPromises);

@@ -328,35 +328,49 @@ export function SearchSection({
               </div>
             )}
             
-            {/* Search results */}
-            {hasSearched && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                {/* System cards */}
-                {SEARCH_SYSTEMS.map((config) => {
-                  // Check employee access
-                  if (!canEmployeeViewSystem(config.system, role, search, email, features)) {
-                    return null;
-                  }
-                  
-                  const results = Array.isArray(searchResults?.[config.system])
-                    ? (searchResults[config.system] as Record<string, unknown>[])
-                    : [];
-                  
-                  return (
-                    <SearchResultCard
-                      key={config.system}
-                      config={config}
-                      results={results}
-                      role={role}
-                      search={search}
-                      token={token}
-                      onViewDetails={(title, data) => openDialog(title, data, "json")}
-                      onSetData={updateDialogData}
-                    />
-                  );
-                })}
-              </div>
-            )}
+            {/* Search results - always show container for consistent layout */}
+            <div className="w-full min-h-[120px] mt-2">
+              {hasSearched ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                  {/* System cards */}
+                  {SEARCH_SYSTEMS.map((config) => {
+                    // Check employee access
+                    if (!canEmployeeViewSystem(config.system, role, search, email, features)) {
+                      return null;
+                    }
+                    
+                    const results = Array.isArray(searchResults?.[config.system])
+                      ? (searchResults[config.system] as Record<string, unknown>[])
+                      : [];
+                    
+                    return (
+                      <SearchResultCard
+                        key={config.system}
+                        config={config}
+                        results={results}
+                        role={role}
+                        search={search}
+                        token={token}
+                        onViewDetails={(title, data) => openDialog(title, data, "json")}
+                        onSetData={updateDialogData}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Placeholder state before search - full width */
+                <div className="w-full flex flex-col items-center justify-center py-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-md">
+                  <div className="text-slate-400 dark:text-slate-500 mb-2">
+                    <svg className="h-8 w-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enter a name, email, or ID to search across identity systems
+                  </p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 

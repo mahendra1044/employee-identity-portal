@@ -255,7 +255,7 @@ export default function HomePage() {
           pfOpsLoading={pfOpsLoading}
         />
 
-        {/* Search Section */}
+        {/* Search Section - Always visible */}
         <SearchSection
           token={token!}
           role={role!}
@@ -271,8 +271,12 @@ export default function HomePage() {
           features={features}
         />
 
-        {/* Ops Quick Actions (tabs) - Refactored to use config-driven actionHandlers */}
-        {isOpsRole(role) && hasSearched && (
+        {/* Ops Quick Actions (tabs) - Smooth transition with CSS */}
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+          isOpsRole(role) && hasSearched 
+            ? 'opacity-100 max-h-[2000px]' 
+            : 'opacity-0 max-h-0 pointer-events-none'
+        }`}>
           <QuickActionsCard
             qaActive={qaActive as SystemKey}
             onSetQaActive={(system) => setQaActive(system)}
@@ -283,10 +287,14 @@ export default function HomePage() {
             splunkUrl={splunkUrl}
             cloudwatchUrl={cloudwatchUrl}
           />
-        )}
+        </div>
 
-        {/* Ops Recent Failures Panel */}
-        {isOpsRole(role) && (
+        {/* Ops Recent Failures Panel - Smooth transition with CSS */}
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+          isOpsRole(role) 
+            ? 'opacity-100 max-h-[2000px]' 
+            : 'opacity-0 max-h-0 pointer-events-none'
+        }`}>
           <RecentFailuresPanel
             minutes={minutes}
             onMinutesChange={setMinutes}
@@ -296,7 +304,7 @@ export default function HomePage() {
             role={role}
             failures={failures}
           />
-        )}
+        </div>
 
         {/* System Cards (hide by default for ops) */}
         <section className="mb-6">

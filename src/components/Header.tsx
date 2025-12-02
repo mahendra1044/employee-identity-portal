@@ -284,7 +284,7 @@ export function Header(props: {
               </Tooltip>
             )}
 
-            {props.educateEnabled && isEmployee && (
+            {props.educateEnabled && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 

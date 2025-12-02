@@ -12,6 +12,7 @@ import { DataDialog } from "@/components/dialogs/DataDialog";
 import { SnowTicketDialog } from "@/components/dialogs/SnowTicketDialog";
 import { getDataStatus, extractKeyMetrics } from "@/lib/system-card-utils";
 import { ErrorHandler } from "@/lib/error-handler";
+import { cachedFetch } from "@/lib/request-cache";
 import type { SystemKey, SystemData } from "@/lib/types";
 
 interface SystemCardProps {
@@ -55,7 +56,8 @@ export function SystemCard({
   const metrics = useMemo(() => extractKeyMetrics(data), [data]);
 
   // Memoized load function to prevent unnecessary re-renders
-  const loadInitial = useCallback(async (showToast = true) => {
+  // Uses cachedFetch for deduplication and caching
+  const loadInitial = useCallback(async (showToast = true, skipCache = false) => {
     if (!enabled || !token) {
       return;
     }
@@ -67,7 +69,9 @@ export function SystemCard({
     
     setLoading(true);
     setError(null);
-    setData(null);
+    if (skipCache) {
+      setData(null);
+    }
     
     try {
       let endpoint;
@@ -79,8 +83,11 @@ export function SystemCard({
       
       const fullUrl = userKey ? endpoint : `${API_BASE}${endpoint}`;
       
-      const res = await fetch(fullUrl, {
+      // Use cachedFetch for deduplication and caching
+      const res = await cachedFetch(fullUrl, {
         headers: { Authorization: `Bearer ${token}` },
+        skipCache,
+        cacheTtl: 30000, // 30 second cache
       });
       
       if (!res.ok) {
@@ -144,14 +151,17 @@ export function SystemCard({
     }
   }, [system, token, userKey]);
 
+  // Load data immediately when component mounts - UI is always visible
+  // Data populates in as it arrives from the backend
   useEffect(() => {
     if (userKey !== undefined) {
       setData(null);
       setError(null);
     }
     
+    // Load immediately - no staggering, UI skeleton is always visible
     loadInitial(false);
-  }, [token, enabled, userKey]);
+  }, [token, enabled, userKey, loadInitial]);
 
   return (
     <>
@@ -207,7 +217,7 @@ export function SystemCard({
               <div className="flex gap-0.5 pr-1 border-r border-slate-300 dark:border-slate-600">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button size="sm" variant="ghost" onClick={() => loadInitial(true)} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
+                    <Button size="sm" variant="ghost" onClick={() => loadInitial(true, true)} disabled={!enabled || loading} className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700">
                       <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
                   </TooltipTrigger>
@@ -327,7 +337,7 @@ export function SystemCard({
               <div className="flex flex-col items-center justify-center py-6 px-2 space-y-3">
                 <XCircle className="h-10 w-10 text-red-500" />
                 <p className="text-xs text-red-600 dark:text-red-400 text-center max-w-[250px]">{error}</p>
-                <Button size="sm" variant="outline" onClick={() => loadInitial(true)} className="h-7 text-xs hover:bg-red-50 dark:hover:bg-red-950 border-red-200 dark:border-red-800">
+                <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} className="h-7 text-xs hover:bg-red-50 dark:hover:bg-red-950 border-red-200 dark:border-red-800">
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Retry
                 </Button>
@@ -393,7 +403,7 @@ export function SystemCard({
                   <Code className="h-6 w-6 text-slate-400" />
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">No data available</p>
-                <Button size="sm" variant="outline" onClick={() => loadInitial(true)} disabled={!enabled} className="h-7 text-xs">
+                <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} disabled={!enabled} className="h-7 text-xs">
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Load Data
                 </Button>

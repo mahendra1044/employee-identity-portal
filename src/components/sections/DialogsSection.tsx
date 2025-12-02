@@ -95,6 +95,7 @@ export function DialogsSection({
         open={educateOpen}
         onOpenChange={onEducateOpenChange}
         email={email}
+        role={role}
       />
 
       {/* SNOW incidents dialog */}

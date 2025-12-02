@@ -2,20 +2,23 @@
  * SearchResultCard Component
  * 
  * Reusable card component for displaying search results from a single system.
- * Renders a table with configurable columns and a "View Details" button.
+ * Renders a paginated table when results exceed threshold.
+ * Supports clicking on individual rows to view their details.
  * 
  * @module SearchResultCard
  */
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useCallback } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { API_BASE } from "@/lib/constants";
 import type { SearchSystemConfig } from "@/lib/search-config";
 import { filterSearchResults, getDetailKey } from "@/lib/search-config";
+import { PaginatedResultsTable } from "./PaginatedResultsTable";
+import { shouldShowPagination } from "@/config/search-results.config";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -51,20 +54,16 @@ export function SearchResultCard({
   onViewDetails,
   onSetData,
 }: SearchResultCardProps) {
-  // Filter results based on role
-  const filteredResults = filterSearchResults(results, role, search);
-  
-  // For ops, show only first result
-  const displayResults = role === "ops" ? filteredResults.slice(0, 1) : filteredResults;
+  // Filter results based on role (now consistent for all roles)
+  const displayResults = filterSearchResults(results, role, search);
 
-  const handleViewDetails = async () => {
-    if (displayResults.length === 0) return;
-    
-    const firstItem = displayResults[0];
-    const detailKey = getDetailKey(firstItem, config);
+  // Fetch and display details for a specific item
+  const fetchAndShowDetails = useCallback(async (item: Record<string, unknown>, title?: string) => {
+    const detailKey = getDetailKey(item, config);
+    const dialogTitle = title || `${config.label} — ${detailKey || "Details"}`;
     
     // Open dialog immediately with loading state
-    onViewDetails(`${config.label} — ${detailKey || "Details"}`, null);
+    onViewDetails(dialogTitle, null);
     
     try {
       const url = `${API_BASE}/api/search-employee/${encodeURIComponent(detailKey)}/details?system=${config.system}`;
@@ -74,17 +73,29 @@ export function SearchResultCard({
       
       if (res.ok) {
         const json = await res.json();
-        onSetData(json.data ?? firstItem);
+        onSetData(json.data ?? item);
       } else {
-        onSetData(firstItem);
+        onSetData(item);
       }
     } catch {
-      onSetData(firstItem);
+      onSetData(item);
     }
-  };
+  }, [config, token, onViewDetails, onSetData]);
+
+  // Handle View Details button click (always shows first row)
+  const handleViewDetails = useCallback(async () => {
+    if (displayResults.length === 0) return;
+    await fetchAndShowDetails(displayResults[0]);
+  }, [displayResults, fetchAndShowDetails]);
+
+  // Handle row click (shows details for clicked row)
+  const handleRowClick = useCallback(async (item: Record<string, unknown>, index: number) => {
+    const detailKey = getDetailKey(item, config);
+    await fetchAndShowDetails(item, `${config.label} — Row ${index + 1}: ${detailKey || "Details"}`);
+  }, [config, fetchAndShowDetails]);
 
   const hasManyResults = displayResults.length > 10;
-  const hasSomeResults = displayResults.length > 0;
+  const showPagination = shouldShowPagination(displayResults.length);
   
   return (
     <Card>
@@ -95,6 +106,9 @@ export function SearchResultCard({
             <span className={hasManyResults ? "text-xs px-1.5 py-0.5 rounded bg-slate-300 dark:bg-slate-600 text-slate-800 dark:text-slate-200 font-medium" : "text-xs px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}>
               {displayResults.length}
             </span>
+            {showPagination && (
+              <span className="text-[10px] text-muted-foreground">(paginated)</span>
+            )}
           </div>
           {displayResults.length > 0 && (
             <Tooltip>
@@ -103,36 +117,18 @@ export function SearchResultCard({
                   <Eye className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>View details</p></TooltipContent>
+              <TooltipContent><p>View first row details</p></TooltipContent>
             </Tooltip>
           )}
         </div>
         
         {displayResults.length > 0 ? (
-          <div className="p-2">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {config.columns.map((col) => (
-                    <TableHead key={col.key} className="h-7 px-2 text-xs">{col.header}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {displayResults.map((item, idx) => (
-                  <TableRow key={`${config.system}-${item[config.rowKey] || idx}`}>
-                    {config.columns.map((col) => (
-                      <TableCell key={col.key} className="py-1.5 px-2 text-xs">
-                        {col.accessor 
-                          ? col.accessor(item) 
-                          : String(item[col.key] ?? "")}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <PaginatedResultsTable
+            config={config}
+            results={displayResults}
+            onRowClick={handleRowClick}
+            onViewDetails={handleViewDetails}
+          />
         ) : (
           <div className="p-2 text-center">
             <p className="text-xs text-muted-foreground">No results found</p>

@@ -261,16 +261,18 @@ export function RecentFailuresPanel({
           </div>
 
           {/* Render all visible failure categories - data-driven approach */}
-          {visibleCategories.map((category, index) => (
-            <FailureCategorySection
-              key={category}
-              category={category}
-              role={role}
-              failures={failures}
-              loading={loading}
-              isLast={index === visibleCategories.length - 1}
-            />
-          ))}
+          <div className="w-full min-h-[150px]">
+            {visibleCategories.map((category, index) => (
+              <FailureCategorySection
+                key={category}
+                category={category}
+                role={role}
+                failures={failures}
+                loading={loading}
+                isLast={index === visibleCategories.length - 1}
+              />
+            ))}
+          </div>
         </CardContent>
       </Card>
     </section>

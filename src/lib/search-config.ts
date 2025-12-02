@@ -133,27 +133,15 @@ export function canEmployeeViewSystem(
 }
 
 /**
- * Filter and limit search results based on role
+ * Filter search results - returns all results consistently for all roles
+ * The API already handles search filtering, so we pass through results as-is
  */
 export function filterSearchResults<T extends Record<string, unknown>>(
   results: T[],
-  role: string,
-  search: string
+  _role: string,
+  _search: string
 ): T[] {
-  if (role !== "ops" || !search.trim()) {
-    return results;
-  }
-  
-  const searchTerm = search.trim();
-  const searchLower = searchTerm.toLowerCase();
-  
-  const filtered = results.filter((item) => 
-    item.userId === searchTerm ||
-    (typeof item.email === "string" && item.email.toLowerCase() === searchLower)
-  );
-  
-  // For ops, return only first match
-  return filtered.slice(0, 1);
+  return results;
 }
 
 /**
