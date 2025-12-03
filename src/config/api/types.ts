@@ -8,6 +8,8 @@
  * @module config/api/types
  */
 
+import type { SystemGroup } from '@/lib/types';
+
 // ============================================================================
 // AUTH & CONNECTION TYPES
 // ============================================================================
@@ -102,41 +104,6 @@ export interface MockEndpointConfig extends BaseEndpointConfig {
 }
 
 // ============================================================================
-// SECTION-SPECIFIC ENDPOINT GROUPS
-// ============================================================================
-
-/**
- * System Cards endpoints - one per system card displayed
- */
-export interface SystemCardsEndpoints {
-  [systemKey: string]: RealEndpointConfig | MockEndpointConfig;
-}
-
-/**
- * Search endpoints
- */
-export interface SearchEndpoints {
-  /** Search for users */
-  searchUsers: RealEndpointConfig | MockEndpointConfig;
-  /** Get detailed user info */
-  getUserDetails: RealEndpointConfig | MockEndpointConfig;
-}
-
-/**
- * Failures endpoints - for ops monitoring
- */
-export interface FailuresEndpoints {
-  [failureType: string]: RealEndpointConfig | MockEndpointConfig;
-}
-
-/**
- * Quick Actions endpoints - for ops actions
- */
-export interface QuickActionsEndpoints {
-  [actionName: string]: RealEndpointConfig | MockEndpointConfig;
-}
-
-// ============================================================================
 // SYSTEM GROUP CONFIGURATION TYPES
 // ============================================================================
 
@@ -227,9 +194,10 @@ export type EndpointConfig = RealEndpointConfig | MockEndpointConfig;
 // ============================================================================
 
 /**
- * System group identifiers
+ * System group identifiers - alias to main SystemGroup type
+ * Re-exported for API module convenience
  */
-export type SystemGroupId = 'sso' | 'pam' | 'iga' | 'entraId' | 'tpag' | 'ops';
+export type SystemGroupId = SystemGroup;
 
 /**
  * Feature section identifiers

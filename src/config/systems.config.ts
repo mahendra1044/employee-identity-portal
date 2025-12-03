@@ -115,22 +115,40 @@ export const SYSTEM_LABELS: Record<SystemKey, string> = {
 
 
 /**
- * System Groups
- * -------------
- * Logical groupings of systems for specialized ops roles
+ * System Groups (UI Display Groups)
+ * ==================================
+ * 
+ * Logical groupings of systems for UI display and role-based access control.
+ * 
+ * IMPORTANT DISTINCTION:
+ * ----------------------
+ * - SystemGroup (in lib/types.ts): Data source groups for API configuration
+ *   Values: 'sso' | 'pam' | 'iga' | 'entraId' | 'tpag' | 'ops'
+ *   Used for: SYSTEM_DATA_SOURCE toggle (mock vs real API)
+ * 
+ * - SYSTEM_GROUPS (here): UI display groups for role-based visibility
+ *   Includes 'core' which is NOT a data source group
+ *   'core' is a subset of systems shown to employees/general ops
+ * 
+ * The 'core' group contains systems from multiple data source groups
+ * (sso + pam + iga + entraId) - it's a UI concept, not a data source concept.
  */
 export const SYSTEM_GROUPS = {
-  // Core systems visible to employees and general ops
+  /**
+   * Core systems - UI subset for employees and general ops
+   * NOTE: This is NOT a data source group. Each system maps to its
+   * own data source group (sso, pam, iga, entraId)
+   */
   core: [
-    'ping-directory',
-    'ping-federate',
-    'ping-mfa',
-    'azure-ad',
-    'cyberark',
-    'saviynt',
+    'ping-directory',   // → sso
+    'ping-federate',    // → sso
+    'ping-mfa',         // → sso
+    'azure-ad',         // → entraId
+    'cyberark',         // → pam
+    'saviynt',          // → iga
   ] as SystemKey[],
   
-  // SSO/Ping systems (for sso_ops role)
+  // SSO/Ping systems (for sso_ops role) → Data source: 'sso'
   sso: [
     'ping-directory',
     'ping-federate',
@@ -170,7 +188,7 @@ export const SYSTEM_GROUPS = {
     'azure-ad-signin',
   ] as SystemKey[],
   
-  // TPAG systems (for tpag_ops role)
+  // TPAG systems (for tpag_ops role) → Data source: 'tpag'
   tpag: [
     'saviynt-tpag',
     'saviynt-tpag-vendors',
@@ -182,22 +200,34 @@ export const SYSTEM_GROUPS = {
 } as const;
 
 /**
- * System Group Type
- * -----------------
- * Type-safe keys for system groups
+ * UI System Group Key
+ * -------------------
+ * Keys for SYSTEM_GROUPS object (includes 'core' for UI display)
+ * 
+ * NOTE: This is different from SystemGroup (data source groups).
+ * - UISystemGroupKey: 'core' | 'sso' | 'pam' | 'iga' | 'entraId' | 'tpag'
+ * - SystemGroup: 'sso' | 'pam' | 'iga' | 'entraId' | 'tpag' | 'ops'
+ * 
+ * 'core' is UI-only, 'ops' is data-source-only
  */
-export type SystemGroupKey = keyof typeof SYSTEM_GROUPS;
+export type UISystemGroupKey = keyof typeof SYSTEM_GROUPS;
+
+// Alias for backward compatibility
+export type SystemGroupKey = UISystemGroupKey;
 
 /**
- * Get the system group for a specific system
- * ------------------------------------------
- * Maps a system key (e.g., 'ping-federate') to its group (e.g., 'sso')
- * Used to determine data source mode for the system
+ * Get the DATA SOURCE group for a specific system
+ * ------------------------------------------------
+ * Maps a system key (e.g., 'ping-federate') to its data source group (e.g., 'sso')
+ * Used to determine mock vs real API mode for the system.
+ * 
+ * NOTE: This returns a DATA SOURCE group, not a UI group.
+ * 'core' is never returned - systems in 'core' map to their actual data source group.
  * 
  * @param system - The system key to look up
- * @returns The system group, or null if not in any group
+ * @returns The data source group (sso, pam, iga, entraId, tpag), or null if unknown
  */
-export function getSystemGroup(system: SystemKey): SystemGroupKey | null {
+export function getSystemGroup(system: SystemKey): UISystemGroupKey | null {
   // Check SSO group
   if ((SYSTEM_GROUPS.sso as readonly SystemKey[]).includes(system)) {
     return 'sso';

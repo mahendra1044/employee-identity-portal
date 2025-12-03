@@ -51,15 +51,26 @@ const SYSTEM_TO_GROUP = {
 
 /**
  * Get the data source mode for a system
+ * 
+ * PRIORITY ORDER:
+ * 1. If features.useMocks === true → Always return 'USE_MOCK' (global override)
+ * 2. If features.systemDataSource[group] exists → Use that setting
+ * 3. Fallback → 'USE_MOCK' for safety
+ * 
  * @param {string} system - System key
  * @param {object} features - Features configuration
  * @returns {'USE_API' | 'USE_MOCK'} Data source mode
  */
 function getDataSourceForSystem(system, features) {
+  // Global override: If useMocks is true, always use mock data
+  if (features.useMocks === true) {
+    return 'USE_MOCK';
+  }
+  
   const group = SYSTEM_TO_GROUP[system];
   if (!group || !features.systemDataSource) {
-    // Fallback to global useMocks setting
-    return features.useMocks ? 'USE_MOCK' : 'USE_API';
+    // No group mapping or systemDataSource config, fallback to mock
+    return 'USE_MOCK';
   }
   return features.systemDataSource[group] || 'USE_MOCK';
 }

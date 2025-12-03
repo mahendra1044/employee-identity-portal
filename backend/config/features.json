@@ -7,7 +7,8 @@
     "pam": "USE_MOCK",
     "iga": "USE_MOCK",
     "entraId": "USE_MOCK",
-    "tpag": "USE_MOCK"
+    "tpag": "USE_MOCK",
+    "ops": "USE_MOCK"
   },
   "systems": {
     "ping-directory": true,

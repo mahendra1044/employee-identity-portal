@@ -1,15 +1,22 @@
 /**
- * Features Configuration
- * ======================
+ * Features Configuration (Frontend Defaults)
+ * ==========================================
  * 
- * Toggle features ON/OFF from this single file.
- * No code changes needed - just flip the boolean!
+ * IMPORTANT: Backend is the SOURCE OF TRUTH for feature configuration.
+ * These values are DEFAULTS/FALLBACKS used when:
+ * - Backend API is unavailable
+ * - Initial page load before API response
+ * - Development/testing without backend
+ * 
+ * The actual runtime configuration is fetched from:
+ *   GET /api/config/features → backend/config/features.json
+ * 
+ * See: useFeatures() hook for how frontend loads backend config
  * 
  * WHEN TO EDIT THIS FILE:
- * - Enabling/disabling a feature for testing
- * - Rolling out features gradually
- * - Turning off features during incidents
- * - Switching system groups from mock to real API
+ * - Changing default fallback values
+ * - Adding new feature flags (also add to backend/config/features.json)
+ * - Testing locally without backend
  */
 
 import type { DataSourceMode, SystemDataSourceConfig, SystemGroup } from '@/lib/types';
@@ -21,6 +28,9 @@ import type { DataSourceMode, SystemDataSourceConfig, SystemGroup } from '@/lib/
  * 
  * USE_API  - Use real API integration (for production-ready systems)
  * USE_MOCK - Use mock data (for development or not-yet-integrated systems)
+ * 
+ * NOTE: If backend's useMocks=true, it overrides ALL systemDataSource settings
+ * to USE_MOCK (global override for development)
  */
 export const DATA_SOURCE_MODE = {
   USE_API: 'USE_API' as const,
@@ -55,28 +65,10 @@ export const SYSTEM_DATA_SOURCE: SystemDataSourceConfig = {
   
   // TPAG (Third Party Access Governance) Systems
   tpag: DATA_SOURCE_MODE.USE_MOCK,
+  
+  // Operations/ServiceNow Systems
+  ops: DATA_SOURCE_MODE.USE_MOCK,
 };
-
-/**
- * Check if a system group uses real API
- */
-export function usesRealApi(group: SystemGroup): boolean {
-  return SYSTEM_DATA_SOURCE[group] === DATA_SOURCE_MODE.USE_API;
-}
-
-/**
- * Check if a system group uses mock data
- */
-export function usesMockData(group: SystemGroup): boolean {
-  return SYSTEM_DATA_SOURCE[group] === DATA_SOURCE_MODE.USE_MOCK;
-}
-
-/**
- * Get the data source mode for a system group
- */
-export function getDataSourceMode(group: SystemGroup): DataSourceMode {
-  return SYSTEM_DATA_SOURCE[group];
-}
 
 /**
  * Feature Flags
@@ -88,10 +80,6 @@ export function getDataSourceMode(group: SystemGroup): DataSourceMode {
 export const FEATURE_FLAGS = {
   // Show the "Educate Me" guide for employees
   educateGuideEnabled: true,
-  
-  // Use mock data instead of real API calls (for development)
-  // DEPRECATED: Use SYSTEM_DATA_SOURCE for per-system control
-  useMockData: true,
   
   // Use mock authentication (for development)
   useMockAuth: true,

@@ -15,7 +15,7 @@ import type { Features } from "@/lib/types";
 // Default features when API is unavailable
 const DEFAULT_FEATURES: Features = {
   credentialSource: "env",
-  useMocks: FEATURE_FLAGS.useMockData,
+  useMocks: false, // Deprecated: Use SYSTEM_DATA_SOURCE for per-system control
   useMockAuth: FEATURE_FLAGS.useMockAuth,
   systemDataSource: SYSTEM_DATA_SOURCE,
   systems: {

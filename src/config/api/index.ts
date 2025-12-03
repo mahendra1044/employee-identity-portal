@@ -52,12 +52,7 @@ export { realApiConfig } from './real';
  * console.log(ssoConfig.connection.baseUrl);
  */
 export function getApiConfig(group: SystemGroupId): SystemConfig {
-  // 'ops' always uses the ops config (doesn't have USE_API/USE_MOCK toggle)
-  if (group === 'ops') {
-    return mockApiConfig.ops;
-  }
-
-  const dataSource = SYSTEM_DATA_SOURCE[group as keyof typeof SYSTEM_DATA_SOURCE];
+  const dataSource = SYSTEM_DATA_SOURCE[group];
   
   if (dataSource === 'USE_API') {
     return realApiConfig[group];
@@ -73,9 +68,49 @@ export function getApiConfig(group: SystemGroupId): SystemConfig {
  * @returns true if using real API, false if using mock
  */
 export function isUsingRealApi(group: SystemGroupId): boolean {
-  if (group === 'ops') return false;
-  const dataSource = SYSTEM_DATA_SOURCE[group as keyof typeof SYSTEM_DATA_SOURCE];
+  const dataSource = SYSTEM_DATA_SOURCE[group];
   return dataSource === 'USE_API';
+}
+
+/**
+ * Check if a system group is using mock data
+ * 
+ * @param group - System group identifier
+ * @returns true if using mock, false if using real API
+ */
+export function isUsingMockData(group: SystemGroupId): boolean {
+  return !isUsingRealApi(group);
+}
+
+/**
+ * Get the data source mode for a system group
+ * 
+ * @param group - System group identifier
+ * @returns 'USE_API' or 'USE_MOCK'
+ */
+export function getDataSourceMode(group: SystemGroupId): 'USE_API' | 'USE_MOCK' {
+  return SYSTEM_DATA_SOURCE[group];
+}
+
+/**
+ * Type guard to check if a config is a MockSystemConfig
+ * 
+ * @param config - The system config to check
+ * @returns true if config is MockSystemConfig
+ */
+export function isMockConfig(config: SystemConfig): config is MockSystemConfig {
+  // Mock configs have 'none' auth and no clientId
+  return config.connection.authMethod === 'none' && !config.connection.clientId;
+}
+
+/**
+ * Type guard to check if a config is a RealSystemConfig
+ * 
+ * @param config - The system config to check
+ * @returns true if config is RealSystemConfig
+ */
+export function isRealConfig(config: SystemConfig): config is RealSystemConfig {
+  return !isMockConfig(config);
 }
 
 /**
@@ -131,8 +166,12 @@ export function getEndpointLookup(
     return undefined;
   }
   
+  // Validate connection base URL
+  const baseUrl = config.connection.baseUrl || '';
+  const endpoint = endpointConfig.endpoint || '';
+  
   // Build full URL with path parameters
-  let fullUrl = `${config.connection.baseUrl}${endpointConfig.endpoint}`;
+  let fullUrl = `${baseUrl}${endpoint}`;
   
   // Replace path parameters like {userId}
   if (pathParams) {
@@ -187,13 +226,26 @@ export function getConnectionInfo(group: SystemGroupId) {
  * Useful for debugging and documentation
  */
 export function listAllEndpoints(): Record<SystemGroupId, Record<FeatureSection, string[]>> {
-  const groups: SystemGroupId[] = ['sso', 'pam', 'iga', 'entraId', 'tpag', 'ops'];
+  // Derive groups from SYSTEM_DATA_SOURCE keys (single source of truth)
+  const groups = Object.keys(SYSTEM_DATA_SOURCE) as SystemGroupId[];
   const sections: FeatureSection[] = ['systemCards', 'search', 'failures', 'quickActions'];
   
-  const result: Record<SystemGroupId, Record<FeatureSection, string[]>> = {} as any;
+  // Initialize empty section for each group dynamically
+  const emptySections = (): Record<FeatureSection, string[]> => ({
+    systemCards: [],
+    search: [],
+    failures: [],
+    quickActions: [],
+  });
   
+  // Build result dynamically from groups
+  const result = groups.reduce((acc, group) => {
+    acc[group] = emptySections();
+    return acc;
+  }, {} as Record<SystemGroupId, Record<FeatureSection, string[]>>);
+  
+  // Populate endpoints
   groups.forEach(group => {
-    result[group] = {} as Record<FeatureSection, string[]>;
     sections.forEach(section => {
       const endpoints = getSectionEndpoints(group, section);
       result[group][section] = Object.keys(endpoints);

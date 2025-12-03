@@ -39,15 +39,33 @@ export type SystemKey =
  * Data Source Mode
  * -----------------
  * Controls whether a system group uses real API or mock data
+ * 
+ * NOTE: If backend's useMocks=true, it acts as a global override
+ * and ALL systems use mock data regardless of systemDataSource settings.
  */
 export type DataSourceMode = 'USE_API' | 'USE_MOCK';
 
 /**
- * System Groups
- * --------------
- * Logical groupings of systems for data source configuration
+ * System Group (Data Source Groups)
+ * ==================================
+ * Logical groupings of systems for DATA SOURCE configuration.
+ * Used to determine whether to use mock or real API for a system.
+ * 
+ * - sso: SSO/Ping Identity systems
+ * - pam: CyberArk PAM systems
+ * - iga: Saviynt IGA systems
+ * - entraId: Microsoft Entra ID systems
+ * - tpag: Third Party Access Governance systems
+ * - ops: Operations/ServiceNow systems
+ * 
+ * NOTE: This is different from UISystemGroupKey in systems.config.ts,
+ * which includes 'core' for UI display purposes.
+ * 'core' is a UI concept containing a subset of systems for employee view.
+ * 
+ * @see UISystemGroupKey in systems.config.ts for UI display groups
+ * @see SYSTEM_DATA_SOURCE in features.config.ts for toggle configuration
  */
-export type SystemGroup = 'sso' | 'pam' | 'iga' | 'entraId' | 'tpag';
+export type SystemGroup = 'sso' | 'pam' | 'iga' | 'entraId' | 'tpag' | 'ops';
 
 /**
  * System Data Source Configuration
