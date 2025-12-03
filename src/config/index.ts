@@ -10,6 +10,7 @@
  * - Need to add a new system? → See systems.config.ts
  * - Need to change API URLs or timeouts? → See app.config.ts
  * - Need to add external service URLs? → See external-services.config.ts
+ * - Need to configure mock vs real APIs? → See api/ folder
  * 
  * HOW TO USE:
  * -----------
@@ -23,6 +24,10 @@
  * 
  * // Get external URL
  * const splunkUrl = EXTERNAL_SERVICES.splunk.url;
+ * 
+ * // Get API config for a system group
+ * import { getApiConfig, getEndpoint } from '@/config/api';
+ * const ssoConfig = getApiConfig('sso');
  */
 
 // Re-export all configurations
@@ -34,3 +39,29 @@ export * from './external-services.config';
 // Export labels configuration
 export { labels, t } from './labels';
 export type { Labels } from './labels';
+
+// Export API configuration utilities
+export {
+  getApiConfig,
+  getEndpoint,
+  getEndpointLookup,
+  getSectionEndpoints,
+  getConnectionInfo,
+  isUsingRealApi,
+  listAllEndpoints,
+  mockApiConfig,
+  realApiConfig,
+} from './api';
+
+// Export API types
+export type {
+  SystemGroupId,
+  FeatureSection,
+  SystemConfig,
+  EndpointConfig,
+  EndpointLookup,
+  ApiConnection,
+  RealEndpointConfig,
+  MockEndpointConfig,
+} from './api';
+
