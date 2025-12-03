@@ -8,7 +8,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { FEATURE_FLAGS } from "@/config";
+import { FEATURE_FLAGS, SYSTEM_DATA_SOURCE } from "@/config";
 import { api } from "@/lib/api-client";
 import type { Features } from "@/lib/types";
 
@@ -17,6 +17,7 @@ const DEFAULT_FEATURES: Features = {
   credentialSource: "env",
   useMocks: FEATURE_FLAGS.useMockData,
   useMockAuth: FEATURE_FLAGS.useMockAuth,
+  systemDataSource: SYSTEM_DATA_SOURCE,
   systems: {
     "ping-directory": true,
     "ping-federate": true,

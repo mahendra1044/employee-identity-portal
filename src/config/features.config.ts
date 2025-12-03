@@ -9,7 +9,74 @@
  * - Enabling/disabling a feature for testing
  * - Rolling out features gradually
  * - Turning off features during incidents
+ * - Switching system groups from mock to real API
  */
+
+import type { DataSourceMode, SystemDataSourceConfig, SystemGroup } from '@/lib/types';
+
+/**
+ * Data Source Modes
+ * -----------------
+ * Controls whether a system group uses real API or mock data
+ * 
+ * USE_API  - Use real API integration (for production-ready systems)
+ * USE_MOCK - Use mock data (for development or not-yet-integrated systems)
+ */
+export const DATA_SOURCE_MODE = {
+  USE_API: 'USE_API' as const,
+  USE_MOCK: 'USE_MOCK' as const,
+} as const;
+
+/**
+ * System Data Source Configuration
+ * --------------------------------
+ * Configure which system groups use real API vs mock data.
+ * This allows incremental API rollout - release one system at a time!
+ * 
+ * HOW TO USE:
+ * - When a system group is ready for real API integration, change to 'USE_API'
+ * - Keep others as 'USE_MOCK' until they're ready
+ * 
+ * EXAMPLE: To release SSO systems with real API:
+ *   sso: DATA_SOURCE_MODE.USE_API,  // ← Switch from USE_MOCK to USE_API
+ */
+export const SYSTEM_DATA_SOURCE: SystemDataSourceConfig = {
+  // SSO/Ping Identity Systems
+  sso: DATA_SOURCE_MODE.USE_MOCK,
+  
+  // CyberArk PAM Systems
+  pam: DATA_SOURCE_MODE.USE_MOCK,
+  
+  // Saviynt IGA Systems
+  iga: DATA_SOURCE_MODE.USE_MOCK,
+  
+  // Microsoft Entra ID Systems
+  entraId: DATA_SOURCE_MODE.USE_MOCK,
+  
+  // TPAG (Third Party Access Governance) Systems
+  tpag: DATA_SOURCE_MODE.USE_MOCK,
+};
+
+/**
+ * Check if a system group uses real API
+ */
+export function usesRealApi(group: SystemGroup): boolean {
+  return SYSTEM_DATA_SOURCE[group] === DATA_SOURCE_MODE.USE_API;
+}
+
+/**
+ * Check if a system group uses mock data
+ */
+export function usesMockData(group: SystemGroup): boolean {
+  return SYSTEM_DATA_SOURCE[group] === DATA_SOURCE_MODE.USE_MOCK;
+}
+
+/**
+ * Get the data source mode for a system group
+ */
+export function getDataSourceMode(group: SystemGroup): DataSourceMode {
+  return SYSTEM_DATA_SOURCE[group];
+}
 
 /**
  * Feature Flags
@@ -23,6 +90,7 @@ export const FEATURE_FLAGS = {
   educateGuideEnabled: true,
   
   // Use mock data instead of real API calls (for development)
+  // DEPRECATED: Use SYSTEM_DATA_SOURCE for per-system control
   useMockData: true,
   
   // Use mock authentication (for development)

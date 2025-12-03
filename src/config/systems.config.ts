@@ -181,6 +181,59 @@ export const SYSTEM_GROUPS = {
   ] as SystemKey[],
 } as const;
 
+/**
+ * System Group Type
+ * -----------------
+ * Type-safe keys for system groups
+ */
+export type SystemGroupKey = keyof typeof SYSTEM_GROUPS;
+
+/**
+ * Get the system group for a specific system
+ * ------------------------------------------
+ * Maps a system key (e.g., 'ping-federate') to its group (e.g., 'sso')
+ * Used to determine data source mode for the system
+ * 
+ * @param system - The system key to look up
+ * @returns The system group, or null if not in any group
+ */
+export function getSystemGroup(system: SystemKey): SystemGroupKey | null {
+  // Check SSO group
+  if ((SYSTEM_GROUPS.sso as readonly SystemKey[]).includes(system)) {
+    return 'sso';
+  }
+  // Check PAM group
+  if ((SYSTEM_GROUPS.pam as readonly SystemKey[]).includes(system)) {
+    return 'pam';
+  }
+  // Check IGA group
+  if ((SYSTEM_GROUPS.iga as readonly SystemKey[]).includes(system)) {
+    return 'iga';
+  }
+  // Check Entra ID group
+  if ((SYSTEM_GROUPS.entraId as readonly SystemKey[]).includes(system)) {
+    return 'entraId';
+  }
+  // Check TPAG group
+  if ((SYSTEM_GROUPS.tpag as readonly SystemKey[]).includes(system)) {
+    return 'tpag';
+  }
+  // System not in any specific group
+  return null;
+}
+
+/**
+ * Get all systems in a group
+ * --------------------------
+ * Returns all system keys that belong to a specific group
+ * 
+ * @param group - The group to get systems for
+ * @returns Array of system keys in the group
+ */
+export function getSystemsInGroup(group: SystemGroupKey): SystemKey[] {
+  return [...SYSTEM_GROUPS[group]];
+}
+
 
 /**
  * Role Display Names

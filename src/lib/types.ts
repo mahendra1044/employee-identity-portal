@@ -35,6 +35,27 @@ export type SystemKey =
   | "saviynt-tpag-risk"
   | "saviynt-tpag-lifecycle";
 
+/**
+ * Data Source Mode
+ * -----------------
+ * Controls whether a system group uses real API or mock data
+ */
+export type DataSourceMode = 'USE_API' | 'USE_MOCK';
+
+/**
+ * System Groups
+ * --------------
+ * Logical groupings of systems for data source configuration
+ */
+export type SystemGroup = 'sso' | 'pam' | 'iga' | 'entraId' | 'tpag';
+
+/**
+ * System Data Source Configuration
+ * ---------------------------------
+ * Maps each system group to its data source mode
+ */
+export type SystemDataSourceConfig = Record<SystemGroup, DataSourceMode>;
+
 // ============================================================================
 // RBAC TYPES
 // ============================================================================
@@ -67,6 +88,11 @@ export type Features = {
   useMocks: boolean;
   useMockAuth: boolean;
   systems: Record<string, boolean>;
+  /**
+   * Per-system-group data source configuration
+   * Allows incremental API rollout by system category
+   */
+  systemDataSource?: SystemDataSourceConfig;
   opsShowTilesAfterSearch?: boolean;
   employeeSearchSystems?: Partial<Record<SystemKey, boolean>>;
   systemsOrder?: SystemKey[];

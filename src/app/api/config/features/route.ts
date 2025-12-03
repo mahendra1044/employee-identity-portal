@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
+import { SYSTEM_DATA_SOURCE } from '@/config/features.config';
 
 export async function GET() {
   const features = {
     credentialSource: "env",
     useMocks: true,
     useMockAuth: true,
+    // Per-system-group data source configuration
+    systemDataSource: SYSTEM_DATA_SOURCE,
     systems: {
       "ping-directory": true,
       "ping-federate": true,

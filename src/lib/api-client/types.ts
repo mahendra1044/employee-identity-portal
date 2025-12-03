@@ -225,6 +225,26 @@ export interface FailureRecord {
 }
 
 // ============================================================================
+// DATA SOURCE TYPES
+// ============================================================================
+
+/**
+ * Data Source Mode
+ * Controls whether a system group uses real API or mock data
+ */
+export type DataSourceMode = 'USE_API' | 'USE_MOCK';
+
+/**
+ * System Group identifiers
+ */
+export type SystemGroup = 'sso' | 'pam' | 'iga' | 'entraId' | 'tpag';
+
+/**
+ * Per-system-group data source configuration
+ */
+export type SystemDataSourceConfig = Record<SystemGroup, DataSourceMode>;
+
+// ============================================================================
 // CONFIG TYPES
 // ============================================================================
 
@@ -236,6 +256,11 @@ export interface FeaturesConfig {
   useMocks: boolean;
   useMockAuth: boolean;
   systems: Record<string, boolean>;
+  /**
+   * Per-system-group data source configuration
+   * Allows incremental API rollout by system category
+   */
+  systemDataSource?: SystemDataSourceConfig;
   opsShowTilesAfterSearch?: boolean;
   employeeSearchSystems?: Partial<Record<SystemKey, boolean>>;
   systemsOrder?: SystemKey[];
