@@ -73,8 +73,8 @@ function getAvailableRoles(userId: string | null) {
   return getRoleObjects(assignedRoleIds);
 }
 
-function getRbacLoginResponse(email: string) {
-  const userId = extractUserId(email);
+function getRbacLoginResponse(userIdInput: string) {
+  const userId = extractUserId(userIdInput);
   const assignedRoleIds = getUserRoleIds(userId);
   const availableRoles = getAvailableRoles(userId);
   const activeRole = availableRoles.length > 0 ? availableRoles[0] : RBAC_CONFIG.roles.R008;

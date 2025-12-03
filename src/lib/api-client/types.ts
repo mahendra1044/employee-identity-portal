@@ -140,7 +140,6 @@ export interface LoginResponse {
   token: string;
   role: string;
   userId?: string;
-  email?: string;
   assignedRoles?: string[];
   availableRoles?: Array<{
     id: string;
