@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { RefreshCw, Search, Ticket, AlertCircle, CheckCircle, Clock, Filter } from "lucide-react";
-import { useTranslation } from "@/i18n";
+import { useSnowTranslations } from "@/i18n";
 
 interface SnowIncidentsDialogProps {
   open: boolean;
@@ -77,18 +77,9 @@ export function SnowIncidentsDialog({
 }: SnowIncidentsDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const { t, translate } = useTranslation();
   
-  // Type-safe access to snow translations
-  const snowT = t.snow as Record<string, unknown> || {};
-  const incidentsT = snowT.incidents as Record<string, string> || {};
-  const filtersT = snowT.filters as Record<string, string> || {};
-  const statusT = snowT.status as Record<string, string> || {};
-  const priorityT = snowT.priority as Record<string, string> || {};
-  const tooltipsT = snowT.tooltips as Record<string, string> || {};
-  const tableT = snowT.table as Record<string, string> || {};
-  const emptyStatesT = snowT.emptyStates as Record<string, Record<string, string>> || {};
-  const footerT = snowT.footer as Record<string, string> || {};
+  // Use specialized SNOW translations hook - cleaner than manual casting
+  const { incidents, filters, status, priority, tooltips, table, emptyStates, footer, translate } = useSnowTranslations();
 
   // Filter incidents based on search and status
   const filteredItems = (snowItems || []).filter((item) => {
@@ -123,7 +114,7 @@ export function SnowIncidentsDialog({
               <div className="p-1.5 rounded-md bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-md">
                 <Ticket className="h-4 w-4" />
               </div>
-              <span>{incidentsT.title || 'SNOW Incidents'}</span>
+              <span>{incidents.get('title', 'SNOW Incidents')}</span>
               {snowEmail && (
                 <span className="text-[11px] font-normal text-muted-foreground ml-1">
                   {snowEmail}
@@ -139,11 +130,11 @@ export function SnowIncidentsDialog({
                     className="text-[11px] px-2 py-1 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                   >
                     <RefreshCw className={`h-3 w-3 ${snowLoading ? 'animate-spin' : ''}`} />
-                    {incidentsT.refresh || 'Refresh'}
+                    {incidents.get('refresh', 'Refresh')}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{tooltipsT.refresh || 'Refresh incidents'}</p>
+                  <p>{tooltips.refresh || 'Refresh incidents'}</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -154,7 +145,7 @@ export function SnowIncidentsDialog({
             <div className="relative flex-shrink-0 w-48">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder={incidentsT.placeholder as string || "Search incidents..."}
+                placeholder={incidents.get('placeholder', 'Search incidents...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-7 pl-8 text-xs bg-background/80 border-border/50 focus:border-orange-500/50"
@@ -169,7 +160,7 @@ export function SnowIncidentsDialog({
                     : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                {translate(filtersT.all || "All ({count})", { count: snowItems?.length || 0 })}
+                {translate(filters.all || "All ({count})", { count: snowItems?.length || 0 })}
               </button>
               <button
                 onClick={() => setStatusFilter("open")}
@@ -180,7 +171,7 @@ export function SnowIncidentsDialog({
                 }`}
               >
                 <AlertCircle className="h-3 w-3" />
-                {translate(filtersT.open || "Open ({count})", { count: openCount })}
+                {translate(filters.open || "Open ({count})", { count: openCount })}
               </button>
               <button
                 onClick={() => setStatusFilter("in-progress")}
@@ -191,7 +182,7 @@ export function SnowIncidentsDialog({
                 }`}
               >
                 <Clock className="h-3 w-3" />
-                {translate(filtersT.inProgress || "In Progress ({count})", { count: progressCount })}
+                {translate(filters.inProgress || "In Progress ({count})", { count: progressCount })}
               </button>
               <button
                 onClick={() => setStatusFilter("resolved")}
@@ -202,7 +193,7 @@ export function SnowIncidentsDialog({
                 }`}
               >
                 <CheckCircle className="h-3 w-3" />
-                {translate(filtersT.resolved || "Resolved ({count})", { count: resolvedCount })}
+                {translate(filters.resolved || "Resolved ({count})", { count: resolvedCount })}
               </button>
             </div>
           </div>
@@ -216,7 +207,7 @@ export function SnowIncidentsDialog({
                 <div className="p-3 rounded-full bg-muted/30 mb-3 animate-pulse">
                   <RefreshCw className="h-6 w-6 text-muted-foreground animate-spin" />
                 </div>
-                <p className="text-sm text-muted-foreground">{incidentsT.loading || 'Loading incidents...'}</p>
+                <p className="text-sm text-muted-foreground">{incidents.get('loading', 'Loading incidents...')}</p>
               </div>
             ) : snowError ? (
               <div className="flex flex-col items-center justify-center py-12">
@@ -227,8 +218,8 @@ export function SnowIncidentsDialog({
               </div>
             ) : filteredItems.length > 0 ? (
               filteredItems.map((item: any) => {
-                const statusStyle = getStatusStyle(item.state, statusT);
-                const priorityStyle = getPriorityStyle(item.priority, priorityT);
+                const statusStyle = getStatusStyle(item.state, status);
+                const priorityStyle = getPriorityStyle(item.priority, priority);
                 const StatusIcon = statusStyle.icon;
 
                 return (
@@ -255,7 +246,7 @@ export function SnowIncidentsDialog({
                             {item.short_description}
                           </p>
                           <p className="text-[11px] text-muted-foreground mt-1.5">
-                            {tableT.updated || 'Updated'} {item.updatedAt}
+                            {table.updated || 'Updated'} {item.updatedAt}
                           </p>
                         </div>
                       </div>
@@ -270,13 +261,13 @@ export function SnowIncidentsDialog({
                 </div>
                 <h3 className="font-medium text-foreground mb-1">
                   {searchQuery || statusFilter !== "all" 
-                    ? (emptyStatesT.noMatch?.title || 'No matching incidents')
-                    : (emptyStatesT.allClear?.title || 'All clear!')}
+                    ? (emptyStates.noMatch?.title || 'No matching incidents')
+                    : (emptyStates.allClear?.title || 'All clear!')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {searchQuery || statusFilter !== "all" 
-                    ? (emptyStatesT.noMatch?.description || 'Try a different search or filter')
-                    : (emptyStatesT.allClear?.description || 'No incidents found for this user')}
+                    ? (emptyStates.noMatch?.description || 'Try a different search or filter')
+                    : (emptyStates.allClear?.description || 'No incidents found for this user')}
                 </p>
               </div>
             )}
@@ -287,11 +278,11 @@ export function SnowIncidentsDialog({
         <div className="px-4 py-2 border-t border-border/30 bg-muted/20 flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Ticket className="h-3 w-3" />
-            <span>{translate(footerT.showing || "Showing {filtered} of {total}", { filtered: filteredItems.length, total: snowItems?.length || 0 })}</span>
+            <span>{translate(footer.showing || "Showing {filtered} of {total}", { filtered: filteredItems.length, total: snowItems?.length || 0 })}</span>
           </div>
           {typeof snowCount === 'number' && snowCount > 0 && (
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0">
-              {translate(footerT.needsAttention || "{count} needs attention", { count: snowCount })}
+              {translate(footer.needsAttention || "{count} needs attention", { count: snowCount })}
             </Badge>
           )}
         </div>
