@@ -1,6 +1,9 @@
 {
   "title": "Quick Actions",
   "subtitle": "Execute operations for searched users",
+  "labels": {
+    "actions": "Actions:"
+  },
   "external": {
     "label": "External:",
     "splunk": {

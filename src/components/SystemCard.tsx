@@ -316,7 +316,7 @@ export function SystemCard({
                 <div className="p-2 rounded-full bg-muted/50">
                   <RefreshCw className="h-5 w-5 text-blue-500 animate-spin" />
                 </div>
-                <p className="text-[11px] text-muted-foreground">Loading {name} data...</p>
+                <p className="text-[11px] text-muted-foreground">{t(labels.systemCards.loading, { name })}</p>
               </div>
             ) : error ? (
               <div className="flex flex-col items-center justify-center py-6 px-3 space-y-2">
@@ -326,7 +326,7 @@ export function SystemCard({
                 <p className="text-[11px] text-red-600 dark:text-red-400 text-center max-w-[220px]">{error}</p>
                 <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} className="h-6 text-[11px] border-border/50">
                   <RefreshCw className="h-3 w-3 mr-1" />
-                  Retry
+                  {labels.systemCards.buttons.retry}
                 </Button>
               </div>
             ) : data ? (
@@ -344,7 +344,7 @@ export function SystemCard({
                         </div>
                       ))
                     ) : (
-                      <span className="text-[11px] font-medium text-muted-foreground">Data loaded</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">{labels.systemCards.status.loaded}</span>
                     )}
                   </div>
                   
@@ -353,7 +353,7 @@ export function SystemCard({
                     className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-muted/80 transition-colors shrink-0"
                   >
                     <Code className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-[11px] font-medium text-foreground whitespace-nowrap">JSON</span>
+                    <span className="text-[11px] font-medium text-foreground whitespace-nowrap">{labels.systemCards.labels.json}</span>
                     <span className="text-[9px] px-1 py-0.5 rounded bg-muted text-muted-foreground font-mono">
                       {Object.keys(data).length}
                     </span>
@@ -377,7 +377,7 @@ export function SystemCard({
                       onClick={() => setJsonCollapsed(false)}
                       className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
                     >
-                      Expand to view JSON ↓
+                      {labels.systemCards.labels.expandJson}
                     </button>
                   </div>
                 )}
@@ -387,10 +387,10 @@ export function SystemCard({
                 <div className="p-2 rounded-full bg-muted/50">
                   <Code className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <p className="text-[11px] text-muted-foreground">No data available</p>
+                <p className="text-[11px] text-muted-foreground">{labels.systemCards.emptyState}</p>
                 <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} disabled={!enabled} className="h-6 text-[11px] border-border/50">
                   <RefreshCw className="h-3 w-3 mr-1" />
-                  Load Data
+                  {labels.systemCards.buttons.loadData}
                 </Button>
               </div>
             )}

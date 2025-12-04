@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { RefreshCw, Search, Ticket, AlertCircle, CheckCircle, Clock, Filter } from "lucide-react";
+import { labels, t } from "@/config/labels";
 
 interface SnowIncidentsDialogProps {
   open: boolean;
@@ -30,7 +31,7 @@ function getStatusStyle(state: string) {
       icon: AlertCircle,
       color: 'text-red-600 dark:text-red-400',
       bg: 'bg-red-500/10',
-      label: 'Open',
+      label: labels.snow.status.open,
     };
   }
   if (stateLower.includes('progress')) {
@@ -38,14 +39,14 @@ function getStatusStyle(state: string) {
       icon: Clock,
       color: 'text-amber-600 dark:text-amber-400',
       bg: 'bg-amber-500/10',
-      label: 'In Progress',
+      label: labels.snow.status.inProgress,
     };
   }
   return {
     icon: CheckCircle,
     color: 'text-green-600 dark:text-green-400',
     bg: 'bg-green-500/10',
-    label: 'Resolved',
+    label: labels.snow.status.resolved,
   };
 }
 
@@ -53,15 +54,15 @@ function getStatusStyle(state: string) {
 function getPriorityStyle(priority: string) {
   const p = String(priority).toLowerCase();
   if (p.includes('1') || p.includes('critical')) {
-    return { color: 'bg-red-500/10 text-red-600 dark:text-red-400', label: 'Critical' };
+    return { color: 'bg-red-500/10 text-red-600 dark:text-red-400', label: labels.snow.priority.critical };
   }
   if (p.includes('2') || p.includes('high')) {
-    return { color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400', label: 'High' };
+    return { color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400', label: labels.snow.priority.high };
   }
   if (p.includes('3') || p.includes('medium')) {
-    return { color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400', label: 'Medium' };
+    return { color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400', label: labels.snow.priority.medium };
   }
-  return { color: 'bg-green-500/10 text-green-600 dark:text-green-400', label: 'Low' };
+  return { color: 'bg-green-500/10 text-green-600 dark:text-green-400', label: labels.snow.priority.low };
 }
 
 export function SnowIncidentsDialog({
@@ -110,7 +111,7 @@ export function SnowIncidentsDialog({
               <div className="p-1.5 rounded-md bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-md">
                 <Ticket className="h-4 w-4" />
               </div>
-              <span>ServiceNow Incidents</span>
+              <span>{labels.snow.incidents.title}</span>
               {snowEmail && (
                 <span className="text-[11px] font-normal text-muted-foreground ml-1">
                   {snowEmail}
@@ -126,11 +127,11 @@ export function SnowIncidentsDialog({
                     className="text-[11px] px-2 py-1 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                   >
                     <RefreshCw className={`h-3 w-3 ${snowLoading ? 'animate-spin' : ''}`} />
-                    Refresh
+                    {labels.snow.incidents.refresh}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Refresh incidents</p>
+                  <p>{labels.snow.tooltips.refresh}</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -141,7 +142,7 @@ export function SnowIncidentsDialog({
             <div className="relative flex-shrink-0 w-48">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search incidents..."
+                placeholder={labels.snow.incidents.placeholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-7 pl-8 text-xs bg-background/80 border-border/50 focus:border-orange-500/50"
@@ -156,7 +157,7 @@ export function SnowIncidentsDialog({
                     : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                All ({snowItems?.length || 0})
+                {t(labels.snow.filters.all, { count: snowItems?.length || 0 })}
               </button>
               <button
                 onClick={() => setStatusFilter("open")}
@@ -167,7 +168,7 @@ export function SnowIncidentsDialog({
                 }`}
               >
                 <AlertCircle className="h-3 w-3" />
-                Open ({openCount})
+                {t(labels.snow.filters.open, { count: openCount })}
               </button>
               <button
                 onClick={() => setStatusFilter("in-progress")}
@@ -178,7 +179,7 @@ export function SnowIncidentsDialog({
                 }`}
               >
                 <Clock className="h-3 w-3" />
-                In Progress ({progressCount})
+                {t(labels.snow.filters.inProgress, { count: progressCount })}
               </button>
               <button
                 onClick={() => setStatusFilter("resolved")}
@@ -189,7 +190,7 @@ export function SnowIncidentsDialog({
                 }`}
               >
                 <CheckCircle className="h-3 w-3" />
-                Resolved ({resolvedCount})
+                {t(labels.snow.filters.resolved, { count: resolvedCount })}
               </button>
             </div>
           </div>
@@ -203,7 +204,7 @@ export function SnowIncidentsDialog({
                 <div className="p-3 rounded-full bg-muted/30 mb-3 animate-pulse">
                   <RefreshCw className="h-6 w-6 text-muted-foreground animate-spin" />
                 </div>
-                <p className="text-sm text-muted-foreground">Loading incidents...</p>
+                <p className="text-sm text-muted-foreground">{labels.snow.incidents.loading}</p>
               </div>
             ) : snowError ? (
               <div className="flex flex-col items-center justify-center py-12">
@@ -242,7 +243,7 @@ export function SnowIncidentsDialog({
                             {item.short_description}
                           </p>
                           <p className="text-[11px] text-muted-foreground mt-1.5">
-                            Updated: {item.updatedAt}
+                            {labels.snow.table.updated} {item.updatedAt}
                           </p>
                         </div>
                       </div>
@@ -256,12 +257,12 @@ export function SnowIncidentsDialog({
                   <CheckCircle className="h-6 w-6 text-green-500" />
                 </div>
                 <h3 className="font-medium text-foreground mb-1">
-                  {searchQuery || statusFilter !== "all" ? "No Matching Incidents" : "All Clear!"}
+                  {searchQuery || statusFilter !== "all" ? labels.snow.emptyStates.noMatch.title : labels.snow.emptyStates.allClear.title}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {searchQuery || statusFilter !== "all" 
-                    ? "Try adjusting your filters" 
-                    : "No incidents found"}
+                    ? labels.snow.emptyStates.noMatch.description 
+                    : labels.snow.emptyStates.allClear.description}
                 </p>
               </div>
             )}
@@ -272,11 +273,11 @@ export function SnowIncidentsDialog({
         <div className="px-4 py-2 border-t border-border/30 bg-muted/20 flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Ticket className="h-3 w-3" />
-            <span>Showing {filteredItems.length} of {snowItems?.length || 0} incidents</span>
+            <span>{t(labels.snow.footer.showing, { filtered: filteredItems.length, total: snowItems?.length || 0 })}</span>
           </div>
           {typeof snowCount === 'number' && snowCount > 0 && (
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0">
-              {snowCount} needs attention
+              {t(labels.snow.footer.needsAttention, { count: snowCount })}
             </Badge>
           )}
         </div>

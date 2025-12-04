@@ -140,21 +140,21 @@ export function SnowTicketDialog({
               </div>
               <div className="px-4 py-3 space-y-2">
                 <div className="grid grid-cols-[80px_1fr] gap-2 text-sm">
-                  <span className="text-blue-600 dark:text-blue-400 font-medium text-xs">User:</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium text-xs">{labels.snow.ticket.labels.user}</span>
                   <span className="text-foreground/80 font-mono text-xs truncate">{email}</span>
                   
-                  <span className="text-purple-600 dark:text-purple-400 font-medium text-xs">System:</span>
+                  <span className="text-purple-600 dark:text-purple-400 font-medium text-xs">{labels.snow.ticket.labels.system}</span>
                   <span className="text-foreground/80 text-xs">{systemKey}</span>
                   
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium text-xs">Payload:</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium text-xs">{labels.snow.ticket.labels.payload}</span>
                   <span className="text-foreground/80 text-xs">
-                    {payloadFieldCount > 0 ? `${payloadFieldCount} fields attached` : 'No data attached'}
+                    {payloadFieldCount > 0 ? labels.snow.ticket.payload.attached : labels.snow.ticket.payload.notAttached}
                   </span>
                 </div>
 
                 {description ? (
                   <div className="pt-2 mt-2 border-t border-border/20">
-                    <span className="text-orange-600 dark:text-orange-400 font-medium text-xs block mb-1.5">Your Note:</span>
+                    <span className="text-orange-600 dark:text-orange-400 font-medium text-xs block mb-1.5">{labels.snow.ticket.labels.yourNote}</span>
                     <div className="bg-background/60 rounded-md p-2.5 border border-border/30">
                       <p className="text-foreground/80 text-xs italic leading-relaxed whitespace-pre-wrap break-words">
                         "{description}"
@@ -165,7 +165,7 @@ export function SnowTicketDialog({
                   <div className="pt-2 mt-2 border-t border-border/20 text-center py-4">
                     <FileText className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
                     <p className="text-xs text-muted-foreground">
-                      Start typing to see your note preview
+                      {labels.snow.ticket.hints.preview}
                     </p>
                   </div>
                 )}
@@ -177,13 +177,13 @@ export function SnowTicketDialog({
               <div className="px-4 py-2.5 flex items-center justify-between bg-muted/20 border-b border-border/20">
                 <div className="flex items-center gap-2">
                   <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Description</span>
-                  <span className="text-[10px] text-muted-foreground">(Optional)</span>
+                  <span className="text-sm font-medium text-foreground">{labels.snow.ticket.labels.description}</span>
+                  <span className="text-[10px] text-muted-foreground">{labels.snow.ticket.labels.optional}</span>
                 </div>
               </div>
               <div className="px-4 py-3">
                 <Textarea
-                  placeholder="Describe the issue or provide additional context...&#x0a;&#x0a;Example: User unable to access application. Need to verify group memberships and authentication logs."
+                  placeholder={labels.snow.ticket.placeholder}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   maxLength={500}
@@ -194,10 +194,10 @@ export function SnowTicketDialog({
                 />
                 <div className="flex items-center justify-between mt-2 text-[11px]">
                   <span className="text-muted-foreground">
-                    {description.length === 0 ? '💡 Add context to help resolve faster' :
-                     description.length < 50 ? '✍️ Consider adding more details' :
-                     description.length < 200 ? '✅ Good detail level' :
-                     description.length < 400 ? '🎯 Comprehensive description' : '⚠️ Approaching limit'}
+                    {description.length === 0 ? labels.snow.ticket.hints.addContext :
+                     description.length < 50 ? labels.snow.ticket.hints.addMoreDetails :
+                     description.length < 200 ? labels.snow.ticket.hints.goodDetail :
+                     description.length < 400 ? labels.snow.ticket.hints.comprehensive : labels.snow.ticket.hints.approachingLimit}
                   </span>
                   <span className={`font-mono font-semibold ${
                     description.length < 200 ? 'text-green-600 dark:text-green-400' :
@@ -205,7 +205,7 @@ export function SnowTicketDialog({
                     description.length < 500 ? 'text-orange-600 dark:text-orange-400' :
                     'text-red-600 dark:text-red-400'
                   }`}>
-                    {description.length}/500
+                    {t(labels.snow.ticket.charCount, { count: description.length, max: 500 })}
                   </span>
                 </div>
               </div>
@@ -217,7 +217,7 @@ export function SnowTicketDialog({
         <div className="px-4 py-2 border-t border-border/30 bg-muted/20 flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Ticket className="h-3 w-3" />
-            <span>Target: {systemName}</span>
+            <span>{labels.snow.ticket.labels.target} {systemName}</span>
           </div>
           <div className="flex gap-2">
             <button
@@ -227,7 +227,7 @@ export function SnowTicketDialog({
               className="text-[11px] px-3 py-1.5 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 disabled:opacity-50"
             >
               <X className="h-3 w-3" />
-              Cancel
+              {labels.common.buttons.cancel}
             </button>
             <button
               type="button"
@@ -238,12 +238,12 @@ export function SnowTicketDialog({
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  Submitting...
+                  {labels.snow.ticket.submitting}
                 </>
               ) : (
                 <>
                   <Send className="h-3 w-3" />
-                  Submit Ticket
+                  {labels.snow.ticket.submit}
                 </>
               )}
             </button>

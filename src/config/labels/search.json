@@ -1,5 +1,34 @@
 {
+  "title": "Employee Search",
+  "description": "Search across all connected identity systems",
   "placeholder": "Search by User ID or Email...",
+  "placeholders": {
+    "ops": "Search all identity systems...",
+    "employee": "Searching your own data...",
+    "initial": "Search by name, email, or ID - press Enter or click search"
+  },
+  "viewAllData": "View all data",
+  "buttons": {
+    "json": "JSON",
+    "formatted": "Formatted"
+  },
+  "tooltips": {
+    "viewJson": "View all systems as JSON",
+    "viewFormatted": "View formatted layout",
+    "copyData": "Copy {system} data",
+    "viewFirstRow": "View first row details"
+  },
+  "aria": {
+    "searchInput": "Search employees",
+    "clearSearch": "Clear search"
+  },
+  "emptyState": {
+    "hint": "Enter a name, email, or ID to search across identity systems"
+  },
+  "badges": {
+    "active": "Active"
+  },
+  "noData": "No data available",
   "results": {
     "title": "Search Results",
     "noResults": "No results found",

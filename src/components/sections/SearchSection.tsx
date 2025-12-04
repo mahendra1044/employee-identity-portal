@@ -128,7 +128,7 @@ export function SearchSection({
     const displayKey = candidateKeys[0] || "";
     
     openDialog(
-      `Consolidated View (${mode.toUpperCase()}) — ${displayKey || "Details"}`,
+      t(labels.search.consolidatedView.title, { mode: mode.toUpperCase(), key: displayKey || "Details" }),
       null,
       mode,
       true // This is an aggregate view
@@ -176,7 +176,7 @@ export function SearchSection({
                   {hasData && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-medium text-green-600 dark:text-green-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-600 dark:bg-green-400" />
-                      Active
+                      {labels.search.badges.active}
                     </span>
                   )}
                 </div>
@@ -193,7 +193,7 @@ export function SearchSection({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Copy {SYSTEM_LABELS[sys]} data</p>
+                    <p>{t(labels.search.tooltips.copyData, { system: SYSTEM_LABELS[sys] })}</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -203,7 +203,7 @@ export function SearchSection({
                   <GroupedFieldsRenderer data={val} className="p-0" />
                 ) : (
                   <div className="bg-muted/30 border border-dashed rounded-lg p-6 text-center">
-                    <p className="text-sm text-muted-foreground italic">No data available</p>
+                    <p className="text-sm text-muted-foreground italic">{labels.search.noData}</p>
                   </div>
                 )
               ) : (
@@ -245,9 +245,9 @@ export function SearchSection({
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-sm font-semibold text-foreground leading-none">
-                  Employee Search
+                  {labels.search.title}
                 </h2>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Search across all connected identity systems</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{labels.search.description}</p>
               </div>
             </div>
             
@@ -255,10 +255,10 @@ export function SearchSection({
             <div className="mb-3">
               <div className="relative">
                 <Input
-                  placeholder={!hasSearched && !searchError ? "Search by name, email, or ID - press Enter or click search" : "Search by name, email, or ID"}
+                  placeholder={!hasSearched && !searchError ? labels.search.placeholders.initial : labels.search.placeholder}
                   value={search}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  aria-label="Search employees"
+                  aria-label={labels.search.aria.searchInput}
                   className="pr-24 h-9 border-border/50 bg-background/50 focus-visible:ring-1 focus-visible:ring-violet-500/50 transition-all"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") onDoSearch();
@@ -268,7 +268,7 @@ export function SearchSection({
                   <button
                     onClick={() => onSearchChange("")}
                     className="absolute right-12 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Clear search"
+                    aria-label={labels.search.aria.clearSearch}
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -295,7 +295,7 @@ export function SearchSection({
             {/* Consolidated actions - shown when results exist */}
             {hasSearched && searchResults && Object.keys(searchResults).length > 0 && (
               <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/30">
-                <span className="text-[11px] text-muted-foreground">View all data:</span>
+                <span className="text-[11px] text-muted-foreground">{labels.search.viewAllData}:</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -305,10 +305,10 @@ export function SearchSection({
                       className="h-6 px-2 text-[11px] hover:bg-muted/80"
                     >
                       <FileText className="h-3 w-3 mr-1" />
-                      JSON
+                      {labels.search.buttons.json}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>View all systems as JSON</p></TooltipContent>
+                  <TooltipContent><p>{labels.search.tooltips.viewJson}</p></TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -319,10 +319,10 @@ export function SearchSection({
                       className="h-6 px-2 text-[11px] hover:bg-muted/80"
                     >
                       <Code className="h-3 w-3 mr-1" />
-                      Formatted
+                      {labels.search.buttons.formatted}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>View formatted layout</p></TooltipContent>
+                  <TooltipContent><p>{labels.search.tooltips.viewFormatted}</p></TooltipContent>
                 </Tooltip>
               </div>
             )}
@@ -362,7 +362,7 @@ export function SearchSection({
                     </svg>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Enter a name, email, or ID to search across identity systems
+                    {labels.search.emptyState.hint}
                   </p>
                 </div>
               )}
@@ -390,7 +390,7 @@ export function SearchSection({
           {/* Custom content for aggregate and single views */}
           {dialogLoading ? (
             <div className="flex items-center justify-center h-32">
-              <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
+              <p className="text-sm text-muted-foreground animate-pulse">{labels.common.status.loading}</p>
             </div>
           ) : dialogData ? (
             <div className="flex-1 overflow-auto">
@@ -398,7 +398,7 @@ export function SearchSection({
             </div>
           ) : (
             <div className="flex items-center justify-center h-32">
-              <p className="text-sm text-muted-foreground">No details available</p>
+              <p className="text-sm text-muted-foreground">{labels.dataViewer.emptyState}</p>
             </div>
           )}
         </DataDialog>

@@ -18,6 +18,7 @@ import type { SearchSystemConfig } from "@/lib/search-config";
 import { filterSearchResults, getDetailKey } from "@/lib/search-config";
 import { PaginatedResultsTable } from "./PaginatedResultsTable";
 import { shouldShowPagination } from "@/config/search-results.config";
+import { labels } from "@/config/labels";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -111,7 +112,7 @@ export function SearchResultCard({
                 <Eye className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent><p>View first row details</p></TooltipContent>
+            <TooltipContent><p>{labels.search.tooltips.viewFirstRow}</p></TooltipContent>
           </Tooltip>
         )}
       </div>
@@ -125,7 +126,7 @@ export function SearchResultCard({
         />
       ) : (
         <div className="px-3 py-4 text-center">
-          <p className="text-[11px] text-muted-foreground">No results found</p>
+          <p className="text-[11px] text-muted-foreground">{labels.search.results.noResults}</p>
         </div>
       )}
     </div>

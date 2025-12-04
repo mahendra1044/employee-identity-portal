@@ -22,6 +22,7 @@ import {
   Check
 } from "lucide-react";
 import { useAppAuth } from "@/hooks/useAppAuth";
+import { labels, t } from "@/config/labels";
 import type { RBACRole } from "@/lib/types";
 
 /**
@@ -100,25 +101,14 @@ const defaultConfig = {
   accentColor: 'bg-slate-500'
 };
 
-// Role display name mappings
-const roleDisplayNames: Record<string, string> = {
-  'R001': 'Super User',
-  'R002': 'SSO Ops',
-  'R003': 'PAM Ops',
-  'R004': 'IGA Ops',
-  'R005': 'Entra ID Ops',
-  'R006': 'TPAG Ops',
-  'R007': 'Employee',
-  'R008': 'Management',
-};
-
 function getRoleConfig(roleId: string) {
   return roleConfig[roleId] || defaultConfig;
 }
 
 function getDisplayName(role: RBACRole): string {
-  // Use mapped display name if available, otherwise use the role name from backend
-  return roleDisplayNames[role.id] || role.name;
+  // Use mapped display name from labels if available, otherwise use the role name from backend
+  const roleLabels = labels.roleSwitcher.roles as Record<string, string>;
+  return roleLabels[role.id] || role.name;
 }
 
 /**
@@ -178,7 +168,7 @@ export function RoleSwitcher() {
                 <ActiveIcon className={`h-3.5 w-3.5 ${activeConfig.color} flex-shrink-0`} />
                 
                 {/* Role name */}
-                <SelectValue placeholder="Select Role">
+                <SelectValue placeholder={labels.roleSwitcher.placeholder}>
                   <span className={`text-xs font-medium ${activeConfig.color} truncate`}>
                     {getDisplayName(activeRole)}
                   </span>
@@ -210,7 +200,7 @@ export function RoleSwitcher() {
               {/* Header label */}
               <div className="px-2.5 py-1.5 mb-1">
                 <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  {isMaster ? 'All Roles Available' : 'Switch Role'}
+                  {isMaster ? labels.roleSwitcher.headers.allRoles : labels.roleSwitcher.headers.switchRole}
                 </span>
               </div>
               
@@ -274,7 +264,7 @@ export function RoleSwitcher() {
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3 w-3 text-violet-400" />
                     <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                      Master access enabled
+                      {labels.roleSwitcher.hints.masterAccess}
                     </span>
                   </div>
                 </div>
@@ -296,7 +286,7 @@ export function RoleSwitcher() {
         className="bg-slate-900 text-white border-slate-800 px-3 py-1.5"
       >
         <p className="text-xs font-medium">
-          {isMaster ? 'Master Access · All Roles' : `${availableRoles.length} roles available`}
+          {isMaster ? labels.roleSwitcher.tooltips.masterAccess : t(labels.roleSwitcher.tooltips.rolesAvailable, { count: availableRoles.length })}
         </p>
       </TooltipContent>
     </Tooltip>

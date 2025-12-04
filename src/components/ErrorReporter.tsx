@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { labels } from "@/config/labels";
 
 type ReporterProps = {
   /*  ⎯⎯ props are only provided on the global-error page ⎯⎯ */
@@ -101,17 +102,17 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
         <div className="max-w-md w-full text-center space-y-6">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-destructive">
-              Something went wrong!
+              {labels.errors.globalError.title}
             </h1>
             <p className="text-muted-foreground">
-              An unexpected error occurred. Please try again fixing with Orchids
+              {labels.errors.globalError.description}
             </p>
           </div>
           <div className="space-y-2">
             {process.env.NODE_ENV === "development" && (
               <details className="mt-4 text-left">
                 <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                  Error details
+                  {labels.errors.globalError.detailsLabel}
                 </summary>
                 <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
                   {error.message}
@@ -122,7 +123,7 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
                   )}
                   {error.digest && (
                     <div className="mt-2 text-muted-foreground">
-                      Digest: {error.digest}
+                      {labels.errors.globalError.digestLabel} {error.digest}
                     </div>
                   )}
                 </pre>

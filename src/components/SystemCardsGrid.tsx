@@ -2,6 +2,7 @@
 
 import { SystemCard } from "@/components/SystemCard";
 import { SYSTEM_LABELS } from "@/lib/constants";
+import { labels } from "@/config/labels";
 import type { SystemKey } from "@/lib/types";
 
 interface SystemCardsGridProps {
@@ -30,10 +31,10 @@ export function SystemCardsGrid({
       <div className={containerClass}>
         <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-slate-200 dark:border-border/40 bg-muted/20">
           <p className="text-sm font-medium text-foreground mb-1">
-            No systems enabled
+            {labels.errors.featureNotEnabled.title}
           </p>
           <p className="text-[11px] text-muted-foreground">
-            Feature not enabled. Please contact your administrator.
+            {labels.errors.featureNotEnabled.description}
           </p>
         </div>
       </div>
@@ -45,12 +46,12 @@ export function SystemCardsGrid({
       <div className={containerClass}>
         <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-slate-200 dark:border-border/40 bg-muted/20">
           <p className="text-sm font-medium text-foreground mb-1">
-            No cards visible
+            {labels.errors.noCardsVisible.title}
           </p>
           <p className="text-[11px] text-muted-foreground">
             {role === "ops" 
-              ? "System cards appear after a successful search." 
-              : "All system cards are hidden. Open Settings to enable some."
+              ? labels.errors.noCardsVisible.descriptionOps 
+              : labels.errors.noCardsVisible.descriptionEmployee
             }
           </p>
         </div>

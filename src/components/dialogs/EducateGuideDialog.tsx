@@ -13,6 +13,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import EDUCATE_CONFIG from "@/lib/educate-config.json";
 import { SYSTEM_LABELS } from "@/lib/constants";
 import { filterSystemsByRole } from "@/lib/role-utils";
+import { labels, t } from "@/config/labels";
 import {
   SYSTEM_CATEGORIES,
   getTipIcon,
@@ -144,11 +145,11 @@ export function EducateGuideDialog({
                 <GraduationCap className="h-4 w-4" />
               </div>
               <span className="flex items-center gap-1.5">
-                Educate Me
+                {labels.educate.title}
                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
               </span>
               <span className="text-[11px] font-normal text-muted-foreground ml-1">
-                {totalTips} tips · {filteredSystems.length} systems
+                {t(labels.educate.stats, { tips: totalTips, systems: filteredSystems.length })}
               </span>
             </DialogTitle>
             <div className="flex items-center gap-1.5 mr-8">
@@ -156,13 +157,13 @@ export function EducateGuideDialog({
                 onClick={expandAll}
                 className="text-[11px] px-2 py-1 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
               >
-                Expand
+                {labels.educate.buttons.expand}
               </button>
               <button
                 onClick={collapseAll}
                 className="text-[11px] px-2 py-1 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
               >
-                Collapse
+                {labels.educate.buttons.collapse}
               </button>
             </div>
           </div>
@@ -172,7 +173,7 @@ export function EducateGuideDialog({
             <div className="relative flex-shrink-0 w-48">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search tips..."
+                placeholder={labels.educate.placeholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-7 pl-8 text-xs bg-background/80 border-border/50 focus:border-violet-500/50"
@@ -187,7 +188,7 @@ export function EducateGuideDialog({
                     : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                All
+                {labels.educate.filters.all}
               </button>
               {(Object.keys(SYSTEM_CATEGORIES) as CategoryKey[]).map((cat) => {
                 const hasMatches = categoryHasMatches(cat);
@@ -246,7 +247,7 @@ export function EducateGuideDialog({
                       {SYSTEM_CATEGORIES[category]}
                     </h3>
                     <Badge variant="secondary" className="ml-auto text-xs">
-                      {systemsWithTips.length} systems
+                      {t(labels.educate.badges.systems, { count: systemsWithTips.length })}
                     </Badge>
                   </div>
 
@@ -277,7 +278,7 @@ export function EducateGuideDialog({
                                 variant="outline"
                                 className="text-[10px] px-1.5 py-0 h-5 font-normal"
                               >
-                                {tips.length} tips
+                                {t(labels.educate.badges.tips, { count: tips.length })}
                               </Badge>
                             </div>
                             {isExpanded ? (
@@ -330,11 +331,10 @@ export function EducateGuideDialog({
                   <GraduationCap className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-medium text-foreground mb-1">
-                  No Systems Available
+                  {labels.educate.emptyStates.noContent.title}
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  No educational content is available for your current role.
-                  Contact your administrator for access.
+                  {labels.educate.emptyStates.noContent.description}
                 </p>
               </div>
             )}
@@ -346,11 +346,10 @@ export function EducateGuideDialog({
                   <Search className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-medium text-foreground mb-1">
-                  No Matching Tips
+                  {labels.educate.emptyStates.noMatch.title}
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  No tips found matching "{searchQuery}". Try a different search
-                  term.
+                  {t(labels.educate.emptyStates.noMatch.description, { query: searchQuery })}
                 </p>
               </div>
             )}
@@ -361,7 +360,7 @@ export function EducateGuideDialog({
         <div className="px-4 py-2 border-t border-border/30 bg-muted/20 flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Lightbulb className="h-3 w-3" />
-            <span>Click system cards to expand tips</span>
+            <span>{labels.educate.footer.tip}</span>
           </div>
           {role && (
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">

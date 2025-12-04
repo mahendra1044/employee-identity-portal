@@ -29,6 +29,15 @@
  * - search.json: Search section labels
  * - quick-actions.json: Quick actions panel labels
  * - failures.json: Failures section labels
+ * - header.json: Header/navigation labels
+ * - roleSwitcher.json: Role switcher component labels
+ * - settings.json: Settings dialog labels
+ * - educate.json: Educate Me dialog labels
+ * - dataViewer.json: Data viewer/dialog labels
+ * - errors.json: Error state labels
+ * - pagination.json: Pagination component labels
+ * - jsonViewer.json: JSON rendering labels
+ * - accessibility.json: Accessibility/ARIA labels
  * 
  * @module config/labels
  */
@@ -41,6 +50,15 @@ import snowLabels from './snow.json';
 import searchLabels from './search.json';
 import quickActionsLabels from './quick-actions.json';
 import failuresLabels from './failures.json';
+import headerLabels from './header.json';
+import roleSwitcherLabels from './roleSwitcher.json';
+import settingsLabels from './settings.json';
+import educateLabels from './educate.json';
+import dataViewerLabels from './dataViewer.json';
+import errorsLabels from './errors.json';
+import paginationLabels from './pagination.json';
+import jsonViewerLabels from './jsonViewer.json';
+import accessibilityLabels from './accessibility.json';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -58,6 +76,15 @@ export interface Labels {
   search: typeof searchLabels;
   quickActions: typeof quickActionsLabels;
   failures: typeof failuresLabels;
+  header: typeof headerLabels;
+  roleSwitcher: typeof roleSwitcherLabels;
+  settings: typeof settingsLabels;
+  educate: typeof educateLabels;
+  dataViewer: typeof dataViewerLabels;
+  errors: typeof errorsLabels;
+  pagination: typeof paginationLabels;
+  jsonViewer: typeof jsonViewerLabels;
+  accessibility: typeof accessibilityLabels;
 }
 
 // ============================================================================
@@ -85,6 +112,15 @@ export const labels: Labels = {
   search: searchLabels,
   quickActions: quickActionsLabels,
   failures: failuresLabels,
+  header: headerLabels,
+  roleSwitcher: roleSwitcherLabels,
+  settings: settingsLabels,
+  educate: educateLabels,
+  dataViewer: dataViewerLabels,
+  errors: errorsLabels,
+  pagination: paginationLabels,
+  jsonViewer: jsonViewerLabels,
+  accessibility: accessibilityLabels,
 };
 
 // ============================================================================
@@ -134,6 +170,15 @@ export const snowL = labels.snow;
 export const searchL = labels.search;
 export const quickActionsL = labels.quickActions;
 export const failuresL = labels.failures;
+export const headerL = labels.header;
+export const roleSwitcherL = labels.roleSwitcher;
+export const settingsL = labels.settings;
+export const educateL = labels.educate;
+export const dataViewerL = labels.dataViewer;
+export const errorsL = labels.errors;
+export const paginationL = labels.pagination;
+export const jsonViewerL = labels.jsonViewer;
+export const accessibilityL = labels.accessibility;
 
 // Default export
 export default labels;

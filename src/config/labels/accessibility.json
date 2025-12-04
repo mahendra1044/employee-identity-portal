@@ -1,0 +1,35 @@
+{
+  "sidebar": {
+    "toggle": "Toggle Sidebar",
+    "title": "Sidebar",
+    "description": "Displays the mobile sidebar."
+  },
+  "pagination": {
+    "label": "pagination",
+    "previous": "Go to previous page",
+    "next": "Go to next page",
+    "buttons": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "more": "More pages"
+  },
+  "buttons": {
+    "close": "Close"
+  },
+  "carousel": {
+    "previous": "Previous slide",
+    "next": "Next slide"
+  },
+  "breadcrumb": {
+    "label": "breadcrumb",
+    "more": "More"
+  },
+  "dialog": {
+    "close": "Close dialog"
+  },
+  "menu": {
+    "open": "Open menu",
+    "close": "Close menu"
+  }
+}

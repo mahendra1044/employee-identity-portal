@@ -33,6 +33,7 @@ import { PfOpsDialog } from "@/components/dialogs/PfOpsDialog";
 import { RecentFailuresPanel } from "@/components/RecentFailuresPanel";
 import { SystemCardsGrid } from "@/components/SystemCardsGrid";
 import { DialogsSection } from "@/components/sections/DialogsSection";
+import { labels } from "@/config/labels";
 import { QuickActionsCard } from "@/components/sections/QuickActionsCard";
 // Import from constants
 import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
@@ -320,9 +321,9 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-sm font-bold text-slate-900 dark:text-neutral-50 [.navy_&]:text-blue-50 leading-none">
-                      System Cards
+                      {labels.systemCards.section.title}
                     </h2>
-                    <p className="text-[11px] text-slate-600 dark:text-neutral-300 [.navy_&]:text-blue-200 leading-tight mt-0.5">View and manage identity data across all integrated systems</p>
+                    <p className="text-[11px] text-slate-600 dark:text-neutral-300 [.navy_&]:text-blue-200 leading-tight mt-0.5">{labels.systemCards.section.description}</p>
                   </div>
                 </div>
               </div>

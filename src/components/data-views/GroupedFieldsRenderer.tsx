@@ -19,6 +19,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { labels } from "@/config/labels";
 import { toPairs } from "@/lib/formatters";
 import {
   getSectionForField,
@@ -153,7 +154,7 @@ export function GroupedFieldsRenderer({ data, className = "" }: GroupedFieldsRen
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Copy value</p>
+                                <p>{labels.jsonViewer.buttons.copyValue}</p>
                               </TooltipContent>
                             </Tooltip>
                           </div>

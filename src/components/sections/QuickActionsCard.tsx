@@ -186,7 +186,7 @@ export function QuickActionsCard({
           {/* Actions Container */}
           <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-slate-50/50 dark:bg-card/50 p-3">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] font-medium text-muted-foreground">Actions:</span>
+              <span className="text-[11px] font-medium text-muted-foreground">{labels.quickActions.labels.actions}</span>
               <div className="flex-1 h-px bg-border/30"></div>
             </div>
             {effectiveActive && qaEnabledTabs[effectiveActive] && (

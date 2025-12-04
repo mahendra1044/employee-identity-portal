@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { RefreshCw, ChevronDown, CheckCircle2 } from "lucide-react";
+import { labels } from "@/config/labels";
 import {
   type FailureKey,
   type FailureData,
@@ -90,7 +91,7 @@ function FailureCard({
         ) : (
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
             <CheckCircle2 className="h-3 w-3 text-green-500" />
-            <span>No failures detected</span>
+            <span>{labels.failures.emptyState}</span>
           </div>
         )}
       </div>
@@ -209,9 +210,9 @@ export function RecentFailuresPanel({
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-sm font-semibold text-foreground leading-none">
-                Recent Failures
+                {labels.failures.title}
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Monitor authentication and access failures</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{labels.failures.description}</p>
             </div>
           </div>
           
@@ -220,7 +221,7 @@ export function RecentFailuresPanel({
             <span className="text-xs font-medium text-foreground">{getPanelTitle(role, minutes)}</span>
             <span className="text-muted-foreground/40">•</span>
             <div className="flex items-center gap-1">
-              <label className="text-[11px] text-muted-foreground">Window:</label>
+              <label className="text-[11px] text-muted-foreground">{labels.failures.labels.window}</label>
               <Input
                 type="number"
                 min={1}
@@ -228,7 +229,7 @@ export function RecentFailuresPanel({
                 value={minutes}
                 onChange={(e) => onMinutesChange(Math.max(1, Number(e.target.value)))}
               />
-              <span className="text-[11px] text-muted-foreground">min</span>
+              <span className="text-[11px] text-muted-foreground">{labels.failures.labels.minutes}</span>
             </div>
             {timePresets.map((preset) => (
               <Button
@@ -248,7 +249,7 @@ export function RecentFailuresPanel({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Refresh failures data</p>
+                <p>{labels.failures.tooltips.refresh}</p>
               </TooltipContent>
             </Tooltip>
             {error && <span className="text-[11px] text-red-600 dark:text-red-400">{error}</span>}

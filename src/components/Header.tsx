@@ -10,6 +10,7 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAppUI } from "@/hooks/useAppUI";
 import { getOpsModeDescription, isOpsRole } from "@/lib/role-utils";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
+import { labels, t } from "@/config/labels";
 
 export function Header(props: {
   onShowSnowTickets?: () => void;
@@ -43,24 +44,8 @@ export function Header(props: {
   };
 
   const getRoleDisplay = () => {
-    switch (currentRole) {
-      case "ops":
-        return "Operations";
-      case "sso_ops":
-        return "SSO Ops";
-      case "pam_ops":
-        return "PAM Ops";
-      case "iga_ops":
-        return "IGA Ops";
-      case "entraid_ops":
-        return "Entra ID Ops";
-      case "tpag_ops":
-        return "TPAG Ops";
-      case "employee":
-        return "Employee";
-      default:
-        return currentRole || "User";
-    }
+    const roleKey = currentRole as keyof typeof labels.header.roles;
+    return labels.header.roles[roleKey] || currentRole || labels.header.roles.unknown;
   };
 
   // Get role-specific colors for badge
@@ -88,10 +73,10 @@ export function Header(props: {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="font-semibold text-sm text-foreground">
-                Identity Sphere
+                {labels.header.brand.name}
               </h1>
               <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-muted/50 text-muted-foreground border-border/50 font-normal">
-                Unified Access
+                {labels.header.brand.badge}
               </Badge>
             </div>
             
@@ -133,7 +118,7 @@ export function Header(props: {
                   variant="ghost" 
                   size="icon" 
                   onClick={() => setTheme(theme === "light" ? "dark" : theme === "dark" ? "navy" : "light")} 
-                  aria-label="Toggle theme"
+                  aria-label={labels.header.aria.themeToggle}
                   className="h-7 w-7 rounded-md hover:bg-muted/80 transition-colors"
                 >
                   {theme === "light" ? (
@@ -144,7 +129,7 @@ export function Header(props: {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Switch theme</p>
+                <p>{labels.header.tooltips.theme.toggle}</p>
               </TooltipContent>
             </Tooltip>
 
@@ -157,14 +142,14 @@ export function Header(props: {
                       variant="ghost" 
                       size="icon" 
                       onClick={() => setRole('ops')} 
-                      aria-label="Switch to general ops"
+                      aria-label={labels.header.aria.switchToOps}
                       className="h-7 w-7 rounded-md hover:bg-muted/80 transition-colors"
                     >
                       <ArrowLeftRight className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Switch to General Operations</p>
+                    <p>{labels.header.tooltips.switchToOps}</p>
                   </TooltipContent>
                 </Tooltip>
 
@@ -174,14 +159,14 @@ export function Header(props: {
                       variant="ghost" 
                       size="icon" 
                       onClick={() => setRole('employee')} 
-                      aria-label="Switch to employee view"
+                      aria-label={labels.header.aria.switchToEmployee}
                       className="h-7 w-7 rounded-md hover:bg-muted/80 transition-colors"
                     >
                       <UserCircle className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Switch to Employee view</p>
+                    <p>{labels.header.tooltips.switchToEmployee}</p>
                   </TooltipContent>
                 </Tooltip>
               </>
@@ -195,14 +180,14 @@ export function Header(props: {
                       variant="ghost" 
                       size="icon" 
                       onClick={() => setRole(originalRole || 'ops')} 
-                      aria-label="Switch to specialized ops"
+                      aria-label={labels.header.aria.switchToSpecialized}
                       className="h-7 w-7 rounded-md hover:bg-muted/80 transition-colors"
                     >
                       <ArrowLeftRight className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Switch to {getOpsModeDescription(originalRole)}</p>
+                    <p>{t(labels.header.tooltips.switchTo, { role: getOpsModeDescription(originalRole) })}</p>
                   </TooltipContent>
                 </Tooltip>
 
@@ -212,14 +197,14 @@ export function Header(props: {
                       variant="ghost" 
                       size="icon" 
                       onClick={() => setRole('employee')} 
-                      aria-label="Switch to employee view"
+                      aria-label={labels.header.aria.switchToEmployee}
                       className="h-7 w-7 rounded-md hover:bg-muted/80 transition-colors"
                     >
                       <UserCircle className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Switch to Employee view</p>
+                    <p>{labels.header.tooltips.switchToEmployee}</p>
                   </TooltipContent>
                 </Tooltip>
               </>
@@ -232,14 +217,14 @@ export function Header(props: {
                     variant="ghost" 
                     size="icon" 
                     onClick={() => setRole(originalRole || 'ops')} 
-                    aria-label="Switch back to ops view"
+                    aria-label={labels.header.aria.switchBackToOps}
                     className="h-7 w-7 rounded-md hover:bg-muted/80 transition-colors"
                   >
                     <Radio className="h-3.5 w-3.5 text-blue-500 animate-pulse" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Switch back to {getOpsModeDescription(originalRole)}</p>
+                  <p>{t(labels.header.tooltips.switchBackTo, { role: getOpsModeDescription(originalRole) })}</p>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -257,7 +242,7 @@ export function Header(props: {
                     className="relative h-7 px-2 rounded-md hover:bg-muted/80 transition-colors text-xs"
                   >
                     <FileText className="h-3.5 w-3.5 mr-1" />
-                    <span className="hidden sm:inline text-[11px]">SNOW</span>
+                    <span className="hidden sm:inline text-[11px]">{labels.header.buttons.snow}</span>
                     {props.snowTicketsCount ? (
                       <Badge className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 text-[9px] bg-orange-500 hover:bg-orange-500 text-white border-0">
                         {props.snowTicketsCount}
@@ -266,7 +251,7 @@ export function Header(props: {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{isOpsRole(currentRole) ? `View incidents for ${userId}` : "View your ServiceNow incidents"}</p>
+                  <p>{isOpsRole(currentRole) ? t(labels.header.tooltips.snowCount, { count: userId || '' }) : labels.header.tooltips.snow}</p>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -281,11 +266,11 @@ export function Header(props: {
                     className="h-7 px-2 rounded-md hover:bg-muted/80 transition-colors"
                   >
                     <BookOpen className="h-3.5 w-3.5 mr-1" />
-                    <span className="hidden sm:inline text-[11px]">Educate</span>
+                    <span className="hidden sm:inline text-[11px]">{labels.header.buttons.educate}</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>View troubleshooting guides</p>
+                  <p>{labels.header.tooltips.educate}</p>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -296,15 +281,15 @@ export function Header(props: {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setUIState('settingsOpen', true)} 
-                  aria-label="Settings"
+                  aria-label={labels.header.aria.settings}
                   className="h-7 px-2 rounded-md hover:bg-muted/80 transition-colors group"
                 >
                   <SettingsIcon className="h-3.5 w-3.5 mr-1 transition-transform duration-300 group-hover:rotate-45" />
-                  <span className="hidden sm:inline text-[11px]">Settings</span>
+                  <span className="hidden sm:inline text-[11px]">{labels.header.buttons.settings}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Manage system visibility</p>
+                <p>{labels.header.tooltips.settings}</p>
               </TooltipContent>
             </Tooltip>
           </div>
@@ -316,15 +301,15 @@ export function Header(props: {
                 variant="ghost"
                 size="sm" 
                 onClick={logout} 
-                aria-label="Sign out"
+                aria-label={labels.header.aria.signOut}
                 className="h-7 px-2 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 transition-colors"
               >
                 <LogOut className="h-3.5 w-3.5 sm:mr-1" />
-                <span className="hidden sm:inline text-[11px] font-medium">Sign out</span>
+                <span className="hidden sm:inline text-[11px] font-medium">{labels.header.buttons.signOut}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Sign out of the portal</p>
+              <p>{labels.header.tooltips.signOut}</p>
             </TooltipContent>
           </Tooltip>
         </div>

@@ -16,6 +16,7 @@
 import React, { useState, useRef } from "react";
 import { toast } from "sonner";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { labels } from "@/config/labels";
 import {
   isEmail,
   isUrl,
@@ -55,7 +56,7 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
       ? `"${key}": ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`
       : typeof value === 'string' ? value : JSON.stringify(value, null, 2);
     navigator.clipboard.writeText(textToCopy);
-    toast.success('Copied to clipboard');
+    toast.success(labels.common.copy.copiedToClipboard);
   };
 
   const renderValue = (value: unknown, path: string, key?: string, indent: number = 0): React.ReactNode => {
@@ -99,7 +100,7 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
                   📋
                 </button>
               </TooltipTrigger>
-              <TooltipContent><p>Copy</p></TooltipContent>
+              <TooltipContent><p>{labels.jsonViewer.buttons.copy}</p></TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -132,7 +133,7 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
                   📋
                 </button>
               </TooltipTrigger>
-              <TooltipContent><p>Copy</p></TooltipContent>
+              <TooltipContent><p>{labels.jsonViewer.buttons.copy}</p></TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -170,7 +171,7 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
                   📋
                 </button>
               </TooltipTrigger>
-              <TooltipContent><p>Copy</p></TooltipContent>
+              <TooltipContent><p>{labels.jsonViewer.buttons.copy}</p></TooltipContent>
             </Tooltip>
           </div>
         </div>

@@ -12,6 +12,7 @@
 
 import React, { useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { labels, t } from "@/config/labels";
 import {
   Table,
   TableBody,
@@ -71,7 +72,7 @@ function truncateText(text: string, maxLength: number): string {
  */
 function formatCellValue(value: unknown): string {
   if (value === null || value === undefined) return "-";
-  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "boolean") return value ? labels.jsonViewer.types.boolean.true : labels.jsonViewer.types.boolean.false;
   if (typeof value === "object") return JSON.stringify(value);
   const strValue = String(value);
   return truncateText(strValue, TABLE_DISPLAY_CONFIG.maxCellTextLength);
@@ -138,7 +139,7 @@ export function PaginatedResultsTable({
   if (results.length === 0) {
     return (
       <div className="p-4 text-center">
-        <p className="text-xs text-muted-foreground">No results found</p>
+        <p className="text-xs text-muted-foreground">{labels.search.results.noResults}</p>
       </div>
     );
   }
@@ -191,7 +192,7 @@ export function PaginatedResultsTable({
                   onKeyDown={(e) => handleKeyDown(e, item, idx)}
                   tabIndex={TABLE_DISPLAY_CONFIG.enableRowClick ? 0 : undefined}
                   role={TABLE_DISPLAY_CONFIG.enableRowClick ? "button" : undefined}
-                  aria-label={TABLE_DISPLAY_CONFIG.enableRowClick ? `View details for row ${actualRowNumber}` : undefined}
+                  aria-label={TABLE_DISPLAY_CONFIG.enableRowClick ? t(labels.pagination.aria.goToRow, { index: actualRowNumber }) : undefined}
                 >
                   {/* Row number */}
                   {TABLE_DISPLAY_CONFIG.showRowNumber && (
@@ -255,7 +256,7 @@ export function PaginatedResultsTable({
                   <ChevronsLeft className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>First page</p></TooltipContent>
+              <TooltipContent><p>{labels.pagination.tooltips.firstPage}</p></TooltipContent>
             </Tooltip>
 
             {/* Previous page */}
@@ -271,12 +272,12 @@ export function PaginatedResultsTable({
                   <ChevronLeft className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>Previous page</p></TooltipContent>
+              <TooltipContent><p>{labels.pagination.tooltips.previousPage}</p></TooltipContent>
             </Tooltip>
 
             {/* Page indicator */}
             <span className="text-[10px] text-muted-foreground px-2 whitespace-nowrap">
-              Page {currentPage} of {totalPages}
+              {t(labels.pagination.pageIndicator, { current: currentPage, total: totalPages })}
             </span>
 
             {/* Next page */}
@@ -292,7 +293,7 @@ export function PaginatedResultsTable({
                   <ChevronRight className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>Next page</p></TooltipContent>
+              <TooltipContent><p>{labels.pagination.tooltips.nextPage}</p></TooltipContent>
             </Tooltip>
 
             {/* Last page */}
@@ -308,14 +309,14 @@ export function PaginatedResultsTable({
                   <ChevronsRight className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>Last page</p></TooltipContent>
+              <TooltipContent><p>{labels.pagination.tooltips.lastPage}</p></TooltipContent>
             </Tooltip>
           </div>
 
           {/* Page size selector */}
           <div className="flex items-center gap-1">
             <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-              Per page:
+              {labels.pagination.labels.perPage}
             </span>
             <Select
               value={String(pageSize)}

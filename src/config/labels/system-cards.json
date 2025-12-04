@@ -1,4 +1,28 @@
 {
+  "section": {
+    "title": "System Cards",
+    "description": "View and manage identity data across all integrated systems"
+  },
+  "loading": "Loading {name} data...",
+  "emptyState": "No data available",
+  "buttons": {
+    "retry": "Retry",
+    "loadData": "Load Data"
+  },
+  "status": {
+    "loaded": "Data loaded"
+  },
+  "labels": {
+    "json": "JSON",
+    "expandJson": "Expand to view JSON ↓"
+  },
+  "links": {
+    "splunk": "View in Splunk"
+  },
+  "dialog": {
+    "title": "{system} — Details"
+  },
+  "fallbackTitle": "Ping Federate",
   "tooltips": {
     "refresh": "Refresh",
     "copyJson": "Copy JSON",
