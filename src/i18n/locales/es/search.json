@@ -1,0 +1,46 @@
+{
+  "title": "Búsqueda de Empleados",
+  "description": "Buscar en todos los sistemas de identidad conectados",
+  "placeholder": "Buscar por ID de Usuario o Correo...",
+  "placeholders": {
+    "ops": "Buscar en todos los sistemas de identidad...",
+    "employee": "Buscando sus propios datos...",
+    "initial": "Buscar por nombre, correo o ID - presione Enter o haga clic en buscar"
+  },
+  "viewAllData": "Ver todos los datos",
+  "buttons": {
+    "json": "JSON",
+    "formatted": "Formateado"
+  },
+  "tooltips": {
+    "viewJson": "Ver todos los sistemas como JSON",
+    "viewFormatted": "Ver diseño formateado",
+    "copyData": "Copiar datos de {system}",
+    "viewFirstRow": "Ver detalles de la primera fila"
+  },
+  "aria": {
+    "searchInput": "Buscar empleados",
+    "clearSearch": "Limpiar búsqueda"
+  },
+  "emptyState": {
+    "hint": "Ingrese un nombre, correo o ID para buscar en los sistemas de identidad"
+  },
+  "badges": {
+    "active": "Activo"
+  },
+  "noData": "No hay datos disponibles",
+  "results": {
+    "title": "Resultados de Búsqueda",
+    "noResults": "No se encontraron resultados",
+    "multipleMatches": "Se encontraron múltiples coincidencias",
+    "rowDetails": "{system} — Fila {index}: {key}"
+  },
+  "consolidatedView": {
+    "title": "Vista Consolidada ({mode}) — {key}",
+    "errorLoading": "No se pudo cargar los detalles agregados",
+    "copiedData": "Datos de {system} copiados"
+  },
+  "errors": {
+    "searchFailed": "Error en la búsqueda"
+  }
+}

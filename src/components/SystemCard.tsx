@@ -11,7 +11,7 @@ import { SnowTicketDialog } from "@/components/dialogs/SnowTicketDialog";
 import { getDataStatus, extractKeyMetrics } from "@/lib/system-card-utils";
 import { ErrorHandler } from "@/lib/error-handler";
 import { api } from "@/lib/api-client";
-import { labels, t } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import type { SystemKey, SystemData } from "@/lib/types";
 
 interface SystemCardProps {
@@ -33,6 +33,20 @@ export function SystemCard({
   email,
   userKey,
 }: SystemCardProps) {
+  const { t, translate } = useTranslation();
+  
+  // Translation accessors
+  const systemCardsT = t.systemCards as Record<string, unknown> || {};
+  const messagesT = systemCardsT.messages as Record<string, string> || {};
+  const tooltipsT = systemCardsT.tooltips as Record<string, string> || {};
+  const buttonsT = systemCardsT.buttons as Record<string, string> || {};
+  const statusT = systemCardsT.status as Record<string, string> || {};
+  const labelsT = systemCardsT.labels as Record<string, string> || {};
+  const pingFederateT = systemCardsT.pingFederate as Record<string, unknown> || {};
+  const userInfoT = pingFederateT.userInfo as Record<string, string> || {};
+  const oidcT = pingFederateT.oidc as Record<string, string> || {};
+  const samlT = pingFederateT.saml as Record<string, string> || {};
+  
   // Data state
   const [data, setData] = useState<SystemData | null>(null);
   const [details, setDetails] = useState<SystemData | null>(null);
@@ -64,8 +78,8 @@ export function SystemCard({
     let refreshToast: string | number | undefined;
     if (showToast) {
       const msg = userKey 
-        ? t(labels.systemCards.messages.refreshingForUser, { name, userKey })
-        : t(labels.systemCards.messages.refreshing, { name });
+        ? translate((messagesT.refreshingForUser as string) || 'Refreshing {name} for {userKey}...', { name, userKey })
+        : translate((messagesT.refreshing as string) || 'Refreshing {name}...', { name });
       refreshToast = toast.loading(msg);
     }
     
@@ -98,15 +112,15 @@ export function SystemCard({
       
       if (showToast) {
         const msg = userKey 
-          ? t(labels.systemCards.messages.refreshedForUser, { name, userKey })
-          : t(labels.systemCards.messages.refreshed, { name });
+          ? translate((messagesT.refreshedForUser as string) || '{name} refreshed for {userKey}', { name, userKey })
+          : translate((messagesT.refreshed as string) || '{name} refreshed', { name });
         toast.success(msg, { id: refreshToast });
       }
     } catch (e: unknown) {
       const errorMessage = ErrorHandler.parseError(e);
       setError(errorMessage);
       if (showToast) {
-        toast.error(t(labels.systemCards.messages.refreshFailed, { name, error: ErrorHandler.getUserFriendlyMessage(e) }), { id: refreshToast });
+        toast.error(translate((messagesT.refreshFailed as string) || 'Failed to refresh {name}: {error}', { name, error: ErrorHandler.getUserFriendlyMessage(e) }), { id: refreshToast });
       }
     } finally {
       setLoading(false);
@@ -183,14 +197,14 @@ export function SystemCard({
                       onClick={(e) => {
                         e.stopPropagation();
                         navigator.clipboard.writeText(userKey);
-                        toast.success(t(labels.systemCards.messages.copiedUserId, { userId: userKey }));
+                        toast.success(translate((messagesT.copiedUserId as string) || 'Copied user ID: {userId}', { userId: userKey }));
                       }}
                       className="inline-flex items-center justify-center px-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-r border border-l-0 border-blue-500/20 hover:bg-blue-500/20 transition-colors"
                     >
                       <Copy className="h-2.5 w-2.5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent><p>{labels.systemCards.tooltips.copyUserId}</p></TooltipContent>
+                  <TooltipContent><p>{(tooltipsT.copyUserId as string) || 'Copy user ID'}</p></TooltipContent>
                 </Tooltip>
               </div>
             )}
@@ -205,19 +219,19 @@ export function SystemCard({
                     <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>{labels.systemCards.tooltips.refresh}</p></TooltipContent>
+                <TooltipContent><p>{(tooltipsT.refresh as string) || 'Refresh'}</p></TooltipContent>
               </Tooltip>
               {data && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-muted/80" onClick={() => {
                       navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-                      toast.success(t(labels.systemCards.messages.copiedJson, { name }));
+                      toast.success(translate((messagesT.copiedJson as string) || '{name} JSON copied', { name }));
                     }}>
                       <Copy className="h-3 w-3" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent><p>{labels.systemCards.tooltips.copyJson}</p></TooltipContent>
+                  <TooltipContent><p>{(tooltipsT.copyJson as string) || 'Copy JSON'}</p></TooltipContent>
                 </Tooltip>
               )}
             </div>
@@ -229,7 +243,7 @@ export function SystemCard({
                     <Eye className="h-3 w-3" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>{labels.systemCards.tooltips.viewDetails}</p></TooltipContent>
+                <TooltipContent><p>{(tooltipsT.viewDetails as string) || 'View details'}</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -237,7 +251,7 @@ export function SystemCard({
                     <FileText className="h-3 w-3" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>{labels.systemCards.tooltips.createTicket}</p></TooltipContent>
+                <TooltipContent><p>{(tooltipsT.createTicket as string) || 'Create ticket'}</p></TooltipContent>
               </Tooltip>
             </div>
           </div>
@@ -249,14 +263,14 @@ export function SystemCard({
                 size="sm"
                 variant="secondary"
                 onClick={async () => {
-                  setPfTitle(labels.systemCards.pingFederate.userInfo.title);
+                  setPfTitle((userInfoT.title as string) || 'User Info');
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
                     const response = await api.sso.pingFederate.getUserInfo({ token });
                     setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
-                    setPfData({ error: labels.systemCards.pingFederate.userInfo.error });
+                    setPfData({ error: (userInfoT.error as string) || 'Failed to load user info' });
                   } finally {
                     setPfLoading(false);
                   }
@@ -264,20 +278,20 @@ export function SystemCard({
                 className="h-7 text-[11px]"
               >
                 <User className="h-3.5 w-3.5 mr-1" />
-                {labels.systemCards.pingFederate.userInfo.button}
+                {(userInfoT.button as string) || 'User Info'}
               </Button>
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={async () => {
-                  setPfTitle(labels.systemCards.pingFederate.oidc.title);
+                  setPfTitle((oidcT.title as string) || 'OIDC Config');
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
                     const response = await api.sso.pingFederate.getOidcConfig({ token });
                     setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
-                    setPfData({ error: labels.systemCards.pingFederate.oidc.error });
+                    setPfData({ error: (oidcT.error as string) || 'Failed to load OIDC config' });
                   } finally {
                     setPfLoading(false);
                   }
@@ -285,20 +299,20 @@ export function SystemCard({
                 className="h-7 text-[11px]"
               >
                 <Globe className="h-3.5 w-3.5 mr-1" />
-                {labels.systemCards.pingFederate.oidc.button}
+                {(oidcT.button as string) || 'OIDC Config'}
               </Button>
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={async () => {
-                  setPfTitle(labels.systemCards.pingFederate.saml.title);
+                  setPfTitle((samlT.title as string) || 'SAML Config');
                   setPfOpen(true);
                   setPfLoading(true);
                   try {
                     const response = await api.sso.pingFederate.getSamlConfig({ token });
                     setPfData(response.ok ? (response.data as SystemData) : { error: response.error });
                   } catch {
-                    setPfData({ error: labels.systemCards.pingFederate.saml.error });
+                    setPfData({ error: (samlT.error as string) || 'Failed to load SAML config' });
                   } finally {
                     setPfLoading(false);
                   }
@@ -306,7 +320,7 @@ export function SystemCard({
                 className="h-7 text-[11px]"
               >
                 <Shield className="h-3.5 w-3.5 mr-1" />
-                {labels.systemCards.pingFederate.saml.button}
+                {(samlT.button as string) || 'SAML Config'}
               </Button>
             </div>
           )}
@@ -316,7 +330,7 @@ export function SystemCard({
                 <div className="p-2 rounded-full bg-muted/50">
                   <RefreshCw className="h-5 w-5 text-blue-500 animate-spin" />
                 </div>
-                <p className="text-[11px] text-muted-foreground">{t(labels.systemCards.loading, { name })}</p>
+                <p className="text-[11px] text-muted-foreground">{translate((systemCardsT.loading as string) || 'Loading {name}...', { name })}</p>
               </div>
             ) : error ? (
               <div className="flex flex-col items-center justify-center py-6 px-3 space-y-2">
@@ -326,7 +340,7 @@ export function SystemCard({
                 <p className="text-[11px] text-red-600 dark:text-red-400 text-center max-w-[220px]">{error}</p>
                 <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} className="h-6 text-[11px] border-border/50">
                   <RefreshCw className="h-3 w-3 mr-1" />
-                  {labels.systemCards.buttons.retry}
+                  {(buttonsT.retry as string) || 'Retry'}
                 </Button>
               </div>
             ) : data ? (
@@ -344,7 +358,7 @@ export function SystemCard({
                         </div>
                       ))
                     ) : (
-                      <span className="text-[11px] font-medium text-muted-foreground">{labels.systemCards.status.loaded}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">{(statusT.loaded as string) || 'Loaded'}</span>
                     )}
                   </div>
                   
@@ -353,7 +367,7 @@ export function SystemCard({
                     className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-muted/80 transition-colors shrink-0"
                   >
                     <Code className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-[11px] font-medium text-foreground whitespace-nowrap">{labels.systemCards.labels.json}</span>
+                    <span className="text-[11px] font-medium text-foreground whitespace-nowrap">{(labelsT.json as string) || 'JSON'}</span>
                     <span className="text-[9px] px-1 py-0.5 rounded bg-muted text-muted-foreground font-mono">
                       {Object.keys(data).length}
                     </span>
@@ -377,7 +391,7 @@ export function SystemCard({
                       onClick={() => setJsonCollapsed(false)}
                       className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
                     >
-                      {labels.systemCards.labels.expandJson}
+                      {(labelsT.expandJson as string) || 'Show JSON'}
                     </button>
                   </div>
                 )}
@@ -387,10 +401,10 @@ export function SystemCard({
                 <div className="p-2 rounded-full bg-muted/50">
                   <Code className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <p className="text-[11px] text-muted-foreground">{labels.systemCards.emptyState}</p>
+                <p className="text-[11px] text-muted-foreground">{(systemCardsT.emptyState as string) || 'No data available'}</p>
                 <Button size="sm" variant="outline" onClick={() => loadInitial(true, true)} disabled={!enabled} className="h-6 text-[11px] border-border/50">
                   <RefreshCw className="h-3 w-3 mr-1" />
-                  {labels.systemCards.buttons.loadData}
+                  {(buttonsT.loadData as string) || 'Load Data'}
                 </Button>
               </div>
             )}

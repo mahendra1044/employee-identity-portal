@@ -5,6 +5,7 @@ import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { AppProvider } from "@/context/AppContext";
+import { I18nProvider } from "@/i18n";
 
 export const metadata: Metadata = {
   title: "Identity Sphere",
@@ -22,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
+        <I18nProvider>
         <AppProvider>
           <ErrorReporter />
         <Script
@@ -48,6 +50,7 @@ export default function RootLayout({
           {children}
           <VisualEditsMessenger />
         </AppProvider>
+        </I18nProvider>
       </body>
     </html>
   );

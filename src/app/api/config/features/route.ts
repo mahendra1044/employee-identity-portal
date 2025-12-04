@@ -55,6 +55,10 @@ export async function GET() {
     quickActionsTabs,
     systemCardCloseEnabled: true,
     userSystemsSettingsEnabled: true,
+    
+    // i18n settings
+    languageSwitcher: true,
+    defaultLanguage: "en",
   };
 
   return NextResponse.json(features);

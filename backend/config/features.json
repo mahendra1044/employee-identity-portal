@@ -2,6 +2,8 @@
   "credentialSource": "env",
   "useMocks": true,
   "useMockAuth": true,
+  "languageSwitcher": true,
+  "defaultLanguage": "en",
   "systemDataSource": {
     "sso": "USE_MOCK",
     "pam": "USE_MOCK",

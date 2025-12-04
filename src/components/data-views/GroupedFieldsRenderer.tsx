@@ -19,7 +19,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { labels } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import { toPairs } from "@/lib/formatters";
 import {
   getSectionForField,
@@ -71,6 +71,11 @@ function groupFieldsBySection(data: Record<string, unknown>): FieldGroup[] {
 
 export function GroupedFieldsRenderer({ data, className = "" }: GroupedFieldsRendererProps) {
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const { t } = useTranslation();
+  
+  // Type-safe access to translations
+  const jsonViewerT = t.jsonViewer as Record<string, unknown> || {};
+  const buttonsT = jsonViewerT.buttons as Record<string, string> || {};
 
   const toggleSection = (sectionKey: string) => {
     setCollapsedSections(prev => {
@@ -154,7 +159,7 @@ export function GroupedFieldsRenderer({ data, className = "" }: GroupedFieldsRen
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>{labels.jsonViewer.buttons.copyValue}</p>
+                                <p>{buttonsT.copyValue || 'Copy value'}</p>
                               </TooltipContent>
                             </Tooltip>
                           </div>

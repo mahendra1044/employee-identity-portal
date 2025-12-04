@@ -22,6 +22,7 @@ import { useAppUI } from "@/hooks/useAppUI";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useThemeDOM } from "@/hooks/useThemeDOM";
 import { useOpsFeatures } from "@/hooks/useOpsFeatures";
+import { useTranslation } from "@/i18n";
 import { Header } from "@/components/Header";
 import { LoginForm } from "@/components/LoginForm";
 import { EducateGuideDialog } from "@/components/dialogs/EducateGuideDialog";
@@ -33,7 +34,6 @@ import { PfOpsDialog } from "@/components/dialogs/PfOpsDialog";
 import { RecentFailuresPanel } from "@/components/RecentFailuresPanel";
 import { SystemCardsGrid } from "@/components/SystemCardsGrid";
 import { DialogsSection } from "@/components/sections/DialogsSection";
-import { labels } from "@/config/labels";
 import { QuickActionsCard } from "@/components/sections/QuickActionsCard";
 // Import from constants
 import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
@@ -52,6 +52,11 @@ export default function HomePage() {
   const { theme, setTheme } = useAppTheme();
   const { toggles: userToggles, toggleSystem, resetToggles } = useAppToggles();
   const { ui, setUIState } = useAppUI();
+  const { t } = useTranslation();
+  
+  // Type-safe access to systemCards translations
+  const systemCardsT = t.systemCards as Record<string, unknown> || {};
+  const sectionT = systemCardsT.section as Record<string, string> || {};
 
   const {
     search,
@@ -226,6 +231,7 @@ export default function HomePage() {
         onShowSnowTickets={openSnowDialog}
         snowTicketsCount={snowCount ?? undefined}
         educateEnabled={educateEnabled}
+        languageSwitcherEnabled={features?.languageSwitcher ?? false}
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 py-3 space-y-3">
@@ -321,9 +327,9 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-sm font-bold text-slate-900 dark:text-neutral-50 [.navy_&]:text-blue-50 leading-none">
-                      {labels.systemCards.section.title}
+                      {sectionT.title || 'System Cards'}
                     </h2>
-                    <p className="text-[11px] text-slate-600 dark:text-neutral-300 [.navy_&]:text-blue-200 leading-tight mt-0.5">{labels.systemCards.section.description}</p>
+                    <p className="text-[11px] text-slate-600 dark:text-neutral-300 [.navy_&]:text-blue-200 leading-tight mt-0.5">{sectionT.description || 'View and manage identity data across all integrated systems'}</p>
                   </div>
                 </div>
               </div>

@@ -1,0 +1,25 @@
+{
+  "types": {
+    "null": "nulo",
+    "boolean": {
+      "true": "Sí",
+      "false": "No"
+    },
+    "emptyArray": "Arreglo vacío",
+    "emptyObject": "Objeto vacío"
+  },
+  "buttons": {
+    "copy": "Copiar",
+    "copyValue": "Copiar valor",
+    "showMore": "+{count} más",
+    "showLess": "Mostrar menos"
+  },
+  "counts": {
+    "items": "[{count} elementos]",
+    "itemSingular": "[{count} elemento]",
+    "fields": "{{{count} campos}}",
+    "fieldSingular": "{{{count} campo}}",
+    "properties": "{count} propiedades",
+    "propertySingular": "{count} propiedad"
+  }
+}

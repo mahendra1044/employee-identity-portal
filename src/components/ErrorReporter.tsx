@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { labels } from "@/config/labels";
+// Import English translations directly for error page (outside of i18n context)
+import errorsEn from "@/i18n/locales/en/errors.json";
 
 type ReporterProps = {
   /*  ⎯⎯ props are only provided on the global-error page ⎯⎯ */
@@ -96,23 +97,25 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
   if (!error) return null;
 
   /* ─ global-error UI ─ */
+  const globalErrorT = errorsEn.globalError;
+  
   return (
     <html>
       <body className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-6">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-destructive">
-              {labels.errors.globalError.title}
+              {globalErrorT.title}
             </h1>
             <p className="text-muted-foreground">
-              {labels.errors.globalError.description}
+              {globalErrorT.description}
             </p>
           </div>
           <div className="space-y-2">
             {process.env.NODE_ENV === "development" && (
               <details className="mt-4 text-left">
                 <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                  {labels.errors.globalError.detailsLabel}
+                  {globalErrorT.detailsLabel}
                 </summary>
                 <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
                   {error.message}
@@ -123,7 +126,7 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
                   )}
                   {error.digest && (
                     <div className="mt-2 text-muted-foreground">
-                      {labels.errors.globalError.digestLabel} {error.digest}
+                      {globalErrorT.digestLabel} {error.digest}
                     </div>
                   )}
                 </pre>

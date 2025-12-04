@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { RefreshCw, ChevronDown, CheckCircle2 } from "lucide-react";
-import { labels } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import {
   type FailureKey,
   type FailureData,
@@ -55,12 +55,14 @@ function FailureCard({
   keyPrefix,
   renderType,
   loading,
+  emptyStateText,
 }: {
   title: string;
   failures: FailureData[];
   keyPrefix: string;
   renderType: 'sso' | 'pam' | 'iga' | 'entra' | 'tpag';
   loading: boolean;
+  emptyStateText: string;
 }) {
   const count = failures?.length || 0;
   const severity = getSeverity(count);
@@ -91,7 +93,7 @@ function FailureCard({
         ) : (
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
             <CheckCircle2 className="h-3 w-3 text-green-500" />
-            <span>{labels.failures.emptyState}</span>
+            <span>{emptyStateText}</span>
           </div>
         )}
       </div>
@@ -121,12 +123,14 @@ function FailureCategorySection({
   failures,
   loading,
   isLast,
+  emptyStateText,
 }: {
   category: FailureCategory;
   role: string | null | undefined;
   failures: Record<FailureKey, FailureData[]>;
   loading: boolean;
   isLast: boolean;
+  emptyStateText: string;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
@@ -173,6 +177,7 @@ function FailureCategorySection({
               keyPrefix={failureType.key}
               renderType={failureType.renderType}
               loading={loading}
+              emptyStateText={emptyStateText}
             />
           ))}
         </div>
@@ -190,12 +195,21 @@ export function RecentFailuresPanel({
   role,
   failures,
 }: RecentFailuresPanelProps) {
+  const { t } = useTranslation();
+  
+  // Translation accessors
+  const failuresT = t.failures as Record<string, unknown> || {};
+  const labelsT = failuresT.labels as Record<string, string> || {};
+  const tooltipsT = failuresT.tooltips as Record<string, string> || {};
+  
   // Get visible categories for this role
   const visibleCategories = FAILURE_CATEGORIES
     .filter(cat => shouldShowCategory(cat.category, role ?? null))
     .map(cat => cat.category);
 
   const timePresets = [5, 15, 30, 60];
+  
+  const emptyStateText = (failuresT.emptyState as string) || 'No failures';
 
   return (
     <section className="mb-4">
@@ -210,9 +224,9 @@ export function RecentFailuresPanel({
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-sm font-semibold text-foreground leading-none">
-                {labels.failures.title}
+                {(failuresT.title as string) || 'Recent Failures'}
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{labels.failures.description}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{(failuresT.description as string) || 'Monitor system failures'}</p>
             </div>
           </div>
           
@@ -221,7 +235,7 @@ export function RecentFailuresPanel({
             <span className="text-xs font-medium text-foreground">{getPanelTitle(role, minutes)}</span>
             <span className="text-muted-foreground/40">•</span>
             <div className="flex items-center gap-1">
-              <label className="text-[11px] text-muted-foreground">{labels.failures.labels.window}</label>
+              <label className="text-[11px] text-muted-foreground">{(labelsT.window as string) || 'Window'}</label>
               <Input
                 type="number"
                 min={1}
@@ -229,7 +243,7 @@ export function RecentFailuresPanel({
                 value={minutes}
                 onChange={(e) => onMinutesChange(Math.max(1, Number(e.target.value)))}
               />
-              <span className="text-[11px] text-muted-foreground">{labels.failures.labels.minutes}</span>
+              <span className="text-[11px] text-muted-foreground">{(labelsT.minutes as string) || 'minutes'}</span>
             </div>
             {timePresets.map((preset) => (
               <Button
@@ -249,7 +263,7 @@ export function RecentFailuresPanel({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{labels.failures.tooltips.refresh}</p>
+                <p>{(tooltipsT.refresh as string) || 'Refresh'}</p>
               </TooltipContent>
             </Tooltip>
             {error && <span className="text-[11px] text-red-600 dark:text-red-400">{error}</span>}
@@ -265,6 +279,7 @@ export function RecentFailuresPanel({
                 failures={failures}
                 loading={loading}
                 isLast={index === visibleCategories.length - 1}
+                emptyStateText={emptyStateText}
               />
             ))}
           </div>

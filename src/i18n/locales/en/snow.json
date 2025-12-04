@@ -1,0 +1,92 @@
+{
+  "incidents": {
+    "title": "ServiceNow Incidents",
+    "noTarget": "No target user found for SNOW incidents",
+    "loading": "Loading incidents...",
+    "refresh": "Refresh",
+    "placeholder": "Search incidents..."
+  },
+  "status": {
+    "open": "Open",
+    "inProgress": "In Progress",
+    "resolved": "Resolved"
+  },
+  "priority": {
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "tooltips": {
+    "refresh": "Refresh incidents"
+  },
+  "labels": {
+    "updated": "Updated:"
+  },
+  "emptyStates": {
+    "noMatch": {
+      "title": "No Matching Incidents",
+      "description": "Try adjusting your filters"
+    },
+    "allClear": {
+      "title": "All Clear!",
+      "description": "No incidents found"
+    }
+  },
+  "footer": {
+    "showing": "Showing {filtered} of {total} incidents",
+    "needsAttention": "{count} needs attention"
+  },
+  "badges": {
+    "live": "live"
+  },
+  "filters": {
+    "all": "All ({count})",
+    "open": "Open ({count})",
+    "inProgress": "In Progress ({count})",
+    "resolved": "Resolved ({count})"
+  },
+  "ticket": {
+    "dialogTitle": "Create ServiceNow Ticket",
+    "livePreview": "Live Preview",
+    "liveIndicator": "● Live",
+    "submit": "Submit Ticket",
+    "submitting": "Submitting...",
+    "successMessage": "SNOW ticket submitted: {ticketNumber}",
+    "labels": {
+      "reporter": "Reporter:",
+      "system": "System:",
+      "payload": "Payload:",
+      "yourNote": "Your Note:",
+      "target": "Target:",
+      "description": "Description",
+      "optional": "(Optional)",
+      "user": "User:"
+    },
+    "payload": {
+      "attached": "Data attached",
+      "notAttached": "No data attached"
+    },
+    "hints": {
+      "preview": "Start typing to see your note preview",
+      "addContext": "💡 Add context to help resolve faster",
+      "addMoreDetails": "✍️ Consider adding more details",
+      "goodDetail": "✅ Good detail level",
+      "comprehensive": "🎯 Comprehensive description",
+      "approachingLimit": "⚠️ Approaching limit"
+    },
+    "charCount": "{count}/{max}",
+    "placeholder": "Describe the issue or provide additional context...\n\nExample: User unable to access application. Need to verify group memberships and authentication logs.",
+    "errorMessages": {
+      "noEmail": "Email not available - please log in again",
+      "submitFailed": "Failed to submit SNOW ticket"
+    }
+  },
+  "table": {
+    "number": "Ticket #",
+    "description": "Description",
+    "state": "State",
+    "priority": "Priority",
+    "updated": "Updated:"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "placeholder": "Select Role",
+  "headers": {
+    "allRoles": "All Roles Available",
+    "switchRole": "Switch Role"
+  },
+  "hints": {
+    "masterAccess": "Master access enabled"
+  },
+  "tooltips": {
+    "masterAccess": "Master Access · All Roles",
+    "rolesAvailable": "{count} roles available"
+  },
+  "roles": {
+    "R001": "Super User",
+    "R002": "SSO Ops",
+    "R003": "PAM Ops",
+    "R004": "IGA Ops",
+    "R005": "Entra ID Ops",
+    "R006": "TPAG Ops",
+    "R007": "Employee",
+    "R008": "Management"
+  }
+}

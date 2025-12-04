@@ -1,0 +1,44 @@
+{
+  "title": "Fallas Recientes",
+  "description": "Monitorear fallas de autenticación y acceso",
+  "subtitle": "Últimos {minutes} minutos",
+  "emptyState": "No se detectaron fallas",
+  "labels": {
+    "window": "Ventana:",
+    "minutes": "min"
+  },
+  "tooltips": {
+    "refresh": "Actualizar datos de fallas"
+  },
+  "table": {
+    "timestamp": "Fecha/Hora",
+    "system": "Sistema",
+    "userId": "ID de Usuario",
+    "error": "Error",
+    "details": "Detalles"
+  },
+  "noFailures": "No hay fallas recientes",
+  "loadError": "Error al cargar datos de fallas",
+  "categories": {
+    "sso": {
+      "name": "Fallas SSO",
+      "description": "Fallas de autenticación de inicio de sesión único"
+    },
+    "pam": {
+      "name": "Fallas PAM",
+      "description": "Fallas de gestión de acceso privilegiado"
+    },
+    "iga": {
+      "name": "Fallas IGA",
+      "description": "Fallas de gobernanza de identidad"
+    },
+    "entra": {
+      "name": "Fallas Entra ID",
+      "description": "Fallas de Microsoft Entra ID"
+    },
+    "tpag": {
+      "name": "Fallas TPAG",
+      "description": "Fallas de acceso de terceros"
+    }
+  }
+}

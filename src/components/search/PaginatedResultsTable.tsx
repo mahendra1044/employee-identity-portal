@@ -12,7 +12,7 @@
 
 import React, { useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { labels, t } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import {
   Table,
   TableBody,
@@ -67,17 +67,6 @@ function truncateText(text: string, maxLength: number): string {
   return text.substring(0, maxLength - 3) + "...";
 }
 
-/**
- * Format cell value for display
- */
-function formatCellValue(value: unknown): string {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "boolean") return value ? labels.jsonViewer.types.boolean.true : labels.jsonViewer.types.boolean.false;
-  if (typeof value === "object") return JSON.stringify(value);
-  const strValue = String(value);
-  return truncateText(strValue, TABLE_DISPLAY_CONFIG.maxCellTextLength);
-}
-
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -89,6 +78,28 @@ export function PaginatedResultsTable({
   onViewDetails,
   className = "",
 }: PaginatedResultsTableProps) {
+  const { t, translate } = useTranslation();
+  
+  // Translation accessors
+  const jsonViewerT = t.jsonViewer as Record<string, unknown> || {};
+  const typesT = jsonViewerT.types as Record<string, unknown> || {};
+  const booleanT = typesT.boolean as Record<string, string> || {};
+  const paginationT = t.pagination as Record<string, unknown> || {};
+  const tooltipsT = paginationT.tooltips as Record<string, string> || {};
+  const labelsT = paginationT.labels as Record<string, string> || {};
+  const ariaT = paginationT.aria as Record<string, string> || {};
+  const searchT = t.search as Record<string, unknown> || {};
+  const resultsT = searchT.results as Record<string, string> || {};
+  
+  // Format cell value for display - uses translations
+  const formatCellValue = useCallback((value: unknown): string => {
+    if (value === null || value === undefined) return "-";
+    if (typeof value === "boolean") return value ? (booleanT.true || 'Yes') : (booleanT.false || 'No');
+    if (typeof value === "object") return JSON.stringify(value);
+    const strValue = String(value);
+    return truncateText(strValue, TABLE_DISPLAY_CONFIG.maxCellTextLength);
+  }, [booleanT]);
+  
   // Pagination hook
   const {
     currentPage,
@@ -139,7 +150,7 @@ export function PaginatedResultsTable({
   if (results.length === 0) {
     return (
       <div className="p-4 text-center">
-        <p className="text-xs text-muted-foreground">{labels.search.results.noResults}</p>
+        <p className="text-xs text-muted-foreground">{(resultsT.noResults as string) || 'No results found'}</p>
       </div>
     );
   }
@@ -192,7 +203,7 @@ export function PaginatedResultsTable({
                   onKeyDown={(e) => handleKeyDown(e, item, idx)}
                   tabIndex={TABLE_DISPLAY_CONFIG.enableRowClick ? 0 : undefined}
                   role={TABLE_DISPLAY_CONFIG.enableRowClick ? "button" : undefined}
-                  aria-label={TABLE_DISPLAY_CONFIG.enableRowClick ? t(labels.pagination.aria.goToRow, { index: actualRowNumber }) : undefined}
+                  aria-label={TABLE_DISPLAY_CONFIG.enableRowClick ? translate((ariaT.goToRow as string) || 'Go to row {index}', { index: actualRowNumber }) : undefined}
                 >
                   {/* Row number */}
                   {TABLE_DISPLAY_CONFIG.showRowNumber && (
@@ -256,7 +267,7 @@ export function PaginatedResultsTable({
                   <ChevronsLeft className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>{labels.pagination.tooltips.firstPage}</p></TooltipContent>
+              <TooltipContent><p>{(tooltipsT.firstPage as string) || 'First page'}</p></TooltipContent>
             </Tooltip>
 
             {/* Previous page */}
@@ -272,12 +283,12 @@ export function PaginatedResultsTable({
                   <ChevronLeft className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>{labels.pagination.tooltips.previousPage}</p></TooltipContent>
+              <TooltipContent><p>{(tooltipsT.previousPage as string) || 'Previous page'}</p></TooltipContent>
             </Tooltip>
 
             {/* Page indicator */}
             <span className="text-[10px] text-muted-foreground px-2 whitespace-nowrap">
-              {t(labels.pagination.pageIndicator, { current: currentPage, total: totalPages })}
+              {translate((paginationT.pageIndicator as string) || 'Page {current} of {total}', { current: currentPage, total: totalPages })}
             </span>
 
             {/* Next page */}
@@ -293,7 +304,7 @@ export function PaginatedResultsTable({
                   <ChevronRight className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>{labels.pagination.tooltips.nextPage}</p></TooltipContent>
+              <TooltipContent><p>{(tooltipsT.nextPage as string) || 'Next page'}</p></TooltipContent>
             </Tooltip>
 
             {/* Last page */}
@@ -309,14 +320,14 @@ export function PaginatedResultsTable({
                   <ChevronsRight className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>{labels.pagination.tooltips.lastPage}</p></TooltipContent>
+              <TooltipContent><p>{(tooltipsT.lastPage as string) || 'Last page'}</p></TooltipContent>
             </Tooltip>
           </div>
 
           {/* Page size selector */}
           <div className="flex items-center gap-1">
             <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-              {labels.pagination.labels.perPage}
+              {(labelsT.perPage as string) || 'Per page'}
             </span>
             <Select
               value={String(pageSize)}

@@ -21,7 +21,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { ExternalLink } from "lucide-react";
 import type { SystemKey } from "@/lib/types";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
-import { labels } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import { OPS_ENDPOINTS, type EndpointAction } from "@/lib/ops-endpoints";
 import type { ActionHandlers } from "@/hooks/useOpsActions";
 
@@ -50,17 +50,19 @@ function getActionsForSystem(system: SystemKey): EndpointAction[] {
  */
 function ActionButtons({ 
   system, 
-  actionHandlers 
+  actionHandlers,
+  noActionsText
 }: { 
   system: SystemKey; 
   actionHandlers: ActionHandlers;
+  noActionsText: string;
 }) {
   const actions = getActionsForSystem(system);
   
   if (actions.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        {labels.quickActions.noActions}
+        {noActionsText}
       </p>
     );
   }
@@ -98,6 +100,16 @@ export function QuickActionsCard({
   splunkUrl,
   cloudwatchUrl,
 }: QuickActionsCardProps) {
+  const { t } = useTranslation();
+  
+  // Type-safe access to quickActions translations
+  const quickActionsT = t.quickActions as Record<string, unknown> || {};
+  const externalT = quickActionsT.external as Record<string, unknown> || {};
+  const splunkT = externalT.splunk as Record<string, string> || {};
+  const cloudwatchT = externalT.cloudwatch as Record<string, string> || {};
+  const targetT = quickActionsT.target as Record<string, string> || {};
+  const labelsT = quickActionsT.labels as Record<string, string> || {};
+  
   // Filter systems that have enabled tabs
   const enabledSystems = SYSTEMS.filter((s) => qaEnabledTabs[s]);
 
@@ -124,16 +136,16 @@ export function QuickActionsCard({
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-sm font-semibold text-foreground leading-none">
-                {labels.quickActions.title}
+                {quickActionsT.title as string || 'Quick Actions'}
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{labels.quickActions.subtitle}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{quickActionsT.subtitle as string || 'Execute common operations quickly'}</p>
             </div>
           </div>
           
           {/* External Tools & Target */}
           <div className="flex items-center justify-between gap-3 mb-3 pb-2 border-b border-border/30">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-muted-foreground">{labels.quickActions.external.label}</span>
+              <span className="text-[11px] text-muted-foreground">{externalT.label as string || 'External Tools:'}</span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -143,10 +155,10 @@ export function QuickActionsCard({
                     className="h-6 px-2 text-[11px] hover:bg-muted/80"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
-                    {labels.quickActions.external.splunk.button}
+                    {splunkT.button || 'Splunk'}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>{labels.quickActions.external.splunk.tooltip}</p></TooltipContent>
+                <TooltipContent><p>{splunkT.tooltip || 'Open Splunk dashboard'}</p></TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -157,13 +169,13 @@ export function QuickActionsCard({
                     className="h-6 px-2 text-[11px] hover:bg-muted/80"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
-                    {labels.quickActions.external.cloudwatch.button}
+                    {cloudwatchT.button || 'CloudWatch'}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>{labels.quickActions.external.cloudwatch.tooltip}</p></TooltipContent>
+                <TooltipContent><p>{cloudwatchT.tooltip || 'Open CloudWatch dashboard'}</p></TooltipContent>
               </Tooltip>
             </div>
-            <span className="text-[11px] text-muted-foreground truncate">{labels.quickActions.target.label} {resolveSnowEmail() || search || `(${labels.quickActions.target.noTarget})`}</span>
+            <span className="text-[11px] text-muted-foreground truncate">{targetT.label || 'Target:'} {resolveSnowEmail() || search || `(${targetT.noTarget || 'No target selected'})`}</span>
           </div>
           
           {/* Tab Navigation */}
@@ -186,13 +198,14 @@ export function QuickActionsCard({
           {/* Actions Container */}
           <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-slate-50/50 dark:bg-card/50 p-3">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] font-medium text-muted-foreground">{labels.quickActions.labels.actions}</span>
+              <span className="text-[11px] font-medium text-muted-foreground">{labelsT.actions || 'Actions'}</span>
               <div className="flex-1 h-px bg-border/30"></div>
             </div>
             {effectiveActive && qaEnabledTabs[effectiveActive] && (
               <ActionButtons 
                 system={effectiveActive} 
                 actionHandlers={actionHandlers}
+                noActionsText={quickActionsT.noActions as string || 'No actions available'}
               />
             )}
           </div>

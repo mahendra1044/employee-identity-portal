@@ -1,0 +1,23 @@
+{
+  "title": "Acciones Rápidas",
+  "subtitle": "Ejecutar operaciones para usuarios buscados",
+  "labels": {
+    "actions": "Acciones:"
+  },
+  "external": {
+    "label": "Externo:",
+    "splunk": {
+      "button": "Splunk",
+      "tooltip": "Abrir registros de Splunk"
+    },
+    "cloudwatch": {
+      "button": "CloudWatch",
+      "tooltip": "Abrir métricas de CloudWatch"
+    }
+  },
+  "target": {
+    "label": "Objetivo:",
+    "noTarget": "Sin usuario objetivo"
+  },
+  "noActions": "No hay acciones configuradas para este sistema."
+}

@@ -1,0 +1,42 @@
+{
+  "featureNotEnabled": {
+    "title": "No systems enabled",
+    "description": "Feature not enabled. Please contact your administrator."
+  },
+  "noCardsVisible": {
+    "title": "No cards visible",
+    "descriptionOps": "System cards appear after a successful search.",
+    "descriptionEmployee": "All system cards are hidden. Open Settings to enable some."
+  },
+  "globalError": {
+    "title": "Something went wrong!",
+    "description": "An unexpected error occurred. Please try again.",
+    "detailsLabel": "Error details...",
+    "digestLabel": "Digest:"
+  },
+  "systemNotFound": {
+    "title": "System not found",
+    "description": "The requested system could not be found."
+  },
+  "loadFailed": {
+    "title": "Failed to load data",
+    "description": "Unable to load data. Please try again."
+  },
+  "boundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred",
+    "retry": "Try again"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist."
+  },
+  "network": {
+    "title": "Network error",
+    "description": "Unable to connect. Please check your connection."
+  },
+  "auth": {
+    "title": "Authentication error",
+    "description": "Your session has expired. Please log in again."
+  }
+}

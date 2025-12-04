@@ -1,0 +1,20 @@
+{
+  "title": "Iniciar sesión",
+  "form": {
+    "userId": {
+      "label": "ID de Usuario",
+      "placeholder": "ej., u1001"
+    },
+    "password": {
+      "label": "Contraseña"
+    }
+  },
+  "buttons": {
+    "submit": "Iniciar sesión",
+    "submitting": "Iniciando sesión..."
+  },
+  "errors": {
+    "loginFailed": "Error de inicio de sesión",
+    "invalidCredentials": "ID de usuario o contraseña inválidos"
+  }
+}

@@ -2,7 +2,7 @@
 
 import { SystemCard } from "@/components/SystemCard";
 import { SYSTEM_LABELS } from "@/lib/constants";
-import { labels } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import type { SystemKey } from "@/lib/types";
 
 interface SystemCardsGridProps {
@@ -24,17 +24,23 @@ export function SystemCardsGrid({
   userKey,
   anyEnabled,
 }: SystemCardsGridProps) {
+  const { t } = useTranslation();
   const containerClass = "w-full min-h-[180px]";
+  
+  // Translation accessors
+  const errorsT = t.errors as Record<string, unknown> || {};
+  const featureNotEnabledT = errorsT.featureNotEnabled as Record<string, string> || {};
+  const noCardsVisibleT = errorsT.noCardsVisible as Record<string, string> || {};
 
   if (!anyEnabled) {
     return (
       <div className={containerClass}>
         <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-slate-200 dark:border-border/40 bg-muted/20">
           <p className="text-sm font-medium text-foreground mb-1">
-            {labels.errors.featureNotEnabled.title}
+            {(featureNotEnabledT.title as string) || 'Feature Not Enabled'}
           </p>
           <p className="text-[11px] text-muted-foreground">
-            {labels.errors.featureNotEnabled.description}
+            {(featureNotEnabledT.description as string) || 'This feature is not enabled for your account.'}
           </p>
         </div>
       </div>
@@ -46,12 +52,12 @@ export function SystemCardsGrid({
       <div className={containerClass}>
         <div className="w-full h-full flex flex-col items-center justify-center py-8 rounded-lg border border-dashed border-slate-200 dark:border-border/40 bg-muted/20">
           <p className="text-sm font-medium text-foreground mb-1">
-            {labels.errors.noCardsVisible.title}
+            {(noCardsVisibleT.title as string) || 'No Cards Visible'}
           </p>
           <p className="text-[11px] text-muted-foreground">
             {role === "ops" 
-              ? labels.errors.noCardsVisible.descriptionOps 
-              : labels.errors.noCardsVisible.descriptionEmployee
+              ? (noCardsVisibleT.descriptionOps as string) || 'Search for a user to view their system data.' 
+              : (noCardsVisibleT.descriptionEmployee as string) || 'No system cards are visible.'
             }
           </p>
         </div>

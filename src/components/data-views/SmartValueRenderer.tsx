@@ -18,7 +18,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ExternalLink } from "lucide-react";
-import { labels, t } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import {
   isEmail,
   isUrl,
@@ -35,6 +35,15 @@ interface SmartValueRendererProps {
 
 export function SmartValueRenderer({ value, fieldKey, uniqueKey }: SmartValueRendererProps) {
   const [expanded, setExpanded] = useState(false);
+  const { t, translate } = useTranslation();
+  
+  // Type-safe access to translations
+  const commonT = t.common as Record<string, unknown> || {};
+  const buttonsT = commonT.buttons as Record<string, string> || {};
+  const jsonViewerT = t.jsonViewer as Record<string, unknown> || {};
+  const typesT = jsonViewerT.types as Record<string, string> || {};
+  const jsonButtonsT = jsonViewerT.buttons as Record<string, string> || {};
+  const countsT = jsonViewerT.counts as Record<string, string> || {};
 
   // Null
   if (value === null) {
@@ -72,7 +81,7 @@ export function SmartValueRenderer({ value, fieldKey, uniqueKey }: SmartValueRen
           className="h-6 px-2 text-xs"
           onClick={() => window.location.href = `mailto:${value}`}
         >
-          {labels.common.buttons.sendEmail}
+          {buttonsT.sendEmail || 'Send Email'}
         </Button>
       </div>
     );
@@ -132,7 +141,7 @@ export function SmartValueRenderer({ value, fieldKey, uniqueKey }: SmartValueRen
   if (Array.isArray(value)) {
     if (value.length === 0) {
       return (
-        <span className="text-slate-400 italic">{labels.jsonViewer.types.emptyArray}</span>
+        <span className="text-slate-400 italic">{typesT.emptyArray || 'Empty array'}</span>
       );
     }
 
@@ -156,7 +165,7 @@ export function SmartValueRenderer({ value, fieldKey, uniqueKey }: SmartValueRen
               onClick={() => setExpanded(true)}
               className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
             >
-              {t(labels.jsonViewer.buttons.showMore, { count: value.length - 3 })}
+              {translate(jsonButtonsT.showMore || '+{count} more', { count: value.length - 3 })}
             </button>
           )}
           {expanded && value.length > 3 && (
@@ -164,7 +173,7 @@ export function SmartValueRenderer({ value, fieldKey, uniqueKey }: SmartValueRen
               onClick={() => setExpanded(false)}
               className="text-xs text-slate-500 hover:underline"
             >
-              {labels.jsonViewer.buttons.showLess}
+              {jsonButtonsT.showLess || 'Show less'}
             </button>
           )}
         </div>
@@ -179,7 +188,7 @@ export function SmartValueRenderer({ value, fieldKey, uniqueKey }: SmartValueRen
           className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
         >
           <ChevronDown className={`h-3 w-3 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-          <span className="font-medium">{t(labels.jsonViewer.counts.items, { count: value.length })}</span>
+          <span className="font-medium">{translate(countsT.items || '{count} items', { count: value.length })}</span>
         </button>
         {expanded && (
           <pre className="mt-2 p-2 bg-slate-50 dark:bg-slate-900 rounded text-xs overflow-auto max-h-48">
@@ -200,7 +209,7 @@ export function SmartValueRenderer({ value, fieldKey, uniqueKey }: SmartValueRen
           className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
         >
           <ChevronDown className={`h-3 w-3 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-          <span className="font-medium">{t(labels.jsonViewer.counts.fields, { count: keys.length })}</span>
+          <span className="font-medium">{translate(countsT.fields || '{count} fields', { count: keys.length })}</span>
         </button>
         {expanded && (
           <pre className="mt-2 p-2 bg-slate-50 dark:bg-slate-900 rounded text-xs overflow-auto max-h-48">

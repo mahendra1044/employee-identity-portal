@@ -1,0 +1,20 @@
+{
+  "title": "Sign in",
+  "form": {
+    "userId": {
+      "label": "User ID",
+      "placeholder": "e.g., u1001"
+    },
+    "password": {
+      "label": "Password"
+    }
+  },
+  "buttons": {
+    "submit": "Sign in",
+    "submitting": "Signing in..."
+  },
+  "errors": {
+    "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid user ID or password"
+  }
+}

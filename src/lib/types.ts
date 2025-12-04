@@ -116,6 +116,10 @@ export type Features = {
   systemsOrder?: SystemKey[];
   employeeEducateGuideEnabled?: boolean;
   quickActionsTabs?: Partial<Record<SystemKey, boolean>>;
+  /** Enable/disable the language switcher in the header */
+  languageSwitcher?: boolean;
+  /** Default language code (e.g., 'en', 'es') */
+  defaultLanguage?: string;
 };
 
 export type LoginResponse = {

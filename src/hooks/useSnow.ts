@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
-import { labels } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 
 export function useSnow(
   token: string | null,
@@ -19,6 +19,12 @@ export function useSnow(
   const [snowCount, setSnowCount] = useState<number | undefined>(undefined);
   const [snowItems, setSnowItems] = useState<any[] | undefined>(undefined);
   const [snowEmail, setSnowEmail] = useState<string | undefined>(undefined);
+  
+  const { t } = useTranslation();
+  
+  // Type-safe access to snow translations
+  const snowT = t.snow as Record<string, unknown> || {};
+  const incidentsT = snowT.incidents as Record<string, string> || {};
 
   // Helper: decide which email to use for SNOW incidents based on role/search
   const resolveSnowEmail = useCallback((): string | undefined => {
@@ -102,13 +108,13 @@ export function useSnow(
     const target = resolveSnowEmail();
     // Only block when ops has no valid searched target; employees can proceed (backend uses self email)
     if (role === 'ops' && !target) {
-      toast.error(labels.snow.incidents.noTarget);
+      toast.error(incidentsT.noTarget || 'Please search for a user first');
       return;
     }
     setSnowOpen(true);
     setSnowEmail(target);
     await loadSnowIncidents(target);
-  }, [token, role, resolveSnowEmail, loadSnowIncidents]);
+  }, [token, role, resolveSnowEmail, loadSnowIncidents, incidentsT]);
 
   // Reset SNOW context on ops search changes to avoid stale counts/targets
   useEffect(() => {

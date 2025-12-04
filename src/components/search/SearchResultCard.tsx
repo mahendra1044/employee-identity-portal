@@ -18,7 +18,7 @@ import type { SearchSystemConfig } from "@/lib/search-config";
 import { filterSearchResults, getDetailKey } from "@/lib/search-config";
 import { PaginatedResultsTable } from "./PaginatedResultsTable";
 import { shouldShowPagination } from "@/config/search-results.config";
-import { labels } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -54,6 +54,13 @@ export function SearchResultCard({
   onViewDetails,
   onSetData,
 }: SearchResultCardProps) {
+  const { t } = useTranslation();
+  
+  // Translation accessors
+  const searchT = t.search as Record<string, unknown> || {};
+  const tooltipsT = searchT.tooltips as Record<string, string> || {};
+  const resultsT = searchT.results as Record<string, string> || {};
+  
   // Filter results based on role (now consistent for all roles)
   const displayResults = filterSearchResults(results, role, search);
 
@@ -112,7 +119,7 @@ export function SearchResultCard({
                 <Eye className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent><p>{labels.search.tooltips.viewFirstRow}</p></TooltipContent>
+            <TooltipContent><p>{(tooltipsT.viewFirstRow as string) || 'View first row details'}</p></TooltipContent>
           </Tooltip>
         )}
       </div>
@@ -126,7 +133,7 @@ export function SearchResultCard({
         />
       ) : (
         <div className="px-3 py-4 text-center">
-          <p className="text-[11px] text-muted-foreground">{labels.search.results.noResults}</p>
+          <p className="text-[11px] text-muted-foreground">{(resultsT.noResults as string) || 'No results found'}</p>
         </div>
       )}
     </div>

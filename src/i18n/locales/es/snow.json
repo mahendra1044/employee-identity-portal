@@ -1,0 +1,92 @@
+{
+  "incidents": {
+    "title": "Incidentes de ServiceNow",
+    "noTarget": "No se encontró usuario objetivo para incidentes SNOW",
+    "loading": "Cargando incidentes...",
+    "refresh": "Actualizar",
+    "placeholder": "Buscar incidentes..."
+  },
+  "status": {
+    "open": "Abierto",
+    "inProgress": "En Progreso",
+    "resolved": "Resuelto"
+  },
+  "priority": {
+    "critical": "Crítico",
+    "high": "Alto",
+    "medium": "Medio",
+    "low": "Bajo"
+  },
+  "tooltips": {
+    "refresh": "Actualizar incidentes"
+  },
+  "labels": {
+    "updated": "Actualizado:"
+  },
+  "emptyStates": {
+    "noMatch": {
+      "title": "No Hay Incidentes Coincidentes",
+      "description": "Intente ajustar sus filtros"
+    },
+    "allClear": {
+      "title": "¡Todo Despejado!",
+      "description": "No se encontraron incidentes"
+    }
+  },
+  "footer": {
+    "showing": "Mostrando {filtered} de {total} incidentes",
+    "needsAttention": "{count} necesita atención"
+  },
+  "badges": {
+    "live": "en vivo"
+  },
+  "filters": {
+    "all": "Todos ({count})",
+    "open": "Abiertos ({count})",
+    "inProgress": "En Progreso ({count})",
+    "resolved": "Resueltos ({count})"
+  },
+  "ticket": {
+    "dialogTitle": "Crear Ticket de ServiceNow",
+    "livePreview": "Vista Previa en Vivo",
+    "liveIndicator": "● En Vivo",
+    "submit": "Enviar Ticket",
+    "submitting": "Enviando...",
+    "successMessage": "Ticket SNOW enviado: {ticketNumber}",
+    "labels": {
+      "reporter": "Reportador:",
+      "system": "Sistema:",
+      "payload": "Carga:",
+      "yourNote": "Su Nota:",
+      "target": "Objetivo:",
+      "description": "Descripción",
+      "optional": "(Opcional)",
+      "user": "Usuario:"
+    },
+    "payload": {
+      "attached": "Datos adjuntos",
+      "notAttached": "Sin datos adjuntos"
+    },
+    "hints": {
+      "preview": "Comience a escribir para ver la vista previa de su nota",
+      "addContext": "💡 Agregue contexto para resolver más rápido",
+      "addMoreDetails": "✍️ Considere agregar más detalles",
+      "goodDetail": "✅ Buen nivel de detalle",
+      "comprehensive": "🎯 Descripción completa",
+      "approachingLimit": "⚠️ Acercándose al límite"
+    },
+    "charCount": "{count}/{max}",
+    "placeholder": "Describa el problema o proporcione contexto adicional...\n\nEjemplo: El usuario no puede acceder a la aplicación. Necesita verificar membresías de grupo y registros de autenticación.",
+    "errorMessages": {
+      "noEmail": "Correo no disponible - por favor inicie sesión de nuevo",
+      "submitFailed": "Error al enviar ticket SNOW"
+    }
+  },
+  "table": {
+    "number": "Ticket #",
+    "description": "Descripción",
+    "state": "Estado",
+    "priority": "Prioridad",
+    "updated": "Actualizado:"
+  }
+}

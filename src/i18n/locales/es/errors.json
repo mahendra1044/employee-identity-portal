@@ -1,0 +1,42 @@
+{
+  "featureNotEnabled": {
+    "title": "No hay sistemas habilitados",
+    "description": "Función no habilitada. Por favor, contacte a su administrador."
+  },
+  "noCardsVisible": {
+    "title": "No hay tarjetas visibles",
+    "descriptionOps": "Las tarjetas del sistema aparecen después de una búsqueda exitosa.",
+    "descriptionEmployee": "Todas las tarjetas del sistema están ocultas. Abra Configuración para habilitar algunas."
+  },
+  "globalError": {
+    "title": "¡Algo salió mal!",
+    "description": "Ocurrió un error inesperado. Por favor, inténtelo de nuevo.",
+    "detailsLabel": "Detalles del error...",
+    "digestLabel": "Resumen:"
+  },
+  "systemNotFound": {
+    "title": "Sistema no encontrado",
+    "description": "El sistema solicitado no pudo ser encontrado."
+  },
+  "loadFailed": {
+    "title": "Error al cargar datos",
+    "description": "No se pudieron cargar los datos. Por favor, inténtelo de nuevo."
+  },
+  "boundary": {
+    "title": "Algo salió mal",
+    "description": "Ocurrió un error inesperado",
+    "retry": "Intentar de nuevo"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "description": "La página que busca no existe."
+  },
+  "network": {
+    "title": "Error de red",
+    "description": "No se puede conectar. Por favor, verifique su conexión."
+  },
+  "auth": {
+    "title": "Error de autenticación",
+    "description": "Su sesión ha expirado. Por favor, inicie sesión de nuevo."
+  }
+}

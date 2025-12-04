@@ -1,0 +1,24 @@
+{
+  "placeholder": "Seleccionar Rol",
+  "headers": {
+    "allRoles": "Todos los Roles Disponibles",
+    "switchRole": "Cambiar Rol"
+  },
+  "hints": {
+    "masterAccess": "Acceso maestro habilitado"
+  },
+  "tooltips": {
+    "masterAccess": "Acceso Maestro · Todos los Roles",
+    "rolesAvailable": "{count} roles disponibles"
+  },
+  "roles": {
+    "R001": "Super Usuario",
+    "R002": "Ops SSO",
+    "R003": "Ops PAM",
+    "R004": "Ops IGA",
+    "R005": "Ops Entra ID",
+    "R006": "Ops TPAG",
+    "R007": "Empleado",
+    "R008": "Gerencia"
+  }
+}

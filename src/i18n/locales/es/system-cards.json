@@ -1,0 +1,60 @@
+{
+  "section": {
+    "title": "Tarjetas del Sistema",
+    "description": "Ver y administrar datos de identidad en todos los sistemas integrados"
+  },
+  "loading": "Cargando datos de {name}...",
+  "emptyState": "No hay datos disponibles",
+  "buttons": {
+    "retry": "Reintentar",
+    "loadData": "Cargar Datos"
+  },
+  "status": {
+    "loaded": "Datos cargados"
+  },
+  "labels": {
+    "json": "JSON",
+    "expandJson": "Expandir para ver JSON ↓"
+  },
+  "links": {
+    "splunk": "Ver en Splunk"
+  },
+  "dialog": {
+    "title": "{system} — Detalles"
+  },
+  "fallbackTitle": "Ping Federate",
+  "tooltips": {
+    "refresh": "Actualizar",
+    "copyJson": "Copiar JSON",
+    "viewDetails": "Detalles",
+    "createTicket": "Crear Ticket",
+    "copyUserId": "Copiar ID de Usuario"
+  },
+  "messages": {
+    "refreshing": "Actualizando {name}...",
+    "refreshingForUser": "Actualizando {name} para {userKey}...",
+    "refreshed": "{name} actualizado",
+    "refreshedForUser": "{name} actualizado para {userKey}",
+    "refreshFailed": "Error al actualizar {name}: {error}",
+    "copiedJson": "JSON de {name} copiado",
+    "copiedUserId": "ID de Usuario copiado: {userId}",
+    "failedToLoadDetails": "Error al cargar detalles"
+  },
+  "pingFederate": {
+    "userInfo": {
+      "title": "Ping Federate — Info de Usuario",
+      "button": "Info Usuario",
+      "error": "Error al cargar Info de Usuario"
+    },
+    "oidc": {
+      "title": "Ping Federate — Conexiones OIDC",
+      "button": "OIDC",
+      "error": "Error al cargar conexiones OIDC"
+    },
+    "saml": {
+      "title": "Ping Federate — Conexiones SAML",
+      "button": "SAML",
+      "error": "Error al cargar conexiones SAML"
+    }
+  }
+}

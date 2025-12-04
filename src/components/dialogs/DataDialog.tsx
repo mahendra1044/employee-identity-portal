@@ -29,7 +29,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Copy, FileText, Code, Database, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { labels, t } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import {
   GroupedFieldsRenderer,
   JsonTreeRenderer,
@@ -79,9 +79,9 @@ function getMaxWidthClass(size: DataDialogProps['maxWidth']): string {
 }
 
 /** Copy data to clipboard with toast notification */
-function copyToClipboard(data: any, name?: string) {
+function copyToClipboard(data: any, name?: string, successMessage?: string) {
   navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-  toast.success(t(labels.dialogs.dataDialog.copySuccess, { name: name || 'data' }));
+  toast.success(successMessage || `Copied ${name || 'data'} to clipboard`);
 }
 
 /** Get icon and color based on system name */
@@ -130,9 +130,9 @@ function HtmlView({ data }: { data: Record<string, unknown> }) {
 }
 
 /** Table view renderer for array data */
-function TableView({ data }: { data: unknown[] }) {
+function TableView({ data, noDataText }: { data: unknown[]; noDataText?: string }) {
   if (!Array.isArray(data) || data.length === 0) {
-    return <p className="text-xs text-muted-foreground">{labels.dialogs.dataDialog.noDataAvailable}</p>;
+    return <p className="text-xs text-muted-foreground">{noDataText || 'No data available'}</p>;
   }
 
   const columns = Object.keys((data[0] as Record<string, unknown>) || {});
@@ -175,7 +175,7 @@ function LoadingView({ message }: { message?: string }) {
       <div className="p-3 rounded-full bg-muted/30 mb-3">
         <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
       </div>
-      <p className="text-sm text-muted-foreground">{message || labels.common.status.loading}</p>
+      <p className="text-sm text-muted-foreground">{message || 'Loading...'}</p>
     </div>
   );
 }
@@ -187,7 +187,7 @@ function EmptyView({ message }: { message?: string }) {
       <div className="p-3 rounded-full bg-muted/30 mb-3">
         <Database className="h-6 w-6 text-muted-foreground" />
       </div>
-      <p className="text-sm text-muted-foreground">{message || labels.dataViewer.noData}</p>
+      <p className="text-sm text-muted-foreground">{message || 'No data available'}</p>
     </div>
   );
 }
@@ -247,6 +247,15 @@ export function DataDialog({
 }: DataDialogProps) {
   const maxWidthClass = getMaxWidthClass(maxWidth);
   const [currentMode, setCurrentMode] = useState<DialogViewMode>(mode);
+  const { t, translate } = useTranslation();
+  
+  // Type-safe access to translations
+  const dataViewerT = t.dataViewer as Record<string, unknown> || {};
+  const buttonsT = dataViewerT.buttons as Record<string, string> || {};
+  const tooltipsT = dataViewerT.tooltips as Record<string, string> || {};
+  const badgesT = dataViewerT.badges as Record<string, string> || {};
+  const footerT = dataViewerT.footer as Record<string, string> || {};
+  const copyT = dataViewerT.copy as Record<string, string> || {};
 
   // Reset mode when prop changes
   useEffect(() => {
@@ -287,7 +296,7 @@ export function DataDialog({
     }
 
     if (loading) {
-      return <LoadingView message={t(labels.dataViewer.loading, { title: cleanTitle.toLowerCase() })} />;
+      return <LoadingView message={translate(dataViewerT.loading as string || 'Loading {title}...', { title: cleanTitle.toLowerCase() })} />;
     }
 
     if (!data) {
@@ -296,7 +305,7 @@ export function DataDialog({
 
     switch (effectiveMode) {
       case 'table':
-        return <TableView data={Array.isArray(data) ? data : [data]} />;
+        return <TableView data={Array.isArray(data) ? data : [data]} noDataText={dataViewerT.noData as string} />;
       case 'html':
         return <HtmlView data={data} />;
       case 'json':
@@ -318,7 +327,7 @@ export function DataDialog({
               <span>{cleanTitle}</span>
               {!loading && data && (
                 <span className="text-[11px] font-normal text-muted-foreground ml-1">
-                  {Array.isArray(data) ? t(labels.dataViewer.badges.records, { count: fieldCount }) : t(labels.dataViewer.badges.fields, { count: fieldCount })}
+                  {Array.isArray(data) ? translate(badgesT.records || '{count} records', { count: fieldCount }) : translate(badgesT.fields || '{count} fields', { count: fieldCount })}
                 </span>
               )}
             </DialogTitle>
@@ -335,7 +344,7 @@ export function DataDialog({
                     }`}
                   >
                     <FileText className="h-3 w-3" />
-                    {labels.dataViewer.buttons.view}
+                    {buttonsT.view || 'View'}
                   </button>
                   <button
                     onClick={() => handleModeChange('json')}
@@ -346,7 +355,7 @@ export function DataDialog({
                     }`}
                   >
                     <Code className="h-3 w-3" />
-                    {labels.dataViewer.buttons.json}
+                    {buttonsT.json || 'JSON'}
                   </button>
                 </>
               )}
@@ -355,14 +364,14 @@ export function DataDialog({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => copyToClipboard(data, title)}
+                      onClick={() => copyToClipboard(data, title, copyT.success || 'Copied to clipboard')}
                       className="text-[11px] px-2 py-1 rounded bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                     >
                       <Copy className="h-3 w-3" />
-                      {labels.dataViewer.buttons.copy}
+                      {buttonsT.copy || 'Copy'}
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent><p>{labels.dataViewer.tooltips.copyAll}</p></TooltipContent>
+                  <TooltipContent><p>{tooltipsT.copyAll || 'Copy all data'}</p></TooltipContent>
                 </Tooltip>
               )}
             </div>
@@ -386,12 +395,12 @@ export function DataDialog({
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Database className="h-3 w-3" />
             <span>
-              {displayMode === 'json' ? labels.dataViewer.footer.jsonView : displayMode === 'table' ? labels.dataViewer.footer.tableView : labels.dataViewer.footer.readableView}
+              {displayMode === 'json' ? (footerT.jsonView || 'JSON View') : displayMode === 'table' ? (footerT.tableView || 'Table View') : (footerT.readableView || 'Readable View')}
             </span>
           </div>
           {!loading && data && (
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
-              {Array.isArray(data) ? t(labels.dataViewer.badges.items, { count: fieldCount }) : t(labels.dataViewer.badges.properties, { count: fieldCount })}
+              {Array.isArray(data) ? translate(badgesT.items || '{count} items', { count: fieldCount }) : translate(badgesT.properties || '{count} properties', { count: fieldCount })}
             </Badge>
           )}
         </div>

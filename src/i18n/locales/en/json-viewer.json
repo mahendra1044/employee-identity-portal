@@ -1,0 +1,25 @@
+{
+  "types": {
+    "null": "null",
+    "boolean": {
+      "true": "Yes",
+      "false": "No"
+    },
+    "emptyArray": "Empty array",
+    "emptyObject": "Empty object"
+  },
+  "buttons": {
+    "copy": "Copy",
+    "copyValue": "Copy value",
+    "showMore": "+{count} more",
+    "showLess": "Show less"
+  },
+  "counts": {
+    "items": "[{count} items]",
+    "itemSingular": "[{count} item]",
+    "fields": "{{{count} fields}}",
+    "fieldSingular": "{{{count} field}}",
+    "properties": "{count} properties",
+    "propertySingular": "{count} property"
+  }
+}

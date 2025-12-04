@@ -16,7 +16,7 @@
 import React, { useState, useRef } from "react";
 import { toast } from "sonner";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { labels } from "@/config/labels";
+import { useTranslation } from "@/i18n";
 import {
   isEmail,
   isUrl,
@@ -32,6 +32,13 @@ interface JsonTreeRendererProps {
 export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const lineNumberRef = useRef(1);
+  const { t } = useTranslation();
+  
+  // Type-safe access to translations
+  const commonT = t.common as Record<string, unknown> || {};
+  const copyT = commonT.copy as Record<string, string> || {};
+  const jsonViewerT = t.jsonViewer as Record<string, unknown> || {};
+  const buttonsT = jsonViewerT.buttons as Record<string, string> || {};
 
   const toggleCollapse = (path: string) => {
     setCollapsed(prev => {
@@ -56,7 +63,7 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
       ? `"${key}": ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value, null, 2)}`
       : typeof value === 'string' ? value : JSON.stringify(value, null, 2);
     navigator.clipboard.writeText(textToCopy);
-    toast.success(labels.common.copy.copiedToClipboard);
+    toast.success(copyT.copiedToClipboard || 'Copied to clipboard');
   };
 
   const renderValue = (value: unknown, path: string, key?: string, indent: number = 0): React.ReactNode => {
@@ -100,7 +107,7 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
                   📋
                 </button>
               </TooltipTrigger>
-              <TooltipContent><p>{labels.jsonViewer.buttons.copy}</p></TooltipContent>
+              <TooltipContent><p>{buttonsT.copy || 'Copy'}</p></TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -133,7 +140,7 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
                   📋
                 </button>
               </TooltipTrigger>
-              <TooltipContent><p>{labels.jsonViewer.buttons.copy}</p></TooltipContent>
+              <TooltipContent><p>{buttonsT.copy || 'Copy'}</p></TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -171,7 +178,7 @@ export function JsonTreeRenderer({ data, className = "" }: JsonTreeRendererProps
                   📋
                 </button>
               </TooltipTrigger>
-              <TooltipContent><p>{labels.jsonViewer.buttons.copy}</p></TooltipContent>
+              <TooltipContent><p>{buttonsT.copy || 'Copy'}</p></TooltipContent>
             </Tooltip>
           </div>
         </div>
