@@ -140,8 +140,16 @@ function parseAssertion(samlResponse, attributeMapping) {
 // ============================================================================
 
 /**
+ * Helper to check if Mock IDP should be used
+ */
+function shouldUseMockIdp() {
+  const features = authService.getFeatures();
+  return features?.mockIdp?.enabled && process.env.NODE_ENV !== 'production';
+}
+
+/**
  * GET /api/saml/login
- * Initiate SAML SSO - redirects user to IDP
+ * Initiate SAML SSO - redirects user to IDP (or Mock IDP for testing)
  */
 router.get('/login', (req, res) => {
   try {
@@ -154,7 +162,20 @@ router.get('/login', (req, res) => {
     }
 
     const spConfig = authService.getSpConfig();
-    const idpConfig = authService.getIdpConfig();
+    const features = authService.getFeatures();
+    
+    // Determine IDP config - use Mock IDP if enabled
+    let idpConfig;
+    if (shouldUseMockIdp()) {
+      console.log('[SAML] Using Mock IDP for development');
+      idpConfig = {
+        ssoUrl: features.mockIdp.ssoUrl || 'http://localhost:3001/api/mock-idp/sso',
+        sloUrl: features.mockIdp.sloUrl || 'http://localhost:3001/api/mock-idp/slo',
+        entityId: features.mockIdp.entityId || 'https://mock-idp.identity-portal.local'
+      };
+    } else {
+      idpConfig = authService.getIdpConfig();
+    }
 
     if (!idpConfig.ssoUrl) {
       return res.status(500).json({

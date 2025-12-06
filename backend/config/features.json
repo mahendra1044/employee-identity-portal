@@ -12,6 +12,16 @@
     "defaultUserId": "u1001"
   },
   
+  "mockIdp": {
+    "enabled": true,
+    "description": "Mock SAML Identity Provider for testing. Set enabled=false or delete backend/mock-idp folder when using real IDP.",
+    "simulateMfa": true,
+    "entityId": "https://mock-idp.identity-portal.local",
+    "ssoUrl": "http://localhost:3001/api/mock-idp/sso",
+    "sloUrl": "http://localhost:3001/api/mock-idp/slo",
+    "metadataUrl": "http://localhost:3001/api/mock-idp/metadata"
+  },
+  
   "mfaAuth": {
     "enabled": false,
     "protocol": "SAML",

@@ -28,6 +28,13 @@ const JWT_EXPIRY = '24h';
 // ============================================================================
 
 /**
+ * Get full features configuration
+ */
+function getFeatures() {
+  return features;
+}
+
+/**
  * Get current auth mode from configuration
  */
 function getAuthMode() {
@@ -165,6 +172,7 @@ function getAttributeMapping() {
 
 export {
   // Auth mode
+  getFeatures,
   getAuthMode,
   isMockAuth,
   isMfaAuth,

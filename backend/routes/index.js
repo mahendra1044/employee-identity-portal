@@ -15,4 +15,18 @@ export function setupAllRoutes(app, features, logger) {
     app.use('/api/saml', samlRouter);
     logger.info('[Routes] SAML SSO routes enabled');
   }
+  
+  // Mock IDP routes (for development/testing only)
+  // ⚠️ This entire mock-idp folder can be deleted when using a real IDP
+  if (features.mockIdp?.enabled && process.env.NODE_ENV !== 'production') {
+    import('../mock-idp/index.js')
+      .then(({ setupMockIdp }) => {
+        setupMockIdp(app);
+        logger.info('[Routes] Mock IDP routes enabled at /api/mock-idp/*');
+      })
+      .catch(err => {
+        logger.warn('[Routes] Mock IDP module not found or failed to load. This is OK if you removed it.');
+        logger.debug('[Routes] Mock IDP error:', err.message);
+      });
+  }
 }
