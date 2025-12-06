@@ -31,6 +31,9 @@
  * - useThemeDOM    - Side-effect hook for applying theme to DOM
  * - useMobile      - Responsive breakpoint detection
  * 
+ * AUTH HOOKS:
+ * - useAuthMode    - Auth mode detection and SSO initiation
+ * 
  * ============================================================================
  */
 
@@ -54,3 +57,11 @@ export { useConsolidatedView } from './useConsolidatedView';
 export { useThemeDOM } from './useThemeDOM';
 export { useIsMobile } from './use-mobile';
 export { usePagination, type UsePaginationOptions, type UsePaginationResult } from './usePagination';
+
+// Auth Hooks
+export { 
+  useAuthMode,
+  isAuthCallback,
+  getAuthCallbackParams,
+  clearAuthCallbackParams,
+} from './useAuthMode';

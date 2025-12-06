@@ -106,6 +106,45 @@ class RBACService {
       roleKey,
     };
   }
+
+  /**
+   * Get role IDs from role keys (e.g., 'master' -> 'R001')
+   */
+  getRoleIdsFromKeys(roleKeys) {
+    const roleIds = [];
+    const reverseMapping = {};
+    
+    // Build reverse mapping from key to ID
+    for (const [id, key] of Object.entries(this.rbac.roleKeyMapping)) {
+      reverseMapping[key] = id;
+    }
+    
+    for (const key of roleKeys) {
+      const id = reverseMapping[key];
+      if (id) {
+        roleIds.push(id);
+      }
+    }
+    
+    return roleIds;
+  }
+
+  /**
+   * Get roles from IDs with master user handling
+   */
+  getRolesFromIds(roleIds, isMaster = false) {
+    if (isMaster) {
+      return Object.values(this.rbac.roles).sort((a, b) => a.priority - b.priority);
+    }
+    return this.getRoleObjects(roleIds);
+  }
+
+  /**
+   * Get default role object
+   */
+  getDefaultRole() {
+    return this.rbac.roles[this.rbac.defaultRole];
+  }
 }
 
 export const rbacService = new RBACService();

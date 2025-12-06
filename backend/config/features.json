@@ -4,6 +4,47 @@
   "useMockAuth": true,
   "languageSwitcher": true,
   "defaultLanguage": "en",
+  
+  "authMode": "USE_MOCK_AUTH",
+  
+  "mockAuth": {
+    "enabled": true,
+    "defaultUserId": "u1001"
+  },
+  
+  "mfaAuth": {
+    "enabled": false,
+    "protocol": "SAML",
+    "serviceProvider": {
+      "entityId": "https://identity-portal.company.com",
+      "assertionConsumerServiceUrl": "http://localhost:3001/api/auth/saml/callback",
+      "singleLogoutUrl": "http://localhost:3001/api/auth/saml/logout"
+    },
+    "identityProvider": {
+      "entityId": "https://sso.company.com",
+      "ssoUrl": "https://sso.company.com/idp/SSO.saml2",
+      "sloUrl": "https://sso.company.com/idp/SLO.saml2",
+      "certificatePath": "./config/saml/idp-certificate.pem"
+    },
+    "attributeMapping": {
+      "userId": "uid",
+      "email": "mail",
+      "displayName": "cn",
+      "groups": "memberOf"
+    }
+  },
+  
+  "groupRoleMapping": {
+    "CN=SSO_OPS,OU=Groups,DC=company,DC=com": ["employee", "sso_ops"],
+    "CN=PAM_OPS,OU=Groups,DC=company,DC=com": ["employee", "pam_ops"],
+    "CN=IGA_OPS,OU=Groups,DC=company,DC=com": ["employee", "iga_ops"],
+    "CN=ENTRAID_OPS,OU=Groups,DC=company,DC=com": ["employee", "entraid_ops"],
+    "CN=TPAG_OPS,OU=Groups,DC=company,DC=com": ["employee", "tpag_ops"],
+    "CN=MASTER_OPS,OU=Groups,DC=company,DC=com": ["employee", "ops"]
+  },
+  
+  "defaultRole": "employee",
+  
   "systemDataSource": {
     "sso": "USE_MOCK",
     "pam": "USE_MOCK",

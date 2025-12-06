@@ -13,8 +13,23 @@
     "submit": "Sign in",
     "submitting": "Signing in..."
   },
+  "sso": {
+    "button": "Sign in with SSO",
+    "description": "Sign in with your corporate credentials using Single Sign-On.",
+    "redirecting": "Redirecting to SSO...",
+    "mfaNote": "You may be prompted for multi-factor authentication.",
+    "error": "SSO authentication failed. Please try again.",
+    "logout": "Sign out (SSO)",
+    "logoutSuccess": "You have been signed out successfully."
+  },
+  "devMode": {
+    "indicator": "Development Mode - Mock Authentication",
+    "description": "Using mock authentication for development and testing."
+  },
   "errors": {
     "loginFailed": "Login failed",
-    "invalidCredentials": "Invalid user ID or password"
+    "invalidCredentials": "Invalid user ID or password",
+    "ssoFailed": "SSO authentication failed",
+    "sessionExpired": "Your session has expired. Please sign in again."
   }
 }
