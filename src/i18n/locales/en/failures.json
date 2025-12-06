@@ -1,0 +1,44 @@
+{
+  "title": "Recent Failures",
+  "description": "Monitor authentication and access failures",
+  "subtitle": "Last {minutes} minutes",
+  "emptyState": "No failures detected",
+  "labels": {
+    "window": "Window:",
+    "minutes": "min"
+  },
+  "tooltips": {
+    "refresh": "Refresh failures data"
+  },
+  "table": {
+    "timestamp": "Timestamp",
+    "system": "System",
+    "userId": "User ID",
+    "error": "Error",
+    "details": "Details"
+  },
+  "noFailures": "No recent failures",
+  "loadError": "Failed to load failure data",
+  "categories": {
+    "sso": {
+      "name": "SSO Failures",
+      "description": "Single Sign-On authentication failures"
+    },
+    "pam": {
+      "name": "PAM Failures",
+      "description": "Privileged access management failures"
+    },
+    "iga": {
+      "name": "IGA Failures",
+      "description": "Identity governance failures"
+    },
+    "entra": {
+      "name": "Entra ID Failures",
+      "description": "Microsoft Entra ID failures"
+    },
+    "tpag": {
+      "name": "TPAG Failures",
+      "description": "Third-party access failures"
+    }
+  }
+}

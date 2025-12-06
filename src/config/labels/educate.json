@@ -1,0 +1,31 @@
+{
+  "title": "Educate Me",
+  "stats": "{tips} tips · {systems} systems",
+  "buttons": {
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "placeholder": "Search tips...",
+  "filters": {
+    "all": "All"
+  },
+  "badges": {
+    "quickTip": "Quick Tip",
+    "howToGuide": "How-to Guide",
+    "tips": "{count} tips",
+    "systems": "{count} systems"
+  },
+  "emptyStates": {
+    "noContent": {
+      "title": "No Systems Available",
+      "description": "No educational content is available for your current role. Contact your administrator for access."
+    },
+    "noMatch": {
+      "title": "No Matching Tips",
+      "description": "No tips found matching \"{query}\". Try a different search term."
+    }
+  },
+  "footer": {
+    "tip": "Click system cards to expand tips"
+  }
+}

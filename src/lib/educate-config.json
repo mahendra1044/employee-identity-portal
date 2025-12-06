@@ -27,6 +27,41 @@
     "Check certification campaigns; failed certs may suspend entitlements.",
     "Review SOD (segregation of duties) violations; they flag risky role combinations."
   ],
+  "saviynt-certifications": [
+    "Review active certification campaigns; open campaigns require action by reviewers.",
+    "Check pending reviews; unaddressed items may auto-revoke access after deadline.",
+    "Verify campaign scope; incorrect filters exclude users or entitlements from review.",
+    "Monitor certification history; past failures indicate recurring access issues.",
+    "Validate escalation paths; misconfigured escalations delay certification completion."
+  ],
+  "saviynt-analytics": [
+    "Review risk scores; elevated scores indicate potential over-privileged users.",
+    "Check anomaly detection results; unusual patterns may indicate compromised accounts.",
+    "Monitor dashboard metrics; trending violations require immediate attention.",
+    "Verify analytics data freshness; stale data leads to inaccurate risk assessments.",
+    "Review usage patterns; deviations from baseline suggest policy violations."
+  ],
+  "saviynt-controls": [
+    "Review SoD violation reports; toxic combinations require mitigating controls.",
+    "Check policy configurations; overly permissive rules allow risky access patterns.",
+    "Validate exception approvals; expired exceptions may suddenly block access.",
+    "Monitor control effectiveness; low detection rates indicate policy gaps.",
+    "Review compensating controls; missing mitigations leave violations unaddressed."
+  ],
+  "saviynt-requests": [
+    "Track pending request status; stuck requests delay user access.",
+    "Review approval workflows; missing approvers cause request bottlenecks.",
+    "Check rejected requests; patterns indicate policy or eligibility issues.",
+    "Validate request forms; incomplete information causes processing delays.",
+    "Monitor request SLAs; breaches indicate workflow inefficiencies."
+  ],
+  "saviynt-provisioning": [
+    "Check task queue status; backed-up queues delay access provisioning.",
+    "Review failed tasks; connector errors prevent access from being granted.",
+    "Verify connector health; offline connectors block all provisioning operations.",
+    "Monitor retry attempts; repeated failures indicate systemic issues.",
+    "Check reconciliation status; sync issues create access discrepancies."
+  ],
   "azure-ad": [
     "Inspect group memberships; removal from groups blocks resource access.",
     "Review sign-in history; repeated failures indicate conditional access blocks.",
@@ -34,11 +69,88 @@
     "Check MFA enrollment; unenrolled users face sign-in challenges.",
     "Examine app registrations; consent issues prevent SSO to SaaS apps."
   ],
+  "azure-ad-users": [
+    "Review user properties and profile information; incomplete data causes app failures.",
+    "Check account status (enabled/disabled); disabled accounts block all M365 access.",
+    "Verify license assignments; missing licenses disable productivity features.",
+    "Monitor guest user access; expired guests create security and compliance risks.",
+    "Review user risk level; high-risk users may need password reset or MFA re-enrollment."
+  ],
+  "azure-ad-groups": [
+    "Validate group membership; missing groups deny access to SharePoint, Teams, and apps.",
+    "Review dynamic group rules; incorrect queries exclude valid users from access.",
+    "Check group-based licensing; unlicensed groups cause feature unavailability.",
+    "Monitor security groups; stale memberships create unnecessary access permissions.",
+    "Verify Microsoft 365 group settings; misconfigured groups affect Teams and Outlook."
+  ],
+  "azure-ad-apps": [
+    "Review enterprise app assignments; unassigned users cannot access applications.",
+    "Check app consent status; missing admin consent blocks user sign-ins.",
+    "Verify app registration credentials; expired secrets cause authentication failures.",
+    "Monitor SAML/OIDC configurations; mismatches cause federation sign-in errors.",
+    "Review API permissions; insufficient scopes cause app functionality failures."
+  ],
+  "azure-ad-conditional": [
+    "Examine CA policy assignments; overly broad policies block legitimate access.",
+    "Review device compliance requirements; non-compliant devices get blocked.",
+    "Check named location configurations; VPN users may be incorrectly restricted.",
+    "Verify MFA requirements in policies; misconfigured MFA causes sign-in loops.",
+    "Monitor sign-in frequency settings; aggressive timeouts frustrate users."
+  ],
+  "azure-ad-signin": [
+    "Review sign-in logs for patterns; repeated failures indicate configuration issues.",
+    "Check error codes in failures; specific codes point to exact remediation steps.",
+    "Monitor risky sign-ins; unaddressed risks may indicate compromised accounts.",
+    "Verify location-based blocks; travel triggers false positives for mobile users.",
+    "Review interrupted sign-ins; CA policy conflicts cause incomplete authentications."
+  ],
   "ping-mfa": [
     "Confirm enrollment status; unenrolled users can't complete MFA challenges.",
     "List enrolled devices; unregistered phones lead to push notification failures.",
     "Review recent events; timeouts or denials suggest device sync problems.",
     "Check policy compliance; bypassed MFA may violate security requirements.",
     "Verify backup methods; without alternatives, lost devices block access entirely."
+  ],
+  "saviynt-tpag": [
+    "Review TPAG dashboard for overall third-party access governance health.",
+    "Monitor active alerts for vendor compliance and access violations.",
+    "Track statistics for vendor onboarding, offboarding, and access trends.",
+    "Use overview to identify high-risk vendors requiring immediate attention.",
+    "Check system status for integration health with external vendor systems."
+  ],
+  "saviynt-tpag-vendors": [
+    "Manage vendor relationships through centralized vendor management portal.",
+    "Review active vendors for current contract and compliance status.",
+    "Track pending onboarding requests for new vendor partnerships.",
+    "Monitor vendor risk scores and compliance certifications.",
+    "Verify vendor contact information and escalation paths are current."
+  ],
+  "saviynt-tpag-contracts": [
+    "Review all contracts for terms, conditions, and data handling requirements.",
+    "Monitor expiring contracts to ensure timely renewal or offboarding.",
+    "Track pending renewals to prevent service interruptions.",
+    "Verify contract compliance with security and privacy requirements.",
+    "Document contract amendments and track version history."
+  ],
+  "saviynt-tpag-access": [
+    "Review third-party access requests for appropriate entitlements.",
+    "Monitor active access grants for vendor users.",
+    "Track revoked access to ensure complete offboarding.",
+    "Verify just-in-time access grants are properly time-limited.",
+    "Audit access patterns for anomalies or policy violations."
+  ],
+  "saviynt-tpag-risk": [
+    "Conduct risk assessments for new and existing vendor relationships.",
+    "Monitor high-risk vendors for enhanced oversight requirements.",
+    "Track compliance status against security frameworks and regulations.",
+    "Review risk mitigation plans and remediation progress.",
+    "Document risk acceptance decisions with proper approvals."
+  ],
+  "saviynt-tpag-lifecycle": [
+    "Manage vendor onboarding workflows from initial request to access grant.",
+    "Track offboarding progress to ensure complete access termination.",
+    "Conduct periodic access reviews for all active vendor users.",
+    "Monitor lifecycle events for compliance and audit trail.",
+    "Verify attestation and certification requirements are met."
   ]
 }

@@ -1,0 +1,53 @@
+{
+  "title": "Visibilidad del Sistema",
+  "status": {
+    "active": "{enabled}/{total} activos"
+  },
+  "buttons": {
+    "reset": "Restablecer",
+    "all": "Todos",
+    "allOn": "Todos Activos",
+    "allOff": "Todos Inactivos"
+  },
+  "placeholder": "Buscar sistemas...",
+  "categories": {
+    "ping": {
+      "name": "Ping Identity (SSO)",
+      "short": "SSO"
+    },
+    "cyberark": {
+      "name": "CyberArk (PAM)",
+      "short": "PAM"
+    },
+    "saviynt": {
+      "name": "Saviynt (IGA)",
+      "short": "IGA"
+    },
+    "azure": {
+      "name": "Microsoft Entra",
+      "short": "Entra"
+    }
+  },
+  "aria": {
+    "toggleVisibility": "Alternar visibilidad de {system}"
+  },
+  "warnings": {
+    "adminDisabled": "Deshabilitado por administrador"
+  },
+  "emptyStates": {
+    "noSystems": {
+      "title": "No Hay Sistemas Disponibles",
+      "description": "No hay sistemas disponibles para su rol actual."
+    },
+    "noMatch": {
+      "title": "No Hay Sistemas Coincidentes",
+      "description": "Intente con un término de búsqueda diferente."
+    }
+  },
+  "footer": {
+    "tip": "Los cambios se aplican inmediatamente · Se restablece al cerrar sesión"
+  },
+  "toast": {
+    "resetSuccess": "Restablecido a valores predeterminados"
+  }
+}

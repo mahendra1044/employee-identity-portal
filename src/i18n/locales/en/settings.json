@@ -1,0 +1,53 @@
+{
+  "title": "System Visibility",
+  "status": {
+    "active": "{enabled}/{total} active"
+  },
+  "buttons": {
+    "reset": "Reset",
+    "all": "All",
+    "allOn": "All On",
+    "allOff": "All Off"
+  },
+  "placeholder": "Search systems...",
+  "categories": {
+    "ping": {
+      "name": "Ping Identity (SSO)",
+      "short": "SSO"
+    },
+    "cyberark": {
+      "name": "CyberArk (PAM)",
+      "short": "PAM"
+    },
+    "saviynt": {
+      "name": "Saviynt (IGA)",
+      "short": "IGA"
+    },
+    "azure": {
+      "name": "Microsoft Entra",
+      "short": "Entra"
+    }
+  },
+  "aria": {
+    "toggleVisibility": "Toggle {system} visibility"
+  },
+  "warnings": {
+    "adminDisabled": "Admin disabled"
+  },
+  "emptyStates": {
+    "noSystems": {
+      "title": "No Systems Available",
+      "description": "No systems are available for your current role."
+    },
+    "noMatch": {
+      "title": "No Matching Systems",
+      "description": "Try a different search term."
+    }
+  },
+  "footer": {
+    "tip": "Changes apply immediately · Reset on logout"
+  },
+  "toast": {
+    "resetSuccess": "Reset to defaults"
+  }
+}

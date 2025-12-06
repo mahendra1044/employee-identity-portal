@@ -1,0 +1,51 @@
+{
+  "brand": {
+    "name": "Identity Sphere",
+    "badge": "Unified Access"
+  },
+  "roles": {
+    "ops": "Full Stack Identity Ops",
+    "sso_ops": "SSO Ops",
+    "pam_ops": "PAM Ops",
+    "iga_ops": "IGA Ops",
+    "entraid_ops": "Entra ID Ops",
+    "tpag_ops": "TPAG Ops",
+    "employee": "Employee",
+    "management": "Management",
+    "unknown": "Unknown Role"
+  },
+  "buttons": {
+    "snow": "SNOW",
+    "educate": "Educate",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  },
+  "tooltips": {
+    "theme": {
+      "toggle": "Toggle theme",
+      "light": "Enable light mode",
+      "dark": "Enable dark mode",
+      "navy": "Enable navy mode"
+    },
+    "snow": "View your ServiceNow incidents",
+    "snowCount": "{count} incidents",
+    "educate": "View troubleshooting guides",
+    "settings": "Manage system visibility",
+    "signOut": "Sign out of the portal",
+    "switchToOps": "Switch to Full Stack Identity Ops",
+    "switchToEmployee": "Switch to Employee view",
+    "switchTo": "Switch to {role}",
+    "switchBackTo": "Switch back to {role}"
+  },
+  "aria": {
+    "themeToggle": "Toggle theme",
+    "snow": "Open ServiceNow incidents",
+    "educate": "Open troubleshooting guide",
+    "settings": "Open settings",
+    "signOut": "Sign out",
+    "switchToOps": "Switch to Full Stack Identity Ops",
+    "switchToEmployee": "Switch to employee view",
+    "switchToSpecialized": "Switch to specialized ops",
+    "switchBackToOps": "Switch back to Full Stack Identity Ops"
+  }
+}

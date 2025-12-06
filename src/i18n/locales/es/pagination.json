@@ -1,0 +1,24 @@
+{
+  "emptyState": "No se encontraron resultados",
+  "columns": {
+    "index": "#"
+  },
+  "tooltips": {
+    "firstPage": "Primera página",
+    "previousPage": "Página anterior",
+    "nextPage": "Página siguiente",
+    "lastPage": "Última página",
+    "pageInfo": "Viendo página {current} de {total}"
+  },
+  "pageIndicator": "Página {current} de {total}",
+  "labels": {
+    "perPage": "Por página:"
+  },
+  "status": {
+    "paginated": "(paginado)"
+  },
+  "aria": {
+    "goToRow": "Ir a la fila {index}",
+    "pagination": "paginación"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "buttons": {
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "refresh": "Actualizar",
+    "retry": "Reintentar",
+    "viewDetails": "Ver Detalles",
+    "view": "Ver",
+    "viewRaw": "Ver datos sin procesar",
+    "viewFullScreen": "Ver pantalla completa",
+    "copyToClipboard": "Copiar al Portapapeles",
+    "search": "Buscar",
+    "clear": "Limpiar",
+    "loadData": "Cargar Datos",
+    "expand": "Expandir",
+    "collapse": "Contraer",
+    "sendEmail": "Enviar Correo"
+  },
+  "status": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "noData": "No hay datos disponibles",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "dataLoaded": "Datos cargados",
+    "live": "en vivo",
+    "mock": "simulado"
+  },
+  "errors": {
+    "generic": "Algo salió mal",
+    "network": "Error de red. Por favor, inténtelo de nuevo.",
+    "unauthorized": "Sesión expirada. Por favor, inicie sesión de nuevo.",
+    "failed": "Fallido"
+  },
+  "copy": {
+    "copiedToClipboard": "Copiado al portapapeles",
+    "copiedData": "{name} copiado al portapapeles",
+    "copiedJson": "{name} JSON copiado",
+    "copiedUserId": "ID de Usuario copiado: {userId}"
+  },
+  "tooltips": {
+    "expandFullScreen": "Expandir pantalla completa",
+    "copyToClipboard": "Copiar al portapapeles"
+  },
+  "labels": {
+    "actions": "Acciones:"
+  }
+}

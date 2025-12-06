@@ -1,0 +1,22 @@
+{
+  "title": "Recent Failures",
+  "description": "Monitor authentication and access failures",
+  "subtitle": "Last {minutes} minutes",
+  "emptyState": "No failures detected",
+  "labels": {
+    "window": "Window:",
+    "minutes": "min"
+  },
+  "tooltips": {
+    "refresh": "Refresh failures data"
+  },
+  "table": {
+    "timestamp": "Timestamp",
+    "system": "System",
+    "userId": "User ID",
+    "error": "Error",
+    "details": "Details"
+  },
+  "noFailures": "No recent failures",
+  "loadError": "Failed to load failure data"
+}

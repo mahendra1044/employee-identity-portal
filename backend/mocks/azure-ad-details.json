@@ -1,24 +1,454 @@
 {
-  "upn": "alice.johnson@company.com",
-  "objectId": "aad-7f3c1a10-12ab-4b9e-9e12-111122223333",
-  "tenant": "company.onmicrosoft.com",
-  "jobTitle": "Senior Software Engineer",
-  "department": "Engineering",
-  "manager": "Bob Martin",
-  "licenses": ["M365 E5", "PowerBI Pro", "Visual Studio Enterprise"],
-  "groups": [
-    { "id": "g-eng", "name": "AAD-Eng" },
-    { "id": "g-vpn", "name": "AAD-VPN-Users" },
-    { "id": "g-dev", "name": "AAD-Developers" }
-  ],
-  "devices": [
-    { "id": "dev-001", "name": "WIN-ALICE-01", "os": "Windows 11", "lastCheckIn": "2025-09-17T10:00:00Z" },
-    { "id": "dev-002", "name": "MBP-ALICE", "os": "macOS 15", "lastCheckIn": "2025-09-16T08:30:00Z" }
-  ],
-  "signInRisk": "low",
-  "conditionalAccess": {
-    "policies": ["Require MFA", "Block legacy auth"],
-    "lastEvaluated": "2025-09-17T12:55:00Z"
+  "u1001": {
+    "upn": "aisha.patel@company.com",
+    "objectId": "aad-1001-4a5b-6c7d-8e9f0a1b2c3d",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Engineering Manager",
+    "department": "Engineering",
+    "manager": "john.smith@company.com",
+    "licenses": ["Microsoft 365 E5", "Power BI Pro", "Azure DevOps Basic"],
+    "groups": [
+      { "id": "grp-eng-001", "name": "Engineering-All", "type": "Security" },
+      { "id": "grp-mgr-001", "name": "Managers", "type": "Microsoft 365" },
+      { "id": "grp-teams-eng", "name": "Teams-Engineering", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-001-lap", "name": "LAPTOP-AP2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T08:30:00Z", "compliant": true },
+      { "id": "dev-001-mob", "name": "iPhone 15 Pro", "os": "iOS 17.2", "lastCheckIn": "2024-01-15T09:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for admins", "Block legacy auth", "Compliant device required"],
+      "lastEvaluated": "2024-01-15T08:30:00Z"
+    },
+    "lastSync": "2024-01-15T08:30:00Z"
   },
-  "lastSync": "2025-09-17T12:55:00Z"
+  "u1002": {
+    "upn": "marcus.johnson@company.com",
+    "objectId": "aad-1002-5b6c-7d8e-9f0a1b2c3d4e",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "IT Support Specialist",
+    "department": "IT Operations",
+    "manager": "sarah.chen@company.com",
+    "licenses": ["Microsoft 365 E3", "Intune Device License"],
+    "groups": [
+      { "id": "grp-it-001", "name": "IT-Support", "type": "Security" },
+      { "id": "grp-helpdesk", "name": "Helpdesk-Team", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-002-lap", "name": "LAPTOP-MJ2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T07:45:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth"],
+      "lastEvaluated": "2024-01-15T07:45:00Z"
+    },
+    "lastSync": "2024-01-15T07:45:00Z"
+  },
+  "u1003": {
+    "upn": "sarah.chen@company.com",
+    "objectId": "aad-1003-6c7d-8e9f-0a1b2c3d4e5f",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "IT Director",
+    "department": "IT Operations",
+    "manager": "ceo@company.com",
+    "licenses": ["Microsoft 365 E5", "Power BI Pro", "Project Plan 3", "Visio Plan 2"],
+    "groups": [
+      { "id": "grp-it-admins", "name": "IT-Admins", "type": "Security" },
+      { "id": "grp-directors", "name": "Directors", "type": "Microsoft 365" },
+      { "id": "grp-azure-admins", "name": "Azure-Global-Admins", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-003-lap", "name": "LAPTOP-SC2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T06:30:00Z", "compliant": true },
+      { "id": "dev-003-tab", "name": "Surface Pro 9", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-14T18:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for admins", "Require compliant device", "Block legacy auth", "Named locations only"],
+      "lastEvaluated": "2024-01-15T06:30:00Z"
+    },
+    "lastSync": "2024-01-15T06:30:00Z"
+  },
+  "u1004": {
+    "upn": "david.kim@company.com",
+    "objectId": "aad-1004-7d8e-9f0a-1b2c3d4e5f6g",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Security Analyst",
+    "department": "Security",
+    "manager": "lisa.wong@company.com",
+    "licenses": ["Microsoft 365 E5", "Microsoft Defender for Endpoint P2"],
+    "groups": [
+      { "id": "grp-sec-001", "name": "Security-Team", "type": "Security" },
+      { "id": "grp-soc", "name": "SOC-Analysts", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-004-lap", "name": "LAPTOP-DK2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T08:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth", "Compliant device required"],
+      "lastEvaluated": "2024-01-15T08:00:00Z"
+    },
+    "lastSync": "2024-01-15T08:00:00Z"
+  },
+  "u1005": {
+    "upn": "emma.wilson@company.com",
+    "objectId": "aad-1005-8e9f-0a1b-2c3d4e5f6g7h",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "HR Business Partner",
+    "department": "Human Resources",
+    "manager": "hr.director@company.com",
+    "licenses": ["Microsoft 365 E3", "Dynamics 365 HR"],
+    "groups": [
+      { "id": "grp-hr-001", "name": "HR-Team", "type": "Security" },
+      { "id": "grp-hr-bp", "name": "HR-Business-Partners", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-005-lap", "name": "LAPTOP-EW2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T09:15:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth"],
+      "lastEvaluated": "2024-01-15T09:15:00Z"
+    },
+    "lastSync": "2024-01-15T09:15:00Z"
+  },
+  "u1006": {
+    "upn": "james.rodriguez@company.com",
+    "objectId": "aad-1006-9f0a-1b2c-3d4e5f6g7h8i",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Financial Analyst",
+    "department": "Finance",
+    "manager": "cfo@company.com",
+    "licenses": ["Microsoft 365 E3", "Power BI Pro"],
+    "groups": [
+      { "id": "grp-fin-001", "name": "Finance-Team", "type": "Security" },
+      { "id": "grp-fin-analysts", "name": "Finance-Analysts", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-006-lap", "name": "LAPTOP-JR2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T08:45:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth", "Compliant device required"],
+      "lastEvaluated": "2024-01-15T08:45:00Z"
+    },
+    "lastSync": "2024-01-15T08:45:00Z"
+  },
+  "u1007": {
+    "upn": "priya.sharma@company.com",
+    "objectId": "aad-1007-0a1b-2c3d-4e5f6g7h8i9j",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Senior Developer",
+    "department": "Engineering",
+    "manager": "aisha.patel@company.com",
+    "licenses": ["Microsoft 365 E5", "Azure DevOps Basic", "GitHub Enterprise"],
+    "groups": [
+      { "id": "grp-eng-001", "name": "Engineering-All", "type": "Security" },
+      { "id": "grp-dev-senior", "name": "Senior-Developers", "type": "Security" },
+      { "id": "grp-azure-dev", "name": "Azure-Developers", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-007-lap", "name": "LAPTOP-PS2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T07:30:00Z", "compliant": true },
+      { "id": "dev-007-mac", "name": "MacBook Pro 16", "os": "macOS Sonoma", "lastCheckIn": "2024-01-15T07:35:00Z", "compliant": true }
+    ],
+    "signInRisk": "medium",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth", "Require compliant device"],
+      "lastEvaluated": "2024-01-15T07:30:00Z"
+    },
+    "lastSync": "2024-01-15T07:30:00Z"
+  },
+  "u1008": {
+    "upn": "michael.brown@company.com",
+    "objectId": "aad-1008-1b2c-3d4e-5f6g7h8i9j0k",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Marketing Manager",
+    "department": "Marketing",
+    "manager": "cmo@company.com",
+    "licenses": ["Microsoft 365 E3", "Dynamics 365 Marketing"],
+    "groups": [
+      { "id": "grp-mkt-001", "name": "Marketing-Team", "type": "Security" },
+      { "id": "grp-mkt-mgrs", "name": "Marketing-Managers", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-008-lap", "name": "LAPTOP-MB2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T09:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth"],
+      "lastEvaluated": "2024-01-15T09:00:00Z"
+    },
+    "lastSync": "2024-01-15T09:00:00Z"
+  },
+  "u1009": {
+    "upn": "lisa.wong@company.com",
+    "objectId": "aad-1009-2c3d-4e5f-6g7h8i9j0k1l",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "CISO",
+    "department": "Security",
+    "manager": "ceo@company.com",
+    "licenses": ["Microsoft 365 E5", "Microsoft Defender for Endpoint P2", "Microsoft Sentinel"],
+    "groups": [
+      { "id": "grp-sec-admins", "name": "Security-Admins", "type": "Security" },
+      { "id": "grp-executives", "name": "Executives", "type": "Microsoft 365" },
+      { "id": "grp-azure-sec", "name": "Azure-Security-Admins", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-009-lap", "name": "LAPTOP-LW2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T06:00:00Z", "compliant": true },
+      { "id": "dev-009-mob", "name": "iPhone 15 Pro Max", "os": "iOS 17.2", "lastCheckIn": "2024-01-15T08:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for admins", "Block legacy auth", "Named locations only", "Require compliant device", "Session timeout 1hr"],
+      "lastEvaluated": "2024-01-15T06:00:00Z"
+    },
+    "lastSync": "2024-01-15T06:00:00Z"
+  },
+  "u1010": {
+    "upn": "robert.taylor@company.com",
+    "objectId": "aad-1010-3d4e-5f6g-7h8i9j0k1l2m",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Legal Counsel",
+    "department": "Legal",
+    "manager": "general.counsel@company.com",
+    "licenses": ["Microsoft 365 E5", "Microsoft 365 eDiscovery"],
+    "groups": [
+      { "id": "grp-legal-001", "name": "Legal-Team", "type": "Security" },
+      { "id": "grp-ediscovery", "name": "eDiscovery-Managers", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-010-lap", "name": "LAPTOP-RT2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T08:30:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth", "Compliant device required"],
+      "lastEvaluated": "2024-01-15T08:30:00Z"
+    },
+    "lastSync": "2024-01-15T08:30:00Z"
+  },
+  "u1011": {
+    "upn": "jennifer.martinez@company.com",
+    "objectId": "aad-1011-4e5f-6g7h-8i9j0k1l2m3n",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Product Manager",
+    "department": "Product",
+    "manager": "vp.product@company.com",
+    "licenses": ["Microsoft 365 E3", "Azure DevOps Basic", "Power BI Pro"],
+    "groups": [
+      { "id": "grp-prod-001", "name": "Product-Team", "type": "Security" },
+      { "id": "grp-prod-mgrs", "name": "Product-Managers", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-011-lap", "name": "LAPTOP-JM2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T07:00:00Z", "compliant": true },
+      { "id": "dev-011-mob", "name": "Samsung Galaxy S24", "os": "Android 14", "lastCheckIn": "2024-01-15T08:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth"],
+      "lastEvaluated": "2024-01-15T07:00:00Z"
+    },
+    "lastSync": "2024-01-15T07:00:00Z"
+  },
+  "u1012": {
+    "upn": "alex.nguyen@company.com",
+    "objectId": "aad-1012-5f6g-7h8i-9j0k1l2m3n4o",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Cloud Architect",
+    "department": "Engineering",
+    "manager": "aisha.patel@company.com",
+    "licenses": ["Microsoft 365 E5", "Azure Reserved Instances", "Azure DevOps Basic"],
+    "groups": [
+      { "id": "grp-eng-001", "name": "Engineering-All", "type": "Security" },
+      { "id": "grp-cloud-arch", "name": "Cloud-Architects", "type": "Security" },
+      { "id": "grp-azure-admins", "name": "Azure-Global-Admins", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-012-lap", "name": "LAPTOP-AN2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T06:45:00Z", "compliant": true }
+    ],
+    "signInRisk": "high",
+    "conditionalAccess": {
+      "policies": ["Require MFA for admins", "Block legacy auth", "Named locations only", "Require compliant device"],
+      "lastEvaluated": "2024-01-15T06:45:00Z"
+    },
+    "lastSync": "2024-01-15T06:45:00Z"
+  },
+  "u1013": {
+    "upn": "stephanie.lee@company.com",
+    "objectId": "aad-1013-6g7h-8i9j-0k1l2m3n4o5p",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Data Scientist",
+    "department": "Data Science",
+    "manager": "head.data@company.com",
+    "licenses": ["Microsoft 365 E5", "Power BI Pro", "Azure ML"],
+    "groups": [
+      { "id": "grp-data-001", "name": "Data-Science", "type": "Security" },
+      { "id": "grp-ml-users", "name": "ML-Platform-Users", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-013-lap", "name": "LAPTOP-SL2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T08:15:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth", "Compliant device required"],
+      "lastEvaluated": "2024-01-15T08:15:00Z"
+    },
+    "lastSync": "2024-01-15T08:15:00Z"
+  },
+  "u1014": {
+    "upn": "chris.anderson@company.com",
+    "objectId": "aad-1014-7h8i-9j0k-1l2m3n4o5p6q",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Sales Director",
+    "department": "Sales",
+    "manager": "vp.sales@company.com",
+    "licenses": ["Microsoft 365 E3", "Dynamics 365 Sales", "Power BI Pro"],
+    "groups": [
+      { "id": "grp-sales-001", "name": "Sales-Team", "type": "Security" },
+      { "id": "grp-sales-dir", "name": "Sales-Directors", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-014-lap", "name": "LAPTOP-CA2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T07:15:00Z", "compliant": true },
+      { "id": "dev-014-mob", "name": "iPhone 15", "os": "iOS 17.2", "lastCheckIn": "2024-01-15T09:30:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth"],
+      "lastEvaluated": "2024-01-15T07:15:00Z"
+    },
+    "lastSync": "2024-01-15T07:15:00Z"
+  },
+  "u1015": {
+    "upn": "maria.gonzalez@company.com",
+    "objectId": "aad-1015-8i9j-0k1l-2m3n4o5p6q7r",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "QA Lead",
+    "department": "Quality Assurance",
+    "manager": "qa.director@company.com",
+    "licenses": ["Microsoft 365 E3", "Azure DevOps Basic", "Azure Test Plans"],
+    "groups": [
+      { "id": "grp-qa-001", "name": "QA-Team", "type": "Security" },
+      { "id": "grp-qa-leads", "name": "QA-Leads", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-015-lap", "name": "LAPTOP-MG2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T08:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth"],
+      "lastEvaluated": "2024-01-15T08:00:00Z"
+    },
+    "lastSync": "2024-01-15T08:00:00Z"
+  },
+  "u1016": {
+    "upn": "kevin.thompson@company.com",
+    "objectId": "aad-1016-9j0k-1l2m-3n4o5p6q7r8s",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Network Engineer",
+    "department": "IT Operations",
+    "manager": "sarah.chen@company.com",
+    "licenses": ["Microsoft 365 E3", "Azure Network Watcher"],
+    "groups": [
+      { "id": "grp-it-001", "name": "IT-Support", "type": "Security" },
+      { "id": "grp-network", "name": "Network-Engineers", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-016-lap", "name": "LAPTOP-KT2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T06:30:00Z", "compliant": true }
+    ],
+    "signInRisk": "medium",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth", "Named locations only"],
+      "lastEvaluated": "2024-01-15T06:30:00Z"
+    },
+    "lastSync": "2024-01-15T06:30:00Z"
+  },
+  "u1017": {
+    "upn": "amanda.white@company.com",
+    "objectId": "aad-1017-0k1l-2m3n-4o5p6q7r8s9t",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "UX Designer",
+    "department": "Design",
+    "manager": "design.lead@company.com",
+    "licenses": ["Microsoft 365 E3", "Adobe Creative Cloud"],
+    "groups": [
+      { "id": "grp-design-001", "name": "Design-Team", "type": "Security" },
+      { "id": "grp-ux", "name": "UX-Designers", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-017-mac", "name": "MacBook Pro 14", "os": "macOS Sonoma", "lastCheckIn": "2024-01-15T09:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth"],
+      "lastEvaluated": "2024-01-15T09:00:00Z"
+    },
+    "lastSync": "2024-01-15T09:00:00Z"
+  },
+  "u1018": {
+    "upn": "daniel.jackson@company.com",
+    "objectId": "aad-1018-1l2m-3n4o-5p6q7r8s9t0u",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "DevOps Engineer",
+    "department": "Engineering",
+    "manager": "aisha.patel@company.com",
+    "licenses": ["Microsoft 365 E5", "Azure DevOps Basic", "GitHub Enterprise"],
+    "groups": [
+      { "id": "grp-eng-001", "name": "Engineering-All", "type": "Security" },
+      { "id": "grp-devops", "name": "DevOps-Team", "type": "Security" },
+      { "id": "grp-azure-contributors", "name": "Azure-Contributors", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-018-lap", "name": "LAPTOP-DJ2024", "os": "Ubuntu 22.04", "lastCheckIn": "2024-01-15T07:00:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth", "Require compliant device"],
+      "lastEvaluated": "2024-01-15T07:00:00Z"
+    },
+    "lastSync": "2024-01-15T07:00:00Z"
+  },
+  "u1019": {
+    "upn": "rachel.moore@company.com",
+    "objectId": "aad-1019-2m3n-4o5p-6q7r8s9t0u1v",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Compliance Officer",
+    "department": "Compliance",
+    "manager": "chief.compliance@company.com",
+    "licenses": ["Microsoft 365 E5", "Microsoft Purview", "Microsoft Compliance Manager"],
+    "groups": [
+      { "id": "grp-compliance-001", "name": "Compliance-Team", "type": "Security" },
+      { "id": "grp-audit", "name": "Internal-Audit", "type": "Security" }
+    ],
+    "devices": [
+      { "id": "dev-019-lap", "name": "LAPTOP-RM2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T08:30:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth", "Compliant device required", "Session timeout 2hr"],
+      "lastEvaluated": "2024-01-15T08:30:00Z"
+    },
+    "lastSync": "2024-01-15T08:30:00Z"
+  },
+  "u1020": {
+    "upn": "jason.clark@company.com",
+    "objectId": "aad-1020-3n4o-5p6q-7r8s9t0u1v2w",
+    "tenant": "company.onmicrosoft.com",
+    "jobTitle": "Technical Writer",
+    "department": "Documentation",
+    "manager": "doc.lead@company.com",
+    "licenses": ["Microsoft 365 E3", "SharePoint Online"],
+    "groups": [
+      { "id": "grp-docs-001", "name": "Documentation-Team", "type": "Security" },
+      { "id": "grp-sharepoint", "name": "SharePoint-Contributors", "type": "Microsoft 365" }
+    ],
+    "devices": [
+      { "id": "dev-020-lap", "name": "LAPTOP-JC2024", "os": "Windows 11 Enterprise", "lastCheckIn": "2024-01-15T09:15:00Z", "compliant": true }
+    ],
+    "signInRisk": "low",
+    "conditionalAccess": {
+      "policies": ["Require MFA for all users", "Block legacy auth"],
+      "lastEvaluated": "2024-01-15T09:15:00Z"
+    },
+    "lastSync": "2024-01-15T09:15:00Z"
+  }
 }

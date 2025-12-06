@@ -1,0 +1,200 @@
+{
+  "u1001": {
+    "userId": "u1001",
+    "name": "Alice Johnson",
+    "email": "alice.johnson@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway", "Dev Gateway"],
+    "accessPolicies": 15,
+    "lastAccessTime": "2025-09-20T10:30:00Z"
+  },
+  "u1002": {
+    "userId": "u1002",
+    "name": "Bob Martin",
+    "email": "bob.martin@company.com",
+    "status": "active",
+    "apiGateways": ["Staging Gateway"],
+    "accessPolicies": 6,
+    "lastAccessTime": "2025-09-18T14:15:00Z"
+  },
+  "u1003": {
+    "userId": "u1003",
+    "name": "Charlie Kim",
+    "email": "charlie.kim@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway"],
+    "accessPolicies": 12,
+    "lastAccessTime": "2025-09-19T09:20:00Z"
+  },
+  "u1004": {
+    "userId": "u1004",
+    "name": "Dana Lee",
+    "email": "dana.lee@company.com",
+    "status": "active",
+    "apiGateways": ["Dev Gateway", "QA Gateway"],
+    "accessPolicies": 8,
+    "lastAccessTime": "2025-09-20T08:45:00Z"
+  },
+  "u1005": {
+    "userId": "u1005",
+    "name": "Evan Torres",
+    "email": "evan.torres@company.com",
+    "status": "inactive",
+    "apiGateways": ["Production Gateway"],
+    "accessPolicies": 10,
+    "lastAccessTime": "2025-09-15T16:30:00Z"
+  },
+  "u1006": {
+    "userId": "u1006",
+    "name": "Fatima Khan",
+    "email": "fatima.khan@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway", "Staging Gateway"],
+    "accessPolicies": 18,
+    "lastAccessTime": "2025-09-20T12:00:00Z"
+  },
+  "u1007": {
+    "userId": "u1007",
+    "name": "George Smith",
+    "email": "george.smith@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway"],
+    "accessPolicies": 8,
+    "lastAccessTime": "2025-09-19T12:00:00Z"
+  },
+  "u1008": {
+    "userId": "u1008",
+    "name": "Hannah Park",
+    "email": "hannah.park@company.com",
+    "status": "active",
+    "apiGateways": ["Dev Gateway"],
+    "accessPolicies": 5,
+    "lastAccessTime": "2025-09-20T07:15:00Z"
+  },
+  "u1009": {
+    "userId": "u1009",
+    "name": "Ian Chen",
+    "email": "ian.chen@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway", "Dev Gateway", "QA Gateway"],
+    "accessPolicies": 22,
+    "lastAccessTime": "2025-09-20T13:45:00Z"
+  },
+  "u1010": {
+    "userId": "u1010",
+    "name": "Julia Nguyen",
+    "email": "julia.nguyen@company.com",
+    "status": "active",
+    "apiGateways": ["Staging Gateway"],
+    "accessPolicies": 7,
+    "lastAccessTime": "2025-09-19T11:20:00Z"
+  },
+  "u1011": {
+    "userId": "u1011",
+    "name": "Kevin Patel",
+    "email": "kevin.patel@company.com",
+    "status": "suspended",
+    "apiGateways": [],
+    "accessPolicies": 0,
+    "lastAccessTime": "2025-09-10T10:00:00Z"
+  },
+  "u1012": {
+    "userId": "u1012",
+    "name": "Laura Garcia",
+    "email": "laura.garcia@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway"],
+    "accessPolicies": 14,
+    "lastAccessTime": "2025-09-20T09:30:00Z"
+  },
+  "u1013": {
+    "userId": "u1013",
+    "name": "Mohammed Ali",
+    "email": "mohammed.ali@company.com",
+    "status": "active",
+    "apiGateways": ["Dev Gateway", "Staging Gateway"],
+    "accessPolicies": 11,
+    "lastAccessTime": "2025-09-19T15:10:00Z"
+  },
+  "u1014": {
+    "userId": "u1014",
+    "name": "Nina Brown",
+    "email": "nina.brown@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway", "QA Gateway"],
+    "accessPolicies": 16,
+    "lastAccessTime": "2025-09-20T11:00:00Z"
+  },
+  "u1015": {
+    "userId": "u1015",
+    "name": "Oscar Diaz",
+    "email": "oscar.diaz@company.com",
+    "status": "active",
+    "apiGateways": ["Dev Gateway"],
+    "accessPolicies": 4,
+    "lastAccessTime": "2025-09-19T14:25:00Z"
+  },
+  "u1016": {
+    "userId": "u1016",
+    "name": "Priya Singh",
+    "email": "priya.singh@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway", "Staging Gateway", "Dev Gateway"],
+    "accessPolicies": 20,
+    "lastAccessTime": "2025-09-20T10:15:00Z"
+  },
+  "u1017": {
+    "userId": "u1017",
+    "name": "Quentin Roux",
+    "email": "quentin.roux@company.com",
+    "status": "inactive",
+    "apiGateways": ["Staging Gateway"],
+    "accessPolicies": 9,
+    "lastAccessTime": "2025-09-12T13:40:00Z"
+  },
+  "u1018": {
+    "userId": "u1018",
+    "name": "Rita Souza",
+    "email": "rita.souza@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway"],
+    "accessPolicies": 13,
+    "lastAccessTime": "2025-09-20T08:00:00Z"
+  },
+  "u1019": {
+    "userId": "u1019",
+    "name": "Sam Wilson",
+    "email": "sam.wilson@company.com",
+    "status": "active",
+    "apiGateways": ["QA Gateway", "Dev Gateway"],
+    "accessPolicies": 10,
+    "lastAccessTime": "2025-09-19T16:50:00Z"
+  },
+  "u1020": {
+    "userId": "u1020",
+    "name": "Tina Zhang",
+    "email": "tina.zhang@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway", "Dev Gateway"],
+    "accessPolicies": 17,
+    "lastAccessTime": "2025-09-20T12:30:00Z"
+  },
+  "alice": {
+    "userId": "u1001",
+    "name": "Alice Johnson",
+    "email": "alice.johnson@company.com",
+    "status": "active",
+    "apiGateways": ["Production Gateway", "Dev Gateway"],
+    "accessPolicies": 15,
+    "lastAccessTime": "2025-09-20T10:30:00Z"
+  },
+  "bob": {
+    "userId": "u1002",
+    "name": "Bob Martin",
+    "email": "bob.martin@company.com",
+    "status": "active",
+    "apiGateways": ["Staging Gateway"],
+    "accessPolicies": 6,
+    "lastAccessTime": "2025-09-18T14:15:00Z"
+  }
+}

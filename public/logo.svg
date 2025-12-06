@@ -1,0 +1,29 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Circle -->
+  <circle cx="32" cy="32" r="30" fill="url(#grad1)" opacity="0.1"/>
+  <circle cx="32" cy="32" r="30" stroke="url(#grad1)" stroke-width="2" fill="none"/>
+  
+  <!-- Identity Symbol - Stylized "IS" or Shield -->
+  <path d="M32 12 L48 20 L48 36 C48 44 40 50 32 52 C24 50 16 44 16 36 L16 20 Z" 
+        fill="url(#grad2)" opacity="0.8"/>
+  
+  <!-- Inner Detail -->
+  <circle cx="32" cy="32" r="8" fill="white" opacity="0.9"/>
+  <circle cx="32" cy="32" r="5" fill="url(#grad1)"/>
+  
+  <!-- User Icon -->
+  <circle cx="32" cy="30" r="3" fill="white"/>
+  <path d="M 26 38 Q 32 35 38 38" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

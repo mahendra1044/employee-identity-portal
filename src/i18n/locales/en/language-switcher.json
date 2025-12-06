@@ -1,0 +1,8 @@
+{
+  "label": "Language",
+  "tooltip": "Change language",
+  "languages": {
+    "en": "English",
+    "es": "Spanish"
+  }
+}

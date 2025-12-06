@@ -31,6 +31,7 @@
     "email": "charlie.kim@company.com",
     "systems": {
       "ping-directory": { "department": "IT", "title": "Support Engineer" },
+      "saviynt": { "roles": ["Support Engineer", "VPN User"], "riskScore": 6 },
       "ping-mfa": { "status": "Disabled" },
       "azure-ad": { "jobTitle": "Support Engineer", "licenses": ["M365 E3"] }
     }
@@ -42,6 +43,7 @@
     "systems": {
       "ping-directory": { "department": "Finance", "title": "Financial Analyst" },
       "ping-federate": { "lastLogin": "2025-09-10T18:12:44Z", "tokenStatus": "Valid" },
+      "saviynt": { "roles": ["Financial Analyst"], "riskScore": 9 },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -62,6 +64,7 @@
     "systems": {
       "ping-directory": { "department": "Security", "title": "Security Analyst" },
       "cyberark": { "privilegedAccess": true, "safe": "Security-Privileged" },
+      "saviynt": { "roles": ["Security Analyst", "VPN User"], "riskScore": 11 },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -71,6 +74,7 @@
     "email": "george.smith@company.com",
     "systems": {
       "ping-directory": { "department": "Marketing", "title": "Marketing Manager" },
+      "saviynt": { "roles": ["Marketing Manager"], "riskScore": 5 },
       "azure-ad": { "jobTitle": "Marketing Manager", "licenses": ["M365 E3"] },
       "ping-mfa": { "status": "Enabled" }
     }
@@ -92,6 +96,7 @@
     "systems": {
       "ping-directory": { "department": "Engineering", "title": "Software Engineer" },
       "ping-federate": { "lastLogin": "2025-09-13T13:55:10Z", "tokenStatus": "Valid" },
+      "saviynt": { "roles": ["Software Engineer", "VPN User"], "riskScore": 8 },
       "azure-ad": { "jobTitle": "Software Engineer", "licenses": ["M365 E5"] },
       "ping-mfa": { "status": "Enabled" }
     }
@@ -112,6 +117,7 @@
     "email": "kevin.patel@company.com",
     "systems": {
       "ping-directory": { "department": "Sales", "title": "Account Executive" },
+      "saviynt": { "roles": ["Account Executive"], "riskScore": 5 },
       "ping-mfa": { "status": "Pending" }
     }
   },
@@ -122,6 +128,7 @@
     "systems": {
       "ping-directory": { "department": "Legal", "title": "Counsel" },
       "ping-federate": { "lastLogin": "2025-09-12T10:20:00Z", "tokenStatus": "Valid" },
+      "saviynt": { "roles": ["Counsel"], "riskScore": 8 },
       "azure-ad": { "jobTitle": "Counsel", "licenses": ["M365 E3"] },
       "ping-mfa": { "status": "Enabled" }
     }
@@ -133,6 +140,7 @@
     "systems": {
       "ping-directory": { "department": "IT", "title": "SysAdmin" },
       "cyberark": { "privilegedAccess": true, "safe": "IT-Privileged" },
+      "saviynt": { "roles": ["SysAdmin", "VPN Admin"], "riskScore": 15 },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -142,6 +150,7 @@
     "email": "nina.brown@company.com",
     "systems": {
       "ping-directory": { "department": "Customer Support", "title": "CSM" },
+      "saviynt": { "roles": ["CSM"], "riskScore": 4 },
       "ping-mfa": { "status": "Disabled" }
     }
   },
@@ -161,6 +170,7 @@
     "email": "priya.singh@company.com",
     "systems": {
       "ping-directory": { "department": "Data", "title": "Data Scientist" },
+      "saviynt": { "roles": ["Data Scientist"], "riskScore": 10 },
       "azure-ad": { "jobTitle": "Data Scientist", "licenses": ["M365 E5", "PowerBI Pro"] },
       "ping-mfa": { "status": "Enabled" }
     }
@@ -172,6 +182,7 @@
     "systems": {
       "ping-directory": { "department": "Finance", "title": "Controller" },
       "ping-federate": { "lastLogin": "2025-09-09T07:30:00Z", "tokenStatus": "Valid" },
+      "saviynt": { "roles": ["Controller"], "riskScore": 14 },
       "ping-mfa": { "status": "Pending" }
     }
   },
@@ -192,6 +203,7 @@
     "systems": {
       "ping-directory": { "department": "Security", "title": "GRC Analyst" },
       "cyberark": { "privilegedAccess": false, "safe": "GRC-ReadOnly" },
+      "saviynt": { "roles": ["GRC Analyst"], "riskScore": 7 },
       "ping-mfa": { "status": "Enabled" }
     }
   },
@@ -201,6 +213,7 @@
     "email": "tina.zhang@company.com",
     "systems": {
       "ping-directory": { "department": "Engineering", "title": "DevOps Engineer" },
+      "saviynt": { "roles": ["DevOps Engineer", "VPN User"], "riskScore": 16 },
       "azure-ad": { "jobTitle": "DevOps Engineer", "licenses": ["M365 E5"] },
       "ping-mfa": { "status": "Disabled" }
     }

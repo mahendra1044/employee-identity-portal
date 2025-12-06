@@ -1,0 +1,12 @@
+{
+  "userId": "u12345",
+  "status": "active",
+  "apiGateways": ["Production Gateway", "Dev Gateway"],
+  "accessPolicies": 12,
+  "totalRequests": 45832,
+  "lastAccessTime": "2025-09-20T15:30:00Z",
+  "activeTokens": 3,
+  "rateLimitStatus": "normal",
+  "securityLevel": "high",
+  "authenticationMethods": ["OAuth 2.0", "API Keys"]
+}

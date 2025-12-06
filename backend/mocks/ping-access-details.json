@@ -1,0 +1,52 @@
+{
+  "userId": "u12345",
+  "status": "active",
+  "apiGateways": ["Production Gateway", "Dev Gateway", "Staging Gateway"],
+  "accessPolicies": 12,
+  "totalRequests": 45832,
+  "lastAccessTime": "2025-09-20T15:30:00Z",
+  "activeTokens": 3,
+  "rateLimitStatus": "normal",
+  "securityLevel": "high",
+  "authenticationMethods": ["OAuth 2.0", "API Keys", "mTLS"],
+  "policies": [
+    {
+      "id": "pol_001",
+      "name": "API Rate Limiting",
+      "type": "rate_limit",
+      "limit": "1000/hour",
+      "status": "active"
+    },
+    {
+      "id": "pol_002",
+      "name": "IP Whitelist",
+      "type": "access_control",
+      "rules": ["10.0.0.0/8", "192.168.1.0/24"],
+      "status": "active"
+    }
+  ],
+  "recentActivity": [
+    {
+      "timestamp": "2025-09-20T15:30:00Z",
+      "endpoint": "/api/v1/users",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "timestamp": "2025-09-20T14:15:00Z",
+      "endpoint": "/api/v1/orders",
+      "method": "POST",
+      "status": 201
+    }
+  ],
+  "tokenInfo": {
+    "active": 3,
+    "revoked": 1,
+    "expired": 5
+  },
+  "quotaUsage": {
+    "current": 45832,
+    "limit": 100000,
+    "resetDate": "2025-10-01T00:00:00Z"
+  }
+}

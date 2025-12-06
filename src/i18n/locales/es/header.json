@@ -1,0 +1,51 @@
+{
+  "brand": {
+    "name": "Identity Sphere",
+    "badge": "Acceso Unificado"
+  },
+  "roles": {
+    "ops": "Full Stack Identity Ops",
+    "sso_ops": "Ops SSO",
+    "pam_ops": "Ops PAM",
+    "iga_ops": "Ops IGA",
+    "entraid_ops": "Ops Entra ID",
+    "tpag_ops": "Ops TPAG",
+    "employee": "Empleado",
+    "management": "Gerencia",
+    "unknown": "Rol Desconocido"
+  },
+  "buttons": {
+    "snow": "SNOW",
+    "educate": "Educación",
+    "settings": "Configuración",
+    "signOut": "Cerrar sesión"
+  },
+  "tooltips": {
+    "theme": {
+      "toggle": "Cambiar tema",
+      "light": "Activar modo claro",
+      "dark": "Activar modo oscuro",
+      "navy": "Activar modo azul marino"
+    },
+    "snow": "Ver sus incidentes de ServiceNow",
+    "snowCount": "{count} incidentes",
+    "educate": "Ver guías de solución de problemas",
+    "settings": "Administrar visibilidad del sistema",
+    "signOut": "Cerrar sesión del portal",
+    "switchToOps": "Cambiar a Full Stack Identity Ops",
+    "switchToEmployee": "Cambiar a vista de Empleado",
+    "switchTo": "Cambiar a {role}",
+    "switchBackTo": "Volver a {role}"
+  },
+  "aria": {
+    "themeToggle": "Cambiar tema",
+    "snow": "Abrir incidentes de ServiceNow",
+    "educate": "Abrir guía de solución de problemas",
+    "settings": "Abrir configuración",
+    "signOut": "Cerrar sesión",
+    "switchToOps": "Cambiar a Full Stack Identity Ops",
+    "switchToEmployee": "Cambiar a vista de empleado",
+    "switchToSpecialized": "Cambiar a operaciones especializadas",
+    "switchBackToOps": "Volver a Full Stack Identity Ops"
+  }
+}

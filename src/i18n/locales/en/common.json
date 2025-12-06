@@ -1,0 +1,53 @@
+{
+  "buttons": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "viewDetails": "View Details",
+    "view": "View",
+    "viewRaw": "View raw data",
+    "viewFullScreen": "View full screen",
+    "copyToClipboard": "Copy to Clipboard",
+    "search": "Search",
+    "clear": "Clear",
+    "loadData": "Load Data",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "sendEmail": "Send Email"
+  },
+  "status": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "noData": "No data available",
+    "active": "Active",
+    "inactive": "Inactive",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "dataLoaded": "Data loaded",
+    "live": "live",
+    "mock": "mock"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "network": "Network error. Please try again.",
+    "unauthorized": "Session expired. Please log in again.",
+    "failed": "Failed"
+  },
+  "copy": {
+    "copiedToClipboard": "Copied to clipboard",
+    "copiedData": "Copied {name} to clipboard",
+    "copiedJson": "Copied {name} JSON",
+    "copiedUserId": "Copied User ID: {userId}"
+  },
+  "tooltips": {
+    "expandFullScreen": "Expand full screen",
+    "copyToClipboard": "Copy to clipboard"
+  },
+  "labels": {
+    "actions": "Actions:"
+  }
+}

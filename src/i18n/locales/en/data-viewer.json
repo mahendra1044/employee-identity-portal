@@ -1,0 +1,55 @@
+{
+  "buttons": {
+    "refresh": "Refresh",
+    "formatted": "Formatted",
+    "json": "JSON",
+    "rawJson": "Raw JSON",
+    "view": "View",
+    "copy": "Copy"
+  },
+  "tooltips": {
+    "refresh": "Refresh data",
+    "formatted": "View formatted layout",
+    "rawJson": "View raw JSON data",
+    "copyAll": "Copy all data"
+  },
+  "placeholder": "Search in data...",
+  "copy": {
+    "success": "Copied to clipboard"
+  },
+  "search": {
+    "noResults": "No results found for \"{query}\""
+  },
+  "loading": "Loading {title}...",
+  "emptyState": "No details available",
+  "noData": "No data available",
+  "badges": {
+    "live": "Live Data",
+    "mock": "Mock Data",
+    "records": "{count} records",
+    "fields": "{count} fields",
+    "items": "{count} items",
+    "properties": "{count} properties"
+  },
+  "footer": {
+    "jsonView": "JSON View",
+    "tableView": "Table View",
+    "readableView": "Readable View"
+  },
+  "results": {
+    "count": "{count} results",
+    "countSingular": "{count} result"
+  },
+  "aria": {
+    "searchInput": "Search within data",
+    "clearSearch": "Clear search"
+  },
+  "title": "Data Viewer",
+  "tabs": {
+    "formatted": "Formatted",
+    "json": "JSON"
+  },
+  "messages": {
+    "copied": "Copied to clipboard"
+  }
+}

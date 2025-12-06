@@ -1,0 +1,55 @@
+{
+  "buttons": {
+    "refresh": "Actualizar",
+    "formatted": "Formateado",
+    "json": "JSON",
+    "rawJson": "JSON Sin Procesar",
+    "view": "Ver",
+    "copy": "Copiar"
+  },
+  "tooltips": {
+    "refresh": "Actualizar datos",
+    "formatted": "Ver diseño formateado",
+    "rawJson": "Ver datos JSON sin procesar",
+    "copyAll": "Copiar todos los datos"
+  },
+  "placeholder": "Buscar en datos...",
+  "copy": {
+    "success": "Copiado al portapapeles"
+  },
+  "search": {
+    "noResults": "No se encontraron resultados para \"{query}\""
+  },
+  "loading": "Cargando {title}...",
+  "emptyState": "No hay detalles disponibles",
+  "noData": "No hay datos disponibles",
+  "badges": {
+    "live": "Datos en Vivo",
+    "mock": "Datos Simulados",
+    "records": "{count} registros",
+    "fields": "{count} campos",
+    "items": "{count} elementos",
+    "properties": "{count} propiedades"
+  },
+  "footer": {
+    "jsonView": "Vista JSON",
+    "tableView": "Vista de Tabla",
+    "readableView": "Vista Legible"
+  },
+  "results": {
+    "count": "{count} resultados",
+    "countSingular": "{count} resultado"
+  },
+  "aria": {
+    "searchInput": "Buscar dentro de los datos",
+    "clearSearch": "Limpiar búsqueda"
+  },
+  "title": "Visor de Datos",
+  "tabs": {
+    "formatted": "Formateado",
+    "json": "JSON"
+  },
+  "messages": {
+    "copied": "Copiado al portapapeles"
+  }
+}

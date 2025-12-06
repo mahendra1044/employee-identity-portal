@@ -1,0 +1,41 @@
+{
+  "skipToContent": "Saltar al contenido",
+  "mainNavigation": "Navegación principal",
+  "searchResults": "Resultados de búsqueda",
+  "closeDialog": "Cerrar diálogo",
+  "expandSection": "Expandir sección",
+  "collapseSection": "Contraer sección",
+  "sidebar": {
+    "toggle": "Alternar Barra Lateral",
+    "title": "Barra Lateral",
+    "description": "Muestra la barra lateral móvil."
+  },
+  "pagination": {
+    "label": "paginación",
+    "previous": "Ir a la página anterior",
+    "next": "Ir a la página siguiente",
+    "buttons": {
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "more": "Más páginas"
+  },
+  "buttons": {
+    "close": "Cerrar"
+  },
+  "carousel": {
+    "previous": "Diapositiva anterior",
+    "next": "Diapositiva siguiente"
+  },
+  "breadcrumb": {
+    "label": "ruta de navegación",
+    "more": "Más"
+  },
+  "dialog": {
+    "close": "Cerrar diálogo"
+  },
+  "menu": {
+    "open": "Abrir menú",
+    "close": "Cerrar menú"
+  }
+}

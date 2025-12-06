@@ -1,0 +1,31 @@
+{
+  "title": "Guía de Aprendizaje",
+  "stats": "{tips} consejos · {systems} sistemas",
+  "buttons": {
+    "expand": "Expandir",
+    "collapse": "Contraer"
+  },
+  "placeholder": "Buscar consejos...",
+  "filters": {
+    "all": "Todos"
+  },
+  "badges": {
+    "quickTip": "Consejo Rápido",
+    "howToGuide": "Guía Práctica",
+    "tips": "{count} consejos",
+    "systems": "{count} sistemas"
+  },
+  "emptyStates": {
+    "noContent": {
+      "title": "No Hay Sistemas Disponibles",
+      "description": "No hay contenido educativo disponible para su rol actual. Contacte a su administrador para obtener acceso."
+    },
+    "noMatch": {
+      "title": "No Hay Consejos Coincidentes",
+      "description": "No se encontraron consejos que coincidan con \"{query}\". Intente con un término de búsqueda diferente."
+    }
+  },
+  "footer": {
+    "tip": "Haga clic en las tarjetas del sistema para expandir los consejos"
+  }
+}

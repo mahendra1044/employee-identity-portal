@@ -2,12 +2,97 @@
   "credentialSource": "env",
   "useMocks": true,
   "useMockAuth": true,
+  "languageSwitcher": true,
+  "defaultLanguage": "en",
+  
+  "authMode": "USE_MOCK_AUTH",
+  
+  "mockAuth": {
+    "enabled": true,
+    "defaultUserId": "u1001"
+  },
+  
+  "mockIdp": {
+    "enabled": true,
+    "description": "Mock SAML Identity Provider for testing. Set enabled=false or delete backend/mock-idp folder when using real IDP.",
+    "simulateMfa": true,
+    "entityId": "https://mock-idp.identity-portal.local",
+    "ssoUrl": "http://localhost:3001/api/mock-idp/sso",
+    "sloUrl": "http://localhost:3001/api/mock-idp/slo",
+    "metadataUrl": "http://localhost:3001/api/mock-idp/metadata"
+  },
+  
+  "mfaAuth": {
+    "enabled": false,
+    "protocol": "SAML",
+    "serviceProvider": {
+      "entityId": "https://identity-portal.company.com",
+      "assertionConsumerServiceUrl": "http://localhost:3001/api/auth/saml/callback",
+      "singleLogoutUrl": "http://localhost:3001/api/auth/saml/logout"
+    },
+    "identityProvider": {
+      "entityId": "https://sso.company.com",
+      "ssoUrl": "https://sso.company.com/idp/SSO.saml2",
+      "sloUrl": "https://sso.company.com/idp/SLO.saml2",
+      "certificatePath": "./config/saml/idp-certificate.pem"
+    },
+    "attributeMapping": {
+      "userId": "uid",
+      "email": "mail",
+      "displayName": "cn",
+      "groups": "memberOf"
+    }
+  },
+  
+  "groupRoleMapping": {
+    "CN=SSO_OPS,OU=Groups,DC=company,DC=com": ["employee", "sso_ops"],
+    "CN=PAM_OPS,OU=Groups,DC=company,DC=com": ["employee", "pam_ops"],
+    "CN=IGA_OPS,OU=Groups,DC=company,DC=com": ["employee", "iga_ops"],
+    "CN=ENTRAID_OPS,OU=Groups,DC=company,DC=com": ["employee", "entraid_ops"],
+    "CN=TPAG_OPS,OU=Groups,DC=company,DC=com": ["employee", "tpag_ops"],
+    "CN=MASTER_OPS,OU=Groups,DC=company,DC=com": ["employee", "ops"]
+  },
+  
+  "defaultRole": "employee",
+  
+  "systemDataSource": {
+    "sso": "USE_MOCK",
+    "pam": "USE_MOCK",
+    "iga": "USE_MOCK",
+    "entraId": "USE_MOCK",
+    "tpag": "USE_MOCK",
+    "ops": "USE_MOCK"
+  },
   "systems": {
     "ping-directory": true,
     "ping-federate": true,
     "cyberark": true,
+    "cyberark-epm": true,
+    "cyberark-alero": true,
+    "cyberark-conjur": true,
+    "cyberark-dpa": true,
+    "cyberark-identity": true,
     "saviynt": true,
     "azure-ad": true,
-    "ping-mfa": true
+    "ping-mfa": true,
+    "ping-access": true,
+    "ping-authorize": true,
+    "ping-intelligence": true
+  },
+  "quickActionsTabs": {
+    "ping-directory": true,
+    "ping-federate": true,
+    "cyberark": true,
+    "cyberark-epm": true,
+    "cyberark-alero": true,
+    "cyberark-conjur": true,
+    "cyberark-dpa": true,
+    "cyberark-identity": true,
+    "saviynt": true,
+    "azure-ad": true,
+    "ping-mfa": true,
+    "ping-access": true,
+    "ping-authorize": true,
+    "ping-intelligence": true
   }
 }

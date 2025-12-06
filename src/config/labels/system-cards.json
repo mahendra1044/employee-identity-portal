@@ -1,0 +1,60 @@
+{
+  "section": {
+    "title": "System Cards",
+    "description": "View and manage identity data across all integrated systems"
+  },
+  "loading": "Loading {name} data...",
+  "emptyState": "No data available",
+  "buttons": {
+    "retry": "Retry",
+    "loadData": "Load Data"
+  },
+  "status": {
+    "loaded": "Data loaded"
+  },
+  "labels": {
+    "json": "JSON",
+    "expandJson": "Expand to view JSON ↓"
+  },
+  "links": {
+    "splunk": "View in Splunk"
+  },
+  "dialog": {
+    "title": "{system} — Details"
+  },
+  "fallbackTitle": "Ping Federate",
+  "tooltips": {
+    "refresh": "Refresh",
+    "copyJson": "Copy JSON",
+    "viewDetails": "Details",
+    "createTicket": "Create Ticket",
+    "copyUserId": "Copy User ID"
+  },
+  "messages": {
+    "refreshing": "Refreshing {name}...",
+    "refreshingForUser": "Refreshing {name} for {userKey}...",
+    "refreshed": "Refreshed {name}",
+    "refreshedForUser": "Refreshed {name} for {userKey}",
+    "refreshFailed": "Failed to refresh {name}: {error}",
+    "copiedJson": "Copied {name} JSON",
+    "copiedUserId": "Copied User ID: {userId}",
+    "failedToLoadDetails": "Failed to load details"
+  },
+  "pingFederate": {
+    "userInfo": {
+      "title": "Ping Federate — User Info",
+      "button": "User Info",
+      "error": "Failed to load User Info"
+    },
+    "oidc": {
+      "title": "Ping Federate — OIDC Connections",
+      "button": "OIDC",
+      "error": "Failed to load OIDC connections"
+    },
+    "saml": {
+      "title": "Ping Federate — SAML Connections",
+      "button": "SAML",
+      "error": "Failed to load SAML connections"
+    }
+  }
+}
