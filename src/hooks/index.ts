@@ -52,6 +52,7 @@ export { useOpsActions, type ActionHandlers, type UseOpsActionsReturn } from './
 export { useSearch } from './useSearch';
 export { useSnow } from './useSnow';
 export { useConsolidatedView } from './useConsolidatedView';
+export { useEmployee360 } from './useEmployee360';
 
 // Utility Hooks
 export { useThemeDOM } from './useThemeDOM';

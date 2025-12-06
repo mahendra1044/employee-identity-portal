@@ -16,7 +16,8 @@
     "viewJson": "View all systems as JSON",
     "viewFormatted": "View formatted layout",
     "copyData": "Copy {system} data",
-    "viewFirstRow": "View first row details"
+    "viewFirstRow": "View first row details",
+    "employee360": "View comprehensive employee data across all systems"
   },
   "aria": {
     "searchInput": "Search employees",
@@ -39,6 +40,22 @@
     "title": "Consolidated View ({mode}) — {key}",
     "errorLoading": "Unable to load aggregated details",
     "copiedData": "Copied {system} data"
+  },
+  "employee360": {
+    "button": "Employee 360° View",
+    "dialogTitle": "Employee 360° View",
+    "profile": "Employee Profile",
+    "discrepancies": "Discrepancies Detected",
+    "missingFields": "Missing Fields",
+    "dataConsistent": "Data consistent",
+    "noData": "No data available",
+    "copySuccess": "Copied to clipboard",
+    "copyDescription": "Employee 360° data copied as {format}",
+    "copyFailed": "Failed to copy",
+    "generated": "Generated: {timestamp}",
+    "noApiCalls": "No additional API calls made",
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All"
   },
   "errors": {
     "searchFailed": "Search failed"

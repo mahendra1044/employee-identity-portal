@@ -12,13 +12,16 @@ import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Code, FileText, Copy } from "lucide-react";
+import { Code, FileText, Copy, Scan } from "lucide-react";
 import { toast } from "sonner";
 import { SYSTEMS, SYSTEM_LABELS } from "@/lib/constants";
 import { useTranslation } from "@/i18n";
 import { DataDialog } from "@/components/dialogs/DataDialog";
 import { SearchResultCard } from "@/components/search/SearchResultCard";
 import { useConsolidatedView } from "@/hooks/useConsolidatedView";
+import { useEmployee360 } from "@/hooks/useEmployee360";
+import { Employee360Dialog } from "@/components/dialogs/employee-360";
+import { isEmployee360Enabled } from "@/config/employee-360.config";
 import { 
   SEARCH_SYSTEMS, 
   canEmployeeViewSystem,
@@ -84,9 +87,18 @@ export function SearchSection({
   const [dialogMode, setDialogMode] = useState<"json" | "html">("html");
   const [isAggregateView, setIsAggregateView] = useState(false);
 
+  // Employee 360° View state
+  const [employee360Open, setEmployee360Open] = useState(false);
+
   // Hooks
   const { fetchConsolidatedData } = useConsolidatedView();
   const { t, translate } = useTranslation();
+  
+  // Employee 360° hook - reuses existing search results
+  const { data: employee360Data, hasData: hasEmployee360Data } = useEmployee360({
+    searchResults,
+    searchTerm: search,
+  });
 
   // Get search translations
   const searchT = t.search as Record<string, unknown> || {};
@@ -308,36 +320,58 @@ export function SearchSection({
             
             {/* Consolidated actions - shown when results exist */}
             {hasSearched && searchResults && Object.keys(searchResults).length > 0 && (
-              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/30">
-                <span className="text-[11px] text-muted-foreground">{(searchT.viewAllData as string) || 'View all data'}:</span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleConsolidatedView("json")}
-                      className="h-6 px-2 text-[11px] hover:bg-muted/80"
-                    >
-                      <FileText className="h-3 w-3 mr-1" />
-                      {buttonsT.json || 'JSON'}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>{tooltipsT.viewJson || 'View JSON data'}</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleConsolidatedView("html")}
-                      className="h-6 px-2 text-[11px] hover:bg-muted/80"
-                    >
-                      <Code className="h-3 w-3 mr-1" />
-                      {buttonsT.formatted || 'Formatted'}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p>{tooltipsT.viewFormatted || 'View formatted data'}</p></TooltipContent>
-                </Tooltip>
+              <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-border/30">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-muted-foreground">{(searchT.viewAllData as string) || 'View all data'}:</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleConsolidatedView("json")}
+                        className="h-6 px-2 text-[11px] hover:bg-muted/80"
+                      >
+                        <FileText className="h-3 w-3 mr-1" />
+                        {buttonsT.json || 'JSON'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{tooltipsT.viewJson || 'View JSON data'}</p></TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleConsolidatedView("html")}
+                        className="h-6 px-2 text-[11px] hover:bg-muted/80"
+                      >
+                        <Code className="h-3 w-3 mr-1" />
+                        {buttonsT.formatted || 'Formatted'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{tooltipsT.viewFormatted || 'View formatted data'}</p></TooltipContent>
+                  </Tooltip>
+                </div>
+                
+                {/* Employee 360° View Button */}
+                {isEmployee360Enabled() && hasEmployee360Data && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => setEmployee360Open(true)}
+                        className="h-7 px-3 text-[11px] bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white shadow-sm"
+                      >
+                        <Scan className="h-3.5 w-3.5 mr-1.5" />
+                        Employee 360° View
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View comprehensive employee data across all systems</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
             )}
             
@@ -416,6 +450,13 @@ export function SearchSection({
             </div>
           )}
         </DataDialog>
+
+        {/* Employee 360° View Dialog - Isolated component */}
+        <Employee360Dialog
+          open={employee360Open}
+          onOpenChange={setEmployee360Open}
+          data={employee360Data}
+        />
       </section>
     </>
   );
