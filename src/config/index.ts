@@ -39,6 +39,7 @@
 export * from './app.config';
 export * from './features.config';
 export * from './systems.config';
+export * from './roles.config';
 export * from './external-services.config';
 export * from './search-results.config';
 

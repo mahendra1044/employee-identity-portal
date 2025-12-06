@@ -269,42 +269,9 @@ export function getSystemsInGroup(group: SystemGroupKey): SystemKey[] {
  * Role Display Names
  * ------------------
  * Human-friendly names for user roles
+ * Re-exported from centralized roles.config.ts
  */
-export const ROLE_LABELS: Record<string, string> = {
-  'ops': 'Operations Team',
-  'sso_ops': 'SSO Ops',
-  'pam_ops': 'PAM Ops',
-  'iga_ops': 'IGA Ops',
-  'entraid_ops': 'Entra ID Ops',
-  'tpag_ops': 'TPAG Ops',
-  'employee': 'Employee Access',
-  'management': 'Management',
-  'admin': 'Administrator',
-  'manager': 'Manager',
-};
-
-
-/**
- * RBAC Role ID to Role Key Mapping
- * --------------------------------
- * Maps RBAC role IDs (R001, R002, etc.) to role keys used in UI
- * This must match backend/config/rbac.json roleKeyMapping
- */
-export const ROLE_ID_TO_KEY: Record<string, string> = {
-  'R001': 'ops',
-  'R002': 'sso_ops',
-  'R003': 'pam_ops',
-  'R004': 'iga_ops',
-  'R005': 'entraid_ops',
-  'R006': 'tpag_ops',
-  'R007': 'ops',
-  'R008': 'employee',
-};
-
-// Helper: Get role key from role ID
-export function getRoleKeyFromId(roleId: string): string {
-  return ROLE_ID_TO_KEY[roleId] || 'employee';
-}
+export { ROLE_LABELS, ROLE_ID_TO_KEY, getRoleKeyFromId, getRoleLabel } from './roles.config';
 
 
 /**
@@ -342,9 +309,4 @@ export function isSystemVisibleToRole(system: SystemKey, role: string | null): b
 // Helper: Get system label
 export function getSystemLabel(system: SystemKey): string {
   return SYSTEM_LABELS[system] || system;
-}
-
-// Helper: Get role label
-export function getRoleLabel(role: string): string {
-  return ROLE_LABELS[role] || role;
 }

@@ -50,11 +50,11 @@
     },
     "R007": {
       "id": "R007",
-      "name": "General Ops",
+      "name": "Full Stack Identity Ops",
       "priority": 7,
       "systems": ["ping-federate", "ping-directory", "ping-mfa", "cyberark", "saviynt", "azure-ad"],
       "isMaster": false,
-      "description": "General operations across all primary systems"
+      "description": "Unified operations access across all identity systems"
     },
     "R008": {
       "id": "R008",

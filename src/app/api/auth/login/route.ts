@@ -5,15 +5,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 // RBAC Configuration matching backend/config/rbac.json
+// Note: Role names here MUST match backend/config/rbac.json exactly
 const RBAC_CONFIG = {
   roles: {
-    R001: { id: 'R001', name: 'Master', priority: 1, systems: ['all'], isMaster: true, description: 'Full access to all systems and roles' },
-    R002: { id: 'R002', name: 'SSO Admin', priority: 2, systems: ['ping-federate', 'ping-directory', 'ping-access', 'ping-authorize', 'ping-intelligence'], isMaster: false, description: 'Single Sign-On operations' },
-    R003: { id: 'R003', name: 'PAM Admin', priority: 3, systems: ['cyberark', 'cyberark-epm', 'cyberark-alero', 'cyberark-conjur', 'cyberark-dpa', 'cyberark-identity'], isMaster: false, description: 'Privileged Access Management operations' },
-    R004: { id: 'R004', name: 'IGA Admin', priority: 4, systems: ['saviynt', 'saviynt-certifications', 'saviynt-analytics', 'saviynt-controls', 'saviynt-requests', 'saviynt-provisioning'], isMaster: false, description: 'Identity Governance & Administration operations' },
-    R005: { id: 'R005', name: 'EntraID Admin', priority: 5, systems: ['azure-ad', 'azure-ad-users', 'azure-ad-groups', 'azure-ad-apps', 'azure-ad-conditional', 'azure-ad-signin'], isMaster: false, description: 'Microsoft Entra ID operations' },
-    R006: { id: 'R006', name: 'TPAG Admin', priority: 6, systems: ['saviynt-tpag', 'saviynt-tpag-vendors', 'saviynt-tpag-contracts', 'saviynt-tpag-access', 'saviynt-tpag-risk', 'saviynt-tpag-lifecycle'], isMaster: false, description: 'Third Party Access Governance operations' },
-    R007: { id: 'R007', name: 'General Admin', priority: 7, systems: ['ping-federate', 'ping-directory', 'ping-mfa', 'cyberark', 'saviynt', 'azure-ad'], isMaster: false, description: 'General operations across all primary systems' },
+    R001: { id: 'R001', name: 'Super User', priority: 1, systems: ['all'], isMaster: true, description: 'Full access to all systems and roles' },
+    R002: { id: 'R002', name: 'SSO Ops', priority: 2, systems: ['ping-federate', 'ping-directory', 'ping-access', 'ping-authorize', 'ping-intelligence'], isMaster: false, description: 'Single Sign-On operations' },
+    R003: { id: 'R003', name: 'PAM Ops', priority: 3, systems: ['cyberark', 'cyberark-epm', 'cyberark-alero', 'cyberark-conjur', 'cyberark-dpa', 'cyberark-identity'], isMaster: false, description: 'Privileged Access Management operations' },
+    R004: { id: 'R004', name: 'IGA Ops', priority: 4, systems: ['saviynt', 'saviynt-certifications', 'saviynt-analytics', 'saviynt-controls', 'saviynt-requests', 'saviynt-provisioning'], isMaster: false, description: 'Identity Governance and Administration operations' },
+    R005: { id: 'R005', name: 'Entra ID Ops', priority: 5, systems: ['azure-ad', 'azure-ad-users', 'azure-ad-groups', 'azure-ad-apps', 'azure-ad-conditional', 'azure-ad-signin'], isMaster: false, description: 'Microsoft Entra ID operations' },
+    R006: { id: 'R006', name: 'TPAG Ops', priority: 6, systems: ['saviynt-tpag', 'saviynt-tpag-vendors', 'saviynt-tpag-contracts', 'saviynt-tpag-access', 'saviynt-tpag-risk', 'saviynt-tpag-lifecycle'], isMaster: false, description: 'Third Party Access Governance operations' },
+    R007: { id: 'R007', name: 'Full Stack Identity Ops', priority: 7, systems: ['ping-federate', 'ping-directory', 'ping-mfa', 'cyberark', 'saviynt', 'azure-ad'], isMaster: false, description: 'Unified operations access across all identity systems' },
     R008: { id: 'R008', name: 'Employee', priority: 8, systems: [], isMaster: false, description: 'Employee self-service access only' },
   },
   userRoles: {

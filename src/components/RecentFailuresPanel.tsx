@@ -217,9 +217,9 @@ export function RecentFailuresPanel({
         <div className="px-4 py-3">
           {/* Section Header */}
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 rounded-md bg-gradient-to-br from-red-500 to-rose-500 text-white shadow-sm">
+            <div className="p-1.5 rounded-md bg-gradient-to-br from-slate-500 to-slate-600 dark:from-slate-400 dark:to-slate-500 text-white shadow-sm">
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">

@@ -4,7 +4,7 @@
     "badge": "Unified Access"
   },
   "roles": {
-    "ops": "Operations",
+    "ops": "Full Stack Identity Ops",
     "sso_ops": "SSO Ops",
     "pam_ops": "PAM Ops",
     "iga_ops": "IGA Ops",
@@ -32,7 +32,7 @@
     "educate": "View troubleshooting guides",
     "settings": "Manage system visibility",
     "signOut": "Sign out of the portal",
-    "switchToOps": "Switch to General Operations",
+    "switchToOps": "Switch to Full Stack Identity Ops",
     "switchToEmployee": "Switch to Employee view",
     "switchTo": "Switch to {role}",
     "switchBackTo": "Switch back to {role}"
@@ -43,9 +43,9 @@
     "educate": "Open troubleshooting guide",
     "settings": "Open settings",
     "signOut": "Sign out",
-    "switchToOps": "Switch to general ops",
+    "switchToOps": "Switch to Full Stack Identity Ops",
     "switchToEmployee": "Switch to employee view",
     "switchToSpecialized": "Switch to specialized ops",
-    "switchBackToOps": "Switch back to ops view"
+    "switchBackToOps": "Switch back to Full Stack Identity Ops"
   }
 }
