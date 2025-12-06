@@ -194,15 +194,15 @@ export function RoleSwitcher() {
             
             <SelectContent 
               className={`
-                min-w-[240px] max-h-[320px] overflow-y-auto p-1.5
-                rounded-xl border border-slate-200/80 dark:border-slate-700/80
+                min-w-[180px] max-h-[280px] overflow-y-auto p-1
+                rounded-lg border border-slate-200/80 dark:border-slate-700/80
                 bg-white/95 dark:bg-slate-900/95
                 backdrop-blur-xl
-                shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50
+                shadow-lg
                 animate-in fade-in-0 zoom-in-95 duration-200
               `}
               align="end"
-              sideOffset={8}
+              sideOffset={6}
             >
               {/* Header label */}
               <div className="px-2.5 py-1.5 mb-1">
@@ -221,44 +221,39 @@ export function RoleSwitcher() {
                     key={role.id} 
                     value={role.id}
                     className={`
-                      relative cursor-pointer rounded-lg px-2.5 py-2 my-0.5
+                      relative cursor-pointer rounded-md px-2 py-1.5 my-0.5
                       transition-all duration-200 ease-out
                       focus:bg-slate-50 dark:focus:bg-slate-800/50
                       data-[highlighted]:bg-slate-50 dark:data-[highlighted]:bg-slate-800/50
-                      ${isActive ? `${config.bgColor} border-l-2 ${config.borderColor}` : 'border-l-2 border-transparent'}
+                      ${isActive ? `${config.bgColor}` : ''}
                     `}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       {/* Icon container */}
                       <div className={`
-                        flex items-center justify-center w-7 h-7 rounded-lg
+                        flex items-center justify-center w-6 h-6 rounded-md
                         ${config.bgColor} ${config.borderColor} border
                         transition-all duration-200
                       `}>
-                        <Icon className={`h-3.5 w-3.5 ${config.color}`} />
+                        <Icon className={`h-3 w-3 ${config.color}`} />
                       </div>
                       
                       {/* Role info */}
                       <div className="flex flex-col min-w-0 flex-1">
                         <span className={`
-                          text-sm font-medium truncate
+                          text-xs font-medium truncate
                           ${isActive ? config.color : 'text-slate-700 dark:text-slate-200'}
                         `}>
                           {getDisplayName(role)}
                         </span>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 truncate">
                           {role.description}
                         </span>
                       </div>
                       
                       {/* Active indicator */}
                       {isActive && (
-                        <div className={`
-                          flex items-center justify-center w-5 h-5 rounded-full
-                          ${config.bgColor}
-                        `}>
-                          <Check className={`h-3 w-3 ${config.color}`} />
-                        </div>
+                        <Check className={`h-3 w-3 ${config.color} flex-shrink-0`} />
                       )}
                     </div>
                   </SelectItem>

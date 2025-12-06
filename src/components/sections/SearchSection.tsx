@@ -247,8 +247,8 @@ export function SearchSection({
 
   return (
     <>
-      <section className="mb-4">
-        <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-gradient-to-br from-background via-background to-slate-50 dark:to-muted/10 shadow-sm overflow-hidden">
+      <section className="mb-4 w-full">
+        <div className="rounded-lg border border-slate-200 dark:border-border/40 bg-gradient-to-br from-background via-background to-slate-50 dark:to-muted/10 shadow-sm overflow-hidden w-full">
           <div className="px-4 py-3">
             {/* Section Header */}
             <div className="flex items-center gap-2 mb-3">

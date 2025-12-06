@@ -234,7 +234,7 @@ export default function HomePage() {
         languageSwitcherEnabled={features?.languageSwitcher ?? false}
       />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-3 space-y-3">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-3 space-y-3">
         {/* All dialogs - rendered as section */}
         <DialogsSection
           settingsOpen={ui.settingsOpen}
@@ -351,7 +351,7 @@ export default function HomePage() {
 
       {/* Dashboard Footer */}
       <footer className="border-t bg-slate-50 dark:bg-slate-900 py-2 mt-3">
-        <div className="max-w-7xl mx-auto px-4 text-center">
+        <div className="max-w-7xl w-full mx-auto px-4 text-center">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Identity Sphere • 
             <button className="hover:text-foreground transition-colors ml-1">Privacy</button> • 
