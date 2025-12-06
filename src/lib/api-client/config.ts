@@ -8,6 +8,8 @@
  * @module api-client/config
  */
 
+import { API_CONFIG as APP_API_CONFIG } from '@/config/app.config';
+
 /**
  * API Configuration
  * 
@@ -24,15 +26,15 @@ export const API_CONFIG = {
 
   /**
    * Default request timeout in milliseconds
-   * Requests taking longer will be aborted
+   * Uses centralized value from app.config.ts
    */
-  defaultTimeout: 30000,
+  defaultTimeout: APP_API_CONFIG.timeout.default,
 
   /**
    * Default cache TTL in milliseconds
-   * Cached responses older than this are considered stale
+   * Uses centralized value from app.config.ts
    */
-  defaultCacheTtl: 30000,
+  defaultCacheTtl: APP_API_CONFIG.cacheTtl.default,
 
   /**
    * Enable debug logging

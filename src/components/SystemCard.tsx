@@ -12,6 +12,7 @@ import { getDataStatus, extractKeyMetrics } from "@/lib/system-card-utils";
 import { ErrorHandler } from "@/lib/error-handler";
 import { api } from "@/lib/api-client";
 import { useTranslation } from "@/i18n";
+import { API_CONFIG } from "@/config/app.config";
 import type { SystemKey, SystemData } from "@/lib/types";
 
 interface SystemCardProps {
@@ -101,7 +102,7 @@ export function SystemCard({
       const response = await api.get<SystemData>(endpoint, {
         token,
         skipCache,
-        cacheTtl: 30000, // 30 second cache
+        cacheTtl: API_CONFIG.cacheTtl.default,
       });
       
       if (!response.ok) {

@@ -10,17 +10,16 @@
  * - Modifying storage keys
  */
 
+import { API_BASE } from '@/lib/constants';
+
 /**
  * API Configuration
  * -----------------
  * Settings for backend communication
  */
 export const API_CONFIG = {
-  // Base URL for the backend API
-  // In production, this should be set via NEXT_PUBLIC_API_BASE environment variable
-  baseUrl: typeof window !== 'undefined' 
-    ? process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3001'
-    : 'http://localhost:3001',
+  // Base URL for the backend API (from @/lib/constants)
+  baseUrl: API_BASE,
   
   // Request timeouts (in milliseconds)
   timeout: {
@@ -33,6 +32,14 @@ export const API_CONFIG = {
   retry: {
     attempts: 3,       // Number of retry attempts
     delay: 1000,       // Delay between retries (ms)
+  },
+  
+  // Cache TTL settings (in milliseconds)
+  // Use these instead of hardcoding 30000 everywhere
+  cacheTtl: {
+    default: 30000,    // 30 seconds - standard cache duration
+    short: 10000,      // 10 seconds - for frequently changing data
+    long: 60000,       // 60 seconds - for stable data
   },
 } as const;
 

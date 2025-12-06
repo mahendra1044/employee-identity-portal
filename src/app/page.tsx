@@ -13,15 +13,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import useSearch from "@/hooks/useSearch";
-import { useSnow } from "@/hooks/useSnow";
-import { useOpsActions } from "@/hooks/useOpsActions";
-import { useAppAuth } from "@/hooks/useAppAuth";
-import { useAppTheme } from "@/hooks/useAppTheme";
-import { useAppToggles } from "@/hooks/useAppToggles";
-import { useAppUI } from "@/hooks/useAppUI";
-import { useFeatures } from "@/hooks/useFeatures";
-import { useThemeDOM } from "@/hooks/useThemeDOM";
-import { useOpsFeatures } from "@/hooks/useOpsFeatures";
+import { 
+  useSnow, 
+  useOpsActions, 
+  useAppAuth, 
+  useAppTheme, 
+  useAppToggles, 
+  useAppUI, 
+  useFeatures, 
+  useThemeDOM, 
+  useOpsFeatures 
+} from "@/hooks";
 import { useTranslation } from "@/i18n";
 import { Header } from "@/components/Header";
 import { LoginForm } from "@/components/LoginForm";
@@ -35,7 +37,7 @@ import { RecentFailuresPanel } from "@/components/RecentFailuresPanel";
 import { SystemCardsGrid } from "@/components/SystemCardsGrid";
 import { DialogsSection } from "@/components/sections/DialogsSection";
 import { QuickActionsCard } from "@/components/sections/QuickActionsCard";
-// Import from constants
+// Import from constants (single source of truth)
 import { SYSTEMS, SYSTEM_LABELS, API_BASE } from "@/lib/constants";
 // Import from centralized config
 import { SPLUNK_CONFIG, CLOUDWATCH_CONFIG } from "@/config";
@@ -107,21 +109,6 @@ export default function HomePage() {
     actionHandlers,
   } = useOpsActions();
 
-  // Apply theme class to root element
-  useEffect(() => {
-    if (typeof window !== 'undefined' && theme) {
-      let classes = '';
-      if (theme === 'light') {
-        classes = '';
-      } else if (theme === 'dark') {
-        classes = 'dark';
-      } else if (theme === 'navy') {
-        classes = 'dark navy';
-      }
-      document.documentElement.className = classes;
-    }
-  }, [theme]);
-
   const isAggregate = useMemo(() => {
     return !!searchDialogData && typeof searchDialogData === 'object' && Object.keys(searchDialogData).some(k => SYSTEMS.includes(k as SystemKey));
   }, [searchDialogData]);
@@ -150,8 +137,9 @@ export default function HomePage() {
   // Determine the order of system cards based on features.systemsOrder (if provided)
   const orderedSystems = useMemo<SystemKey[]>(() => {
     const order = features?.systemsOrder || [];
-    const valid = order.filter((s): s is SystemKey => (SYSTEMS as string[]).includes(s as string));
-    const remaining = SYSTEMS.filter((s) => !valid.includes(s));
+    const systemsArray = [...SYSTEMS]; // Convert readonly array to mutable
+    const valid = order.filter((s): s is SystemKey => systemsArray.includes(s as SystemKey));
+    const remaining = systemsArray.filter((s) => !valid.includes(s));
     return [...valid, ...remaining];
   }, [features]);
 

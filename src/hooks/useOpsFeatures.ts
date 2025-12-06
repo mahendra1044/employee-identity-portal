@@ -10,7 +10,7 @@
  * @hook
  * @param {string | null} role - Current user role
  * @param {string | null} token - Authentication token for API requests
- * @param {any} features - Application features configuration
+ * @param {Features | null} features - Application features configuration
  * @param {Record<SystemKey, boolean>} enabled - Enabled systems map
  * @returns {UseOpsFeaturesResult} Object with minutes, failures, loading state, and action methods
  */
@@ -21,7 +21,7 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { OPS_CONFIG } from "@/lib/ui-config";
 import { isOpsRole } from "@/lib/role-utils";
 import { api } from "@/lib/api-client";
-import type { SystemKey } from "@/lib/types";
+import type { SystemKey, Features } from "@/lib/types";
 import {
   type FailureKey,
   type FailureData,
@@ -56,7 +56,7 @@ export interface UseOpsFeaturesResult {
 export function useOpsFeatures(
   role: string | null,
   token: string | null,
-  features: any,
+  features: Features | null | undefined,
   enabled: Record<SystemKey, boolean>
 ): UseOpsFeaturesResult {
   const isOps = isOpsRole(role);

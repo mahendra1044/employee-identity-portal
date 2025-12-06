@@ -3,37 +3,16 @@
  * This file contains all TypeScript interfaces and types
  */
 
-export type SystemKey =
-  | "ping-directory"
-  | "ping-federate"
-  | "cyberark"
-  | "cyberark-epm"
-  | "cyberark-alero"
-  | "cyberark-conjur"
-  | "cyberark-dpa"
-  | "cyberark-identity"
-  | "saviynt"
-  | "saviynt-certifications"
-  | "saviynt-analytics"
-  | "saviynt-controls"
-  | "saviynt-requests"
-  | "saviynt-provisioning"
-  | "azure-ad"
-  | "azure-ad-users"
-  | "azure-ad-groups"
-  | "azure-ad-apps"
-  | "azure-ad-conditional"
-  | "azure-ad-signin"
-  | "ping-mfa"
-  | "ping-access"
-  | "ping-authorize"
-  | "ping-intelligence"
-  | "saviynt-tpag"
-  | "saviynt-tpag-vendors"
-  | "saviynt-tpag-contracts"
-  | "saviynt-tpag-access"
-  | "saviynt-tpag-risk"
-  | "saviynt-tpag-lifecycle";
+// Import SystemKey for use within this file
+import type { SystemKey as SystemKeyType } from '@/config/systems.config';
+
+// Re-export SystemKey from systems.config.ts (SINGLE SOURCE OF TRUTH)
+// The type is derived from the SYSTEM_KEYS array, so adding a new system
+// to SYSTEM_KEYS automatically makes it a valid SystemKey
+export type { SystemKey } from '@/config/systems.config';
+
+// Local alias for use in this file
+type SystemKey = SystemKeyType;
 
 /**
  * Data Source Mode

@@ -16,14 +16,13 @@
  * - ROLE_SYSTEM_ACCESS: Which roles can see which systems
  */
 
-import type { SystemKey } from '@/lib/types';
-
 /**
  * All System Keys
  * ---------------
- * Complete list of system identifiers used throughout the app
+ * Complete list of system identifiers used throughout the app.
+ * This is the SINGLE SOURCE OF TRUTH - the SystemKey type is derived from this array.
  */
-export const SYSTEM_KEYS: SystemKey[] = [
+export const SYSTEM_KEYS = [
   // Ping Identity Systems
   'ping-directory',
   'ping-federate',
@@ -63,7 +62,15 @@ export const SYSTEM_KEYS: SystemKey[] = [
   'saviynt-tpag-access',
   'saviynt-tpag-risk',
   'saviynt-tpag-lifecycle',
-];
+] as const;
+
+/**
+ * SystemKey Type
+ * --------------
+ * Derived from SYSTEM_KEYS array - this is the SINGLE SOURCE OF TRUTH
+ * Any new system added to SYSTEM_KEYS will automatically be part of this type
+ */
+export type SystemKey = typeof SYSTEM_KEYS[number];
 
 
 /**
@@ -295,9 +302,9 @@ export const ROLE_SYSTEM_ACCESS: Record<string, SystemKey[] | null> = {
 
 // Helper: Get systems for a role
 export function getSystemsForRole(role: string | null): SystemKey[] {
-  if (!role) return SYSTEM_GROUPS.core;
+  if (!role) return [...SYSTEM_GROUPS.core];
   const systems = ROLE_SYSTEM_ACCESS[role];
-  return systems ?? SYSTEM_KEYS; // null means all systems
+  return systems ? [...systems] : [...SYSTEM_KEYS]; // null means all systems
 }
 
 // Helper: Check if system is visible to role

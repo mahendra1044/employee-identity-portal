@@ -1,44 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { RBAC_CONFIG } from '@/config/roles.config';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-// RBAC Configuration matching backend/config/rbac.json
-// Note: Role names here MUST match backend/config/rbac.json exactly
-const RBAC_CONFIG = {
-  roles: {
-    R001: { id: 'R001', name: 'Super User', priority: 1, systems: ['all'], isMaster: true, description: 'Full access to all systems and roles' },
-    R002: { id: 'R002', name: 'SSO Ops', priority: 2, systems: ['ping-federate', 'ping-directory', 'ping-access', 'ping-authorize', 'ping-intelligence'], isMaster: false, description: 'Single Sign-On operations' },
-    R003: { id: 'R003', name: 'PAM Ops', priority: 3, systems: ['cyberark', 'cyberark-epm', 'cyberark-alero', 'cyberark-conjur', 'cyberark-dpa', 'cyberark-identity'], isMaster: false, description: 'Privileged Access Management operations' },
-    R004: { id: 'R004', name: 'IGA Ops', priority: 4, systems: ['saviynt', 'saviynt-certifications', 'saviynt-analytics', 'saviynt-controls', 'saviynt-requests', 'saviynt-provisioning'], isMaster: false, description: 'Identity Governance and Administration operations' },
-    R005: { id: 'R005', name: 'Entra ID Ops', priority: 5, systems: ['azure-ad', 'azure-ad-users', 'azure-ad-groups', 'azure-ad-apps', 'azure-ad-conditional', 'azure-ad-signin'], isMaster: false, description: 'Microsoft Entra ID operations' },
-    R006: { id: 'R006', name: 'TPAG Ops', priority: 6, systems: ['saviynt-tpag', 'saviynt-tpag-vendors', 'saviynt-tpag-contracts', 'saviynt-tpag-access', 'saviynt-tpag-risk', 'saviynt-tpag-lifecycle'], isMaster: false, description: 'Third Party Access Governance operations' },
-    R007: { id: 'R007', name: 'Full Stack Identity Ops', priority: 7, systems: ['ping-federate', 'ping-directory', 'ping-mfa', 'cyberark', 'saviynt', 'azure-ad'], isMaster: false, description: 'Unified operations access across all identity systems' },
-    R008: { id: 'R008', name: 'Employee', priority: 8, systems: [], isMaster: false, description: 'Employee self-service access only' },
-  },
-  userRoles: {
-    u1001: ['R001'],
-    u1002: ['R002'],
-    u1003: ['R003'],
-    u1004: ['R004'],
-    u1005: ['R005'],
-    u1006: ['R006'],
-    u1007: ['R007'],
-    u1008: ['R008'],
-    u1009: ['R002', 'R003', 'R004'],
-  } as Record<string, string[]>,
-  defaultRole: 'R008',
-  roleKeyMapping: {
-    R001: 'ops',
-    R002: 'sso_ops',
-    R003: 'pam_ops',
-    R004: 'iga_ops',
-    R005: 'entraid_ops',
-    R006: 'tpag_ops',
-    R007: 'ops',
-    R008: 'employee',
-  } as Record<string, string>,
+// User to Role mapping (static for mock auth)
+// In production, this would come from a database or identity provider
+const USER_ROLES: Record<string, string[]> = {
+  u1001: ['R001'],
+  u1002: ['R002'],
+  u1003: ['R003'],
+  u1004: ['R004'],
+  u1005: ['R005'],
+  u1006: ['R006'],
+  u1007: ['R007'],
+  u1008: ['R008'],
+  u1009: ['R002', 'R003', 'R004'],
 };
 
 function extractUserId(userId: string): string | null {
@@ -52,7 +29,7 @@ function extractUserId(userId: string): string | null {
 
 function getUserRoleIds(userId: string | null): string[] {
   if (!userId) return [RBAC_CONFIG.defaultRole];
-  const roles = RBAC_CONFIG.userRoles[userId];
+  const roles = USER_ROLES[userId];
   return roles && roles.length > 0 ? roles : [RBAC_CONFIG.defaultRole];
 }
 

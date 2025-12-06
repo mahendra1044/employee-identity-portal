@@ -135,30 +135,9 @@ export interface LoginRequest {
 
 /**
  * Login response with token and RBAC data
+ * Re-exported from central types.ts (single source of truth)
  */
-export interface LoginResponse {
-  token: string;
-  role: string;
-  userId?: string;
-  assignedRoles?: string[];
-  availableRoles?: Array<{
-    id: string;
-    name: string;
-    priority: number;
-    systems: string[];
-    isMaster: boolean;
-    description: string;
-  }>;
-  activeRole?: {
-    id: string;
-    name: string;
-    priority: number;
-    systems: string[];
-    isMaster: boolean;
-    description: string;
-  };
-  isMaster?: boolean;
-}
+export type { LoginResponse } from '@/lib/types';
 
 // ============================================================================
 // SEARCH TYPES

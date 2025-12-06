@@ -6,7 +6,7 @@
  */
 
 import type { SystemKey } from "./types";
-import { PING_SYSTEMS, PAM_SYSTEMS, IGA_SYSTEMS, ENTRAID_SYSTEMS, TPAG_SYSTEMS, ORIGINAL_SYSTEMS } from "./constants";
+import { ROLE_SYSTEM_ACCESS } from "@/config/systems.config";
 import { OPS_ROLE_KEYS, ROLE_DESCRIPTIONS, isOpsRoleKey } from "@/config/roles.config";
 
 /**
@@ -19,41 +19,33 @@ export function isOpsRole(role: string | null | undefined): boolean {
 
 /**
  * Gets the allowed systems for a specific ops role
- * Returns original 6 systems for general ops, or filtered systems for specialized ops
+ * Uses ROLE_SYSTEM_ACCESS from systems.config.ts (single source of truth)
  */
 export function getAllowedSystemsForRole(role: string | null | undefined): SystemKey[] | null {
   if (!role) return null;
   
-  switch (role) {
-    case "ops":
-      return ORIGINAL_SYSTEMS; // General ops sees only the original 6 systems
-    case "sso_ops":
-      return PING_SYSTEMS;
-    case "pam_ops":
-      return PAM_SYSTEMS;
-    case "iga_ops":
-      return IGA_SYSTEMS;
-    case "entraid_ops":
-      return ENTRAID_SYSTEMS;
-    case "tpag_ops":
-      return TPAG_SYSTEMS;
-    case "employee":
-      return ORIGINAL_SYSTEMS; // Employees see only the original 6 systems
-    default:
-      return null;
-  }
+  // Use centralized ROLE_SYSTEM_ACCESS mapping
+  const systems = ROLE_SYSTEM_ACCESS[role];
+  
+  // undefined means role not found, return null (all systems)
+  // null means admin role (all systems)
+  // array means specific systems for that role
+  if (systems === undefined) return null;
+  if (systems === null) return null;
+  
+  return [...systems]; // Return copy to prevent mutation
 }
 
 /**
  * Filters systems based on role permissions
  */
-export function filterSystemsByRole(systems: SystemKey[], role: string | null | undefined): SystemKey[] {
-  if (!role) return systems;
+export function filterSystemsByRole(systems: readonly SystemKey[], role: string | null | undefined): SystemKey[] {
+  if (!role) return [...systems];
   
   const allowedSystems = getAllowedSystemsForRole(role);
   
   // null means all systems allowed
-  if (allowedSystems === null) return systems;
+  if (allowedSystems === null) return [...systems];
   
   // Filter to only allowed systems
   return systems.filter(sys => allowedSystems.includes(sys));
